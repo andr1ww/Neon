@@ -1,8 +1,7 @@
-// dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 
 void Main() {
-
+    LogFortSDK(Log, VeryVerbose, "Neon SDK loaded successfully!");
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,
