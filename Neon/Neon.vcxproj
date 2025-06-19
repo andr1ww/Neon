@@ -111,6 +111,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -130,6 +131,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -140,6 +142,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Actor\Header\Actor.h" />
+    <ClInclude Include="Engine\PlayerController\Header\PlayerController.h" />
+    <ClInclude Include="Engine\Quat\Header\Quat.h" />
+    <ClInclude Include="Engine\Rotator\Header\Rotator.h" />
+    <ClInclude Include="Engine\Transform\Header\Transform.h" />
+    <ClInclude Include="Engine\Vector\Header\Vector.h" />
+    <ClInclude Include="FortniteGame\FortAthenaMapInfo\Header\FortAthenaMapInfo.h" />
+    <ClInclude Include="FortniteGame\FortGameMode\Header\FortGameMode.h" />
+    <ClInclude Include="FortniteGame\FortGameState\Header\FortGameState.h" />
+    <ClInclude Include="FortniteGame\FortPlaylistAthena\Header\FortPlaylistAthena.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SDK\include\SDK.h" />
     <ClInclude Include="SDK\include\sdk\CoreObject_classes.h" />
@@ -155,6 +167,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Engine\Actor\Source\Actor.cpp" />
+    <ClCompile Include="FortniteGame\FortGameMode\Source\FortGameMode.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -164,6 +178,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="SDK\FortSDK.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="FortniteGame\FortGameState\Source\" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1341,6 +1341,18 @@ static void SetBool( void *Obj, const SDK::UBoolProperty *Prop, bool b ) {
         *Byte = b ? ( *Byte | Prop->FieldMask ) : ( *Byte & ~Prop->FieldMask );
 }
 
+#define DECLARE_STATIC_CLASS(ClassName) \
+static UClass* StaticClass() \
+{ \
+return StaticClassImpl(#ClassName + 1); \
+}
+
+#define DECLARE_DEFAULT_OBJECT(ClassName) \
+static UObject* GetDefaultObj() \
+{ \
+return ClassName::StaticClass()->GetClassDefaultObject(); \
+} \
+
 #define MEMBER_PTR( RetType, MemberName, Offset )                       \
         RetType MemberName() const {                                    \
                 return *reinterpret_cast<RetType *>(                           \
@@ -1407,6 +1419,5 @@ static int PropOffset = -1;                            \
                         }                                                      \
                         *reinterpret_cast<Ret *>( uintptr_t( this ) +   \
                                                          PropOffset ) = Value;         \
-                } \
 }
 

@@ -1,7 +1,20 @@
 #include "pch.h"
 
+#include "FortniteGame/FortGameMode/Header/FortGameMode.h"
+
 void Main() {
-    LogFortSDK(Log, VeryVerbose, "Neon SDK loaded successfully!");
+    AllocConsole();
+    FILE* File = nullptr;
+    freopen_s(&File, "CONOUT$", "w+", stdout);
+    freopen_s(&File, "CONOUT$", "w+", stderr);
+    SetConsoleTitleA("Neon | Setting up");
+
+    SDK::Init();
+
+    UE_LOG(LogNeon, Error, "FUCK FUCK TRANNY");
+
+    AFortGameModeAthena* GameMode = nullptr;
+    GameMode->GetbWorldIsReady();
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,
