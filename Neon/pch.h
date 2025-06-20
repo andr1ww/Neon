@@ -19,4 +19,20 @@ DEFINE_LOG_CATEGORY(LogNeon);
 
 #define IMAGEBASE uint64_t(GetModuleHandle(0))
 
+static int RetTrue()
+{
+    return 1;
+}
+
+static int RetFalse()
+{
+    return 0;
+}
+
+static void Return()
+{
+    return;
+}
+
+
 #endif //PCH_H

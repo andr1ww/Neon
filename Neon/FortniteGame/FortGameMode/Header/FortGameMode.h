@@ -20,5 +20,5 @@ public:
     DECLARE_DEFAULT_OBJECT(AFortGameModeAthena);
     DECLARE_STATIC_CLASS(AFortGameModeAthena);
 public:
-    bool ReadyToStartMatch(AFortGameModeAthena* GameMode);
+    static bool ReadyToStartMatch(AFortGameModeAthena* GameMode);
 };

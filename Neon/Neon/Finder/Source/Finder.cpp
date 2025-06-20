@@ -66,6 +66,7 @@ uint64 UFinder::GIsClient()
             }
         }
     }
+    
     return 0;
 }
 
@@ -542,4 +543,25 @@ uint64 UFinder::DemoReplicateActor()
         return Memcury::Scanner::FindPattern(
             "48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ? 4C 8B E9 45 8A E1"
         ).Get();
+}
+
+uint64 UFinder::WorldGetNetMode()
+{
+    Memcury::Scanner Scanner = Memcury::Scanner::FindPattern("E8 ? ? ? ? 48 8B BC 24 ? ? ? ? 33 C0 48 81 C4");
+    if (Scanner.Get() == 0)
+    {
+        if (Fortnite_Version.GetMajorVersion() == 18)
+        {
+           return Memcury::Scanner::FindPattern("48 83 EC 28 48 83 79 ? ? 75 20 48 8B 91 ? ? ? ? 48 85 D2 74 1E 48 8B 02 48 8B CA FF 90").Get();
+        }
+        else
+        {
+            return Memcury::Scanner::FindPattern("E9 ? ? ? ? E9 ? ? ? ? B8 ? ? ? ? C3", true).ScanFor({ 0x48 }, false, 3).Get();
+        }
+    }
+
+    if (Fortnite_Version.GetMajorVersion() >= 20)
+        return Memcury::Scanner::FindPattern("48 83 EC ? 48 83 79 ? ? 74 ? B8").Get();
+
+    return Scanner.ScanFor({ 0x40, 0x53 }, false).Get();
 }

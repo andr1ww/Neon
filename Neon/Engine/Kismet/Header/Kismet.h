@@ -16,3 +16,12 @@ public:
     DECLARE_STATIC_CLASS(UKismetStringLibrary);
     DECLARE_DEFAULT_OBJECT(UKismetStringLibrary);
 };
+
+
+class UKismetSystemLibrary : public UObject
+{
+public:
+public:
+    DECLARE_STATIC_CLASS(UKismetSystemLibrary);
+    DECLARE_DEFAULT_OBJECT(UKismetSystemLibrary);
+};

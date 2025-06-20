@@ -286,7 +286,7 @@ public:
     bool InitListen(UWorld* Networknotify, FURL URL, bool bReuseAddressAndPort);
     void SetWorld(UWorld* World);
     
-    void TickFlush(UNetDriver* NetDriver, float DeltaSeconds);
+    static void TickFlush(UNetDriver* NetDriver, float DeltaSeconds);
 
     int32& ReplicationFrame()
     {
@@ -320,12 +320,12 @@ public:
     }
     
     // Replication
-    int32 ServerReplicateActors(UNetDriver* NetDriver, float DeltaSeconds);
-    int32 ServerReplicateActors_PrepConnections(UNetDriver*, float DeltaSeconds);
-    void ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TArray<AActor*>& OutConsiderList, const float ServerTickTime);
-    int32 ServerReplicateActors_ProcessActors(UNetDriver*, UNetConnection* Connection, TArray<AActor*>& Actors);
-    bool IsActorRelevantToConnection(const AActor* Actor, const TArray<FNetViewer>& ConnectionViewers);
-    UNetConnection* IsActorOwnedByAndRelevantToConnection(const AActor* Actor, const TArray<FNetViewer>& ConnectionViewers, bool& bOutHasNullViewTarget);
+    static int32 ServerReplicateActors(UNetDriver* NetDriver, float DeltaSeconds);
+    static int32 ServerReplicateActors_PrepConnections(UNetDriver*, float DeltaSeconds);
+    static void ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TArray<AActor*>& OutConsiderList, const float ServerTickTime);
+    static int32 ServerReplicateActors_ProcessActors(UNetDriver*, UNetConnection* Connection, TArray<AActor*>& Actors);
+    static bool IsActorRelevantToConnection(const AActor* Actor, const TArray<FNetViewer>& ConnectionViewers);
+    static UNetConnection* IsActorOwnedByAndRelevantToConnection(const AActor* Actor, const TArray<FNetViewer>& ConnectionViewers, bool& bOutHasNullViewTarget);
 public:
     DECLARE_STATIC_CLASS(UNetDriver);
     DECLARE_DEFAULT_OBJECT(UNetDriver);

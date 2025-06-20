@@ -78,6 +78,8 @@ public:
     uint64 RemoveNetworkActor();
 
     uint64 DemoReplicateActor();
+
+    uint64 WorldGetNetMode();
 };
 
 inline UFinder* Finder;

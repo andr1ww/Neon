@@ -502,6 +502,21 @@ class UObjectBaseUtility : public UObjectBase
         template <class T> bool IsA() const { return IsA( T::StaticClass() ); }
 };
 
+    class UClass;
+
+    
+    #define DECLARE_STATIC_CLASS(ClassName) \
+static UClass* StaticClass() \
+{ \
+return StaticClassImpl(#ClassName + 1); \
+}
+
+#define DECLARE_DEFAULT_OBJECT(ClassName) \
+static UObject* GetDefaultObj() \
+{ \
+return ClassName::StaticClass()->GetClassDefaultObject(); \
+} \
+
 class UObject : public UObjectBaseUtility {
       public:
         void ProcessEvent( class UFunction *Function, void *Parms ) const;
@@ -517,8 +532,10 @@ class UObject : public UObjectBaseUtility {
                       const std::string &FunctionName, Args &&...args );
 
         class UFunction *GetFunction(const std::string& FunctionName);
+public:
+    DECLARE_STATIC_CLASS(UObject);
 };
-
+    
 class UField : public UObject
 {
       public:
@@ -1343,18 +1360,6 @@ static void SetBool( void *Obj, const SDK::UBoolProperty *Prop, bool b ) {
             reinterpret_cast<uint8_t *>( Obj ) + Prop->Offset_Internal;
         *Byte = b ? ( *Byte | Prop->FieldMask ) : ( *Byte & ~Prop->FieldMask );
 }
-
-#define DECLARE_STATIC_CLASS(ClassName) \
-static UClass* StaticClass() \
-{ \
-return StaticClassImpl(#ClassName + 1); \
-}
-
-#define DECLARE_DEFAULT_OBJECT(ClassName) \
-static UObject* GetDefaultObj() \
-{ \
-return ClassName::StaticClass()->GetClassDefaultObject(); \
-} \
 
 #define MEMBER_PTR( RetType, MemberName, Offset )                       \
         RetType MemberName() const {                                    \

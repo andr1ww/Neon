@@ -12,11 +12,11 @@ namespace Runtime
 		uint32_t Idx = 0;
 		if (!Function)
 			return Idx;
-		uint64_t ExecFunctionAddress = reinterpret_cast<uint64_t>(Function->ExecFunction);
+		uint64_t ExecFunctionAddress = reinterpret_cast<uint64_t>(Function->GetNativeFunc());
 
 		Memcury::Scanner Scanner(ExecFunctionAddress);
 
-		std::string FuncName = Function->GetName() + "_Validate";
+		std::string FuncName = Function->GetFName().ToString().ToString() + "_Validate";
 	
 		std::vector<BYTE> BytesToScanFor = { 0xFF, 0x90 };
 		Scanner.ScanFor(BytesToScanFor, true, Memcury::Scanner::FindStringRef(
@@ -75,7 +75,7 @@ namespace Runtime
 	}
 	    
 	template <typename T>
-	inline T* StaticFindObject(std::string ObjectPath, UClass* Class = UObject::GetClass()) {
+	inline T* StaticFindObject(std::string ObjectPath, UClass* Class = UObject::StaticClass()) {
 		return (T*)Funcs::StaticFindObject(Class, nullptr, std::wstring(ObjectPath.begin(), ObjectPath.end()).c_str(), false);
 	}
 
@@ -95,7 +95,7 @@ namespace Runtime
 		if (!Fn) return;
 
 		uint32_t Ind = GetFunctionIdx(Fn);
-		auto Vt = Ct::GetDefaultObj()->VTable;
+		auto Vt = Ct::GetDefaultObj()->GetVTable();
     
 		if (!std::is_same_v<Ot, void*>)
 			Orig = (Ot)Vt[Ind];
