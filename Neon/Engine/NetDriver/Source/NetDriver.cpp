@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "../Header/NetDriver.h"
 
+#include "Engine/GameplayStatics/Header/GameplayStatics.h"
+#include "Engine/Level/Header/Level.h"
 #include "Engine/UEngine/Header/UEngine.h"
 
 UWorld* UWorld::GetWorld()
@@ -72,6 +74,67 @@ int32 UNetDriver::ServerReplicateActors_PrepConnections(UNetDriver* NetDriver, f
     }
 
     return bFoundReadyConnection ? NumClientsToTick : 0;
+}
+
+__forceinline float FRand()
+{
+    constexpr int32 RandMax = 0x00ffffff < RAND_MAX ? 0x00ffffff : RAND_MAX;
+    return (rand() & RandMax) / (float)RandMax;
+}
+
+void UNetDriver::ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TArray<AActor*>& OutConsiderList, const float ServerTickTime)
+{
+    static void (*CallPreReplication)(AActor* Actor, UNetDriver* Driver) = decltype(CallPreReplication)(IMAGEBASE + 0x9CC9E34);
+    static void (*RemoveNetworkActor)(UNetDriver*, AActor*) = decltype(RemoveNetworkActor)(IMAGEBASE + 0x10AD474);
+
+    auto NetworkObjectList = *(*(class TSharedPtr<FNetworkObjectList>*)(__int64(Driver) + 0x720));
+    const float CurrentTime = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
+    
+    TArray<AActor*> ActorsToRemove;
+
+    for (auto& ActorInfo : NetworkObjectList.ActiveNetworkObjects)
+    {
+        auto Actor = ActorInfo->Actor;
+
+        if (!Actor)
+        {
+            continue;
+        }
+		
+        if (!Actor || Actor->bActorIsBeingDestroyed || Actor->RemoteRole == ENetRole::ROLE_None || Actor->NetDriverName != Driver->GetNetDriverName())
+        {
+            ActorsToRemove.Add(Actor);
+            continue;
+        }
+
+        if (Actor->NetDormancy == ENetDormancy::DORM_Initial)
+        {
+            continue;
+        }
+
+        ULevel* Level = ULevel::GetLevel(Actor);
+        if (!Level || Level == Level->GetOwningWorld()->GetCurrentLevelPendingVisibility() || Level == Level->GetOwningWorld()->GetCurrentLevelPendingInvisibility())
+        {
+            continue;
+        }
+
+        if (!ActorInfo->bPendingNetUpdate)
+        {
+            const float NextUpdateDelta = 1.f / Actor->NetUpdateFrequency;
+            ActorInfo->NextUpdateTime = CurrentTime + FRand() * ServerTickTime + NextUpdateDelta;
+            ActorInfo->LastNetUpdateTimeStamp = CurrentTime;
+        }
+
+        ActorInfo->bPendingNetUpdate = true;
+        
+        OutConsiderList.Add(Actor);
+        CallPreReplication(Actor, Driver);
+    }
+	
+    for (auto& Actor : ActorsToRemove) {
+        RemoveNetworkActor(Driver, Actor);
+    }
+    ActorsToRemove.Free();
 }
 
 int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSeconds)

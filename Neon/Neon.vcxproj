@@ -144,8 +144,11 @@
   <ItemGroup>
     <ClInclude Include="Engine\Actor\Header\Actor.h" />
     <ClInclude Include="Engine\Array\Header\Array.h" />
+    <ClInclude Include="Engine\GameplayStatics\Header\GameplayStatics.h" />
     <ClInclude Include="Engine\Kismet\Header\Kismet.h" />
+    <ClInclude Include="Engine\Level\Header\Level.h" />
     <ClInclude Include="Engine\NetDriver\Header\NetDriver.h" />
+    <ClInclude Include="Engine\ObjectPtr\Header\ObjectPtr.h" />
     <ClInclude Include="Engine\PlayerController\Header\PlayerController.h" />
     <ClInclude Include="Engine\Quat\Header\Quat.h" />
     <ClInclude Include="Engine\Rotator\Header\Rotator.h" />
@@ -173,6 +176,7 @@
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Engine\Actor\Source\Actor.cpp" />
+    <ClCompile Include="Engine\GameplayStatics\Source\GameplayStatics.cpp" />
     <ClCompile Include="Engine\NetDriver\Source\NetDriver.cpp" />
     <ClCompile Include="Engine\PlayerController\Source\PlayerController.cpp" />
     <ClCompile Include="Engine\UEngine\Source\UEngine.cpp" />

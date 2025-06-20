@@ -1,6 +1,8 @@
 #pragma once
 #include "pch.h"
 
+#include "Engine/Level/Header/Level.h"
+#include "Engine/ObjectPtr/Header/ObjectPtr.h"
 #include "Engine/PlayerController/Header/PlayerController.h"
 #include "FortniteGame/FortGameState/Header/FortGameState.h"
 
@@ -43,7 +45,100 @@ public:
 
 };
 
+enum class ENetDormancy : uint8
+{
+    DORM_Never                               = 0,
+    DORM_Awake                               = 1,
+    DORM_DormantAll                          = 2,
+    DORM_DormantPartial                      = 3,
+    DORM_Initial                             = 4,
+    DORM_MAX                                 = 5,
+};
+
+
+enum class ENetRole : uint8
+{
+    ROLE_None                                = 0,
+    ROLE_SimulatedProxy                      = 1,
+    ROLE_AutonomousProxy                     = 2,
+    ROLE_Authority                           = 3,
+    ROLE_MAX                                 = 4,
+};
+
 class UWorld;
+
+template< class ObjectType>
+class TSharedPtr
+{
+public:
+    ObjectType* Object;
+
+    int32 SharedReferenceCount;
+    int32 WeakReferenceCount;
+
+    FORCEINLINE ObjectType* Get()
+    {
+        return Object;
+    }
+    FORCEINLINE ObjectType* Get() const
+    {
+        return Object;
+    }
+    FORCEINLINE ObjectType& operator*()
+    {
+        return *Object;
+    }
+    FORCEINLINE const ObjectType& operator*() const
+    {
+        return *Object;
+    }
+    FORCEINLINE ObjectType* operator->()
+    {
+        return Object;
+    }
+    FORCEINLINE ObjectType* operator->() const
+    {
+        return Object;
+    }
+};
+
+struct FNetworkObjectInfo
+{
+    AActor* Actor;
+
+    TWeakObjectPtr<AActor> WeakActor;
+
+    double NextUpdateTime;
+
+    double LastNetReplicateTime;
+
+    float OptimalNetUpdateDelta;
+
+    float LastNetUpdateTimeStamp;
+
+    TSet<TWeakObjectPtr<UNetConnection>> DormantConnections;
+    TSet<TWeakObjectPtr<UNetConnection>> RecentlyDormantConnections;
+
+    uint32 bPendingNetUpdate : 1;
+
+    uint8 bDirtyForReplay : 1;
+
+    uint8 bSwapRolesOnReplicate : 1;
+
+    uint32 ForceRelevantFrame = 0;
+};
+
+class FNetworkObjectList
+{
+public:
+    using FNetworkObjectSet = TSet<TSharedPtr<FNetworkObjectInfo>>;
+
+    FNetworkObjectSet AllNetworkObjects;
+    FNetworkObjectSet ActiveNetworkObjects;
+    FNetworkObjectSet ObjectsDormantOnAllConnections;
+
+    TMap<TWeakObjectPtr<UNetConnection>, int32> NumDormantObjectsPerConnection;
+};
 
 class UNetDriver : public UObject
 {
@@ -91,6 +186,7 @@ public:
     // Replication
     int32 ServerReplicateActors(UNetDriver* NetDriver, float DeltaSeconds);
     int32 ServerReplicateActors_PrepConnections(UNetDriver*, float DeltaSeconds);
+    void ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TArray<AActor*>& OutConsiderList, const float ServerTickTime);
 public:
     DECLARE_STATIC_CLASS(UNetDriver);
     DECLARE_DEFAULT_OBJECT(UNetDriver);
@@ -132,6 +228,8 @@ public:
     DEFINE_MEMBER(UGameInstance*, UWorld, OwningGameInstance);
     DEFINE_MEMBER(UNetDriver*, UWorld, NetDriver);
     DEFINE_MEMBER(SDK::TArray<struct FLevelCollection>, UWorld, LevelCollections);
+    DEFINE_MEMBER(ULevel*, UWorld, CurrentLevelPendingVisibility);
+    DEFINE_MEMBER(ULevel*, UWorld, CurrentLevelPendingInvisibility);
 public:
     DECLARE_STATIC_CLASS(UWorld);
     DECLARE_DEFAULT_OBJECT(UWorld);

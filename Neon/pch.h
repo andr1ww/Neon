@@ -16,4 +16,6 @@
 using namespace SDK;
 DEFINE_LOG_CATEGORY(LogNeon);
 
+#define IMAGEBASE uint64_t(GetModuleHandle(0))
+
 #endif //PCH_H
