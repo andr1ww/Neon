@@ -476,3 +476,13 @@ uint64 UFinder::GameSessionPatch()
 
     return 0;
 }
+
+uint64 UFinder::GetWorldContextFromObject()
+{
+    
+}
+
+uint64 UFinder::CreateNetDriverLocal()
+{
+    
+}

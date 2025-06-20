@@ -64,6 +64,10 @@ public:
     uint64 InitListen();
 
     uint64 GameSessionPatch();
+
+    uint64 GetWorldContextFromObject();
+
+    uint64 CreateNetDriverLocal();
 };
 
 inline UFinder* Finder;

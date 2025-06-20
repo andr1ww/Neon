@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClInclude Include="Engine\Actor\Header\Actor.h" />
     <ClInclude Include="Engine\Array\Header\Array.h" />
+    <ClInclude Include="Engine\Kismet\Header\Kismet.h" />
     <ClInclude Include="Engine\NetDriver\Header\NetDriver.h" />
     <ClInclude Include="Engine\PlayerController\Header\PlayerController.h" />
     <ClInclude Include="Engine\Quat\Header\Quat.h" />
