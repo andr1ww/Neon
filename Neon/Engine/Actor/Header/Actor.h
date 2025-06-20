@@ -1,6 +1,8 @@
 #pragma once
 #include "pch.h"
 
+#include "Engine/Transform/Header/Transform.h"
+
 class AActor : public UObject
 {
 private:

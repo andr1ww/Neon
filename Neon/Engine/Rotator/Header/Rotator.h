@@ -1,9 +1,6 @@
 #pragma once
 #include "pch.h"
 
-#include "Engine/Quat/Header/Quat.h"
-#include "Engine/Vector/Header/Vector.h"
-
 struct FRotator
 {
     float Pitch;
@@ -26,11 +23,6 @@ struct FRotator
         return std::abs(NormalizeAxis(Pitch - Other.Pitch)) < Tolerance &&
             std::abs(NormalizeAxis(Yaw - Other.Yaw)) < Tolerance &&
             std::abs(NormalizeAxis(Roll - Other.Roll)) < Tolerance;
-    }
-    
-    FQuat Quaternion() const
-    {
-        return FQuat::FromRotator(*this);
     }
 private:
     static float NormalizeAxis(float Angle)
