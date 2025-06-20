@@ -72,3 +72,11 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
     auto Ret = GameMode->GetbWorldIsReady() && GameMode->GetNumPlayers() > 0;
     return Ret;
 }
+
+APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, APlayerController* NewPlayer, AActor* StartSpot)
+{
+    FTransform SpawnTransform = StartSpot ? StartSpot->CallFunc<FTransform>("Actor", "GetTransform") : FTransform::FTransform();
+    SpawnTransform.Translation.Z += 250.f;
+
+    return GameMode->CallFunc<APawn*>("FortGameModeAthena", "SpawnDefaultPawnAtTransform", NewPlayer, SpawnTransform);
+}

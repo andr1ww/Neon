@@ -318,7 +318,7 @@ public:
     
         return *reinterpret_cast<int32*>(__int64(this) + RepFrameOffset);
     }
-    
+    static void DispatchRequest(void* unknown_1, void* MCPData, int MCPCode);
     // Replication
     static int32 ServerReplicateActors(UNetDriver* NetDriver, float DeltaSeconds);
     static int32 ServerReplicateActors_PrepConnections(UNetDriver*, float DeltaSeconds);
@@ -332,6 +332,7 @@ public:
 };
 
 inline void (*TickFlushOriginal)(UNetDriver*, float DeltaSeconds);
+inline void (*DispatchRequestOriginal)(void* unknown_1, void* MCPData, int MCPCode);
 
 static bool ReplicateToClient(UNetDriver* Driver, AActor* Actor, UNetConnection* Client) {
     if (!Client || !Actor) {

@@ -299,11 +299,19 @@ int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSecond
 
 void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 {
-    if (NetDriver->GetClientConnections().Num() > 0)
+    if (Finder->RepDriverServerReplicateActors() && Fortnite_Version.GetMajorVersion() <= 20)
     {
-        ServerReplicateActors(NetDriver, DeltaSeconds);
+        UE_LOG(LogNeon, Log, "Using Replication Driver for ServerReplicateActors");
+        reinterpret_cast<void(*)(UObject*)>(NetDriver->GetReplicationDriver()->GetVTable()[Finder->RepDriverServerReplicateActors()])(NetDriver->GetReplicationDriver());
+    } else
+    {
+        UE_LOG(LogNeon, Log, "Using UNetDriver::ServerReplicateActors for ServerReplicateActors");
+        if (NetDriver->GetClientConnections().Num() > 0)
+        {
+            ServerReplicateActors(NetDriver, DeltaSeconds);
+        }
     }
-
+    
 	return TickFlushOriginal(NetDriver, DeltaSeconds);
 }
 
@@ -323,4 +331,10 @@ void UNetDriver::SetWorld(UWorld* World)
     if (!SetWorld)
         SetWorld = decltype(SetWorld)(Finder->SetWorld());
     return SetWorld(this, World);
+}
+
+void UNetDriver::DispatchRequest(void* unknown_1, void* MCPData, int MCPCode)
+{
+    if (Fortnite_Version < 8.01) *(int*)(__int64(MCPData) + (Fortnite_Version < 4.2 ? 0x60 : 0x28)) = 3;
+    return DispatchRequestOriginal(unknown_1, MCPData, MCPCode);
 }

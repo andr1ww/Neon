@@ -775,19 +775,7 @@ namespace Memcury
                     }
                 }
             }
-
-            if (bWarnIfNotFound)
-            {
-                if (add == 0)
-                {
-                    MessageBoxA(0, "FindPointerRef return nullptr", "Memcury", MB_OK);
-                }
-                else
-                {
-                    MessageBoxA(0, std::format("FindPointerRef return 0x{:x}", add.Get() - __int64(GetModuleHandleW(0))).c_str(), "Memcury", MB_OK);
-                }
-            }
-
+            
             return Scanner(add);
         }
 

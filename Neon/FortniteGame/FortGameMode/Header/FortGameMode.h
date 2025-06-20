@@ -15,10 +15,9 @@ public:
     DEFINE_MEMBER(int32, AFortGameModeAthena, NumPlayers);
     DEFINE_BOOL(AFortGameModeAthena, bWorldIsReady);
 public:
-    AActor* SpawnDefaultPawnAtTransform(APlayerController* NewPlayer, FTransform SpawnTransform);
-public:
     DECLARE_DEFAULT_OBJECT(AFortGameModeAthena);
     DECLARE_STATIC_CLASS(AFortGameModeAthena);
 public:
     static bool ReadyToStartMatch(AFortGameModeAthena* GameMode);
+    static APawn* SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, APlayerController* NewPlayer, AActor* StartSpot);
 };

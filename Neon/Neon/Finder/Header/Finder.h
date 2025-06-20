@@ -82,6 +82,8 @@ public:
     uint64 WorldGetNetMode();
 
     uint64 RepDriverServerReplicateActors();
+
+    uint64 StaticFindObject();
 };
 
 inline UFinder* Finder;
