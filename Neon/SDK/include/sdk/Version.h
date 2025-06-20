@@ -125,5 +125,9 @@ namespace SDK
             bool operator>=( const FFortniteVersion &Other ) const {
                     return *this > Other || *this == Other;
             }
+
+            inline int GetMajorVersion() const {
+                return Major;
+            };
     };
     }

@@ -11,7 +11,7 @@ void Main() {
 
     SDK::Init();
 
-    UE_LOG(LogNeon, Error, "FUCK FUCK TRANNY");
+   
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,
