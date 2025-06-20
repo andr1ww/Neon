@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "../Header/FortGameMode.h"
 
+#include "Engine/NetDriver/Header/NetDriver.h"
+
 bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 {
     AFortGameStateAthena* GameState = GameMode->GetGameState();
@@ -27,6 +29,11 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
     }
 
     if (!GameState->GetMapInfo()) return false;
+
+    if (!UWorld::GetWorld()->GetNetDriver())
+    {
+     // listening   
+    }
     
     auto Ret = GameMode->GetbWorldIsReady() && GameMode->GetNumPlayers() > 0;
     return Ret;

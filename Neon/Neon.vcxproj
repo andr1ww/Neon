@@ -144,10 +144,12 @@
   <ItemGroup>
     <ClInclude Include="Engine\Actor\Header\Actor.h" />
     <ClInclude Include="Engine\Array\Header\Array.h" />
+    <ClInclude Include="Engine\NetDriver\Header\NetDriver.h" />
     <ClInclude Include="Engine\PlayerController\Header\PlayerController.h" />
     <ClInclude Include="Engine\Quat\Header\Quat.h" />
     <ClInclude Include="Engine\Rotator\Header\Rotator.h" />
     <ClInclude Include="Engine\Transform\Header\Transform.h" />
+    <ClInclude Include="Engine\UEngine\Header\UEngine.h" />
     <ClInclude Include="Engine\Vector\Header\Vector.h" />
     <ClInclude Include="FortniteGame\FortAthenaMapInfo\Header\FortAthenaMapInfo.h" />
     <ClInclude Include="FortniteGame\FortGameMode\Header\FortGameMode.h" />
@@ -169,6 +171,8 @@
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Engine\Actor\Source\Actor.cpp" />
+    <ClCompile Include="Engine\NetDriver\Source\NetDriver.cpp" />
+    <ClCompile Include="Engine\UEngine\Source\UEngine.cpp" />
     <ClCompile Include="FortniteGame\FortGameMode\Source\FortGameMode.cpp" />
     <ClCompile Include="FortniteGame\FortGameState\Source\FortGameState.cpp" />
     <ClCompile Include="pch.cpp">
