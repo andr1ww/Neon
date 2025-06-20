@@ -22,52 +22,9 @@ uint64_t UFinder::WorldNetMode()
 
 uint64 UFinder::GIsClient()
 {
-    auto Addr = Memcury::Scanner::FindStringRef(L"AllowCommandletRendering");
-
-    std::vector<std::vector<uint8_t>> BytesToCheck = {
-        {0x88, 0x05},
-        {0xC6, 0x05},
-        {0x88, 0x1D},
-        {0x44, 0x88}
-    };
-
-    int Picked = 0;
-    int Skip = 2;
-
-    for (int i = 0; i < 50; i++) {
-        auto Curr = (uint8_t*)(Addr.Get() - i);
-        for (const auto& Bytes : BytesToCheck) {
-            if (*Curr == Bytes[0]) {
-                bool Found = true;
-                for (size_t j = 1; j < Bytes.size(); j++) {
-                    if (*(Curr + j) != Bytes[j]) {
-                        Found = false;
-                        break;
-                    }
-                }
-                if (Found) {
-                    auto Relative = Bytes[0] == 0x44 ? 3 : 2;
-
-                    if (Bytes[0] == 0x44 && *(Curr + 2) == 0x74) continue;
-
-                    if (!Picked) Picked = Bytes[0];
-                    else if (Picked != Bytes[0]) continue;
-
-                    if (Skip > 0) {
-                        Skip--;
-                        continue;
-                    }
-
-                    auto Scanner = Memcury::Scanner(Curr);
-                    return Bytes[0] == 0xC6 ?
-                        Scanner.RelativeOffset(Relative, 1).Get() :
-                        Scanner.RelativeOffset(Relative).Get();
-                }
-            }
-        }
-    }
+    auto Addr = Memcury::Scanner::FindStringRef(L"bEnableInClient");
     
-    return 0;
+    return Addr.ScanFor({0x44, 0x38, 0x25}, false, 0, 0, 2000).RelativeOffset(3).Get();
 }
 
 uint64 UFinder::TickFlush()
@@ -547,21 +504,9 @@ uint64 UFinder::DemoReplicateActor()
 
 uint64 UFinder::WorldGetNetMode()
 {
-    Memcury::Scanner Scanner = Memcury::Scanner::FindPattern("E8 ? ? ? ? 48 8B BC 24 ? ? ? ? 33 C0 48 81 C4");
-    if (Scanner.Get() == 0)
-    {
-        if (Fortnite_Version.GetMajorVersion() == 18)
-        {
-           return Memcury::Scanner::FindPattern("48 83 EC 28 48 83 79 ? ? 75 20 48 8B 91 ? ? ? ? 48 85 D2 74 1E 48 8B 02 48 8B CA FF 90").Get();
-        }
-        else
-        {
-            return Memcury::Scanner::FindPattern("E9 ? ? ? ? E9 ? ? ? ? B8 ? ? ? ? C3", true).ScanFor({ 0x48 }, false, 3).Get();
-        }
-    }
-
     if (Fortnite_Version.GetMajorVersion() >= 20)
         return Memcury::Scanner::FindPattern("48 83 EC ? 48 83 79 ? ? 74 ? B8").Get();
 
-    return Scanner.ScanFor({ 0x40, 0x53 }, false).Get();
+    return Memcury::Scanner::FindPattern("48 83 EC ? 48 83 79 ? ? 74 ? B8").Get();
+
 }
