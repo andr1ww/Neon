@@ -12,9 +12,6 @@ void Main() {
     SDK::Init();
 
     UE_LOG(LogNeon, Error, "FUCK FUCK TRANNY");
-
-    AFortGameModeAthena* GameMode = nullptr;
-    GameMode->GetbWorldIsReady();
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,
