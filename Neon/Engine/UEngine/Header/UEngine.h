@@ -1,6 +1,8 @@
 #pragma once
 #include "pch.h"
 
+class UGameEngine;
+
 class UEngine : public UObject
 {
 public:
@@ -8,6 +10,18 @@ public:
     DECLARE_STATIC_CLASS(UEngine);
     DECLARE_DEFAULT_OBJECT(UEngine);
     static UEngine* GetEngine();
+    static UGameEngine* GetGameEngine();
+};
+
+class UGameEngine : public UEngine
+{
+public:
+};
+
+class UFortEngine : public UEngine
+{
+public:
+ 
 };
 
 class UGameViewportClient : public UObject

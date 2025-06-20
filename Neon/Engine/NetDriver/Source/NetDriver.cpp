@@ -4,6 +4,7 @@
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "Engine/Level/Header/Level.h"
 #include "Engine/UEngine/Header/UEngine.h"
+#include "Neon/Finder/Header/Finder.h"
 
 UWorld* UWorld::GetWorld()
 {
@@ -145,7 +146,29 @@ int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSecond
     {
         return 0;
     }
+
+    static float (*GetMaxTickRate)(UGameEngine*, float DeltaSeconds) = decltype(GetMaxTickRate)(Finder->GetMaxTickRate());
+
+    static TArray<AActor*> ConsiderList;
+    static TArray<APlayerController*> ControllersToAdjust;
+    static FString ActorStr = L"Actor";
     
+    const float ServerTickTime = 1.0f / GetMaxTickRate(UFortEngine::GetGameEngine(), DeltaSeconds);
+    ServerReplicateActors_BuildConsiderList(NetDriver, ConsiderList, ServerTickTime);
+
+    for (int32 i = 0; i < NetDriver->GetClientConnections().Num(); i++)
+    {
+        UNetConnection* Connection = NetDriver->GetClientConnections()[i];
+        if (!Connection || !Connection->GetViewTarget() || !Connection->GetPlayerController()) {
+            continue;
+        }
+       
+        ControllersToAdjust.Add(Connection->GetPlayerController());
+    }
+
+    for (APlayerController* Controller : ControllersToAdjust) {
+     //   SendClientAdjustment(Controller);
+    }
 }
 
 void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)

@@ -21,3 +21,8 @@ UEngine* UEngine::GetEngine()
 
     return GEngine;
 }
+
+UGameEngine* UEngine::GetGameEngine()
+{
+	return static_cast<UGameEngine*>(UEngine::GetEngine());
+}
