@@ -77,6 +77,11 @@ int32 UNetDriver::ServerReplicateActors_PrepConnections(UNetDriver* NetDriver, f
 int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSeconds)
 {
     ++NetDriver->ReplicationFrame();
+    const int32 NumClientsToTick = ServerReplicateActors_PrepConnections(NetDriver, DeltaSeconds);
+    if (NumClientsToTick == 0)
+    {
+        return 0;
+    }
     
 }
 
