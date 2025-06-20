@@ -17,8 +17,8 @@ void Main() {
     MH_Initialize();
     Sleep(7500);
 
-    *(bool*)(IMAGEBASE + 0xEBD8A4C) = false; //for zonngster: this is GISClient which defines if the game is client 
-    *(bool*)(IMAGEBASE + 0xEBD8A4C + 1) = true; // this is GISServer which defines if the game is server
+    *(bool*)(Finder->GIsClient()) = false; 
+    *(bool*)(Finder->GIsClient() + 1) = true;
     
     Runtime::ExecVFT<AFortGameModeAthena>("/Script/Engine.GameMode.ReadyToStartMatch", AFortGameModeAthena::ReadyToStartMatch);
     Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)TickFlushOriginal);
@@ -26,14 +26,26 @@ void Main() {
     Runtime::Hook(Finder->KickPlayer(), RetTrue);
     Runtime::Hook(Finder->WorldNetMode(), RetTrue);
     Runtime::Hook(Finder->WorldGetNetMode(), RetTrue);
-    Runtime::Patch(IMAGEBASE + 0xA065C42 + 1, 0x85);
-    Runtime::Patch(IMAGEBASE + 0x2CB0094, 0xC3);
-    Runtime::Patch(IMAGEBASE + 0x6060C30, 0xC3);
-    Runtime::Patch(IMAGEBASE + 0x25F340C, 0xC3);
-    Runtime::Patch(IMAGEBASE + 0x28EAA10, 0xC3);
     
     UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
-    UKismetSystemLibrary::GetDefaultObj()->CallFunc<void>("KismetSystemLibrary", "ExecuteConsoleCommand", UWorld::GetWorld(), FString(L"open Asteria_Terrain"), nullptr);
+    FString WorldName;
+    if (Fortnite_Version <= 10.40)
+    {
+        WorldName = FString("open Athena_Terrain");
+    }
+    else if (Fortnite_Version <= 18.40 && Fortnite_Version >= 10.40)
+    {
+        WorldName = FString("open Apollo_Terain");
+    }
+    else if (Fortnite_Version <= 22.40 && Fortnite_Version >= 19.00)
+    {
+        WorldName = FString("open Artemis_Terrain");
+    } else if (Fortnite_Version <= 23.00)
+    {
+        WorldName = FString("open Asteria_Terrain");
+    }
+    
+    UKismetSystemLibrary::GetDefaultObj()->CallFunc<void>("KismetSystemLibrary", "ExecuteConsoleCommand", UWorld::GetWorld(), WorldName, nullptr);
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,

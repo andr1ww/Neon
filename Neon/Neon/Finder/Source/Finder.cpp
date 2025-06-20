@@ -22,9 +22,12 @@ uint64_t UFinder::WorldNetMode()
 
 uint64 UFinder::GIsClient()
 {
-    auto Addr = Memcury::Scanner::FindStringRef(L"bEnableInClient");
-    
-    return Addr.ScanFor({0x44, 0x38, 0x25}, false, 0, 0, 2000).RelativeOffset(3).Get();
+    Memcury::Scanner Scanner = Memcury::Scanner::FindPattern("38 05 ? ? ? ? 0F 95 C0 FF C0");
+    if (Scanner.Get() == 0)
+    {
+        Scanner = Memcury::Scanner::FindPattern("88 1D ? ? ? ? 45 8A EC", true);
+    }
+    return Scanner.RelativeOffset(2).Get();
 }
 
 uint64 UFinder::TickFlush()
@@ -509,4 +512,15 @@ uint64 UFinder::WorldGetNetMode()
 
     return Memcury::Scanner::FindPattern("48 83 EC ? 48 83 79 ? ? 74 ? B8").Get();
 
+}
+
+uint64 UFinder::RepDriverServerReplicateActors()
+{
+    std::vector<uint8_t> Bytes = (Fortnite_Version >= 19.00) ? std::vector<uint8_t>({ 0x48,0x8B,0xC4 }) : std::vector<uint8_t>({ 0x4C, 0x8B, 0xDC });
+    if (Fortnite_Version <= 4.50) {
+        return Memcury::Scanner::FindPattern(
+            "4C 8B DC 55 49 8D AB ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 48 8B 41 ? 49 89 5B ? 49 89 73 ? 49 89 7B").Get();
+    }
+		
+    return Memcury::Scanner::FindStringRef(L"NET_PrepareReplication", true).ScanFor(Bytes, false).Get();
 }

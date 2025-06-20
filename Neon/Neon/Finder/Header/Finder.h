@@ -80,6 +80,8 @@ public:
     uint64 DemoReplicateActor();
 
     uint64 WorldGetNetMode();
+
+    uint64 RepDriverServerReplicateActors();
 };
 
 inline UFinder* Finder;
