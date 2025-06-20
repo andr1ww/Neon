@@ -3,6 +3,7 @@
 #include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/FortGameMode/Header/FortGameMode.h"
+#include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "Neon/Finder/Header/Finder.h"
 #include "Neon/Runtime/Runtime.h"
 
@@ -90,6 +91,8 @@ void Main() {
 	
 	Runtime::Exec<&AFortGameModeAthena::StaticClass>("ReadyToStartMatch", AFortGameModeAthena::ReadyToStartMatch);
 	Runtime::Exec<&AFortGameModeAthena::StaticClass>("SpawnDefaultPawnFor", AFortGameModeAthena::SpawnDefaultPawnFor);
+	Runtime::Exec<&AFortPlayerControllerAthena::StaticClass>("ServerAcknowledgePossession", AFortPlayerControllerAthena::ServerAcknowledgePossession);
+	
     Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
 	Runtime::Hook(Finder->DispatchRequest(), UNetDriver::DispatchRequest, (void**)&DispatchRequestOriginal);
 	

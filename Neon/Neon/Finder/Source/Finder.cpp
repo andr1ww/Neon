@@ -347,7 +347,7 @@ uint64 UFinder::KickPlayer()
         return Memcury::Scanner::FindPattern("48 8B C4 48 89 58 08 48 89 70 10 48 89 78 18 4C 89 60 20 55 41 56 41 57 48 8B EC 48 83 EC 60 48 83 65 ? ? 4C 8B F2 83 65 E8 00 4C 8B E1 83 65 EC").Get();
     if (Fortnite_Version.GetMajorVersion() == 19)
         return Memcury::Scanner::FindPattern("48 89 5C 24 ? 55 56 57 48 8B EC 48 83 EC 60 48 8B FA 48 8B F1 E8").Get();
-    if (Engine_Version >= 423 || Engine_Version <= 4.25) // && instead of || ??
+    if (Engine_Version >= 4.23 || Engine_Version <= 4.25) // && instead of || ??
         return Memcury::Scanner::FindPattern("48 89 5C 24 08 48 89 74 24 10 57 48 83 EC ? 49 8B F0 48 8B DA 48 85 D2").Get();
 
     uint64 Ret = 0;

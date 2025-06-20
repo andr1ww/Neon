@@ -13,8 +13,8 @@ public:
 
 class APlayerController : public AController
 {
-private:
-
+public:
+    DEFINE_MEMBER(APawn*, APlayerController, AcknowledgedPawn);
 public:
     DECLARE_STATIC_CLASS(APlayerController);
     DECLARE_DEFAULT_OBJECT(APlayerController);
