@@ -1,9 +1,12 @@
 #pragma once
 #include "pch.h"
 #include "Engine/Actor/Header/Actor.h"
+#include "Engine/Pawn/Header/Pawn.h"
 
 class AController : public AActor
 {
+public:
+    DEFINE_MEMBER(APawn*, AController, Pawn);
 public:
     AActor* GetViewTarget();
 };

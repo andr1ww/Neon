@@ -145,6 +145,10 @@ class FName
         }
 
         FString ToString() const;
+
+    bool operator<(const FName& other) const {
+        return ComparisonIndex < other.ComparisonIndex;
+    }
 };
 
 /** Mask for all object flags */
@@ -152,72 +156,71 @@ class FName
         (EObjectFlags)0xffffffff ///< All flags, used mainly for error checking
 
 class FUObjectArray;
-class UObjectBase
-{
-      public:
+    class UObjectBase
+    {
+    public:
         friend class UObjectBaseUtility;
         friend class FUObjectArray;
 
-        public:
-
-            bool IsValidLowLevel() const
+        bool IsValidLowLevel() const
+        {
+            if (this == nullptr)
             {
-                if (this == nullptr)
-                {
-                            UE_LOG( LogUObjectBase, Warning,
-                                    "NULL Object" );
-                        return false;
-                }
-                if (!ClassPrivate)
-                {
-                        UE_LOG( LogUObjectBase, Warning,
-                                "Object is not registered" );
-                        return false;
-                }
-                return this->InternalIndex > 0;
+                UE_LOG( LogUObjectBase, Warning,
+                        "NULL Object" );
+                return false;
             }
-            bool IsValidLowLevelFast( bool bRecursive = true ) const;
-            
-
-
-            /**
-             * Returns the unique ID of the object...these are reused so it is
-             *only unique while the object is alive. Useful as a tag.
-             **/
-            FORCEINLINE uint32 GetUniqueID() const {
-                    return (uint32)InternalIndex;
+            if (!ClassPrivate)
+            {
+                UE_LOG( LogUObjectBase, Warning,
+                        "Object is not registered" );
+                return false;
             }
+            return this->InternalIndex > 0;
+        }
+   
+        bool IsValidLowLevelFast( bool bRecursive = true ) const;
 
-            /** Returns the UClass that defines the fields of this object */
-            FORCEINLINE class UClass *GetClass() const { return ClassPrivate; }
+        /**
+         * Returns the unique ID of the object...these are reused so it is
+         * only unique while the object is alive. Useful as a tag.
+         **/
+        FORCEINLINE uint32 GetUniqueID() const {
+            return (uint32)InternalIndex;
+        }
 
-            /** Returns the UObject this object resides in */
-            FORCEINLINE class UObject *GetOuter() const { return OuterPrivate; }
+        /** Returns the UClass that defines the fields of this object */
+        FORCEINLINE class UClass *GetClass() const { return ClassPrivate; }
 
-            /** Returns the logical name of this object */
-            FORCEINLINE FName GetFName() const { return NamePrivate; }
+        /** Returns the UObject this object resides in */
+        FORCEINLINE class UObject *GetOuter() const { return OuterPrivate; }
 
-        private:
+        /** Returns the logical name of this object */
+        FORCEINLINE FName GetFName() const { return NamePrivate; }
 
-          void **VTable;
+        /** Returns the VTable pointer */
+        FORCEINLINE void** GetVTable() const { return VTable; }
 
-          /** Flags used to track and report various object states. This needs to be 8 byte aligned on 32-bit 
-            platforms to reduce memory waste */
-          EObjectFlags ObjectFlags;
+    private:
+        void** VTable;
 
-          /** Index into GObjectArray...very private. */
-          int32 InternalIndex;
+        /** Flags used to track and report various object states. This needs to be 8 byte aligned on 32-bit 
+          platforms to reduce memory waste */
+        EObjectFlags ObjectFlags;
 
-          /** Class the object belongs to. */
-          class UClass *ClassPrivate;
+        /** Index into GObjectArray...very private. */
+        int32 InternalIndex;
 
-          /** Name of this object */
-          FName NamePrivate;
+        /** Class the object belongs to. */
+        class UClass *ClassPrivate;
 
-          /** Object this object resides in. */
-          UObject *OuterPrivate;
-};
+        /** Name of this object */
+        FName NamePrivate;
 
+        /** Object this object resides in. */
+        UObject *OuterPrivate;
+    };
+    
 /**
  * Flags describing a class.
  */

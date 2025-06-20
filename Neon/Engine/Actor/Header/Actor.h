@@ -8,7 +8,7 @@ class AActor : public UObject
 private:
 
 public:
-
+    FVector GetActorLocation();
 public:
     FTransform GetTransform();
 public:

@@ -5,6 +5,8 @@
 #include "Engine/ObjectPtr/Header/ObjectPtr.h"
 #include "Engine/PlayerController/Header/PlayerController.h"
 #include "FortniteGame/FortGameState/Header/FortGameState.h"
+#include "Neon/Finder/Header/Finder.h"
+
 
 struct FURL
 {
@@ -33,6 +35,11 @@ public:
     DEFINE_MEMBER(SDK::TArray<class UChildConnection*>, UNetConnection, Children);
 };
 
+static TSet<FName>* GetClientVisibleLevelNames(UNetConnection* NetConnection)
+{
+    return (TSet<FName>*)(__int64(NetConnection) + 0x336C8);
+}
+
 class UChildConnection : public UNetConnection
 {
 public:
@@ -40,6 +47,18 @@ public:
 };
 
 class UReplicationDriver : public UObject
+{
+public:
+
+};
+
+class UChannel : public UObject
+{
+public:
+
+};
+
+class UActorChannel : public UChannel
 {
 public:
 
@@ -63,6 +82,12 @@ enum class ENetRole : uint8
     ROLE_AutonomousProxy                     = 2,
     ROLE_Authority                           = 3,
     ROLE_MAX                                 = 4,
+};
+
+enum class EChannelCreateFlags : uint32_t
+{
+    None = (1 << 0),
+    OpenedLocally = (1 << 1)
 };
 
 class UWorld;
@@ -140,6 +165,117 @@ public:
     TMap<TWeakObjectPtr<UNetConnection>, int32> NumDormantObjectsPerConnection;
 };
 
+class FNetworkGUID
+{
+public:
+
+    uint32 Value;
+
+public:
+
+    FNetworkGUID()
+        : Value(0)
+    {
+    }
+
+    FNetworkGUID(uint32 V)
+        : Value(V)
+    {
+    }
+
+public:
+
+    friend bool operator==(const FNetworkGUID& X, const FNetworkGUID& Y)
+    {
+        return (X.Value == Y.Value);
+    }
+
+    friend bool operator!=(const FNetworkGUID& X, const FNetworkGUID& Y)
+    {
+        return (X.Value != Y.Value);
+    }
+
+public:
+
+    void BuildFromNetIndex(int32 StaticNetIndex)
+    {
+        Value = (StaticNetIndex << 1 | 1);
+    }
+
+    int32 ExtractNetIndex()
+    {
+        if (Value & 1)
+        {
+            return Value >> 1;
+        }
+        return 0;
+    }
+
+    friend uint32 GetTypeHash(const FNetworkGUID& Guid)
+    {
+        return Guid.Value;
+    }
+
+    bool IsDynamic() const
+    {
+        return Value > 0 && !(Value & 1);
+    }
+
+    bool IsStatic() const
+    {
+        return Value & 1;
+    }
+
+    bool IsValid() const
+    {
+        return Value > 0;
+    }
+
+    bool IsDefault() const
+    {
+        return (Value == 1);
+    }
+
+    /* CORE_API*/ static FNetworkGUID GetDefault()
+    {
+        return FNetworkGUID(1);
+    }
+
+    void Reset()
+    {
+        Value = 0;
+    }
+
+public:
+
+    /* CORE_API */ static FNetworkGUID Make(int32 seed, bool bIsStatic)
+    {
+        return FNetworkGUID(seed << 1 | (bIsStatic ? 1 : 0));
+    }
+};
+
+
+struct FActorDestructionInfo
+{
+    TWeakObjectPtr<ULevel>		Level;
+    TWeakObjectPtr<UObject>		ObjOuter;
+    FVector			DestroyedPosition;
+    FNetworkGUID	NetGUID;
+    FString			PathName;
+    FName			StreamingLevelName;
+};
+
+struct FNetViewer final
+{
+public:
+    class UNetConnection*                         Connection;                                        // 0x0000(0x0008)(ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    class AActor*                                 InViewer;                                          // 0x0008(0x0008)(ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    class AActor*                                 ViewTarget;                                        // 0x0010(0x0008)(ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    struct FVector                                ViewLocation;                                      // 0x0018(0x0018)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    struct FVector                                ViewDir;                                           // 0x0030(0x0018)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
+
+
 class UNetDriver : public UObject
 {
 public:
@@ -149,7 +285,7 @@ public:
 public:
     bool InitListen(UWorld* Networknotify, FURL URL, bool bReuseAddressAndPort);
     void SetWorld(UWorld* World);
-
+    
     void TickFlush(UNetDriver* NetDriver, float DeltaSeconds);
 
     int32& ReplicationFrame()
@@ -187,10 +323,29 @@ public:
     int32 ServerReplicateActors(UNetDriver* NetDriver, float DeltaSeconds);
     int32 ServerReplicateActors_PrepConnections(UNetDriver*, float DeltaSeconds);
     void ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TArray<AActor*>& OutConsiderList, const float ServerTickTime);
+    int32 ServerReplicateActors_ProcessActors(UNetDriver*, UNetConnection* Connection, TArray<AActor*>& Actors);
+    bool IsActorRelevantToConnection(const AActor* Actor, const TArray<FNetViewer>& ConnectionViewers);
+    UNetConnection* IsActorOwnedByAndRelevantToConnection(const AActor* Actor, const TArray<FNetViewer>& ConnectionViewers, bool& bOutHasNullViewTarget);
 public:
     DECLARE_STATIC_CLASS(UNetDriver);
     DECLARE_DEFAULT_OBJECT(UNetDriver);
 };
+
+inline void (*TickFlushOriginal)(UNetDriver*, float DeltaSeconds);
+
+static bool ReplicateToClient(UNetDriver* Driver, AActor* Actor, UNetConnection* Client) {
+    if (!Client || !Actor) {
+        return false;
+    }
+    if (Actor->IsA(APlayerController::StaticClass()) && Client->GetPlayerController() && Actor != Client->GetPlayerController()) {
+        return false;
+    }
+ 
+    bool (*DemoReplicateActor)(UNetDriver *, AActor *, UNetConnection *, bool) = decltype(DemoReplicateActor)(Finder->DemoReplicateActor());
+    DemoReplicateActor(Driver, Actor, Client, false);
+	
+    return true;
+}
 
 class ULocalPlayer : public UObject
 {

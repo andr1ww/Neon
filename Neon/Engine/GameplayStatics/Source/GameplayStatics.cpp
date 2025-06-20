@@ -3,5 +3,5 @@
 
 float UGameplayStatics::GetTimeSeconds(UWorld* World)
 {
-    return UGameplayStatics::GetDefaultObj()->CallFunc<float>("UGameplayStatics","GetTimeSeconds", World);
+    return GetDefaultObj()->CallFunc<float>("GameplayStatics","GetTimeSeconds", World);
 }

@@ -491,3 +491,55 @@ uint64 UFinder::CreateNetDriverLocal()
     if (Scanner.Get())
         return  Scanner.RelativeOffset(1).Get();
 }
+
+uint64 UFinder::CreateChannel()
+{
+    if (Fortnite_Version <= 3.3)
+        return Memcury::Scanner::FindPattern("40 56 57 41 54 41 55 41 57 48 83 EC 60 48 8B 01 41 8B F9 45 0F B6 E0").Get();
+    if (Fortnite_Version.GetMajorVersion() >= 20) // 21.00
+        return Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 44 89 4C 24 ? 55 57 41 54 41 56 41 57 48 8B EC 48 83 EC 50 45 33 E4 48 8D 05 ? ? ? ? 44 38 25").Get();
+
+    return 0;
+}
+
+uint64 UFinder::SendClientAdjustment()
+{
+    if (Fortnite_Version.GetMajorVersion() >= 20)
+    {
+        return Memcury::Scanner::FindPattern(
+            "48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 83 3D ? ? ? ? ? 48 8B D9 75"
+        ).Get();
+    }
+}
+
+uint64 UFinder::CallPreReplication()
+{
+    if (Engine_Version == 4.16)
+        return Memcury::Scanner::FindPattern("48 85 D2 0F 84 ? ? ? ? 48 8B C4 55 57 41 57 48 8D 68 A1 48 81 EC").Get();
+    if (Engine_Version == 4.19)
+        return Memcury::Scanner::FindPattern("48 85 D2 0F 84 ? ? ? ? 48 8B C4 55 57 41 54 48 8D 68 A1 48 81 EC ? ? ? ? 48 89 58 08 4C").Get();
+    if (Fortnite_Version >= 2.5 && Fortnite_Version <= 3.3)
+        return Memcury::Scanner::FindPattern("48 85 D2 0F 84 ? ? ? ? 56 41 56 48 83 EC 38 4C 8B F2").Get();
+    if (Fortnite_Version.GetMajorVersion() == 20)
+        return Memcury::Scanner::FindPattern("48 85 D2 0F 84 ? ? ? ? 48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC 40 F6 41 58 30 48 8B EA 48 8B D9 40 B6 01").Get();
+    if (Fortnite_Version.GetMajorVersion() >= 21)
+        return Memcury::Scanner::FindPattern("48 85 D2 0F 84 ? ? ? ? 48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC 40 F6 41 58 30 4C 8B F2").Get();
+    if (Fortnite_Version.GetMajorVersion() >= 23)
+        return Memcury::Scanner::FindPattern("48 85 D2 0F 84 ? ? ? ? 48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 56 41 57 48 8B EC 48 83 EC ? F6 41").Get();
+}
+
+uint64 UFinder::RemoveNetworkActor()
+{
+    if (Fortnite_Version.GetMajorVersion() >= 20)
+        return Memcury::Scanner::FindPattern(
+            "48 89 5C 24 ? 57 48 83 EC ? 48 8B D9 48 8B FA 48 8B 89 ? ? ? ? E8 ? ? ? ? 44 8B 83"
+        ).Get();
+}
+
+uint64 UFinder::DemoReplicateActor()
+{
+    if (Fortnite_Version.GetMajorVersion() >= 20)
+        return Memcury::Scanner::FindPattern(
+            "48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ? 4C 8B E9 45 8A E1"
+        ).Get();
+}

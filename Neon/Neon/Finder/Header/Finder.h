@@ -68,6 +68,16 @@ public:
     uint64 GetWorldContextFromObject();
 
     uint64 CreateNetDriverLocal();
+
+    uint64 CreateChannel();
+
+    uint64 SendClientAdjustment();
+
+    uint64 CallPreReplication();
+
+    uint64 RemoveNetworkActor();
+
+    uint64 DemoReplicateActor();
 };
 
 inline UFinder* Finder;
