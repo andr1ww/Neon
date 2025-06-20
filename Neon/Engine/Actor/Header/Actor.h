@@ -5,7 +5,7 @@
 
 class AActor : public UObject
 {
-private:
+public:
 
 public:
     FVector GetActorLocation();

@@ -11,6 +11,7 @@
 #include <string>
 #include <thread>
 #include <random>
+#include <MinHook.h>
 #include "SDK/include/SDK.h"
 #pragma comment(lib, "SDK/FortSDK.lib")
 using namespace SDK;

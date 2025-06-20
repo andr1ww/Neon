@@ -143,13 +143,13 @@ void UNetDriver::ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TAr
             continue;
         }
 		
-        if (!Actor || Actor->bActorIsBeingDestroyed || Actor->RemoteRole == ENetRole::ROLE_None || Actor->NetDriverName != Driver->GetNetDriverName())
+        if (!Actor || Actor->Get<uint8>("Actor", "bActorIsBeingDestroyed") || Actor->Get<ENetRole>("Actor", "RemoteRole") == ENetRole::ROLE_None || Actor->Get<FName>("Actor", "NetDriverName").ToString().ToString().c_str() != Driver->GetNetDriverName().ToString().ToString().c_str())
         {
             ActorsToRemove.Add(Actor);
             continue;
         }
 
-        if (Actor->NetDormancy == ENetDormancy::DORM_Initial)
+        if (Actor->Get<ENetDormancy>("Actor", "NetDormancy") == ENetDormancy::DORM_Initial)
         {
             continue;
         }
@@ -162,7 +162,7 @@ void UNetDriver::ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TAr
 
         if (!ActorInfo->bPendingNetUpdate)
         {
-            const float NextUpdateDelta = 1.f / Actor->NetUpdateFrequency;
+            const float NextUpdateDelta = 1.f / Actor->Get<float>("Actor", "NetUpdateFrequency");
             ActorInfo->NextUpdateTime = CurrentTime + FRand() * ServerTickTime + NextUpdateDelta;
             ActorInfo->LastNetUpdateTimeStamp = CurrentTime;
         }
@@ -305,4 +305,22 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
     }
 
 	return TickFlushOriginal(NetDriver, DeltaSeconds);
+}
+
+bool UNetDriver::InitListen(UWorld* NetWorkNotify, FURL URL, bool bReuseAddressAndPort)
+{
+    static bool (*InitListen)(UNetDriver*, UWorld*, FURL&, bool, FString&) = decltype(InitListen)(Finder->InitListen());
+    FString Error;
+
+    UWorld* World = UWorld::GetWorld();
+    printf("Valid World: %d", World ? 1 : 0);
+    return InitListen(this, World, URL, bReuseAddressAndPort, Error);
+}
+
+void UNetDriver::SetWorld(UWorld* World)
+{
+    static void (*SetWorld)(UNetDriver*, UWorld*) = nullptr;
+    if (!SetWorld)
+        SetWorld = decltype(SetWorld)(Finder->SetWorld());
+    return SetWorld(this, World);
 }

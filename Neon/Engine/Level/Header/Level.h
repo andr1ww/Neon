@@ -11,16 +11,19 @@ class ULevel : public UObject
 public:
     DEFINE_MEMBER(UWorld*, ULevel, OwningWorld);
 public:
-    ULevel* GetLevel(AActor* Actor) {
+    static ULevel* GetLevel(AActor* Actor) {
         auto Outer = Actor->GetOuter();
 
         while (Outer)
         {
-            if (Outer->GetClass() == ULevel::GetClass())
+            if (Outer->GetClass() == ULevel::StaticClass())
                 return (ULevel*)Outer;
             else
                 Outer = Outer->GetOuter();
         }
         return nullptr;
     }
+public:
+    DECLARE_STATIC_CLASS(ULevel);
+    DECLARE_DEFAULT_OBJECT(ULevel);
 };

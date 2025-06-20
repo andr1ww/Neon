@@ -161,6 +161,7 @@
     <ClInclude Include="FortniteGame\FortGameState\Header\FortGameState.h" />
     <ClInclude Include="FortniteGame\FortPlaylistAthena\Header\FortPlaylistAthena.h" />
     <ClInclude Include="Neon\Finder\Header\Finder.h" />
+    <ClInclude Include="Neon\Runtime\Runtime.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SDK\include\SDK.h" />
     <ClInclude Include="SDK\include\sdk\CoreObject_classes.h" />

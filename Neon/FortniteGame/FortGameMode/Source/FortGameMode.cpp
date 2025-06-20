@@ -29,6 +29,10 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
         GameState->OnRep_CurrentPlaylistInfo();
 
         GameMode->SetWarmupRequiredPlayerCount(1);
+
+        GameState->CallFunc<void>("FortGameStateAthena", "OnFinishedStreamingAdditionalPlaylistLevel");
+        GameState->CallFunc<void>("FortGameStateAthena", "OnRep_AdditionalPlaylistLevelsStreamed");
+        GameState->Set("FortGameStateAthena", "bIsUsingDownloadOnDemand", false);
     }
 
     if (!GameState->GetMapInfo()) return false;
