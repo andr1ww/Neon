@@ -57,6 +57,17 @@ public:
     DECLARE_DEFAULT_OBJECT(UGameInstance);
 };
 
+struct FLevelCollection
+{
+    BYTE CollectionType[1];
+    bool bIsVisible;
+    AFortGameStateAthena* GameState;
+    UNetDriver* NetDriver;
+    void* DemoNetDriver;
+    void* PersistentLevel;
+    uint8_t Levels[0x50];
+};
+
 class UWorld : public UObject
 {
 public:
