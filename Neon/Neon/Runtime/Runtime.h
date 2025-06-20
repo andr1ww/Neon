@@ -119,7 +119,7 @@ namespace Runtime
 		UFunction* Function = DefaultObj->GetFunction(FuncName);
 		if (!Function) return;
     
-		int idx = GetVTableIndex(Function); 
+		int idx = GetVTableIndex(Function);
     
 		if (!std::is_same_v<T, void*>)
 			og = (T)VTable[idx];

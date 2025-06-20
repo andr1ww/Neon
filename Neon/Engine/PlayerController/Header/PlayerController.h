@@ -14,6 +14,8 @@ public:
 class APlayerController : public AController
 {
 public:
+    
+public:
     DEFINE_MEMBER(APawn*, APlayerController, AcknowledgedPawn);
 public:
     DECLARE_STATIC_CLASS(APlayerController);

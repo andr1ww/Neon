@@ -82,7 +82,7 @@ void Main() {
     SDK::Init();
 	
     MH_Initialize();
-    Sleep(3500);
+    Sleep(2500);
 
     *(bool*)(Finder->GIsClient()) = false; 
     *(bool*)(Finder->GIsClient() + 1) = true;
