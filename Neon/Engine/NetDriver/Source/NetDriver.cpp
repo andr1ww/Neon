@@ -37,8 +37,16 @@ bool UNetDriver::IsActorRelevantToConnection(const AActor* Actor, const TArray<F
 
 UNetConnection* UNetDriver::IsActorOwnedByAndRelevantToConnection(const AActor* Actor, const TArray<FNetViewer>& ConnectionViewers, bool& bOutHasNullViewTarget)
 {
-    bool (*IsRelevancyOwnerFor)(const AActor*, const AActor*, const AActor*, const AActor*) = decltype(IsRelevancyOwnerFor)(Actor->GetVTable()[0x9e]);
-    AActor* (*GetNetOwner)(const AActor*) = decltype(GetNetOwner)(Actor->GetVTable()[0xa2]);
+    bool (*IsRelevancyOwnerFor)(const AActor*, const AActor*, const AActor*, const AActor*) = decltype(IsRelevancyOwnerFor)(Actor->GetVTable()[
+        (Engine_Version == 416 || Fortnite_Version == 3.3) ? 0x420 / 8 + 2 :
+        (Fortnite_Version == 1.10 || Fortnite_Version == 1.11 || (Fortnite_Version >= 2.42 && Fortnite_Version <= 3.2)) ? 0x418 / 8 + 2:
+        0x9C + 2
+    ]);
+    AActor* (*GetNetOwner)(const AActor*) =  decltype(GetNetOwner)(Actor->GetVTable()[
+        (Engine_Version == 416 || Fortnite_Version == 3.3) ? 0x420 / 8 + 2 + 4 :
+        (Fortnite_Version == 1.10 || Fortnite_Version == 1.11 || (Fortnite_Version >= 2.42 && Fortnite_Version <= 3.2)) ? 0x418 / 8 + 2 + 4 :
+        0x9C + 2 + 4
+    ]);
 
     const AActor* AOwner = GetNetOwner(Actor);
 
@@ -301,11 +309,9 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 {
     if (Finder->RepDriverServerReplicateActors() && Fortnite_Version.GetMajorVersion() <= 20)
     {
-        UE_LOG(LogNeon, Log, "Using Replication Driver for ServerReplicateActors");
-        reinterpret_cast<void(*)(UObject*)>(NetDriver->GetReplicationDriver()->GetVTable()[Finder->RepDriverServerReplicateActors()])(NetDriver->GetReplicationDriver());
+        reinterpret_cast<void(*)(UReplicationDriver*)>(NetDriver->GetReplicationDriver()->GetVTable()[Finder->RepDriverServerReplicateActors()])(NetDriver->GetReplicationDriver());
     } else
     {
-        UE_LOG(LogNeon, Log, "Using UNetDriver::ServerReplicateActors for ServerReplicateActors");
         if (NetDriver->GetClientConnections().Num() > 0)
         {
             ServerReplicateActors(NetDriver, DeltaSeconds);
@@ -333,8 +339,8 @@ void UNetDriver::SetWorld(UWorld* World)
     return SetWorld(this, World);
 }
 
-void UNetDriver::DispatchRequest(void* unknown_1, void* MCPData, int MCPCode)
+void UNetDriver::DispatchRequest(__int64 a1, __int64* a2, int a3)
 {
-    if (Fortnite_Version < 8.01) *(int*)(__int64(MCPData) + (Fortnite_Version < 4.2 ? 0x60 : 0x28)) = 3;
-    return DispatchRequestOriginal(unknown_1, MCPData, MCPCode);
+    if (Fortnite_Version < 8.01) *(int*)(__int64(a2) + (Fortnite_Version < 4.2 ? 0x60 : 0x28)) = 3;
+    return DispatchRequestOriginal(a1, a2, 3);
 }

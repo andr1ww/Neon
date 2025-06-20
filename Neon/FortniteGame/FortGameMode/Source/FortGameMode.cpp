@@ -12,27 +12,43 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
     if (!GameState)
         return false;
 
-    if (GameMode->Get<int32>("FortGameModeAthena", "CurrentPlaylistId") == -1)
+    static bool bSetup = false;
+
+    if (!bSetup)
     {
+        bSetup = true;
         UFortPlaylistAthena* Playlist = (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_DefaultSolo");
 
-        GameState->GetCurrentPlaylistInfo().SetBasePlaylist(Playlist);
-        GameState->GetCurrentPlaylistInfo().SetOverridePlaylist(Playlist);
-        GameState->GetCurrentPlaylistInfo().SetPlaylistReplicationKey(GameState->GetCurrentPlaylistInfo().GetPlaylistReplicationKey() + 1);
-        GameState->GetCurrentPlaylistInfo().MarkArrayDirty();
+        if (Fortnite_Version >= 6.10)
+        {
+            GameState->GetCurrentPlaylistInfo().SetBasePlaylist(Playlist);
+            GameState->GetCurrentPlaylistInfo().SetOverridePlaylist(Playlist);
+            GameState->GetCurrentPlaylistInfo().SetPlaylistReplicationKey(GameState->GetCurrentPlaylistInfo().GetPlaylistReplicationKey() + 1);
+            GameState->GetCurrentPlaylistInfo().MarkArrayDirty();
 
-        GameState->SetCurrentPlaylistId(Playlist->GetPlaylistId());
-        GameMode->SetCurrentPlaylistId(Playlist->GetPlaylistId());
-        GameMode->SetCurrentPlaylistName(Playlist->GetPlaylistName());
+            GameState->SetCurrentPlaylistId(Playlist->GetPlaylistId());
+            GameMode->SetCurrentPlaylistId(Playlist->GetPlaylistId());
+            GameMode->SetCurrentPlaylistName(Playlist->GetPlaylistName());
         
-        GameState->OnRep_CurrentPlaylistId();
-        GameState->OnRep_CurrentPlaylistInfo();
+            GameState->OnRep_CurrentPlaylistId();
+            GameState->OnRep_CurrentPlaylistInfo();
 
-        GameMode->SetWarmupRequiredPlayerCount(1);
+            GameMode->SetWarmupRequiredPlayerCount(1);
 
-        GameState->CallFunc<void>("FortGameStateAthena", "OnFinishedStreamingAdditionalPlaylistLevel");
-        GameState->CallFunc<void>("FortGameStateAthena", "OnRep_AdditionalPlaylistLevelsStreamed");
-        GameState->Set("FortGameStateAthena", "bIsUsingDownloadOnDemand", false);
+            GameState->CallFunc<void>("FortGameStateAthena", "OnFinishedStreamingAdditionalPlaylistLevel");
+            GameState->CallFunc<void>("FortGameStateAthena", "OnRep_AdditionalPlaylistLevelsStreamed");
+            GameState->Set("FortGameStateAthena", "bIsUsingDownloadOnDemand", false);
+        } else
+        {
+            GameState->Set("FortGameStateAthena", "CurrentPlaylistData", Playlist);
+            
+            GameState->SetCurrentPlaylistId(Playlist->GetPlaylistId());
+            GameMode->SetCurrentPlaylistId(Playlist->GetPlaylistId());
+            GameMode->SetCurrentPlaylistName(Playlist->GetPlaylistName());
+        
+            GameState->OnRep_CurrentPlaylistId();
+            GameState->OnRep_CurrentPlaylistData();
+        }
     }
 
     if (!GameState->GetMapInfo()) return false;
@@ -41,12 +57,18 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
     {
         FName GameNetDriver = UKismetStringLibrary::GetDefaultObj()->CallFunc<FName>("KismetStringLibrary","Conv_StringToName",FString(L"GameNetDriver"));
         UNetDriver* NetDriver = nullptr;
-        static void* (*GetWorldContextFromObject)(UEngine*, UWorld*) = decltype(GetWorldContextFromObject)(Finder->GetWorldContextFromObject());
-        void* WorldContext = GetWorldContextFromObject(UEngine::GetEngine(), UWorld::GetWorld());
-        static UNetDriver* (*CreateNetDriver_Local)(UEngine*, void* WorldContext, FName) = decltype(CreateNetDriver_Local)(Finder->CreateNetDriverLocal());
 
-        NetDriver = CreateNetDriver_Local(UEngine::GetEngine(), WorldContext, GameNetDriver);
-
+        if (Fortnite_Version >= 16.40)
+        {
+            static void* (*GetWorldContextFromObject)(UEngine*, UWorld*) = decltype(GetWorldContextFromObject)(Finder->GetWorldContextFromObject());
+            void* WorldContext = GetWorldContextFromObject(UEngine::GetEngine(), UWorld::GetWorld());
+            static UNetDriver* (*CreateNetDriver_Local)(UEngine*, void* WorldContext, FName) = decltype(CreateNetDriver_Local)(Finder->CreateNetDriverLocal());
+            NetDriver = CreateNetDriver_Local(UEngine::GetEngine(), WorldContext, GameNetDriver);
+        } else
+        {
+			NetDriver = ((UNetDriver * (*)(UObject*, UObject*, FName)) Finder->CreateNetDriver())(UEngine::GetEngine(), UWorld::GetWorld(), GameNetDriver);
+        }
+        
         UWorld::GetWorld()->SetNetDriver(NetDriver);
 
         if (UWorld::GetWorld()->GetNetDriver())
@@ -66,17 +88,20 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
             }
 
             SetConsoleTitleA("Neon | Listening on Port: 7777");
+            GameMode->SetbWorldIsReady(true);
         }
     }
     
-    auto Ret = GameMode->GetbWorldIsReady() && GameMode->GetNumPlayers() > 0;
+    auto Ret = GameMode->GetNumPlayers() > 0;
     return Ret;
 }
 
-APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, APlayerController* NewPlayer, AActor* StartSpot)
+AActor* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, APlayerController* NewPlayer, AActor* StartSpot)
 {
     FTransform SpawnTransform = StartSpot ? StartSpot->CallFunc<FTransform>("Actor", "GetTransform") : FTransform::FTransform();
     SpawnTransform.Translation.Z += 250.f;
 
-    return GameMode->CallFunc<APawn*>("FortGameModeAthena", "SpawnDefaultPawnAtTransform", NewPlayer, SpawnTransform);
+    AActor* Pawn = GameMode->CallFunc<AActor*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer, SpawnTransform);
+
+    return Pawn;
 }

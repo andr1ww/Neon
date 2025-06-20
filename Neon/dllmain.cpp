@@ -50,10 +50,7 @@ void InitNullsAndRetTrues() {
 		NullFuncs.push_back(Addr.ScanFor({ 0x48, 0x89, 0x5C }, false, 0, 1, 2000).Get());
 	}
 
-	if (Finder->KickPlayer()) {
-		auto KickPlayer = Finder->KickPlayer();
-		NullFuncs.push_back(KickPlayer);
-	}
+	NullFuncs.push_back(Finder->KickPlayer());
 
 	if (Fortnite_Version == 0) RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 57 41 56 41 57 48 81 EC ? ? ? ? 48 8B 01 49 8B E9 45 0F B6 F8").Get());
 	else if (Fortnite_Version >= 16.40) {
@@ -61,18 +58,18 @@ void InitNullsAndRetTrues() {
 		RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 8B C4 48 89 58 08 48 89 70 10 48 89 78 18 4C 89 60 20 55 41 56 41 57 48 8B EC 48 83 EC 60 49 8B D9 45 8A").Get());
 	}
 
-	DWORD og;
 	for (auto& Func : NullFuncs) {
 		if (Func == 0x0) continue;
-		VirtualProtect((void*)Func, 1, PAGE_EXECUTE_READWRITE, &og);
-		*(uint8*)Func = 0xC3;
-		VirtualProtect((void*)Func, 1, og, &og);
+		Runtime::Patch(Func, 0xC3);
 	}
 
 	for (auto& Func : RetTrueFuncs) {
 		if (Func == 0x0) continue;
 		Runtime::Hook(Func, RetTrue);
 	}
+
+	Runtime::Hook(Finder->WorldNetMode(), RetTrue);
+	Runtime::Hook(Finder->WorldGetNetMode(), RetTrue);
 }
 
 void Main() {
@@ -82,25 +79,20 @@ void Main() {
     freopen_s(&File, "CONOUT$", "w+", stderr);
     SetConsoleTitleA("Neon | Setting up");
     SDK::Init();
-     
+	
     MH_Initialize();
-    Sleep(7500);
+    Sleep(3500);
 
     *(bool*)(Finder->GIsClient()) = false; 
     *(bool*)(Finder->GIsClient() + 1) = true;
-    
+
+	InitNullsAndRetTrues();
+	
 	Runtime::Exec<&AFortGameModeAthena::StaticClass>("ReadyToStartMatch", AFortGameModeAthena::ReadyToStartMatch);
 	Runtime::Exec<&AFortGameModeAthena::StaticClass>("SpawnDefaultPawnFor", AFortGameModeAthena::SpawnDefaultPawnFor);
-
-    Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)TickFlushOriginal);
-
-    Runtime::Hook(Finder->KickPlayer(), RetTrue);
-    Runtime::Hook(Finder->WorldNetMode(), RetTrue);
-    Runtime::Hook(Finder->WorldGetNetMode(), RetTrue);
-	Runtime::Hook(Finder->DispatchRequest(), UNetDriver::DispatchRequest, (void**)DispatchRequestOriginal);
+    Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
+	Runtime::Hook(Finder->DispatchRequest(), UNetDriver::DispatchRequest, (void**)&DispatchRequestOriginal);
 	
-	InitNullsAndRetTrues();
-    
     UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
     FString WorldName;
     if (Fortnite_Version <= 10.40)

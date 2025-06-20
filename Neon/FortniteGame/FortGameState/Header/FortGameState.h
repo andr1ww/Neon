@@ -11,6 +11,7 @@ public:
     DEFINE_MEMBER(FPlaylistPropertyArray, AFortGameStateAthena, CurrentPlaylistInfo)
     DEFINE_MEMBER(UFortPlaylistAthena*, AFortGameStateAthena, CurrentPlaylistData)
     void OnRep_CurrentPlaylistId();
+    void OnRep_CurrentPlaylistData();
     void OnRep_CurrentPlaylistInfo();
     DEFINE_MEMBER(int32, AFortGameStateAthena, CurrentPlaylistId);
     DEFINE_MEMBER(AFortAthenaMapInfo*, AFortGameStateAthena, MapInfo);
