@@ -479,10 +479,15 @@ uint64 UFinder::GameSessionPatch()
 
 uint64 UFinder::GetWorldContextFromObject()
 {
-    
+    Memcury::Scanner Scanner = Memcury::Scanner::FindPattern("E8 ? ? ? ? 48 85 C0 75 ? E8 ? ? ? ? 4C 8B C3 48 8B D0 48 8B CE");
+    if (Scanner.Get())
+        return Scanner.RelativeOffset(1).Get();
 }
 
 uint64 UFinder::CreateNetDriverLocal()
 {
-    
+    Memcury::Scanner Scanner = Memcury::Scanner::FindPattern("E8 ? ? ? ? 48 89 87 ? ? ? ? 48 85 C0 74 ? 83 64 24 ? ? 48 8D 05");
+
+    if (Scanner.Get())
+        return  Scanner.RelativeOffset(1).Get();
 }

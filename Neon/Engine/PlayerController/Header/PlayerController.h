@@ -2,7 +2,13 @@
 #include "pch.h"
 #include "Engine/Actor/Header/Actor.h"
 
-class APlayerController : public AActor
+class AController : public AActor
+{
+public:
+    AActor* GetViewTarget();
+};
+
+class APlayerController : public AController
 {
 private:
 
