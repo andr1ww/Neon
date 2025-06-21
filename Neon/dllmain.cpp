@@ -70,8 +70,6 @@ void InitNullsAndRetTrues() {
 		if (Func == 0x0) continue;
 		Runtime::Hook(Func, RetTrue);
 	}
-
-	UE_LOG(LogNeon, Log, "WorldNetMode: 0x%x", Finder->WorldNetMode() - IMAGEBASE);
 }
 
 void Main() {
