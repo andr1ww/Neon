@@ -83,9 +83,24 @@ namespace Runtime
 		VirtualProtect(&vft[idx], sizeof(void*), dwProt, &dwTemp);
 	}
 
+	inline int GetOffset(UObject* Obj, const std::string& PropName) {
+		int Offset = -1;
+		for (UStruct* Struct = Obj->GetClass(); Struct;
+			Struct = Struct->GetSuperStruct()) {
+			auto FuncInfo = SDK::PropLibrary->GetPropertyByName(
+				Struct->GetFName().ToString().ToString(), PropName);
+
+			Offset = FuncInfo.Offset;
+
+			if (Offset != -1)
+				break;
+			}
+		return Offset;
+	}
+	
 	inline void* nullptrForHook = nullptr;
 
-	int32 GetVTableIndex(UFunction* Func) {
+	inline int32 GetVTableIndex(UFunction* Func) {
 		if (!Func) return -1;
 		auto ValidateName = Func->GetFName().ToString().ToString() + "_Validate";
 		auto ValidateRef = Memcury::Scanner::FindStringRef(std::wstring(ValidateName.begin(), ValidateName.end()).c_str(), false);

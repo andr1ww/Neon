@@ -5,6 +5,7 @@
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "Engine/UEngine/Header/UEngine.h"
 #include "Neon/Finder/Header/Finder.h"
+#include "Neon/Runtime/Runtime.h"
 
 bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 {
@@ -24,10 +25,13 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 
         if (Fortnite_Version >= 6.10)
         {
-            GameState->GetCurrentPlaylistInfo().SetBasePlaylist(Playlist);
-            GameState->GetCurrentPlaylistInfo().SetOverridePlaylist(Playlist);
-            GameState->GetCurrentPlaylistInfo().SetPlaylistReplicationKey(GameState->GetCurrentPlaylistInfo().GetPlaylistReplicationKey() + 1);
-            GameState->GetCurrentPlaylistInfo().MarkArrayDirty();
+            static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameState, "CurrentPlaylistInfo");
+            
+            FPlaylistPropertyArray& CurrentPlaylistInfoPtr = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
+            CurrentPlaylistInfoPtr.SetBasePlaylist(Playlist);
+            CurrentPlaylistInfoPtr.SetOverridePlaylist(Playlist);
+            CurrentPlaylistInfoPtr.SetPlaylistReplicationKey(CurrentPlaylistInfoPtr.GetPlaylistReplicationKey() + 1);
+            CurrentPlaylistInfoPtr.MarkArrayDirty();
 
             GameState->SetCurrentPlaylistId(Playlist->GetPlaylistId());
             GameMode->SetCurrentPlaylistId(Playlist->GetPlaylistId());
@@ -94,11 +98,13 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 
             SetConsoleTitleA("Neon | Listening on Port: 7777");
             GameMode->SetbWorldIsReady(true);
+
+            GameState->OnRep_CurrentPlaylistId();
+            GameState->OnRep_CurrentPlaylistInfo();
         }
     }
-
-    ReadyToStartMatchOriginal(GameMode);
-    return GameMode->GetNumPlayers() > 0;
+    
+    return Fortnite_Version <= 10.40 ? ReadyToStartMatchOriginal(GameMode) : GameMode->GetNumPlayers() > 0;
 }
 
 APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, APlayerController* NewPlayer, AActor* StartSpot)
