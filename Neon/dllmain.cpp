@@ -52,7 +52,9 @@ void InitNullsAndRetTrues() {
 	}
 
 	NullFuncs.push_back(Finder->KickPlayer());
-
+	RetTrueFuncs.push_back(Finder->WorldNetMode());
+	RetTrueFuncs.push_back(Finder->WorldGetNetMode());
+	
 	if (Fortnite_Version == 0) RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 57 41 56 41 57 48 81 EC ? ? ? ? 48 8B 01 49 8B E9 45 0F B6 F8").Get());
 	else if (Fortnite_Version >= 16.40) {
 		if (Fortnite_Version.GetMajorVersion() == 17) RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 8B C4 48 89 58 08 48 89 70 10 48 89 78 18 4C 89 60 20 55 41 56 41 57 48 8B EC 48 83 EC 60 4D 8B F9 41 8A F0 4C 8B F2 48 8B F9 45 32 E4").Get());
@@ -69,8 +71,7 @@ void InitNullsAndRetTrues() {
 		Runtime::Hook(Func, RetTrue);
 	}
 
-	Runtime::Hook(Finder->WorldNetMode(), RetTrue);
-	Runtime::Hook(Finder->WorldGetNetMode(), RetTrue);
+	UE_LOG(LogNeon, Log, "WorldNetMode: 0x%x", Finder->WorldNetMode() - IMAGEBASE);
 }
 
 void Main() {
@@ -89,9 +90,9 @@ void Main() {
 
 	InitNullsAndRetTrues();
 	
-	Runtime::Exec<&AFortGameModeAthena::StaticClass>("ReadyToStartMatch", AFortGameModeAthena::ReadyToStartMatch);
-	Runtime::Exec<&AFortGameModeAthena::StaticClass>("SpawnDefaultPawnFor", AFortGameModeAthena::SpawnDefaultPawnFor);
-	Runtime::Exec<&AFortPlayerControllerAthena::StaticClass>("ServerAcknowledgePossession", AFortPlayerControllerAthena::ServerAcknowledgePossession);
+	Runtime::Hook<&AFortGameModeAthena::StaticClass>("ReadyToStartMatch", AFortGameModeAthena::ReadyToStartMatch, ReadyToStartMatchOriginal);
+	Runtime::Hook<&AFortGameModeAthena::StaticClass>("SpawnDefaultPawnFor", AFortGameModeAthena::SpawnDefaultPawnFor);
+	Runtime::Hook<&AFortPlayerControllerAthena::StaticClass>("ServerAcknowledgePossession", AFortPlayerControllerAthena::ServerAcknowledgePossession);
 	
     Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
 	Runtime::Hook(Finder->DispatchRequest(), UNetDriver::DispatchRequest, (void**)&DispatchRequestOriginal);

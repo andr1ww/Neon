@@ -307,7 +307,7 @@ int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSecond
 
 void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 {
-    if (Finder->RepDriverServerReplicateActors() && Fortnite_Version.GetMajorVersion() <= 20)
+    if (Fortnite_Version.GetMajorVersion() <= 20)
     {
         reinterpret_cast<void(*)(UReplicationDriver*)>(NetDriver->GetReplicationDriver()->GetVTable()[Finder->RepDriverServerReplicateActors()])(NetDriver->GetReplicationDriver());
     } else

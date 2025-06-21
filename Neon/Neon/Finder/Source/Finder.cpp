@@ -5,21 +5,27 @@
 
 uint64_t UFinder::WorldNetMode()
 {
-    if (SDK::Fortnite_Version == FFortniteVersion(18,0,0)) {
-        return Memcury::Scanner::FindPattern(
-            "48 83 EC 28 48 83 79 ? ? 75 20 48 8B 91 ? ? ? ? 48 85 D2 74 1E 48 8B 02 48 8B CA FF 90"
-        ).Get();
-    }
+    auto Addr = Memcury::Scanner::FindStringRef(L"PREPHYSBONES");
 
-    auto stringRef = Memcury::Scanner::FindStringRef(L"PREPHYSBONES");
-    auto fBegin = stringRef.ScanFor({ 0x40, 0x55 }, false).Get();
+    auto BeginningFunction = FindBytes(Addr, { 0x40, 0x55 }, 1000, 0, true);
 
-    for (int i = 0; i < 0x400; i++) {
-        if (*(uint8_t*)(fBegin + i) == 0xe8 && *(uint8_t*)(fBegin + i - 1) != 0x8b) {
-            return Memcury::Scanner(fBegin + i).RelativeOffset(1).Get();
+    uint64 CallToFunc = 0;
+
+    for (int i = 0; i < 400; i++)
+    {
+        if ((*(uint8_t*)(uint8_t*)(BeginningFunction + i) == 0xE8) && (*(uint8_t*)(uint8_t*)(BeginningFunction + i - 1) != 0x8B)) // scuffed but idk how to guarantee its not a register
+        {
+            CallToFunc = BeginningFunction + i;
+            break;
         }
     }
-    return 0;
+
+    if (!CallToFunc)
+    {
+        return 0;
+    }
+        
+    return Memcury::Scanner(CallToFunc).RelativeOffset(1).Get();
 }
 
 uint64 UFinder::GIsClient()
@@ -563,7 +569,6 @@ uint64 UFinder::WorldGetNetMode()
         return Memcury::Scanner::FindPattern("48 83 EC ? 48 83 79 ? ? 74 ? B8").Get();
 
     return Memcury::Scanner::FindPattern("48 83 EC ? 48 83 79 ? ? 74 ? B8").Get();
-
 }
 
 uint64 UFinder::RepDriverServerReplicateActors()
@@ -571,8 +576,6 @@ uint64 UFinder::RepDriverServerReplicateActors()
     static uint64 CachedResult = 0;
     if (CachedResult != 0)
         return CachedResult;
-
-    UE_LOG(LogNeon, Log, "EngineVersion: %.2f, FortniteVersion: %.2f", Engine_Version, Fortnite_Version);
     
     if (Engine_Version == 4.20)
         CachedResult = 0x53;

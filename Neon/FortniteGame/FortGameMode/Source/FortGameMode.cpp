@@ -10,8 +10,11 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 {
     AFortGameStateAthena* GameState = GameMode->GetGameState();
     if (!GameState)
+    {
+        ReadyToStartMatchOriginal(GameMode);
         return false;
-
+    }
+    
     static bool bSetup = false;
 
     if (!bSetup)
@@ -34,9 +37,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
             GameState->OnRep_CurrentPlaylistInfo();
 
             GameMode->SetWarmupRequiredPlayerCount(1);
-
-            GameState->CallFunc<void>("FortGameStateAthena", "OnFinishedStreamingAdditionalPlaylistLevel");
-            GameState->CallFunc<void>("FortGameStateAthena", "OnRep_AdditionalPlaylistLevelsStreamed");
+            
             GameState->Set("FortGameStateAthena", "bIsUsingDownloadOnDemand", false);
         } else
         {
@@ -51,7 +52,11 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
         }
     }
 
-    if (!GameState->GetMapInfo()) return false;
+    if (!GameState->GetMapInfo())
+    {
+        ReadyToStartMatchOriginal(GameMode);
+        return false;
+    }
 
     if (!UWorld::GetWorld()->GetNetDriver())
     {
@@ -91,17 +96,30 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
             GameMode->SetbWorldIsReady(true);
         }
     }
-    
-    auto Ret = GameMode->GetNumPlayers() > 0;
-    return Ret;
+
+    ReadyToStartMatchOriginal(GameMode);
+    return GameMode->GetNumPlayers() > 0;
 }
 
-AActor* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, APlayerController* NewPlayer, AActor* StartSpot)
+APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, APlayerController* NewPlayer, AActor* StartSpot)
 {
-    FTransform SpawnTransform = StartSpot ? StartSpot->CallFunc<FTransform>("Actor", "GetTransform") : FTransform::FTransform();
-    SpawnTransform.Translation.Z += 250.f;
+    static const UClass* PlayerPawnClass = (UClass*)GUObjectArray.FindObject("PlayerPawn_Athena_C");
 
-    AActor* Pawn = GameMode->CallFunc<AActor*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer, SpawnTransform);
+    if (!PlayerPawnClass)
+    {
+        UE_LOG(LogNeon, Fatal, "PlayerPawn_Athena_C not found!");
+        return nullptr;
+    }
 
-    return Pawn;
+    if (GameMode)
+    {
+        GameMode->Set("GameModeBase", "DefaultPawnClass", PlayerPawnClass);
+    }
+    else
+    {
+        UE_LOG(LogNeon, Fatal, "GameMode is null in SpawnDefaultPawnFor!");
+        return nullptr;
+    }
+    
+    return GameMode->CallFunc<APawn*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer,  StartSpot->CallFunc<FTransform>("Actor", "GetTransform"));;
 }

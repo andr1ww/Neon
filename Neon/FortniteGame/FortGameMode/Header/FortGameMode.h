@@ -19,5 +19,7 @@ public:
     DECLARE_STATIC_CLASS(AFortGameModeAthena);
 public:
     static bool ReadyToStartMatch(AFortGameModeAthena* GameMode);
-    static AActor* SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, APlayerController* NewPlayer, AActor* StartSpot);
+    static APawn* SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, APlayerController* NewPlayer, AActor* StartSpot);
 };
+
+inline bool (*ReadyToStartMatchOriginal)(AFortGameModeAthena* GameMode);
