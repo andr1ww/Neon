@@ -86,6 +86,10 @@ public:
     uint64 StaticFindObject();
 
     uint64 InternalTryActivateAbility();
+
+    uint64 ConstructSpec();
+
+    uint64 GiveAbility();
 };
 
 inline UFinder* Finder;

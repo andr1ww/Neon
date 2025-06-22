@@ -195,6 +195,16 @@ namespace Runtime
 			_Orig = (T)Function->GetNativeFunc();
 		Function->SetNativeFunc(reinterpret_cast<FNativeFuncPtr>(_Detour));
 	}
+
+	template <typename _Ct>
+	__forceinline static void Every(uint32_t Ind, void* Detour) {
+		for (int i = 0; i < GUObjectArray.GetAllocatedSize(); i++) {
+			auto Obj = GUObjectArray.IndexToObject(i);
+			if (Obj && Obj->Object->GetClass()->IsA(_Ct::StaticClass())) {
+				VFTHook(Obj->Object->GetVTable(), Ind, Detour);
+			}
+		}
+	}
 	
 	template<auto ClassFunc, typename T = void*>
 	__forceinline void Hook(const char* FuncName, void* detour, T& og = nullptrForHook) {

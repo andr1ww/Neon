@@ -590,3 +590,64 @@ uint64 UFinder::InternalTryActivateAbility()
 	
     return CachedResult;
 }
+
+uint64 UFinder::ConstructSpec()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+
+    if (Engine_Version == 4.20)
+        CachedResult = Memcury::Scanner::FindPattern("80 61 29 F8 48 8B 44 24 ?").Get(); // 3.5
+
+    if (Engine_Version == 4.21)
+        CachedResult = Memcury::Scanner::FindPattern("80 61 29 F8 48 8B 44 24 ?").Get(); // 6.21
+
+    if (Engine_Version == 4.22)
+        CachedResult = Memcury::Scanner::FindPattern("80 61 29 F8 48 8B 44 24 ?").Get(); // was a guess
+
+    if (Engine_Version == 4.23)
+        CachedResult = Memcury::Scanner::FindPattern("80 61 29 F8 48 8B 44 24 ?").Get(); // was a guess
+
+    if (Engine_Version == 4.24)
+        CachedResult = Memcury::Scanner::FindPattern("80 61 29 F8 48 8B 44 24 ?").Get(); // 11.31
+
+    if (Engine_Version == 4.25)
+    {
+        auto ba = Memcury::Scanner::FindPattern("48 8B 44 24 ? 80 61 29 F8 80 61 31 FE 48 89 41 20 33 C0 89 41", false).Get();
+	
+        if (!ba)
+            ba = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 41 56 48 83 EC 20 45 33 F6 48 C7 01 ? ? ? ? 48 C7 41").Get(); // i think this right for 12.00 ??
+
+        CachedResult = ba;
+    }
+
+    if (Engine_Version == 4.26)
+        CachedResult = Memcury::Scanner::FindPattern("80 61 31 FE 0F 57 C0 80 61 29 F0 48 8B 44 24 ? 48").Get();
+
+    if (Engine_Version == 4.27)
+        CachedResult = Memcury::Scanner::FindPattern("80 61 31 FE 41 83 C9 FF 80 61 29 F0 48 8B 44 24 ? 48 89 41").Get();
+
+    if (Engine_Version == 5.00)
+        CachedResult = Memcury::Scanner::FindPattern("4C 8B C9 48 8B 44 24 ? 83 C9 FF 41 80 61 ? ? 41 80 61 ? ? 49 89 41 20 33 C0 41 88 41 30 49 89 41").Get();
+
+    return CachedResult;
+}
+
+uint64 UFinder::GiveAbility()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+
+    if (Engine_Version <= 420)
+        CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 56 57 41 56 48 83 EC 20 83 B9").Get();
+    if (Engine_Version == 421)
+        CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 48 89 7C 24 ? 41 56 48 83 EC 20 83 B9 ? ? ? ? ? 49 8B E8 4C 8B F2").Get();
+    if (Engine_Version == 500)
+        CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 56 48 83 EC 20 8B 81 ? ? ? ? 49 8B E8 4C").Get(); 
+    Memcury::Scanner addr = Memcury::Scanner::FindStringRef(L"GiveAbilityAndActivateOnce called on ability %s on the client, not allowed!", true, 1, Engine_Version >= 500); // Memcury::Scanner(FindGiveAbilityAndActivateOnce());
+    
+    CachedResult = Memcury::Scanner(FindBytes(addr, { 0xE8 }, 500, 0, false)).RelativeOffset(1).Get();
+}
+

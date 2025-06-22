@@ -10,18 +10,20 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
     FPredictionKey& PredictionKey, 
     FGameplayEventData* TriggerEventData)
 {
-    FGameplayAbilitySpec* Spec;
+    FGameplayAbilitySpec* Spec = nullptr;
     for (int i = 0; i < AbilitySystemComponent->GetActivatableAbilities().GetItems().Num(); i++) {
         FGameplayAbilitySpec& CurrentSpec = AbilitySystemComponent->GetActivatableAbilities().GetItems()[i];
         if (CurrentSpec.GetHandle().Handle == Handle.Handle)
         {
             Spec = &CurrentSpec;
+            break; 
         }
     }
 
     if (!Spec)
     {
-        return GetDefaultObj()->CallFunc<void>("AbilitySystemComponent", "ClientActivateAbilityFailed", Handle, PredictionKey.GetCurrent());
+        GetDefaultObj()->CallFunc<void>("AbilitySystemComponent", "ClientActivateAbilityFailed", Handle, PredictionKey.GetCurrent());
+        return;
     }
 
     Spec->SetInputPressed(InputPressed);
@@ -45,4 +47,41 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
     }
     
     AbilitySystemComponent->GetActivatableAbilities().MarkItemDirty(*Spec);
+}
+
+void UAbilitySystemComponent::GiveAbility(UAbilitySystemComponent* AbilitySystemComponent, UClass* Ability)
+{
+    FGameplayAbilitySpec Spec{};
+    
+    using ConstructSpecFunc = void (*)(
+        FGameplayAbilitySpec*,
+        UGameplayAbility*,
+        int,
+        int,
+        UObject*
+        );
+
+    using GiveAbilityFunc = FGameplayAbilitySpecHandle * (__fastcall*)(
+        UAbilitySystemComponent*,
+        FGameplayAbilitySpecHandle*,
+        FGameplayAbilitySpec
+        );
+
+    ((ConstructSpecFunc)uint64_t(Finder->ConstructSpec()))(&Spec, (UGameplayAbility*)Ability->GetClassDefaultObject(), 1, -1, nullptr);
+    FGameplayAbilitySpecHandle SpecHandle = Spec.GetHandle();
+    ((GiveAbilityFunc)uint64_t(Finder->GiveAbility()))(AbilitySystemComponent, &SpecHandle, Spec);
+}
+
+void UAbilitySystemComponent::GiveAbilitySet(UAbilitySystemComponent* AbilitySystemComponent, UFortAbilitySet* Set)
+{
+    if (Set)
+    {
+        for (int i = 0; i < Set->GetGameplayAbilities().Num(); i++) {
+            UClass* Ability = Set->GetGameplayAbilities()[i];
+            if (Ability)
+            {
+                GiveAbility(AbilitySystemComponent, Ability);
+            }
+        }
+    }
 }
