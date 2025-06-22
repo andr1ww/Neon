@@ -4,20 +4,21 @@
 void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry Entry)
 {
     if (!PlayerController) return;
-    auto WorldInventory = PlayerController->Get<UObject*>("FortPlayerController", "WorldInventory");
-    auto Inventory = WorldInventory->Get<UStruct*>("FortInventory", "Inventory");
+    AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+    FFortItemList Inventory = WorldInventory->GetInventory();
     WorldInventory->Set("FortInventory", "bRequiresLocalUpdate", true);
     WorldInventory->CallFunc<void>("FortInventory", "HandleInventoryLocalUpdate");
 
-    if (Entry.ReplicationKey) 
+    FFastArraySerializer InventorySerializer = Inventory;
+    if (Entry.ReplicationKey)
     {
-        FFastArraySerializerItem EntryRef = static_cast<FFastArraySerializerItem>(Entry); 
-        ((FFastArraySerializer*)Inventory)->MarkItemDirty(EntryRef);
-        ((FFastArraySerializer*)Inventory)->MarkArrayDirty();
+        FFastArraySerializerItem EntryRef = static_cast<FFastArraySerializerItem>(Entry);
+        InventorySerializer.MarkItemDirty(EntryRef);
+        InventorySerializer.MarkArrayDirty();
     }
     else
     {
-        ((FFastArraySerializer*)Inventory)->MarkArrayDirty();
+        InventorySerializer.MarkArrayDirty();
     }
 }
 
@@ -26,7 +27,7 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     if (!PlayerController) return nullptr;
     UFortWorldItem* BP = Def->CallFunc<UFortWorldItem*>("FortItemDefinition", "CreateTemporaryItemInstanceBP", Count, Level);
     
-    BP->SetOwningControllerForTemporaryItem(PlayerController);
+//    BP->SetOwningControllerForTemporaryItem(PlayerController);
     BP->GetItemEntry().SetCount(Count);
     BP->GetItemEntry().SetLoadedAmmo(LoadedAmmo);
     BP->GetItemEntry().SetLevel(Level);
@@ -45,7 +46,6 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
 
     return BP;
 }
-
 
 void UFortItem::SetOwningControllerForTemporaryItem(AFortPlayerControllerAthena* InController)
 {
