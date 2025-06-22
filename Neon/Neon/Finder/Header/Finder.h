@@ -84,6 +84,8 @@ public:
     uint64 RepDriverServerReplicateActors();
 
     uint64 StaticFindObject();
+
+    uint64 InternalTryActivateAbility();
 };
 
 inline UFinder* Finder;
