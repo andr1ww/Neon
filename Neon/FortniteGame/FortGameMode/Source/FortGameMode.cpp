@@ -4,6 +4,8 @@
 #include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "Engine/UEngine/Header/UEngine.h"
+#include "FortniteGame/FortInventory/Header/FortInventory.h"
+#include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "Neon/Finder/Header/Finder.h"
 #include "Neon/Runtime/Runtime.h"
 
@@ -105,7 +107,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
     return Fortnite_Version <= 10.40 ? ReadyToStartMatchOriginal(GameMode) : GameMode->GetNumPlayers() > 0;
 }
 
-APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, APlayerController* NewPlayer, AActor* StartSpot)
+APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer, AActor* StartSpot)
 {
     static const UClass* PlayerPawnClass = (UClass*)GUObjectArray.FindObject("PlayerPawn_Athena_C");
 
@@ -124,6 +126,25 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         UE_LOG(LogNeon, Fatal, "GameMode is null in SpawnDefaultPawnFor!");
         return nullptr;
     }
+
+    auto Pawn = GameMode->CallFunc<APawn*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer,  StartSpot->CallFunc<FTransform>("Actor", "GetTransform"));;
+
+    auto WorldInventory = NewPlayer->Get<UObject*>("FortPlayerController", "WorldInventory");
+    auto Inventory = WorldInventory->Get<AFortInventory*>("FortInventory", "Inventory");
+
+    if (Fortnite_Version.GetMajorVersion() <= 8.50) {
+
+    }
+    else {
+        auto CosmeticLoadoutPC = NewPlayer->GetCosmeticLoadoutPC();
+        auto Pickaxe = CosmeticLoadoutPC.GetPickaxe();
+        auto WeaponDef = Pickaxe.GetWeaponDefinition();
+        if (!WeaponDef) {
+            return Pawn;
+        }
     
-    return GameMode->CallFunc<APawn*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer,  StartSpot->CallFunc<FTransform>("Actor", "GetTransform"));;
+        AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 1, 1);
+    }
+    
+    return Pawn;
 }

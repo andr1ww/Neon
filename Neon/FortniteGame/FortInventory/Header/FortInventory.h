@@ -1,16 +1,47 @@
 #pragma once
 #include "pch.h"
 
+#include "Engine/Array/Header/Array.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 
+class UFortItemDefinition : public UObject
+{
+    
+};
 
 struct FFortItemEntry : FFastArraySerializerItem
 {
+    DEFINE_MEMBER(int32, FFortItemEntry, Count);
+    DEFINE_MEMBER(int32, FFortItemEntry, LoadedAmmo);
+    DEFINE_MEMBER(int32, FFortItemEntry, Level);
+    DEFINE_MEMBER(UFortItemDefinition*, FFortItemEntry, ItemDefinition);
 };
 
-class AFortInventory : public UObject
+class UFortItem : public UObject
 {
 public:
-    void Update(AFortPlayerControllerAthena* PlayerController, UObject* Entry);
-    UObject* GiveItem(AFortPlayerControllerAthena* PlayerController, UObject* Def, int Count, int LoadedAmmo, int Level);
+    DEFINE_MEMBER(FFortItemEntry*, UFortItem, ItemEntry);
+public:
+    void SetOwningControllerForTemporaryItem(class AFortPlayerControllerAthena* InController);
+};
+
+struct FFortItemList : public FFastArraySerializer
+{
+    DEFINE_MEMBER(TArray<UFortItem*>*, FFortItemList, ItemInstances);
+    DEFINE_MEMBER(TArray<FFortItemEntry>*, FFortItemList, ReplicatedEntries);
+};
+
+class UFortWorldItem : public UFortItem
+{
+public:
+    DEFINE_MEMBER(FFortItemEntry*, UFortWorldItem, ItemEntry);
+};
+
+class AFortInventory : public AActor
+{
+public:
+    DEFINE_MEMBER(FFortItemList*, AFortInventory, Inventory);
+public:
+    static void Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry* Entry);
+    static UObject* GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int Count, int LoadedAmmo, int Level);
 };

@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "FortniteGame/FortInventory/Header/FortInventory.h"
 
-void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, UObject* Entry)
+void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry* Entry)
 {
     if (!PlayerController) return;
     auto WorldInventory = PlayerController->Get<UObject*>("FortPlayerController", "WorldInventory");
@@ -21,7 +21,33 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, UObje
     }
 }
 
-UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UObject* Def, int Count, int LoadedAmmo, int Level)
+UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int Count, int LoadedAmmo, int Level)
 {
-    if (!PlayerController || !Def) return nullptr;
+    if (!PlayerController) return nullptr;
+    UFortWorldItem* BP = Def->CallFunc<UFortWorldItem*>("FortItemDefinition", "CreateTemporaryItemInstanceBP", Count, Level);
+
+    BP->SetOwningControllerForTemporaryItem(PlayerController);
+    BP->GetItemEntry()->SetCount(Count);
+    BP->GetItemEntry()->SetLoadedAmmo(LoadedAmmo);
+    BP->GetItemEntry()->SetLevel(Level);
+    BP->GetItemEntry()->SetItemDefinition(Def);
+    
+    auto WorldInventory = PlayerController->Get<UObject*>("FortPlayerController", "WorldInventory");
+    auto Inventory = WorldInventory->Get<AFortInventory*>("FortInventory", "Inventory");
+    
+    auto ReplicatedEntries = Inventory->GetInventory()->GetReplicatedEntries();
+    auto ItemInstances = Inventory->GetInventory()->GetItemInstances();
+
+    ReplicatedEntries->Add(*BP->GetItemEntry());
+    ItemInstances->Add(BP);
+
+    Update(PlayerController, BP->GetItemEntry());
+
+    return BP;
+}
+
+
+void UFortItem::SetOwningControllerForTemporaryItem(class AFortPlayerControllerAthena* InController)
+{
+    this->CallFunc<void>("FortItem", "SetOwningControllerForTemporaryItem", InController);
 }

@@ -4,6 +4,7 @@
 #include "Engine/PlayerController/Header/PlayerController.h"
 #include "Engine/Transform/Header/Transform.h"
 #include "FortniteGame/FortGameState/Header/FortGameState.h"
+#include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 
 class AFortGameModeAthena : public SDK::UObject
 {
@@ -19,7 +20,7 @@ public:
     DECLARE_STATIC_CLASS(AFortGameModeAthena);
 public:
     static bool ReadyToStartMatch(AFortGameModeAthena* GameMode);
-    static APawn* SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, APlayerController* NewPlayer, AActor* StartSpot);
+    static APawn* SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer, AActor* StartSpot);
 };
 
 inline bool (*ReadyToStartMatchOriginal)(AFortGameModeAthena* GameMode);
