@@ -188,6 +188,7 @@
     <ClCompile Include="FortniteGame\AbilitySystemComponent\Source\AbilitySystemComponent.cpp" />
     <ClCompile Include="FortniteGame\FortGameMode\Source\FortGameMode.cpp" />
     <ClCompile Include="FortniteGame\FortGameState\Source\FortGameState.cpp" />
+    <ClCompile Include="FortniteGame\FortInventory\Source\FortInventory.cpp" />
     <ClCompile Include="FortniteGame\FortPlayerController\Source\FortPlayerController.cpp" />
     <ClCompile Include="Neon\Finder\Source\Finder.cpp" />
     <ClCompile Include="pch.cpp">
