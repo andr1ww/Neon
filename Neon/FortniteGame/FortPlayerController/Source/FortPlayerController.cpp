@@ -5,10 +5,16 @@
 
 void* (*ApplyCharacterCustomization)(UObject*, APawn*) = decltype(ApplyCharacterCustomization)(Finder->ApplyCharacterCustomization());
 
-void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, APawn* Pawn)
+void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) 
 {
-    UE_LOG(LogNeon, Log, "ServerAcknowledgePossession");
-    PlayerController->SetAcknowledgedPawn(Pawn);
+    APawn* PawnToAcknowledge;
+    Stack.StepCompiledIn(&PawnToAcknowledge);
+    Stack.IncrementCode();
     
-    ApplyCharacterCustomization(PlayerController->Get<UObject*>("APlayerController", "PlayerState"), Pawn);
+    UE_LOG(LogNeon, Log, "ServerAcknowledgePossession");
+    if (!PlayerController) return;
+    PlayerController->SetAcknowledgedPawn(PawnToAcknowledge);
+    
+   // ApplyCharacterCustomization(PlayerController->Get<UObject*>("PlayerController", "PlayerState"), PawnToAcknowledge);
 }
+ 

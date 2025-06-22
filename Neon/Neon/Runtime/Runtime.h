@@ -39,6 +39,66 @@ struct ConstexprString
 	}
 };
 
+class FOutputDevice
+{
+public:
+	bool bSuppressEventTag;
+	bool bAutoEmitLineTerminator;
+	uint8_t _Padding1[0x6];
+};
+
+class FFrame : public FOutputDevice
+{
+public:
+	void** VTable;
+	UFunction* Node;
+	UObject* Object;
+	uint8* Code;
+	uint8* Locals;
+	void* MostRecentProperty;
+	uint8_t* MostRecentPropertyAddress;
+	uint8_t _Padding1[0x40];
+	UField* PropertyChainForCompiledIn;
+
+public:
+	void StepCompiledIn(void* const Result, bool ForceExplicitProp = false)
+	{
+		if (Code && !ForceExplicitProp)
+		{
+			((void (*)(FFrame*, UObject*, void* const))(Memcury::Scanner::FindPattern("48 8B 41 20 4C 8B D2 48 8B D1 44 0F B6 08 48 FF").Get()))(this, Object, Result); 
+		}
+		else
+		{
+			UField* _Prop = PropertyChainForCompiledIn;
+			PropertyChainForCompiledIn = _Prop->Next;
+			((void (*)(FFrame*, void* const, UField*))(Memcury::Scanner::FindPattern("41 8B 40 ? 4D 8B C8").Get()))(this, Result, _Prop); 
+		}
+	}
+
+	template <typename T>
+	T& StepCompiledInRef() {
+		T TempVal{};
+		MostRecentPropertyAddress = nullptr;
+
+		if (Code)
+		{
+			((void (*)(FFrame*, UObject*, void* const))(Memcury::Scanner::FindPattern("48 8B 41 20 4C 8B D2 48 8B D1 44 0F B6 08 48 FF").Get()))(this, Object, &TempVal); 
+		}
+		else
+		{
+			UField* _Prop = PropertyChainForCompiledIn;
+			PropertyChainForCompiledIn = _Prop->Next;
+			((void (*)(FFrame*, void* const, UField*))(Memcury::Scanner::FindPattern("41 8B 40 ? 4D 8B C8").Get()))(this, &TempVal, _Prop); 
+		}
+
+		return MostRecentPropertyAddress ? *(T*)MostRecentPropertyAddress : TempVal;
+	}
+
+	void IncrementCode() {
+		Code = (uint8_t*)(__int64(Code) + (bool)Code);
+	}
+};
+
 namespace Runtime
 {
 	static uint32_t GetFunctionIdx(UFunction* Function)
@@ -121,6 +181,19 @@ namespace Runtime
 			}
 		}
 		return -1;
+	}
+
+	template<auto ClassFunc, typename T = void*>
+	__forceinline static void Exec(const char* _Name, void* _Detour, T& _Orig = nullptrForHook) {
+		UClass* ClassName = ClassFunc();
+		if (!ClassName) return;
+    
+		UObject* DefaultObj = ClassName->GetClassDefaultObject();
+		UFunction* Function = DefaultObj->GetFunction(_Name);
+		if (!Function) return;
+		if (!std::is_same_v<T, void*>)
+			_Orig = (T)Function->GetNativeFunc();
+		Function->SetNativeFunc(reinterpret_cast<FNativeFuncPtr>(_Detour));
 	}
 	
 	template<auto ClassFunc, typename T = void*>
