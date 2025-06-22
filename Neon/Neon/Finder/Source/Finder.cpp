@@ -248,27 +248,7 @@ uint64 UFinder::GetMaxTickRate()
 
 uint64 UFinder::DispatchRequest()
 {
-    auto sRef = Memcury::Scanner::FindStringRef(
-          L"MCP-Profile: Dispatching request to %s",
-          false,
-          0,
-          Fortnite_Version.GetMajorVersion() >= 19
-      ).Get();
-
-    if (!sRef) return 0;
-
-    for (int i = 0; i < 1000; i++) {
-        if (*(uint8_t*)(uint8_t*)(sRef - i) == 0x48 && *(uint8_t*)(uint8_t*)(sRef - i + 1) == 0x89 &&
-            *(uint8_t*)(uint8_t*)(sRef - i + 2) == 0x5C) {
-            return sRef - i;
-            }
-
-        if (*(uint8_t*)(uint8_t*)(sRef - i) == 0x48 && *(uint8_t*)(uint8_t*)(sRef - i + 1) == 0x8B &&
-            *(uint8_t*)(uint8_t*)(sRef - i + 2) == 0xC4) {
-            return sRef - i;
-            }
-    }
-    return 0;
+    return Memcury::Scanner::FindStringRef(L"MCP-Profile: Dispatching request to %s").ScanFor({ 0x48,0x89,0x5C }, false).Get();
 }  
 
 uint64 UFinder::CreateNetDriver()
@@ -317,37 +297,22 @@ uint64 UFinder::ApplyCharacterCustomization()
     static uint64 CachedResult = 0;
     if (CachedResult != 0)
         return CachedResult;
+    
+    Memcury::Scanner Scanner = Memcury::Scanner::FindPattern("48 8B C4 48 89 50 ? 55 57 48 8D 68 ? 48 81 EC ? ? ? ? 80 B9");
+    CachedResult = Scanner.Get();
 
-    auto Addrr = Memcury::Scanner::FindStringRef(L"AFortPlayerState::ApplyCharacterCustomization - Failed initialization, using default parts. Player Controller: %s PlayerState: %s, HeroId: %s", false, 0, SDK::Fortnite_Version >= 20, true).Get();
-
-    if (!Addrr) return 0;
-
-    for (int i = 0; i < 7000; i++)
+    if (CachedResult == 0)
     {
-        if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x40 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x53)
+        Scanner = Memcury::Scanner::FindPattern("E8 ? ? ? ? 44 0F B6 E0 EB ? 33 F6");
+
+        if (!Scanner.Get())
         {
-            CachedResult = Addrr - i;
-            return CachedResult;
+            Scanner = Memcury::Scanner::FindPattern("E8 ? ? ? ? E9 ? ? ? ? FF 90 ? ? ? ? 49 8B CE");
         }
 
-        if (SDK::Fortnite_Version >= 15)
-        {
-            if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(Addrr - i + 2) == 0x5C)
-            {
-                CachedResult = Addrr - i;
-                return CachedResult;
-            }
-        }
-
-        if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x8B && *(uint8_t*)(uint8_t*)(Addrr - i + 2) == 0xC4)
-        {
-            CachedResult = Addrr - i;
-            return CachedResult;
-        }
+        CachedResult = Scanner.RelativeOffset(1).Get();
     }
 
-    uint64 Addr = Memcury::Scanner::FindPattern("48 8B C4 48 89 50 10 55 57 48 8D 68 A1 48 81 EC ? ? ? ? 80 B9").Get();
-    CachedResult = Addr;
     return CachedResult;
 }
 

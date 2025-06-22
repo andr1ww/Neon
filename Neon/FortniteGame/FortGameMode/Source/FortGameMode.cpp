@@ -41,8 +41,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
             GameState->OnRep_CurrentPlaylistInfo();
 
             GameMode->SetWarmupRequiredPlayerCount(1);
-            
-            GameState->Set("FortGameStateAthena", "bIsUsingDownloadOnDemand", false);
         } else
         {
             GameState->Set("FortGameStateAthena", "CurrentPlaylistData", Playlist);

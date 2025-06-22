@@ -79,10 +79,10 @@ void Main() {
     freopen_s(&File, "CONOUT$", "w+", stderr);
     SetConsoleTitleA("Neon | Setting up");
     SDK::Init();
-	
+
     MH_Initialize();
     Sleep(2500);
-
+	
     *(bool*)(Finder->GIsClient()) = false; 
     *(bool*)(Finder->GIsClient() + 1) = true;
 
@@ -91,7 +91,7 @@ void Main() {
 	Runtime::Hook<&AFortGameModeAthena::StaticClass>("ReadyToStartMatch", AFortGameModeAthena::ReadyToStartMatch, ReadyToStartMatchOriginal);
 	Runtime::Hook<&AFortGameModeAthena::StaticClass>("SpawnDefaultPawnFor", AFortGameModeAthena::SpawnDefaultPawnFor);
 	Runtime::Exec<&AFortPlayerControllerAthena::StaticClass>("ServerAcknowledgePossession", AFortPlayerControllerAthena::ServerAcknowledgePossession);
-	
+
     Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
 	Runtime::Hook(Finder->DispatchRequest(), UNetDriver::DispatchRequest, (void**)&DispatchRequestOriginal);
 	

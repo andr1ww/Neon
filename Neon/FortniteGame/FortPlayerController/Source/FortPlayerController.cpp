@@ -11,10 +11,10 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
     Stack.StepCompiledIn(&PawnToAcknowledge);
     Stack.IncrementCode();
     
-    UE_LOG(LogNeon, Log, "ServerAcknowledgePossession");
     if (!PlayerController) return;
     PlayerController->SetAcknowledgedPawn(PawnToAcknowledge);
+    PlayerController->GetPlayerState().SetHeroType(PlayerController->GetCosmeticLoadoutPC().GetCharacter().GetHeroDefinition());
     
-   // ApplyCharacterCustomization(PlayerController->Get<UObject*>("PlayerController", "PlayerState"), PawnToAcknowledge);
+   ApplyCharacterCustomization(PlayerController->Get<UObject*>("PlayerController", "PlayerState"), PawnToAcknowledge);
 }
  

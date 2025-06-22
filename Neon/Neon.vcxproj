@@ -160,6 +160,7 @@
     <ClInclude Include="FortniteGame\FortGameMode\Header\FortGameMode.h" />
     <ClInclude Include="FortniteGame\FortGameState\Header\FortGameState.h" />
     <ClInclude Include="FortniteGame\FortPlayerController\Header\FortPlayerController.h" />
+    <ClInclude Include="FortniteGame\FortPlayerState\Header\FortPlayerState.h" />
     <ClInclude Include="FortniteGame\FortPlaylistAthena\Header\FortPlaylistAthena.h" />
     <ClInclude Include="Neon\Finder\Header\Finder.h" />
     <ClInclude Include="Neon\Runtime\Runtime.h" />
