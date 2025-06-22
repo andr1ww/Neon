@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "FortniteGame/FortInventory/Header/FortInventory.h"
 
-void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry* Entry)
+void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry Entry)
 {
     if (!PlayerController) return;
     auto WorldInventory = PlayerController->Get<UObject*>("FortPlayerController", "WorldInventory");
@@ -9,13 +9,13 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
     WorldInventory->Set("FortInventory", "bRequiresLocalUpdate", true);
     WorldInventory->CallFunc<void>("FortInventory", "HandleInventoryLocalUpdate");
 
-    if (Entry)
+    if (Entry.ReplicationKey) 
     {
-        auto EntryPtr = reinterpret_cast<FFastArraySerializerItem*>(Entry);
-        FFastArraySerializerItem& EntryRef = *EntryPtr;
+        FFastArraySerializerItem EntryRef = static_cast<FFastArraySerializerItem>(Entry); 
         ((FFastArraySerializer*)Inventory)->MarkItemDirty(EntryRef);
         ((FFastArraySerializer*)Inventory)->MarkArrayDirty();
-    } else
+    }
+    else
     {
         ((FFastArraySerializer*)Inventory)->MarkArrayDirty();
     }
@@ -25,21 +25,21 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
 {
     if (!PlayerController) return nullptr;
     UFortWorldItem* BP = Def->CallFunc<UFortWorldItem*>("FortItemDefinition", "CreateTemporaryItemInstanceBP", Count, Level);
-
+    
     BP->SetOwningControllerForTemporaryItem(PlayerController);
-    BP->GetItemEntry()->SetCount(Count);
-    BP->GetItemEntry()->SetLoadedAmmo(LoadedAmmo);
-    BP->GetItemEntry()->SetLevel(Level);
-    BP->GetItemEntry()->SetItemDefinition(Def);
+    BP->GetItemEntry().SetCount(Count);
+    BP->GetItemEntry().SetLoadedAmmo(LoadedAmmo);
+    BP->GetItemEntry().SetLevel(Level);
+    BP->GetItemEntry().SetItemDefinition(Def);
     
-    auto WorldInventory = PlayerController->Get<UObject*>("FortPlayerController", "WorldInventory");
-    auto Inventory = WorldInventory->Get<AFortInventory*>("FortInventory", "Inventory");
+    AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+    FFortItemList Inventory = WorldInventory->GetInventory();
     
-    auto ReplicatedEntries = Inventory->GetInventory()->GetReplicatedEntries();
-    auto ItemInstances = Inventory->GetInventory()->GetItemInstances();
+    TArray<FFortItemEntry> ReplicatedEntries = Inventory.GetReplicatedEntries();
+    TArray<UFortItem*> ItemInstances = Inventory.GetItemInstances();
 
-    ReplicatedEntries->Add(*BP->GetItemEntry());
-    ItemInstances->Add(BP);
+    ReplicatedEntries.Add(BP->GetItemEntry());
+    ItemInstances.Add(BP);
 
     Update(PlayerController, BP->GetItemEntry());
 
@@ -47,7 +47,7 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
 }
 
 
-void UFortItem::SetOwningControllerForTemporaryItem(class AFortPlayerControllerAthena* InController)
+void UFortItem::SetOwningControllerForTemporaryItem(AFortPlayerControllerAthena* InController)
 {
-    this->CallFunc<void>("FortItem", "SetOwningControllerForTemporaryItem", InController);
+    this->CallFunc<void>("FortItem", "SetOwningControllerForTemporaryItem", &InController);
 }

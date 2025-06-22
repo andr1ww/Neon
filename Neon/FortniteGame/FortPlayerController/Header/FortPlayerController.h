@@ -2,8 +2,11 @@
 #include "pch.h"
 #include "Neon/Runtime/Runtime.h"
 #include "Engine/PlayerController/Header/PlayerController.h"
-#include "FortniteGame/FortPlayerState/Header/FortPlayerState.h"
+#include "FortniteGame/Common/Header/ItemDefinition.h"
 #include "FortniteGame/FortInventory/Header/FortInventory.h"
+#include "FortniteGame/FortPlayerState/Header/FortPlayerState.h"
+
+class AFortInventory;
 
 class UAthenaCharacterItemDefinition : public UObject 
 {
@@ -34,7 +37,7 @@ class AFortPlayerControllerAthena : public APlayerController
 public:
     DEFINE_MEMBER(AFortPlayerStateAthena*, AFortPlayerControllerAthena, PlayerState);
     DEFINE_MEMBER(FFortAthenaLoadout, AFortPlayerControllerAthena, CosmeticLoadoutPC);
-
+    DEFINE_MEMBER(AFortInventory*, AFortPlayerControllerAthena, WorldInventory);
 public:
     static void ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
 };

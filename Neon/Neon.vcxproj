@@ -157,6 +157,7 @@
     <ClInclude Include="Engine\UEngine\Header\UEngine.h" />
     <ClInclude Include="Engine\Vector\Header\Vector.h" />
     <ClInclude Include="FortniteGame\AbilitySystemComponent\Header\AbilitySystemComponent.h" />
+    <ClInclude Include="FortniteGame\Common\Header\ItemDefinition.h" />
     <ClInclude Include="FortniteGame\FortAthenaMapInfo\Header\FortAthenaMapInfo.h" />
     <ClInclude Include="FortniteGame\FortGameMode\Header\FortGameMode.h" />
     <ClInclude Include="FortniteGame\FortGameState\Header\FortGameState.h" />
