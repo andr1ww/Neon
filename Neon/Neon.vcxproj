@@ -198,6 +198,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="FortniteGame\FortInventory\Header\FortInventory.h" />
     <Content Include="SDK\FortSDK.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
