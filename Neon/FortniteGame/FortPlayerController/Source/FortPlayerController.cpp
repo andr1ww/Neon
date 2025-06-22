@@ -18,7 +18,7 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
     
     ApplyCharacterCustomization(PlayerController->Get<UObject*>("PlayerController", "PlayerState"), PawnToAcknowledge);
 
-    static UFortAbilitySet* AbilitySet = (UFortAbilitySet*)GUObjectArray.FindObject("GAS_AthenaPlayer");
-    UAbilitySystemComponent::GiveAbilitySet(PlayerController->GetPlayerState().GetAbilitySystemComponent(), AbilitySet);
+    //static UFortAbilitySet* AbilitySet = (UFortAbilitySet*)GUObjectArray.FindObject("GAS_AthenaPlayer");
+    //UAbilitySystemComponent::GiveAbilitySet(PlayerController->GetPlayerState().GetAbilitySystemComponent(), AbilitySet);
 }
  

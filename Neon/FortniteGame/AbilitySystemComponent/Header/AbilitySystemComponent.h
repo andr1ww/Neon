@@ -34,7 +34,7 @@ struct FGameplayAbilitySpecContainer : public FFastArraySerializer
 class UFortAbilitySet : public UObject
 {
 public:
-    DEFINE_MEMBER(TArray<TSubclassOf<class UGameplayAbility>>, UFortAbilitySet, GameplayAbilities);
+    DEFINE_MEMBER(TArray<UClass*>, UFortAbilitySet, GameplayAbilities);
 };
 
 class UAbilitySystemComponent : public UObject
