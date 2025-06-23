@@ -6,14 +6,14 @@
 #include "FortniteGame/FortGameState/Header/FortGameState.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 
-struct FItemAndCount final 
+struct FItemAndCount final : public UObject
 {
 public:
     DEFINE_MEMBER(int32, FItemAndCount, Count);
     DEFINE_MEMBER(UFortItemDefinition*, FItemAndCount, Item);
 };
 
-class AFortGameModeAthena : public SDK::UObject
+class AFortGameModeAthena : public UObject
 {
 public:
     DEFINE_MEMBER(AFortGameStateAthena*, AFortGameModeAthena,GameState);

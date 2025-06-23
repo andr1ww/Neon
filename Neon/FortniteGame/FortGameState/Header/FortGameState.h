@@ -5,7 +5,7 @@
 #include "FortniteGame/FortAthenaMapInfo/Header/FortAthenaMapInfo.h"
 #include "FortniteGame/FortPlaylistAthena/Header/FortPlaylistAthena.h"
 
-class AFortGameStateAthena : public SDK::UObject
+class AFortGameStateAthena : public UObject
 {
 public:
     DEFINE_MEMBER(FPlaylistPropertyArray, AFortGameStateAthena, CurrentPlaylistInfo)

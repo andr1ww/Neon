@@ -3,5 +3,11 @@
 
 FVector AActor::GetActorLocation()
 {
-    return GetDefaultObj()->CallFunc<FVector>("Actor","K2_GetActorLocation");
+    struct
+    {
+        FVector ReturnValue;
+    } Params{};
+
+    GetDefaultObj()->Call(L"K2_GetActorLocation", &Params);
+    return Params.ReturnValue;
 }

@@ -7,20 +7,6 @@
 #include "FortniteGame/FortGameState/Header/FortGameState.h"
 #include "Neon/Finder/Header/Finder.h"
 
-
-struct FURL
-{
-public:
-    FString Protocol;
-    FString Host;
-    int32 Port;
-    int32 Valid;
-    FString Map;
-    FString RedirectUrl;
-    TArray<FString> Op;
-    FString Portal;
-};
-
 class UPlayer : public UObject
 {
 public:
@@ -32,7 +18,7 @@ class UNetConnection : public UPlayer
 public:
     DEFINE_MEMBER(AActor*, UNetConnection, OwningActor);
     DEFINE_MEMBER(AActor*, UNetConnection, ViewTarget);
-    DEFINE_MEMBER(SDK::TArray<class UChildConnection*>, UNetConnection, Children);
+    DEFINE_MEMBER(TArray<class UChildConnection*>, UNetConnection, Children);
 };
 
 static TSet<FName>* GetClientVisibleLevelNames(UNetConnection* NetConnection)
@@ -271,8 +257,8 @@ public:
     class UNetConnection*                         Connection;                                        // 0x0000(0x0008)(ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
     class AActor*                                 InViewer;                                          // 0x0008(0x0008)(ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
     class AActor*                                 ViewTarget;                                        // 0x0010(0x0008)(ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    struct FVector                                ViewLocation;                                      // 0x0018(0x0018)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    struct FVector                                ViewDir;                                           // 0x0030(0x0018)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    FVector                                ViewLocation;                                      // 0x0018(0x0018)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    FVector                                ViewDir;                                           // 0x0030(0x0018)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 };
 
 
@@ -281,7 +267,7 @@ class UNetDriver : public UObject
 public:
     DEFINE_MEMBER(FName, UNetDriver, NetDriverName);
     DEFINE_MEMBER(UReplicationDriver*, UNetDriver, ReplicationDriver);
-    DEFINE_MEMBER(SDK::TArray<class UNetConnection*>, UNetDriver, ClientConnections);
+    DEFINE_MEMBER(TArray<class UNetConnection*>, UNetDriver, ClientConnections);
 public:
     bool InitListen(UWorld* Networknotify, FURL URL, bool bReuseAddressAndPort);
     void SetWorld(UWorld* World);
@@ -292,9 +278,9 @@ public:
     {
         static int RepFrameOffset = 0x440; 
     
-        int Major = SDK::Fortnite_Version.GetMajorVersion();
+        int Major = std::floor(FNVer);
     
-        if (Engine_Version == 419)
+        if (Engine_Version == 4.19)
         {
             RepFrameOffset = 0x2C8;
         }
@@ -303,11 +289,11 @@ public:
         {
             RepFrameOffset = 0x3D8;
         }
-        else if (SDK::Fortnite_Version >= 2.5 && SDK::Fortnite_Version <= 3.1) 
+        else if (FNVer >= 2.5 && FNVer <= 3.1) 
         {
             RepFrameOffset = 0x328;
         }
-        else if (SDK::Fortnite_Version == 3.2 || SDK::Fortnite_Version == 3.3)
+        else if (FNVer == 3.2 || FNVer == 3.3)
         {
             RepFrameOffset = 0x330;
         }
@@ -383,7 +369,7 @@ public:
     DEFINE_MEMBER(AFortGameStateAthena*, UWorld, GameState);
     DEFINE_MEMBER(UGameInstance*, UWorld, OwningGameInstance);
     DEFINE_MEMBER(UNetDriver*, UWorld, NetDriver);
-    DEFINE_MEMBER(SDK::TArray<struct FLevelCollection>, UWorld, LevelCollections);
+    DEFINE_MEMBER(TArray<struct FLevelCollection>, UWorld, LevelCollections);
     DEFINE_MEMBER(ULevel*, UWorld, CurrentLevelPendingVisibility);
     DEFINE_MEMBER(ULevel*, UWorld, CurrentLevelPendingInvisibility);
 public:

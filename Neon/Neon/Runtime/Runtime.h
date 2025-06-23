@@ -3,41 +3,9 @@
 #include "../Finder/Header/Finder.h"
 
 namespace Funcs {
-	static inline auto StaticFindObject = (SDK::UObject* (*)(SDK::UClass*, SDK::UObject*, const wchar_t*, bool)) (uint64_t(Finder->StaticFindObject()));
+	static inline auto StaticFindObject = (UObject* (*)(UClass*, UObject*, const wchar_t*, bool)) (uint64_t(Finder->StaticFindObject()));
 };
 
-
-template<int32 _Sl>
-struct DefaultObjChars
-{
-	char _Ch[_Sl + 9];
-
-	consteval DefaultObjChars(const char(&_St)[_Sl])
-	{
-		copy_n("Default__", 9, _Ch);
-		copy_n(_St, _Sl, _Ch + 9);
-	}
-
-	operator const char* () const
-	{
-		return static_cast<const char*>(_Ch);
-	}
-};
-template<int32 _Sl>
-struct ConstexprString
-{
-	char _Ch[_Sl];
-
-	consteval ConstexprString(const char(&_St)[_Sl])
-	{
-		copy_n(_St, _Sl, _Ch);
-	}
-
-	operator const char* () const
-	{
-		return static_cast<const char*>(_Ch);
-	}
-};
 
 class FOutputDevice
 {
@@ -70,8 +38,8 @@ public:
 		else
 		{
 			UField* _Prop = PropertyChainForCompiledIn;
-			PropertyChainForCompiledIn = _Prop->Next;
-			((void (*)(FFrame*, void* const, UField*))(Memcury::Scanner::FindPattern("41 8B 40 ? 4D 8B C8").Get()))(this, Result, _Prop); 
+            PropertyChainForCompiledIn = const_cast<UField*>(_Prop->GetNext());
+            ((void (*)(FFrame*, void* const, UField*))(Memcury::Scanner::FindPattern("41 8B 40 ? 4D 8B C8").Get()))(this, Result, _Prop);
 		}
 	}
 
@@ -87,8 +55,8 @@ public:
 		else
 		{
 			UField* _Prop = PropertyChainForCompiledIn;
-			PropertyChainForCompiledIn = _Prop->Next;
-			((void (*)(FFrame*, void* const, UField*))(Memcury::Scanner::FindPattern("41 8B 40 ? 4D 8B C8").Get()))(this, &TempVal, _Prop); 
+            PropertyChainForCompiledIn = const_cast<UField*>(_Prop->GetNext());
+            ((void (*)(FFrame*, void* const, UField*))(Memcury::Scanner::FindPattern("41 8B 40 ? 4D 8B C8").Get()))(this, &TempVal, _Prop);
 		}
 
 		return MostRecentPropertyAddress ? *(T*)MostRecentPropertyAddress : TempVal;
@@ -110,12 +78,12 @@ namespace Runtime
 
 		Memcury::Scanner Scanner(ExecFunctionAddress);
 
-		std::string FuncName = Function->GetFName().ToString().ToString() + "_Validate";
+		std::string FuncName = Function->GetName().ToString() + "_Validate";
 	
 		std::vector<BYTE> BytesToScanFor = { 0xFF, 0x90 };
-		Scanner.ScanFor(BytesToScanFor, true, Memcury::Scanner::FindStringRef(
-			std::wstring(FuncName.begin(), FuncName.end())
-		).Get() != 0);
+        Scanner.ScanFor(BytesToScanFor, true, Memcury::Scanner::FindStringRef(
+        FuncName.c_str()
+        ).Get() != 0);
 		
 		if (Scanner.Get() == 0)
 			return Idx;
@@ -145,12 +113,11 @@ namespace Runtime
 
 	inline int GetOffset(UObject* Obj, const std::string& PropName) {
 		int Offset = -1;
-		for (UStruct* Struct = Obj->GetClass(); Struct;
-			Struct = Struct->GetSuperStruct()) {
-			auto FuncInfo = SDK::PropLibrary->GetPropertyByName(
-				Struct->GetFName().ToString().ToString(), PropName);
+		for (const UStruct* Struct = Obj->Class; Struct;
+			Struct = Struct->GetSuper()) {
+            auto FuncInfo = Struct->GetProperty(std::wstring(PropName.begin(), PropName.end()).c_str());
 
-			Offset = FuncInfo.Offset;
+			Offset = FuncInfo->GetOffset(L"");
 
 			if (Offset != -1)
 				break;
@@ -160,12 +127,11 @@ namespace Runtime
 
 	inline int GetOffsetStruct(const std::string& StructName, const std::string& PropName) {
 		int Offset = -1;
-		for (UStruct* Struct = (UStruct*)GUObjectArray.FindObject(StructName); Struct;
-			Struct = Struct->GetSuperStruct()) {
-			auto FuncInfo = SDK::PropLibrary->GetPropertyByName(
-				Struct->GetFName().ToString().ToString(), PropName);
+		for (const UStruct* Struct = (UStruct*)TUObjectArray::FindObject(StructName); Struct;
+			Struct = Struct->GetSuper()) {
+            auto FuncInfo = Struct->GetProperty(std::wstring(PropName.begin(), PropName.end()).c_str());
 
-			Offset = FuncInfo.Offset;
+			Offset = FuncInfo->GetOffset(L"");
 
 			if (Offset != -1)
 				break;
@@ -177,8 +143,8 @@ namespace Runtime
 
 	inline int32 GetVTableIndex(UFunction* Func) {
 		if (!Func) return -1;
-		auto ValidateName = Func->GetFName().ToString().ToString() + "_Validate";
-		auto ValidateRef = Memcury::Scanner::FindStringRef(std::wstring(ValidateName.begin(), ValidateName.end()).c_str(), false);
+		auto ValidateName = Func->GetName().ToString() + "_Validate";
+		auto ValidateRef = Memcury::Scanner::FindStringRef(ValidateName.c_str(), false);
 
 		auto Addr = ValidateRef.Get();
 
@@ -190,7 +156,7 @@ namespace Runtime
 			for (int i = 0; i < 4000; i++) {
 				if (*((uint8*)Addr + i) == 0xFF && (*((uint8*)Addr + i + 1) == 0x90 || *((uint8*)Addr + i + 1) == 0x93 || *((uint8*)Addr + i + 1) == 0xA0)) {
 					auto VTIndex = *(uint32_t*)(Addr + i + 2);
-					UE_LOG(LogNeon, Log, "VTable Index for %s: %d", Func->GetFName().ToString().ToString().c_str(), VTIndex / 8);
+					UE_LOG(LogNeon, Log, "VTable Index for %s: %d", Func->GetName().ToString().c_str(), VTIndex / 8);
 					return VTIndex / 8;
 				}
 			}
@@ -198,36 +164,37 @@ namespace Runtime
 		return -1;
 	}
 
-	template<auto ClassFunc, typename T = void*>
-	__forceinline static void Exec(const char* _Name, void* _Detour, T& _Orig = nullptrForHook) {
-		UClass* ClassName = ClassFunc();
-		if (!ClassName) return;
-    
-		UObject* DefaultObj = ClassName->GetClassDefaultObject();
-		UFunction* Function = DefaultObj->GetFunction(_Name);
-		if (!Function) return;
-		if (!std::is_same_v<T, void*>)
-			_Orig = (T)Function->GetNativeFunc();
-		Function->SetNativeFunc(reinterpret_cast<FNativeFuncPtr>(_Detour));
-	}
+template<auto ClassFunc, typename T = void*>
+__forceinline static void Exec(const wchar_t* Name, void* Detour, T& _Orig = nullptrForHook) {
+    UClass* ClassName = ClassFunc();
+    if (!ClassName) return;
 
-	template <typename _Ct>
-	__forceinline static void Every(uint32_t Ind, void* Detour) {
-		for (int i = 0; i < GUObjectArray.GetAllocatedSize(); i++) {
-			auto Obj = GUObjectArray.IndexToObject(i);
-			if (Obj && Obj->Object->GetClass()->IsA(_Ct::StaticClass())) {
-				VFTHook(Obj->Object->GetVTable(), Ind, Detour);
-			}
-		}
-	}
+    UObject* DefaultObj = ClassName->GetClassDefaultObject();
+    UFunction* Function = DefaultObj->GetFunction(Name);
+    if (!Function) return;
+    
+    if (!std::is_same_v<T, void*>)
+        _Orig = (T)Function->GetNativeFunc();
+    Function->GetNativeFunc() = Detour;
+}
+
+template <typename _Ct>
+__forceinline static void Every(uint32_t Ind, void* Detour) {
+    for (int i = 0; i < TUObjectArray::Max(); i++) {
+        auto Item = TUObjectArray::GetItemByIndex(i);
+        if (Item && Item->Object && Item->Object->Class->IsA(_Ct::StaticClass())) {
+            VFTHook(Item->Object->Vft, Ind, Detour);
+        }
+    }
+}
 	
 	template<auto ClassFunc, typename T = void*>
-	__forceinline void Hook(const char* FuncName, void* detour, T& og = nullptrForHook) {
+	__forceinline void Hook(const wchar_t* FuncName, void* detour, T& og = nullptrForHook) {
 		UClass* ClassName = ClassFunc();
 		if (!ClassName) return;
     
 		UObject* DefaultObj = ClassName->GetClassDefaultObject();
-		auto VTable = DefaultObj->GetVTable();
+		auto VTable = DefaultObj->Vft;
     
 		UFunction* Function = DefaultObj->GetFunction(FuncName);
 		if (!Function) return;

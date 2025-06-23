@@ -3,5 +3,7 @@
 
 AActor* AController::GetViewTarget()
 {
-    this->CallFunc<AActor*>("AController","GetViewTarget");
+    struct ParamsStruct { AActor* ReturnValue; } Params{};
+    this->Call(L"GetViewTarget", &Params);
+    return Params.ReturnValue;
 }

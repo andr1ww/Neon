@@ -8,8 +8,8 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
     static int InventoryOffset = Runtime::GetOffset(WorldInventory, "Inventory");
     FFortItemList& InventoryPtr = *reinterpret_cast<FFortItemList*>(__int64(WorldInventory) + InventoryOffset);
 
-    WorldInventory->Set("FortInventory", "bRequiresLocalUpdate", true);
-    WorldInventory->CallFunc<void>("FortInventory", "HandleInventoryLocalUpdate");
+    WorldInventory->SetBitfield<L"bRequiresLocalUpdate">(true);
+    WorldInventory->Call<"HandleInventoryLocalUpdate">();
 
     InventoryPtr.MarkItemDirty(Entry);
     InventoryPtr.MarkArrayDirty();
@@ -18,9 +18,21 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
 UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int Count, int LoadedAmmo, int Level)
 {
     if (!PlayerController) return nullptr;
-    UFortWorldItem* BP = Def->CallFunc<UFortWorldItem*>("FortItemDefinition", "CreateTemporaryItemInstanceBP", Count, Level);
+    struct FortItemDefinition_CreateTemporaryItemInstanceBP final
+    {
+    public:
+        int32                                         Count;
+        int32                                         Level;
+        UFortWorldItem* ReturnValue;
+    } Params{
+        Count, Level
+    };
+
+    Def->Call<"CreateTemporaryItemInstanceBP">(&Params);
+
+    UFortWorldItem* BP = Params.ReturnValue;
+
     if (!BP) {
-        UE_LOG(LogNeon, Error, "Failed to create temporary item instance for %s", *Def->GetFName().ToString());
         return nullptr;
     }
     
@@ -43,29 +55,12 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry());
     ItemInstancesOffsetPtr.Add(BP);
 
- //   Update(PlayerController, BP->GetItemEntry());
+    Update(PlayerController, BP->GetItemEntry());
 
     return BP;
 }
 
 void UFortItem::SetOwningControllerForTemporaryItem(AFortPlayerControllerAthena* InController)
 {
-    struct FortItem_SetOwningControllerForTemporaryItem final
-    {
-    public:
-        AFortPlayerControllerAthena*                  InController;                                    
-    };
-
-    FortItem_SetOwningControllerForTemporaryItem Params{};
-
-    Params.InController = InController;
-
-    UFunction* Function = (UFunction*)GUObjectArray.FindObject("SetOwningControllerForTemporaryItem");
-    if (!Function)
-    {
-        UE_LOG(LogNeon, Error, "SetOwningControllerForTemporaryItem function not found!");
-        return;
-    }
-    
-    this->ProcessEvent(Function, &Params);
+    this->Call<"SetOwningControllerForTemporaryItem">(InController);
 }

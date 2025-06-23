@@ -20,9 +20,20 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
         }
     }
 
+    struct AbilitySystemComponent_ClientActivateAbilityFailed final
+{
+public:
+	struct FGameplayAbilitySpecHandle             AbilityToActivate;                                 // 0x0000(0x0004)(Parm, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	int16                                         PredictionKey;                                     // 0x0004(0x0002)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	uint8                                         Pad_6[0x2];                                        // 0x0006(0x0002)(Fixing Struct Size After Last Property [ Dumper-7 ])
+    } Params{
+        Handle, 
+		PredictionKey.GetCurrent()
+    };
+
     if (!Spec)
     {
-        GetDefaultObj()->CallFunc<void>("AbilitySystemComponent", "ClientActivateAbilityFailed", Handle, PredictionKey.GetCurrent());
+        GetDefaultObj()->Call(L"ClientActivateAbilityFailed", &Params);
         return;
     }
 
@@ -42,8 +53,9 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
     auto InternalTryActivate = reinterpret_cast<TryActivateFunc>(Finder->InternalTryActivateAbility());
     if (!InternalTryActivate(AbilitySystemComponent, Handle, PredictionKey, &InstancedAbility, nullptr, TriggerEventData))
     {
-        GetDefaultObj()->CallFunc<void>("AbilitySystemComponent", "ClientActivateAbilityFailed", Handle, PredictionKey.GetCurrent());
-        Spec->SetInputPressed(false);
+        GetDefaultObj()->Call(L"ClientActivateAbilityFailed", &Params);
+        uint8 bInputPressed = false;
+        Spec->SetInputPressed(bInputPressed);
     }
     
     AbilitySystemComponent->GetActivatableAbilities().MarkItemDirty(*Spec);
