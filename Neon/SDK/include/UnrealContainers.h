@@ -1187,7 +1187,7 @@ class FString {
 
       public:
         FString( const wchar_t *Str ) {
-                const uint32 NullTerminatedLength =
+                const uint32 NullTerminatedLength = 
                     static_cast<uint32>( wcslen( Str ) + 0x1 );
 
                 Data.Data = ( const_cast<wchar_t *>( Str ) );

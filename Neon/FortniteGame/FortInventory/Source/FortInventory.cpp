@@ -24,7 +24,7 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
         return nullptr;
     }
     
-  //  BP->SetOwningControllerForTemporaryItem(PlayerController);
+    BP->SetOwningControllerForTemporaryItem(PlayerController);
     BP->GetItemEntry().SetCount(Count);
     BP->GetItemEntry().SetLoadedAmmo(LoadedAmmo);
     BP->GetItemEntry().SetLevel(Level);
@@ -43,7 +43,7 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry());
     ItemInstancesOffsetPtr.Add(BP);
 
-    Update(PlayerController, BP->GetItemEntry());
+ //   Update(PlayerController, BP->GetItemEntry());
 
     return BP;
 }

@@ -161,7 +161,7 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
             return Pawn;
         }
     
-     //   AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 1, 1);
+        AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 1, 1);
     }
     
     return Pawn;
