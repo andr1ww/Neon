@@ -157,6 +157,21 @@ namespace Runtime
 			}
 		return Offset;
 	}
+
+	inline int GetOffsetStruct(const std::string& StructName, const std::string& PropName) {
+		int Offset = -1;
+		for (UStruct* Struct = (UStruct*)GUObjectArray.FindObject(StructName); Struct;
+			Struct = Struct->GetSuperStruct()) {
+			auto FuncInfo = SDK::PropLibrary->GetPropertyByName(
+				Struct->GetFName().ToString().ToString(), PropName);
+
+			Offset = FuncInfo.Offset;
+
+			if (Offset != -1)
+				break;
+		}
+		return Offset;
+	}
 	
 	inline void* nullptrForHook = nullptr;
 

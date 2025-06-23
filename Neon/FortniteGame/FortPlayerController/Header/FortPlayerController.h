@@ -38,6 +38,7 @@ public:
     DEFINE_MEMBER(AFortPlayerStateAthena*, AFortPlayerControllerAthena, PlayerState);
     DEFINE_MEMBER(FFortAthenaLoadout, AFortPlayerControllerAthena, CosmeticLoadoutPC);
     DEFINE_MEMBER(AFortInventory*, AFortPlayerControllerAthena, WorldInventory);
+    DEFINE_BOOL(AFortPlayerControllerAthena, bHasServerFinishedLoading);
 public:
     static void ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
 };

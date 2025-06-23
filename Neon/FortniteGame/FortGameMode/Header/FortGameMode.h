@@ -6,6 +6,13 @@
 #include "FortniteGame/FortGameState/Header/FortGameState.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 
+struct FItemAndCount final 
+{
+public:
+    DEFINE_MEMBER(int32, FItemAndCount, Count);
+    DEFINE_MEMBER(UFortItemDefinition*, FItemAndCount, Item);
+};
+
 class AFortGameModeAthena : public SDK::UObject
 {
 public:
@@ -14,6 +21,7 @@ public:
     DEFINE_MEMBER(FName, AFortGameModeAthena, CurrentPlaylistName);
     DEFINE_MEMBER(int32, AFortGameModeAthena, WarmupRequiredPlayerCount);
     DEFINE_MEMBER(int32, AFortGameModeAthena, NumPlayers);
+    DEFINE_MEMBER(TArray<AFortPlayerControllerAthena*>, AFortGameModeAthena, AlivePlayers);
     DEFINE_BOOL(AFortGameModeAthena, bWorldIsReady);
 public:
     DECLARE_DEFAULT_OBJECT(AFortGameModeAthena);

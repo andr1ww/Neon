@@ -103,8 +103,21 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
             GameState->OnRep_CurrentPlaylistInfo();
         }
     }
+
+    if (GameMode->GetAlivePlayers().Num() > 0)
+    {
+        auto AlivePlayers = GameMode->GetAlivePlayers();
+        for (int i = 0; i < AlivePlayers.Num(); i++)
+        {
+            AFortPlayerControllerAthena* PlayerController = AlivePlayers[i];
+            if (PlayerController->GetbHasServerFinishedLoading())
+            {
+                return true;
+            }
+        }
+    }
     
-    return Fortnite_Version <= 10.40 ? ReadyToStartMatchOriginal(GameMode) : GameMode->GetNumPlayers() > 0;
+    return ReadyToStartMatchOriginal(GameMode);
 }
 
 APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer, AActor* StartSpot)
@@ -129,9 +142,14 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
 
     auto Pawn = GameMode->CallFunc<APawn*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer,  StartSpot->CallFunc<FTransform>("Actor", "GetTransform"));;
 
-    auto WorldInventory = NewPlayer->Get<UObject*>("FortPlayerController", "WorldInventory");
-    auto Inventory = WorldInventory->Get<AFortInventory*>("FortInventory", "Inventory");
+  /*  for (auto& I : GameMode->Get<TArray<FItemAndCount>>("FortGameModeZone", "StartingItems"))
+    {
+    	auto Count = I.GetCount();
+    	auto Item = I.GetItem();
 
+    	AFortInventory::GiveItem(NewPlayer, Item , Count, 1, 1);
+    } */
+    
     if (Fortnite_Version.GetMajorVersion() <= 8.50) {
 
     }
@@ -143,7 +161,7 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
             return Pawn;
         }
     
-        AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 1, 1);
+     //   AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 1, 1);
     }
     
     return Pawn;
