@@ -2,7 +2,6 @@
 #include "pch.h"
 #include "Neon/Runtime/Runtime.h"
 #include "Engine/PlayerController/Header/PlayerController.h"
-#include "FortniteGame/Common/Header/ItemDefinition.h"
 #include "FortniteGame/FortInventory/Header/FortInventory.h"
 #include "FortniteGame/FortPlayerState/Header/FortPlayerState.h"
 

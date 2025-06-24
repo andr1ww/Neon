@@ -24,22 +24,22 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
 {
     if (!PlayerController) return;
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
-    static int InventoryOffset = Runtime::GetOffset(WorldInventory, "Inventory");
-    FFortItemList& InventoryPtr = *reinterpret_cast<FFortItemList*>(__int64(WorldInventory) + InventoryOffset);
-
+    FFortItemList* Inventory = WorldInventory->GetInventory();
+    
     WorldInventory->Set("FortInventory", "bRequiresLocalUpdate", true);
     WorldInventory->HandleInventoryLocalUpdate();
 
-    InventoryPtr.MarkItemDirty(Entry);
-    InventoryPtr.MarkArrayDirty();
+    Inventory->MarkItemDirty(Entry);
+    Inventory->MarkArrayDirty();
 }
 
 UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int Count, int LoadedAmmo, int Level)
 {
     if (!PlayerController) return nullptr;
+    
     UFortWorldItem* BP = Def->CallFunc<UFortWorldItem*>("FortItemDefinition", "CreateTemporaryItemInstanceBP", Count, Level);
     if (!BP) {
-        UE_LOG(LogNeon, Error, "Failed to create temporary item instance for %s", *Def->GetFName().ToString());
+        UE_LOG(LogNeon, Error, "Failed to create temporary item instance for %s", *Def->GetFName().ToString().ToString().c_str());
         return nullptr;
     }
     
@@ -50,17 +50,12 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     BP->GetItemEntry().SetItemDefinition(Def);
     
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
-    static int InventoryOffset = Runtime::GetOffset(WorldInventory, "Inventory");
-    FFortItemList& InventoryPtr = *reinterpret_cast<FFortItemList*>(__int64(WorldInventory) + InventoryOffset);
-
-    static int ReplicatedEntriesOffset = Runtime::GetOffsetStruct("FortItemList", "ReplicatedEntries");
-    TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = *reinterpret_cast<TArray<FFortItemEntry>*>(reinterpret_cast<__int64>(&InventoryPtr) + ReplicatedEntriesOffset);
-
-    static int ItemInstancesOffset = Runtime::GetOffsetStruct("FortItemList", "ItemInstances");
-    TArray<UFortItem*>& ItemInstancesOffsetPtr = *reinterpret_cast<TArray<UFortItem*>*>(reinterpret_cast<__int64>(&InventoryPtr) + ItemInstancesOffset);
+    FFortItemList* Inventory = WorldInventory->GetInventory();
+    TArray<FFortItemEntry> ReplicatedEntries = Inventory->GetReplicatedEntries();
+    TArray<UFortItem*> ItemInstances = Inventory->GetItemInstances();
     
-    ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry());
-    ItemInstancesOffsetPtr.Add(BP);
+    ReplicatedEntries.Add(BP->GetItemEntry());
+    ItemInstances.Add(BP);
 
     Update(PlayerController, BP->GetItemEntry());
 

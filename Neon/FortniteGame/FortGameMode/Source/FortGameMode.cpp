@@ -157,9 +157,6 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         auto CosmeticLoadoutPC = NewPlayer->GetCosmeticLoadoutPC();
         auto Pickaxe = CosmeticLoadoutPC.GetPickaxe();
         auto WeaponDef = Pickaxe.GetWeaponDefinition();
-        if (!WeaponDef) {
-            return Pawn;
-        }
     
         AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 1, 1);
     }
