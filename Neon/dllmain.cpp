@@ -73,33 +73,6 @@ void InitNullsAndRetTrues() {
 	}
 }
 
-static void ExecuteConsoleCommand(SDK::UObject* WorldContextObject, const SDK::FString& Command, SDK::UObject* Controller)
-{
-	static SDK::UFunction* Func = nullptr;
-	SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetSystemLibrary", "ExecuteConsoleCommand");
-
-	if (Func == nullptr)
-		Func = Info.Func;
-	if (!Func)
-		return;
-
-	struct ExecuteConsoleCommand
-	{
-	public:
-		SDK::UObject* WorldContextObject;
-		SDK::FString Command;
-		SDK::UObject* PlayerController;
-	};
-
-	ExecuteConsoleCommand Params{};
-
-	Params.WorldContextObject = WorldContextObject;
-	Params.Command = std::move(Command);
-	Params.PlayerController = Controller;
-
-	SDK::StaticClassImpl("KismetSystemLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &Params);
-}
-
 void Main()
 {
 	AllocConsole();
@@ -130,7 +103,7 @@ void Main()
 		UE_LOG(LogNeon, Log, "InternalServerTryActivateAbilityIndex: 0x%x", InternalServerTryActivateAbilityIndex);
 	}
 	
-	Runtime::Every<UAbilitySystemComponent>(InternalServerTryActivateAbilityIndex, UAbilitySystemComponent::InternalServerTryActivateAbility);
+	//Runtime::Every<UAbilitySystemComponent>(InternalServerTryActivateAbilityIndex, UAbilitySystemComponent::InternalServerTryActivateAbility);
 
 	Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
 	Runtime::Hook(Finder->DispatchRequest(), UNetDriver::DispatchRequest, (void**)&DispatchRequestOriginal);

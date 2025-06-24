@@ -34,5 +34,32 @@ static void Return()
     return;
 }
 
+static void ExecuteConsoleCommand(SDK::UObject* WorldContextObject, const SDK::FString& Command, SDK::UObject* Controller)
+{
+    static SDK::UFunction* Func = nullptr;
+    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetSystemLibrary", "ExecuteConsoleCommand");
+
+    if (Func == nullptr)
+        Func = Info.Func;
+    if (!Func)
+        return;
+
+    struct ExecuteConsoleCommand
+    {
+    public:
+        SDK::UObject* WorldContextObject;
+        SDK::FString Command;
+        SDK::UObject* PlayerController;
+    };
+
+    ExecuteConsoleCommand Params{};
+
+    Params.WorldContextObject = WorldContextObject;
+    Params.Command = std::move(Command);
+    Params.PlayerController = Controller;
+
+    SDK::StaticClassImpl("KismetSystemLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &Params);
+}
+
 
 #endif //PCH_H
