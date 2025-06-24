@@ -43,21 +43,21 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
         return nullptr;
     }
     
-    BP->SetOwningControllerForTemporaryItem(PlayerController);
-    BP->GetItemEntry().SetCount(Count);
-    BP->GetItemEntry().SetLoadedAmmo(LoadedAmmo);
-    BP->GetItemEntry().SetLevel(Level);
-    BP->GetItemEntry().SetItemDefinition(Def);
-    
+    auto ItemEntry = BP->GetItemEntry();
+    ItemEntry.SetCount(Count);
+    ItemEntry.SetLoadedAmmo(LoadedAmmo);
+    ItemEntry.SetLevel(Level);
+    ItemEntry.SetItemDefinition(Def);
+
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
     FFortItemList Inventory = WorldInventory->GetInventory();
     TArray<FFortItemEntry>& ReplicatedEntries = Inventory.GetReplicatedEntries();
     TArray<UFortItem*>& ItemInstances = Inventory.GetItemInstances();
     
-    ReplicatedEntries.Add(BP->GetItemEntry());
+    ReplicatedEntries.Add(ItemEntry);
     ItemInstances.Add(BP);
 
-    Update(PlayerController, BP->GetItemEntry());
+    Update(PlayerController, ItemEntry);
 
     return BP;
 }

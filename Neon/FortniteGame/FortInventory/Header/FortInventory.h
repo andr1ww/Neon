@@ -12,7 +12,7 @@ struct FFortItemEntry : public FFastArraySerializerItem
     DEFINE_MEMBER(int32, FFortItemEntry, Count);
     DEFINE_MEMBER(int32, FFortItemEntry, LoadedAmmo);
     DEFINE_MEMBER(int32, FFortItemEntry, Level);
-    DEFINE_MEMBER(UFortItemDefinition*, FFortItemEntry, ItemDefinition);
+    DEFINE_PTR(UFortItemDefinition, FFortItemEntry, ItemDefinition);
 };
 
 class UFortItem : public UObject
