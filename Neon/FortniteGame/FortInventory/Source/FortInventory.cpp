@@ -24,13 +24,13 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
 {
     if (!PlayerController) return;
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
-    FFortItemList* Inventory = WorldInventory->GetInventory();
+    FFortItemList Inventory = WorldInventory->GetInventory();
     
     WorldInventory->Set("FortInventory", "bRequiresLocalUpdate", true);
     WorldInventory->HandleInventoryLocalUpdate();
 
-    Inventory->MarkItemDirty(Entry);
-    Inventory->MarkArrayDirty();
+    Inventory.MarkItemDirty(Entry);
+    Inventory.MarkArrayDirty();
 }
 
 UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int Count, int LoadedAmmo, int Level)
@@ -50,9 +50,9 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     BP->GetItemEntry().SetItemDefinition(Def);
     
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
-    FFortItemList* Inventory = WorldInventory->GetInventory();
-    TArray<FFortItemEntry> ReplicatedEntries = Inventory->GetReplicatedEntries();
-    TArray<UFortItem*> ItemInstances = Inventory->GetItemInstances();
+    FFortItemList Inventory = WorldInventory->GetInventory();
+    TArray<FFortItemEntry>& ReplicatedEntries = Inventory.GetReplicatedEntries();
+    TArray<UFortItem*>& ItemInstances = Inventory.GetItemInstances();
     
     ReplicatedEntries.Add(BP->GetItemEntry());
     ItemInstances.Add(BP);

@@ -38,7 +38,7 @@ public:
 class AFortInventory : public AActor
 {
 public:
-    DEFINE_PTR(FFortItemList, AFortInventory, Inventory);
+    DEFINE_MEMBER(FFortItemList, AFortInventory, Inventory);
 public:
     static void HandleInventoryLocalUpdate();
     static void Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry Entry);
