@@ -36,8 +36,8 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
 UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int Count, int LoadedAmmo, int Level)
 {
     if (!PlayerController || !Def) return nullptr;
-    
-    UFortWorldItem* BP = (UFortWorldItem*)Def->CreateTemporaryItemInstanceBP(Count, Level);
+
+    UFortWorldItem* BP = Def->CallFunc<UFortWorldItem*>("FortItemDefinition", "CreateTemporaryItemInstanceBP", Count, Level);
     if (!BP) {
         UE_LOG(LogNeon, Log, "Failed to create temporary item instance");
         return nullptr;
