@@ -5,7 +5,7 @@
 
 uint64_t UFinder::WorldNetMode()
 {
-    auto Addr = Memcury::Scanner::FindStringRef("PREPHYSBONES");
+    auto Addr = Memcury::Scanner::FindWStringRef(L"PREPHYSBONES");
 
     auto BeginningFunction = FindBytes(Addr, { 0x40, 0x55 }, 1000, 0, true);
 
@@ -248,7 +248,7 @@ uint64 UFinder::GetMaxTickRate()
 
 uint64 UFinder::DispatchRequest()
 {
-    return Memcury::Scanner::FindStringRef("MCP-Profile: Dispatching request to %s").ScanFor({ 0x48,0x89,0x5C }, false).Get();
+    return Memcury::Scanner::FindWStringRef(L"MCP-Profile: Dispatching request to %s").ScanFor({ 0x48,0x89,0x5C }, false).Get();
 }  
 
 uint64 UFinder::CreateNetDriver()
