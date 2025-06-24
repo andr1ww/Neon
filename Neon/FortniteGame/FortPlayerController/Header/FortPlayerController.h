@@ -28,15 +28,15 @@ struct FFortAthenaLoadout final
 {
 public:
     DEFINE_PTR(UAthenaCharacterItemDefinition, FFortAthenaLoadout, Character);
-    DEFINE_MEMBER(UAthenaPickaxeItemDefinition, FFortAthenaLoadout, Pickaxe);
+    DEFINE_PTR(UAthenaPickaxeItemDefinition, FFortAthenaLoadout, Pickaxe);
 }; 
 
 class AFortPlayerControllerAthena : public APlayerController 
 {
 public:
-    DEFINE_MEMBER(AFortPlayerStateAthena*, AFortPlayerControllerAthena, PlayerState);
+    DEFINE_PTR(AFortPlayerStateAthena, AFortPlayerControllerAthena, PlayerState);
     DEFINE_MEMBER(FFortAthenaLoadout, AFortPlayerControllerAthena, CosmeticLoadoutPC);
-    DEFINE_MEMBER(AFortInventory*, AFortPlayerControllerAthena, WorldInventory);
+    DEFINE_PTR(AFortInventory, AFortPlayerControllerAthena, WorldInventory);
     DEFINE_BOOL(AFortPlayerControllerAthena, bHasServerFinishedLoading);
 public:
     static void ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);

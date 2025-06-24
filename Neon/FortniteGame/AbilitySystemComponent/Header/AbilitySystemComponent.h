@@ -2,6 +2,7 @@
 #include "pch.h"
 
 #include "Engine/Array/Header/Array.h"
+#include "Neon/Runtime/Runtime.h"
 
 using FGameplayEventData = char[0xB0]; 
 
@@ -34,7 +35,7 @@ struct FGameplayAbilitySpecContainer : public FFastArraySerializer
 class UFortAbilitySet : public UObject
 {
 public:
-    DEFINE_MEMBER(TArray<UClass*>, UFortAbilitySet, GameplayAbilities);
+    DEFINE_MEMBER(TArray<TSubclassOf<UClass>>, UFortAbilitySet, GameplayAbilities);
 };
 
 class UAbilitySystemComponent : public UObject

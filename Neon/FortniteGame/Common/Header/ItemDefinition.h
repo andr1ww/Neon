@@ -26,8 +26,11 @@ public:
         if (Func == nullptr)
             Func = Info.Func;
         if (!Func)
+        {
+            UE_LOG(LogNeon, Fatal, "Failed to find function CreateTemporaryItemInstanceBP in FortItemDefinition");
             return nullptr;
-
+        }
+        
         auto Flgs = Func->FunctionFlags();
         Func->FunctionFlags() |= 0x400;
     
