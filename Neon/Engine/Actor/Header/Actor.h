@@ -2,6 +2,7 @@
 #include "pch.h"
 
 #include "Engine/Transform/Header/Transform.h"
+#include "Engine/Vector/Header/Vector.h"
 
 class AActor : public UObject
 {

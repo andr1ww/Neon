@@ -1,4 +1,8 @@
+﻿// https://github.com/kem0x/memcury
+
 #pragma once
+#include <dbghelp.h>
+#pragma comment(lib, "dbghelp.lib")
 
 /*
    Memcury is a single-header file library for memory manipulation in C++.
@@ -37,34 +41,23 @@
                -RemoveHook: Removes a hook from the VEH Hook system.
 */
 
-#include <string>
-#include <format>
-#include <vector>
-#include <stdexcept>
-#include <type_traits>
-#include <intrin.h>
-#include <Windows.h>
-#include <source_location>
-#include <DbgHelp.h>
-#pragma comment(lib, "Dbghelp.lib")
 
 #define MemcuryAssert(cond)                                              \
-    if (!(cond))                                                         \
-    {                                                                    \
-        MessageBoxA(nullptr, #cond, __FUNCTION__, MB_ICONERROR | MB_OK); \
-        Memcury::Safety::FreezeCurrentThread();                          \
-    }
+        if (!(cond))                                                         \
+        {                                                                    \
+            MessageBoxA(nullptr, #cond, __FUNCTION__, MB_ICONERROR | MB_OK); \
+            Memcury::Safety::FreezeCurrentThread();                          \
+        }
 
 #define MemcuryAssertM(cond, msg)                                      \
-    if (!(cond))                                                       \
-    {                                                                  \
-        MessageBoxA(nullptr, msg, __FUNCTION__, MB_ICONERROR | MB_OK); \
-        Memcury::Safety::FreezeCurrentThread();                        \
-    }
+        if (!(cond))                                                       \
+        {                                                                  \
+            MessageBoxA(nullptr, msg, __FUNCTION__, MB_ICONERROR | MB_OK); \
+        }
 
 #define MemcuryThrow(msg)                                          \
-    MessageBoxA(nullptr, msg, __FUNCTION__, MB_ICONERROR | MB_OK); \
-    Memcury::Safety::FreezeCurrentThread();
+        MessageBoxA(nullptr, msg, __FUNCTION__, MB_ICONERROR | MB_OK); \
+        Memcury::Safety::FreezeCurrentThread();
 
 namespace Memcury
 {
@@ -232,7 +225,7 @@ namespace Memcury
     {
         constexpr const bool bLogging = true;
 
-        inline const char* moduleName = nullptr;
+        static const char* moduleName = nullptr;
     }
 
     namespace ASM
@@ -507,13 +500,13 @@ namespace Memcury
             {
                 return _address != address._address;
             }
-            
+
             auto RelativeOffset(uint32_t offset, uint32_t off2 = 0) -> Address
             {
                 if (_address) _address = ((_address + offset + 4 + off2) + *(int32_t*)(_address + offset));
                 return *this;
             }
-            
+
             auto AbsoluteOffset(uint32_t offset) -> Address
             {
                 _address = _address + offset;
@@ -535,20 +528,19 @@ namespace Memcury
             {
                 return _address;
             }
-            
+
             template <typename T>
             auto GetAs() -> T
             {
                 return reinterpret_cast<T>(_address);
             }
-            
+
             auto IsValid() -> bool
             {
                 return _address != 0;
             }
         };
 
-        
         class Section
         {
         public:
@@ -623,53 +615,7 @@ namespace Memcury
             PE::SetCurrentModule(moduleName);
         }
 
-        static auto FindPattern(const char* signature, bool bWarnIfNotFound = true) -> Scanner
-        {
-            PE::Address add{ nullptr };
-
-            const auto sizeOfImage = PE::GetNTHeaders()->OptionalHeader.SizeOfImage;
-            auto patternBytes = ASM::pattern2bytes(signature);
-            const auto scanBytes = reinterpret_cast<std::uint8_t*>(PE::GetModuleBase());
-
-            const auto s = patternBytes.size();
-            const auto d = patternBytes.data();
-
-            for (auto i = 0ul; i < sizeOfImage - s; ++i)
-            {
-                bool found = true;
-                for (auto j = 0ul; j < s; ++j)
-                {
-                    if (scanBytes[i + j] != d[j] && d[j] != -1)
-                    {
-                        found = false;
-                        break;
-                    }
-                }
-
-                if (found)
-                {
-                    add = reinterpret_cast<uintptr_t>(&scanBytes[i]);
-                    break;
-                }
-            }
-
-            std::string errorMsg = "FindPattern return nullptr for signature: ";
-            errorMsg += signature;
-            //MemcuryAssertM(add != 0, errorMsg.c_str());
-
-            if (bWarnIfNotFound)
-            {
-                if (add == 0)
-                {
-                    // MessageBoxA(0, ("FindPattern " + std::string(signature) + " null").c_str(), "Memcury", MB_ICONERROR);
-                }
-            }
-
-            return Scanner(add);
-        }
-
-
-           static auto FindPatternEx(HANDLE handle, const char* pattern, const char* mask, uint64_t begin, uint64_t end) -> Scanner
+        static auto FindPatternEx(HANDLE handle, const char* pattern, const char* mask, uint64_t begin, uint64_t end) -> Scanner
         {
             auto scan = [](const char* pattern, const char* mask, char* begin, unsigned int size) -> char*
                 {
@@ -727,7 +673,81 @@ namespace Memcury
             return Scanner(match);
         }
 
-            static auto FindPointerRef(void* Pointer, int useRefNum = 0, bool bUseFirstResult = false, bool bWarnIfNotFound = true) -> Scanner // credit me and ender
+        static auto FindPatternEx(HANDLE handle, const char* sig) -> Scanner
+        {
+            char pattern[100];
+            char mask[100];
+
+            char lastChar = ' ';
+            unsigned int j = 0;
+
+            for (unsigned int i = 0; i < strlen(sig); i++)
+            {
+                if ((sig[i] == '?' || sig[i] == '*') && (lastChar != '?' && lastChar != '*'))
+                {
+                    pattern[j] = mask[j] = '?';
+                    j++;
+                }
+
+                else if (isspace(lastChar))
+                {
+                    pattern[j] = lastChar = (char)strtol(&sig[i], 0, 16);
+                    mask[j] = 'x';
+                    j++;
+                }
+                lastChar = sig[i];
+            }
+            pattern[j] = mask[j] = '\0';
+
+            auto module = (uint64_t)GetModuleHandle(nullptr);
+
+            return FindPatternEx(handle, pattern, mask, module, module + Memcury::PE::GetNTHeaders()->OptionalHeader.SizeOfImage);
+        }
+
+        static auto FindPattern(const char* signature, bool bWarnIfNotFound = true) -> Scanner
+        {
+            PE::Address add{ nullptr };
+
+            const auto sizeOfImage = PE::GetNTHeaders()->OptionalHeader.SizeOfImage;
+            auto patternBytes = ASM::pattern2bytes(signature);
+            const auto scanBytes = reinterpret_cast<std::uint8_t*>(PE::GetModuleBase());
+
+            const auto s = patternBytes.size();
+            const auto d = patternBytes.data();
+
+            for (auto i = 0ul; i < sizeOfImage - s; ++i)
+            {
+                bool found = true;
+                for (auto j = 0ul; j < s; ++j)
+                {
+                    if (scanBytes[i + j] != d[j] && d[j] != -1)
+                    {
+                        found = false;
+                        break;
+                    }
+                }
+
+                if (found)
+                {
+                    add = reinterpret_cast<uintptr_t>(&scanBytes[i]);
+                    break;
+                }
+            }
+
+            // MemcuryAssertM(add != 0, "FindPattern return nullptr");
+
+            if (bWarnIfNotFound)
+            {
+                if (add == 0)
+                {
+                    // MessageBoxA(0, ("FindPattern " + std::string(signature) + " null").c_str(), "Memcury", MB_ICONERROR);
+                }
+            }
+
+            return Scanner(add);
+        }
+
+        static auto FindPointerRef(void* Pointer, int useRefNum = 0, bool bUseFirstResult = false, bool bWarnIfNotFound = true) -> Scanner // credit me and ender
         {
             PE::Address add{ nullptr };
 
@@ -775,134 +795,146 @@ namespace Memcury
                     }
                 }
             }
-            
+
+            if (bWarnIfNotFound)
+            {
+                if (add == 0)
+                {
+                    // MessageBoxA(0, "FindPointerRef return nullptr", "Memcury", MB_OK);
+                }
+                else
+                {
+                    // MessageBoxA(0, std::format("FindPointerRef return 0x{:x}", add.Get() - __int64(GetModuleHandleW(0))).c_str(), "Memcury", MB_OK);
+                }
+            }
+
             return Scanner(add);
         }
 
-   // Supports wide and normal strings both std and pointers
-            template <typename T = const wchar_t*>
-            static auto FindStringRef(T string, bool bWarnIfNotFound = true, int useRefNum = 0, bool bIsInFunc = false, bool bSkunky = false) -> Scanner
+        // Supports wide and normal strings both std and pointers
+// For wide strings (wchar_t*)
+static auto FindWStringRef(const wchar_t* string, bool bWarnIfNotFound = true, int useRefNum = 0, bool bIsInFunc = false, bool bSkunky = false) -> Scanner
+{
+    PE::Address add{ nullptr };
+
+    auto textSection = PE::Section::GetSection(".text");
+    auto rdataSection = PE::Section::GetSection(".rdata");
+
+    const auto scanBytes = reinterpret_cast<std::uint8_t*>(textSection.GetSectionStart().Get());
+
+    int aa = 0;
+
+    // scan only text section
+    for (DWORD i = 0x0; i < textSection.GetSectionSize(); i++)
+    {
+        if ((scanBytes[i] == ASM::CMOVL || scanBytes[i] == ASM::CMOVS) && scanBytes[i + 1] == ASM::LEA)
+        {
+            auto stringAdd = PE::Address(&scanBytes[i]).RelativeOffset(3);
+
+            // Check if the string is in the .rdata section
+            if (rdataSection.isInSection(stringAdd))
             {
-                PE::Address add{ nullptr };
+                auto strBytes = stringAdd.GetAs<std::uint8_t*>();
 
-                constexpr auto bIsWide = std::is_same<T, const wchar_t*>::value;
-                constexpr auto bIsChar = std::is_same<T, const char*>::value;
-
-                constexpr auto bIsPtr = bIsWide || bIsChar;
-
-                auto textSection = PE::Section::GetSection(".text");
-                auto rdataSection = PE::Section::GetSection(".rdata");
-
-                const auto scanBytes = reinterpret_cast<std::uint8_t*>(textSection.GetSectionStart().Get());
-
-                int aa = 0;
-
-                // scan only text section
-                for (DWORD i = 0x0; i < textSection.GetSectionSize(); i++)
+                // Check if the first char is printable
+                if (ASM::byteIsAscii(strBytes[0]))
                 {
-                    if ((scanBytes[i] == ASM::CMOVL || scanBytes[i] == ASM::CMOVS) && scanBytes[i + 1] == ASM::LEA)
+                    auto lea = stringAdd.GetAs<const wchar_t*>();
+
+                    if (wcscmp(string, lea) == 0)
                     {
-                        auto stringAdd = PE::Address(&scanBytes[i]).RelativeOffset(3);
-
-                        // Check if the string is in the .rdata section
-                        if (rdataSection.isInSection(stringAdd))
-                        {
-                            auto strBytes = stringAdd.GetAs<std::uint8_t*>();
-
-                            // Check if the first char is printable
-                            if (ASM::byteIsAscii(strBytes[0]))
-                            {
-                                if constexpr (!bIsPtr)
-                                {
-                                    // typedef T::value_type char_type;
-                                    using char_type = typename T::value_type;
-                                    
-                                    auto lea = stringAdd.GetAs<char_type*>();
-
-                                    T leaT(lea);
-
-                                    if (leaT == string)
-                                    {
-                                        add = PE::Address(&scanBytes[i]);
-
-                                        if (++aa > useRefNum)
-                                            break;
-                                    }
-                                }
-                                else
-                                {
-                                    auto lea = stringAdd.GetAs<T>();
-
-                                    if constexpr (bIsWide)
-                                    {
-                                        if (wcscmp(string, lea) == 0)
-                                        {
-                                            add = PE::Address(&scanBytes[i]);
-
-                                            if (++aa > useRefNum)
-                                                break;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (strcmp(string, lea) == 0)
-                                        {
-                                            add = PE::Address(&scanBytes[i]);
-
-                                            if (++aa > useRefNum)
-                                                break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        add = PE::Address(&scanBytes[i]);
+                        if (++aa > useRefNum)
+                            break;
                     }
                 }
-
-                // MemcuryAssertM(add != 0, "FindStringRef return nullptr");
-
-                if (bWarnIfNotFound)
-                {
-                    if (add == 0)
-                    {
-                        if constexpr (bIsWide)
-                        {
-                            std::wstring wstr = std::wstring(string);
-
-                            // auto aaa = (L"failed FindStringRef " + std::wstring(string));
-                            // MessageBoxA(0, std::string(aaa.begin(), aaa.end()).c_str(), "Memcury", MB_ICONERROR);
-                        }
-                        else
-                        {
-                            // MessageBoxA(0, ("failed FindStringRef " + std::string(string)).c_str(), "Memcury", MB_ICONERROR);
-                        }
-                    }
-                }
-
-                if (add.Get())
-                {
-                    if (bIsInFunc)
-                    {
-                        for (int i = 0; i < 300; i++)
-                        {
-                            if (!bSkunky ? (*(uint8_t*)(add.Get() - i) == 0x48 && *(uint8_t*)(add.Get() - i + 1) == 0x83) : 
-                                (*(uint8_t*)(add.Get() - i) == 0x4C && *(uint8_t*)(add.Get() - i + 1) == 0x8B && *(uint8_t*)(add.Get() - i + 2) == 0xDC))
-                            {
-                                // MessageBoxA(0, std::format("0x{:x}", (__int64(add.Get() - i) - __int64(GetModuleHandleW(0)))).c_str(), "Memcury", MB_OK);
-
-                                auto beginFunc = Scanner(add.Get() - i);
-
-                                auto ref = FindPointerRef(beginFunc.GetAs<void*>());
-
-                                return ref;
-                            }
-                        }
-                    }
-                }
-
-                return Scanner(add);
             }
-        
+        }
+    }
+
+    if (bWarnIfNotFound && add == 0)
+    {
+        // Warning logic for wide strings
+    }
+
+    if (add.Get() && bIsInFunc)
+    {
+        for (int i = 0; i < 300; i++)
+        {
+            if (!bSkunky ? (*(uint8_t*)(add.Get() - i) == 0x48 && *(uint8_t*)(add.Get() - i + 1) == 0x83) :
+                (*(uint8_t*)(add.Get() - i) == 0x4C && *(uint8_t*)(add.Get() - i + 1) == 0x8B && *(uint8_t*)(add.Get() - i + 2) == 0xDC))
+            {
+                auto beginFunc = Scanner(add.Get() - i);
+                auto ref = FindPointerRef(beginFunc.GetAs<void*>());
+                return ref;
+            }
+        }
+    }
+
+    return Scanner(add);
+}
+
+// For regular strings (char*)
+static auto FindStringRef(const char* string, bool bWarnIfNotFound = true, int useRefNum = 0, bool bIsInFunc = false, bool bSkunky = false) -> Scanner
+{
+    PE::Address add{ nullptr };
+
+    auto textSection = PE::Section::GetSection(".text");
+    auto rdataSection = PE::Section::GetSection(".rdata");
+
+    const auto scanBytes = reinterpret_cast<std::uint8_t*>(textSection.GetSectionStart().Get());
+
+    int aa = 0;
+
+    // scan only text section
+    for (DWORD i = 0x0; i < textSection.GetSectionSize(); i++)
+    {
+        if ((scanBytes[i] == ASM::CMOVL || scanBytes[i] == ASM::CMOVS) && scanBytes[i + 1] == ASM::LEA)
+        {
+            auto stringAdd = PE::Address(&scanBytes[i]).RelativeOffset(3);
+
+            // Check if the string is in the .rdata section
+            if (rdataSection.isInSection(stringAdd))
+            {
+                auto strBytes = stringAdd.GetAs<std::uint8_t*>();
+
+                // Check if the first char is printable
+                if (ASM::byteIsAscii(strBytes[0]))
+                {
+                    auto lea = stringAdd.GetAs<const char*>();
+
+                    if (strcmp(string, lea) == 0)
+                    {
+                        add = PE::Address(&scanBytes[i]);
+                        if (++aa > useRefNum)
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    if (bWarnIfNotFound && add == 0)
+    {
+        // Warning logic for regular strings
+    }
+
+    if (add.Get() && bIsInFunc)
+    {
+        for (int i = 0; i < 300; i++)
+        {
+            if (!bSkunky ? (*(uint8_t*)(add.Get() - i) == 0x48 && *(uint8_t*)(add.Get() - i + 1) == 0x83) :
+                (*(uint8_t*)(add.Get() - i) == 0x4C && *(uint8_t*)(add.Get() - i + 1) == 0x8B && *(uint8_t*)(add.Get() - i + 2) == 0xDC))
+            {
+                auto beginFunc = Scanner(add.Get() - i);
+                auto ref = FindPointerRef(beginFunc.GetAs<void*>());
+                return ref;
+            }
+        }
+    }
+
+    return Scanner(add);
+}
         auto Jump() -> Scanner
         {
             _address.Jump();
@@ -993,7 +1025,6 @@ namespace Memcury
             return *this;
         }
 
-
         auto FindFunctionBoundary(bool forward = false) -> Scanner
         {
             const auto scanBytes = _address.GetAs<std::uint8_t*>();
@@ -1024,7 +1055,7 @@ namespace Memcury
 
             return *this;
         }
-        
+
         auto AbsoluteOffset(uint32_t offset) -> Scanner
         {
             _address.AbsoluteOffset(offset);
@@ -1343,4 +1374,63 @@ namespace Memcury
             return false;
         }
     }
+}
+
+inline bool IsBadReadPtr(void* p)
+{
+    MEMORY_BASIC_INFORMATION mbi = { 0 };
+    if (::VirtualQuery(p, &mbi, sizeof(mbi)))
+    {
+        DWORD mask = (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY);
+        bool b = !(mbi.Protect & mask);
+        // check the page is not a guard page
+        if (mbi.Protect & (PAGE_GUARD | PAGE_NOACCESS)) b = true;
+
+        return b;
+    }
+    return true;
+}
+
+static void VirtualSwap(void** VTable, int Idx, void* NewFunc)
+{
+    DWORD dwProtection;
+    VirtualProtect(&VTable[Idx], 8, PAGE_EXECUTE_READWRITE, &dwProtection);
+
+    VTable[Idx] = NewFunc;
+
+    DWORD dwTemp;
+    VirtualProtect(&VTable[Idx], 8, dwProtection, &dwTemp);
+}
+
+inline uintptr_t FindNameRef(const wchar_t* Name, int skip = 0, bool bWarnStringNotFound = true)
+{
+    auto StringRef = Memcury::Scanner::FindWStringRef(Name, bWarnStringNotFound, skip);
+
+    if (!StringRef.Get())
+        return 0;
+
+    auto FunctionPtr = StringRef.ScanFor({ 0x48, 0x8D, 0x0D }).RelativeOffset(3).GetAs<void*>();
+
+    auto PtrRef = Memcury::Scanner::FindPointerRef(FunctionPtr);
+
+    return PtrRef.Get();
+}
+
+// Finds a string ref, then goes searches xref of the function that it's in and returns that address.
+inline uintptr_t FindFunctionCall(const wchar_t* Name, const std::vector<uint8_t>& Bytes = std::vector<uint8_t>{ 0x48, 0x89, 0x5C }, int skip = 0, bool bWarnStringNotFound = true) // credit ender & me
+{
+    auto NameRef = FindNameRef(Name, skip, bWarnStringNotFound);
+
+    if (!NameRef)
+        return 0;
+
+    return Memcury::Scanner(NameRef).ScanFor(Bytes, false).Get();
+}
+
+inline bool IsNullSub(uint64_t Addr)
+{
+    // if (*(uint8_t*)(Addr) == 0xEB && *(uint8_t*)(Addr + 1) == 0xF7) // positive sp value has been detected, the output may be wrong!
+       // return true;
+
+    return *(uint8_t*)(Addr) == 0xC3 || *(uint8_t*)(Addr) == 0xC2;
 }
