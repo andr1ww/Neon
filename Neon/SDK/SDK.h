@@ -1439,39 +1439,11 @@ public:
 	class FName Name;
 	UObject* Outer;
 	static inline void(*ProcessEventInternal)(const UObject*, class UFunction*, void*) = ([]() {
-		uintptr_t addr = 0;
-
-		if (FNVer < 14 && addr == 0) {
-			auto refe = Memcury::Scanner::FindWStringRef(L"AccessNoneNoContext");
-			if (!refe.Get()) return (void(*)(const UObject*, UFunction*, void*))nullptr;
-
-			auto scan = refe.ScanFor({ 0x40, 0x55 }, true, 0, 1, 2000);
-			if (!scan.Get()) return (void(*)(const UObject*, UFunction*, void*))nullptr;
-
-			addr = scan.Get();
-		}
-	/*	else if (FNVer >= 23 && addr == 0) {
-			auto refe = Memcury::Scanner::FindPattern("0F 84 ? ? ? ? F7 41 ? ? ? ? ? 0F 85 ? ? ? ? F7 87");
-			if (!refe.Get()) return (void(*)(const UObject*, UFunction*, void*))nullptr;
-
-			auto scan = refe.ScanFor({ 0x40, 0x55 }, false);
-			if (!scan.Get()) return (void(*)(const UObject*, UFunction*, void*))nullptr;
-
-			addr = scan.Get();
-		} */
-		else if (addr == 0) {
-			auto refe = Memcury::Scanner::FindWStringRef(L"UMeshNetworkComponent::ProcessEvent: Invalid mesh network node type: %s", true, 0, FNVer >= 19);
-			if (!refe.Get()) return (void(*)(const UObject*, UFunction*, void*))nullptr;
-
-			auto scan = refe.ScanFor({ 0xE8 }, true, FNVer < 19 ? 1 : 3, 0, 2000);
-			if (!scan.Get()) return (void(*)(const UObject*, UFunction*, void*))nullptr;
-
-			addr = scan.RelativeOffset(1).Get();
-		}
-		
-
-		return reinterpret_cast<void(*)(const UObject*, class UFunction*, void*)>(addr);
-	})();
+		uintptr_t addr;
+		if (FNVer < 14.00) addr = Memcury::Scanner::FindWStringRef(L"AccessNoneNoContext").ScanFor({ 0x40, 0x55 }, true, 0, 1, 2000).Get();
+		else addr = Memcury::Scanner::FindWStringRef(L"UMeshNetworkComponent::ProcessEvent: Invalid mesh network node type: %s", true, 0, FNVer >= 19.00).ScanFor({ 0xE8 }, true, FNVer < 19.00 ? 1 : 3, 0, 2000).RelativeOffset(1).Get();
+		return (void(*)(const UObject*, class UFunction*, void*)) addr;
+		})();
 
 public:
 	const class UField* GetProperty(const wchar_t* Name) const;
