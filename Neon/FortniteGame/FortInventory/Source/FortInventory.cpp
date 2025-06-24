@@ -1,6 +1,25 @@
 ﻿#include "pch.h"
 #include "FortniteGame/FortInventory/Header/FortInventory.h"
 
+void AFortInventory::HandleInventoryLocalUpdate()
+{
+    static SDK::UFunction* Func = nullptr;
+
+    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortInventory", "HandleInventoryLocalUpdate");
+
+    if (Func == nullptr)
+        Func = Info.Func;
+    if (!Func)
+        return;
+
+    auto Flgs = Func->FunctionFlags();
+    Func->FunctionFlags() |= 0x400;
+    
+    SDK::StaticClassImpl("FortInventory")->GetClassDefaultObject()->ProcessEvent(Func, nullptr);
+
+    Func->FunctionFlags() = Flgs;
+}
+
 void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry Entry)
 {
     if (!PlayerController) return;
@@ -9,7 +28,7 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
     FFortItemList& InventoryPtr = *reinterpret_cast<FFortItemList*>(__int64(WorldInventory) + InventoryOffset);
 
     WorldInventory->Set("FortInventory", "bRequiresLocalUpdate", true);
-    WorldInventory->CallFunc<void>("FortInventory", "HandleInventoryLocalUpdate");
+    WorldInventory->HandleInventoryLocalUpdate();
 
     InventoryPtr.MarkItemDirty(Entry);
     InventoryPtr.MarkArrayDirty();
@@ -53,19 +72,25 @@ void UFortItem::SetOwningControllerForTemporaryItem(AFortPlayerControllerAthena*
     struct FortItem_SetOwningControllerForTemporaryItem final
     {
     public:
-        AFortPlayerControllerAthena*                  InController;                                    
+        class AFortPlayerControllerAthena*                  InController;                                      // 0x0000(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
     };
 
     FortItem_SetOwningControllerForTemporaryItem Params{};
 
     Params.InController = InController;
+    static SDK::UFunction* Func = nullptr;
 
-    UFunction* Function = (UFunction*)GUObjectArray.FindObject("SetOwningControllerForTemporaryItem");
-    if (!Function)
-    {
-        UE_LOG(LogNeon, Error, "SetOwningControllerForTemporaryItem function not found!");
+    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortItem", "SetOwningControllerForTemporaryItem");
+
+    if (Func == nullptr)
+        Func = Info.Func;
+    if (!Func)
         return;
-    }
+
+    auto Flgs = Func->FunctionFlags();
+    Func->FunctionFlags() |= 0x400;
     
-    this->ProcessEvent(Function, &Params);
+    SDK::StaticClassImpl("FortItem")->GetClassDefaultObject()->ProcessEvent(Func, &Params);
+
+    Func->FunctionFlags() = Flgs;
 }

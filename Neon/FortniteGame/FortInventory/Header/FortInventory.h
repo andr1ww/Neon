@@ -40,6 +40,7 @@ class AFortInventory : public AActor
 public:
     DEFINE_MEMBER(FFortItemList, AFortInventory, Inventory);
 public:
+    static void HandleInventoryLocalUpdate();
     static void Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry Entry);
     static UObject* GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int Count, int LoadedAmmo, int Level);
 };

@@ -4,8 +4,6 @@
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
 #include "Neon/Finder/Header/Finder.h"
 
-void* (*ApplyCharacterCustomization)(UObject*, APawn*) = decltype(ApplyCharacterCustomization)(Finder->ApplyCharacterCustomization());
-
 void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) 
 {
     APawn* PawnToAcknowledge;
@@ -15,8 +13,9 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
     if (!PlayerController) return;
     PlayerController->SetAcknowledgedPawn(PawnToAcknowledge);
     PlayerController->GetPlayerState()->SetHeroType(PlayerController->GetCosmeticLoadoutPC().GetCharacter().GetHeroDefinition());
+    void* (*ApplyCharacterCustomization)(AFortPlayerStateAthena*, APawn*) = decltype(ApplyCharacterCustomization)(Finder->ApplyCharacterCustomization());
     
-    ApplyCharacterCustomization(PlayerController->Get<UObject*>("PlayerController", "PlayerState"), PawnToAcknowledge);
+    ApplyCharacterCustomization(PlayerController->GetPlayerState(), PawnToAcknowledge);
     //static UFortAbilitySet* AbilitySet = (UFortAbilitySet*)GUObjectArray.FindObject("GAS_AthenaPlayer");
     //UAbilitySystemComponent::GiveAbilitySet(PlayerController->GetPlayerState().GetAbilitySystemComponent(), AbilitySet);
 }

@@ -280,8 +280,8 @@ class UNetDriver : public UObject
 {
 public:
     DEFINE_MEMBER(FName, UNetDriver, NetDriverName);
-    DEFINE_MEMBER(UReplicationDriver*, UNetDriver, ReplicationDriver);
-    DEFINE_MEMBER(SDK::TArray<class UNetConnection*>, UNetDriver, ClientConnections);
+    DEFINE_PTR(UReplicationDriver, UNetDriver, ReplicationDriver);
+    DEFINE_MEMBER(TArray<class UNetConnection*>, UNetDriver, ClientConnections);
 public:
     bool InitListen(UWorld* Networknotify, FURL URL, bool bReuseAddressAndPort);
     void SetWorld(UWorld* World);

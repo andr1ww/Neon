@@ -73,19 +73,45 @@ void InitNullsAndRetTrues() {
 	}
 }
 
-void Main() {
-    AllocConsole();
-    FILE* File = nullptr;
-    freopen_s(&File, "CONOUT$", "w+", stdout);
-    freopen_s(&File, "CONOUT$", "w+", stderr);
-    SetConsoleTitleA("Neon | Setting up");
-    SDK::Init();
+static void ExecuteConsoleCommand(SDK::UObject* WorldContextObject, const SDK::FString& Command, SDK::UObject* Controller)
+{
+	static SDK::UFunction* Func = nullptr;
+	SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetSystemLibrary", "ExecuteConsoleCommand");
+		Func = Info.Func;
+	if (!Func)
+		return;
 
-    MH_Initialize();
-    Sleep(5000);
+	struct ExecuteConsoleCommand
+	{
+	public:
+		SDK::UObject* WorldContextObject;
+		SDK::FString Command;
+		SDK::UObject* PlayerController;
+	};
+
+	ExecuteConsoleCommand Params{};
+
+	Params.WorldContextObject = WorldContextObject;
+	Params.Command = std::move(Command);
+	Params.PlayerController = Controller;
+
+	SDK::StaticClassImpl("KismetSystemLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &Params);
+}
+
+void Main()
+{
+	AllocConsole();
+	FILE* File = nullptr;
+	freopen_s(&File, "CONOUT$", "w+", stdout);
+	freopen_s(&File, "CONOUT$", "w+", stderr);
+	SetConsoleTitleA("Neon | Setting up");
+	SDK::Init();
+
+	MH_Initialize();
+	Sleep(5000);
 	
-    *(bool*)(Finder->GIsClient()) = false; 
-    *(bool*)(Finder->GIsClient() + 1) = true;
+	*(bool*)(Finder->GIsClient()) = false; 
+	*(bool*)(Finder->GIsClient() + 1) = true;
 
 	InitNullsAndRetTrues();
 	
@@ -104,28 +130,28 @@ void Main() {
 	
 	Runtime::Every<UAbilitySystemComponent>(InternalServerTryActivateAbilityIndex, UAbilitySystemComponent::InternalServerTryActivateAbility);
 
-    Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
+	Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
 	Runtime::Hook(Finder->DispatchRequest(), UNetDriver::DispatchRequest, (void**)&DispatchRequestOriginal);
 	
-    UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
-    FString WorldName;
-    if (Fortnite_Version <= 10.40)
-    {
-        WorldName = FString(L"open Athena_Terrain");
-    }
-    else if (Fortnite_Version <= 18.40 && Fortnite_Version >= 10.40)
-    {
-        WorldName = FString(L"open Apollo_Terain");
-    }
-    else if (Fortnite_Version <= 22.40 && Fortnite_Version >= 19.00)
-    {
-        WorldName = FString(L"open Artemis_Terrain");
-    } else if (Fortnite_Version <= 23.00)
-    {
-        WorldName = FString(L"open Asteria_Terrain");
-    }
+	UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
+	FString WorldName;
+	if (Fortnite_Version <= 10.40)
+	{
+		WorldName = L"open Athena_Terrain";
+	}
+	else if (Fortnite_Version <= 18.40 && Fortnite_Version >= 10.40)
+	{
+		WorldName = L"open Apollo_Terain";
+	}
+	else if (Fortnite_Version <= 22.40 && Fortnite_Version >= 19.00)
+	{
+		WorldName = L"open Artemis_Terrain";
+	} else if (Fortnite_Version >= 23.00)
+	{
+		WorldName = L"open Asteria_Terrain";
+	}
     
-    UKismetSystemLibrary::GetDefaultObj()->CallFunc<void>("KismetSystemLibrary", "ExecuteConsoleCommand", UWorld::GetWorld(), WorldName, nullptr);
+	ExecuteConsoleCommand(UWorld::GetWorld(), WorldName, nullptr);
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,
