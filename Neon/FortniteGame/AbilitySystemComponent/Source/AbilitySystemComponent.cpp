@@ -77,10 +77,9 @@ void UAbilitySystemComponent::GiveAbilitySet(UAbilitySystemComponent* AbilitySys
     if (Set)
     {
         for (int i = 0; i < Set->GetGameplayAbilities().Num(); i++) {
-            UClass* Ability = Set->GetGameplayAbilities()[i];
-            if (Ability)
+            if (Set->GetGameplayAbilities().IsValidIndex(i))
             {
-                GiveAbility(AbilitySystemComponent, Ability);
+                GiveAbility(AbilitySystemComponent, Set->GetGameplayAbilities()[i]);
             }
         }
     }
