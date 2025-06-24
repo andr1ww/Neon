@@ -77,6 +77,8 @@ static void ExecuteConsoleCommand(SDK::UObject* WorldContextObject, const SDK::F
 {
 	static SDK::UFunction* Func = nullptr;
 	SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetSystemLibrary", "ExecuteConsoleCommand");
+
+	if (Func == nullptr)
 		Func = Info.Func;
 	if (!Func)
 		return;
