@@ -142,13 +142,13 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
 
     auto Pawn = GameMode->CallFunc<APawn*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer,  StartSpot->CallFunc<FTransform>("Actor", "GetTransform"));;
 
-  /*  for (auto& I : GameMode->Get<TArray<FItemAndCount>>("FortGameModeZone", "StartingItems"))
+    for (auto& I : GameMode->GetStartingItems())
     {
     	auto Count = I.GetCount();
     	auto Item = I.GetItem();
 
     	AFortInventory::GiveItem(NewPlayer, Item , Count, 1, 1);
-    } */
+    } 
     
     if (Fortnite_Version.GetMajorVersion() <= 8.50) {
 
