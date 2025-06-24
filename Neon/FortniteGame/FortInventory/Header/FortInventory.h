@@ -18,8 +18,6 @@ struct FFortItemEntry : public FFastArraySerializerItem
 class UFortItem : public UObject
 {
 public:
-    DEFINE_MEMBER(FFortItemEntry*, UFortItem, ItemEntry);
-public:
     void SetOwningControllerForTemporaryItem(AFortPlayerControllerAthena* InController);
 };
 

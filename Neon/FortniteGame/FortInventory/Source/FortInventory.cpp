@@ -24,7 +24,7 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
 {
     if (!PlayerController) return;
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
-    FFortItemList Inventory = WorldInventory->GetInventory();
+    FFortItemList& Inventory = WorldInventory->GetInventory();
     
     WorldInventory->Set("FortInventory", "bRequiresLocalUpdate", true);
     WorldInventory->HandleInventoryLocalUpdate();
@@ -35,11 +35,11 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
 
 UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int Count, int LoadedAmmo, int Level)
 {
-    if (!PlayerController) return nullptr;
+    if (!PlayerController || !Def) return nullptr;
     
-    UFortWorldItem* BP = Def->CallFunc<UFortWorldItem*>("FortItemDefinition", "CreateTemporaryItemInstanceBP", Count, Level);
+    UFortWorldItem* BP = (UFortWorldItem*)Def->CreateTemporaryItemInstanceBP(Count, Level);
     if (!BP) {
-        UE_LOG(LogNeon, Error, "Failed to create temporary item instance for %s", *Def->GetFName().ToString().ToString().c_str());
+        UE_LOG(LogNeon, Log, "Failed to create temporary item instance");
         return nullptr;
     }
     
@@ -50,12 +50,10 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     ItemEntry.SetItemDefinition(Def);
 
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
-    FFortItemList Inventory = WorldInventory->GetInventory();
-    TArray<FFortItemEntry>& ReplicatedEntries = Inventory.GetReplicatedEntries();
-    TArray<UFortItem*>& ItemInstances = Inventory.GetItemInstances();
+    FFortItemList& Inventory = WorldInventory->GetInventory();
     
-    ReplicatedEntries.Add(ItemEntry);
-    ItemInstances.Add(BP);
+    Inventory.GetReplicatedEntries().Add(ItemEntry);
+    Inventory.GetItemInstances().Add(BP);
 
     Update(PlayerController, ItemEntry);
 

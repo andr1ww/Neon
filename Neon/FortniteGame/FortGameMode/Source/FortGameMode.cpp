@@ -154,11 +154,10 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
 
     }
     else {
-        auto CosmeticLoadoutPC = NewPlayer->GetCosmeticLoadoutPC();
-        auto Pickaxe = CosmeticLoadoutPC.GetPickaxe();
+        auto Pickaxe = NewPlayer->GetCosmeticLoadoutPC().GetPickaxe();
         auto WeaponDef = Pickaxe.GetWeaponDefinition();
-    
-        AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 1, 1);
+        
+        AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 0, 1); 
     }
     
     return Pawn;

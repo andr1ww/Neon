@@ -21,13 +21,13 @@ class UFortWeaponMeleeItemDefinition : public UFortItemDefinition
 class UAthenaPickaxeItemDefinition : public UObject 
 {
 public:
-    DEFINE_MEMBER(UFortWeaponMeleeItemDefinition*, UAthenaPickaxeItemDefinition, WeaponDefinition);
+    DEFINE_PTR(UFortWeaponMeleeItemDefinition, UAthenaPickaxeItemDefinition, WeaponDefinition);
 };
 
 struct FFortAthenaLoadout final 
 {
 public:
-    DEFINE_MEMBER(UAthenaCharacterItemDefinition, FFortAthenaLoadout, Character);
+    DEFINE_PTR(UAthenaCharacterItemDefinition, FFortAthenaLoadout, Character);
     DEFINE_MEMBER(UAthenaPickaxeItemDefinition, FFortAthenaLoadout, Pickaxe);
 }; 
 
