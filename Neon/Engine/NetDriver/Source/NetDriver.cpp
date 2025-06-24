@@ -6,7 +6,6 @@
 #include "Engine/Level/Header/Level.h"
 #include "Engine/UEngine/Header/UEngine.h"
 #include "Neon/Finder/Header/Finder.h"
-#include "Engine/Vector/Header/Vector.h"
 
 UWorld* UWorld::GetWorld()
 {
@@ -21,34 +20,29 @@ UWorld* UWorld::GetWorld()
     }
 }
 
-
 bool UNetDriver::IsActorRelevantToConnection(const AActor* Actor, const TArray<FNetViewer>& ConnectionViewers)
 {
-    bool (*IsNetRelevantFor)(const AActor*, const AActor*, const AActor*, const FVector&) = decltype(IsNetRelevantFor)(Actor->Vft[
+    bool (*IsNetRelevantFor)(const AActor*, const AActor*, const AActor*, const FVector&) = decltype(IsNetRelevantFor)(Actor->GetVTable()[
         (Engine_Version == 416 || Fortnite_Version == 3.3) ? 0x420 / 8 :
-            (Fortnite_Version == 1.10 || Fortnite_Version == 1.11 || (Fortnite_Version >= 2.42 && Fortnite_Version <= 3.2)) ? 0x418 / 8 :
-            0x9C
+        (Fortnite_Version == 1.10 || Fortnite_Version == 1.11 || (Fortnite_Version >= 2.42 && Fortnite_Version <= 3.2)) ? 0x418 / 8 :
+        0x9C
     ]);
-
-    for (int32 i = 0; i < ConnectionViewers.Num(); ++i)
-    {
-        const FNetViewer& Viewer = ConnectionViewers[i];
-        const FVector& ViewLocation = Viewer.ViewLocation;
-        if (IsNetRelevantFor(Actor, Viewer.InViewer, Viewer.ViewTarget, ViewLocation))
+    
+    for (const FNetViewer& Viewer : ConnectionViewers)
+        if (IsNetRelevantFor(Actor, Viewer.InViewer, Viewer.ViewTarget, Viewer.ViewLocation))
             return true;
-    }
-
+	
     return false;
 }
 
 UNetConnection* UNetDriver::IsActorOwnedByAndRelevantToConnection(const AActor* Actor, const TArray<FNetViewer>& ConnectionViewers, bool& bOutHasNullViewTarget)
 {
-    bool (*IsRelevancyOwnerFor)(const AActor*, const AActor*, const AActor*, const AActor*) = decltype(IsRelevancyOwnerFor)(Actor->Vft[
+    bool (*IsRelevancyOwnerFor)(const AActor*, const AActor*, const AActor*, const AActor*) = decltype(IsRelevancyOwnerFor)(Actor->GetVTable()[
         (Engine_Version == 416 || Fortnite_Version == 3.3) ? 0x420 / 8 + 2 :
         (Fortnite_Version == 1.10 || Fortnite_Version == 1.11 || (Fortnite_Version >= 2.42 && Fortnite_Version <= 3.2)) ? 0x418 / 8 + 2:
         0x9C + 2
     ]);
-    AActor* (*GetNetOwner)(const AActor*) =  decltype(GetNetOwner)(Actor->Vft[
+    AActor* (*GetNetOwner)(const AActor*) =  decltype(GetNetOwner)(Actor->GetVTable()[
         (Engine_Version == 416 || Fortnite_Version == 3.3) ? 0x420 / 8 + 2 + 4 :
         (Fortnite_Version == 1.10 || Fortnite_Version == 1.11 || (Fortnite_Version >= 2.42 && Fortnite_Version <= 3.2)) ? 0x418 / 8 + 2 + 4 :
         0x9C + 2 + 4
@@ -58,9 +52,8 @@ UNetConnection* UNetDriver::IsActorOwnedByAndRelevantToConnection(const AActor* 
 
     bOutHasNullViewTarget = false;
 
-    for (int32 i = 0; i < ConnectionViewers.Num(); ++i)
+    for (auto& Viewer : ConnectionViewers)
     {
-        const FNetViewer& Viewer = ConnectionViewers[i];
         UNetConnection* ViewerConnection = Viewer.Connection;
         bOutHasNullViewTarget |= (ViewerConnection->GetViewTarget() == nullptr);
 
@@ -84,6 +77,7 @@ int32 UNetDriver::ServerReplicateActors_PrepConnections(UNetDriver* NetDriver, f
     for (int32 ConnIdx = 0; ConnIdx < NetDriver->GetClientConnections().Num(); ConnIdx++)
     {
         UNetConnection* Connection = NetDriver->GetClientConnections()[ConnIdx];
+        check(Connection);
 
         AActor* OwningActor = Connection->GetOwningActor();
         if (OwningActor != NULL)
@@ -121,12 +115,10 @@ int32 UNetDriver::ServerReplicateActors_PrepConnections(UNetDriver* NetDriver, f
         }
         else
         {
-            AActor* NullActor = nullptr;
-            Connection->SetViewTarget(NullActor);
+            Connection->SetViewTarget(NULL);
             for (int32 ChildIdx = 0; ChildIdx < Connection->GetChildren().Num(); ChildIdx++)
             {
-                AActor* NullChildActor = nullptr;
-                Connection->GetChildren()[ChildIdx]->SetViewTarget(NullChildActor);
+                Connection->GetChildren()[ChildIdx]->SetViewTarget(NULL);
             }
         }
     }
@@ -159,13 +151,13 @@ void UNetDriver::ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TAr
             continue;
         }
 		
-        if (!Actor || Actor->Get<uint8>(L"bActorIsBeingDestroyed") || Actor->Get<ENetRole>(L"RemoteRole") == ENetRole::ROLE_None || Actor->Get<FName>(L"NetDriverName").ToString().c_str() != Driver->GetNetDriverName().ToString().c_str())
+        if (!Actor || Actor->Get<uint8>("Actor", "bActorIsBeingDestroyed") || Actor->Get<ENetRole>("Actor", "RemoteRole") == ENetRole::ROLE_None || Actor->Get<FName>("Actor", "NetDriverName").ToString().ToString().c_str() != Driver->GetNetDriverName().ToString().ToString().c_str())
         {
             ActorsToRemove.Add(Actor);
             continue;
         }
 
-        if (Actor->Get<ENetDormancy>(L"NetDormancy") == ENetDormancy::DORM_Initial)
+        if (Actor->Get<ENetDormancy>("Actor", "NetDormancy") == ENetDormancy::DORM_Initial)
         {
             continue;
         }
@@ -178,7 +170,7 @@ void UNetDriver::ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TAr
 
         if (!ActorInfo->bPendingNetUpdate)
         {
-            const float NextUpdateDelta = 1.f / Actor->Get<float>(L"NetUpdateFrequency");
+            const float NextUpdateDelta = 1.f / Actor->Get<float>("Actor", "NetUpdateFrequency");
             ActorInfo->NextUpdateTime = CurrentTime + FRand() * ServerTickTime + NextUpdateDelta;
             ActorInfo->LastNetUpdateTimeStamp = CurrentTime;
         }
@@ -231,7 +223,7 @@ int32 UNetDriver::ServerReplicateActors_ProcessActors(UNetDriver* Driver, UNetCo
     
     int32 FinalActors = 0;
     const int32 ActorCount = Actors.Num();
-	AActor* const* ActorData = Actors.Data;
+	AActor* const* ActorData = Actors.GetData();
     
     for (int32 i = 0; i < ActorCount; i++) {
         AActor* Actor = ActorData[i];
@@ -272,7 +264,7 @@ int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSecond
     static TArray<AActor*> ConsiderList;
     static TArray<APlayerController*> ControllersToAdjust;
     static FString ActorStr = L"Actor";
-	static FName ActorName = Conv_StringToName(ActorStr);
+    static FName ActorName = UKismetStringLibrary::GetDefaultObj()->CallFunc<FName>("KismetStringLibrary","Conv_StringToName", ActorStr);
 
     const float ServerTickTime = 1.0f / GetMaxTickRate(UFortEngine::GetGameEngine(), DeltaSeconds);
     ServerReplicateActors_BuildConsiderList(NetDriver, ConsiderList, ServerTickTime);
@@ -295,7 +287,7 @@ int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSecond
                 bool bFound = false;
                
                 for (FName& ClientVisibleLevelName : *ClientVisibleLevelNames) {
-                    if (ClientVisibleLevelName.ToString().c_str() == DeletionEntry->StreamingLevelName.ToString().c_str()) {
+                    if (ClientVisibleLevelName.ToString().ToString().c_str() == DeletionEntry->StreamingLevelName.ToString().ToString().c_str()) {
                         bFound = true;
                         break;
                     }
@@ -317,9 +309,9 @@ int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSecond
 
 void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 {
-    if (Finder->RepDriverServerReplicateActors() && std::floor(Fortnite_Version) <= 20)
+    if (Finder->RepDriverServerReplicateActors() && Fortnite_Version.GetMajorVersion() <= 20)
     {
-        reinterpret_cast<void(*)(UReplicationDriver*)>(NetDriver->GetReplicationDriver()->Vft[Finder->RepDriverServerReplicateActors()])(NetDriver->GetReplicationDriver());
+        reinterpret_cast<void(*)(UReplicationDriver*)>(NetDriver->GetReplicationDriver()->GetVTable()[Finder->RepDriverServerReplicateActors()])(NetDriver->GetReplicationDriver());
     } else
     {
         if (NetDriver->GetClientConnections().Num() > 0)

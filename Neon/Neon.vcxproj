@@ -167,8 +167,17 @@
     <ClInclude Include="Neon\Finder\Header\Finder.h" />
     <ClInclude Include="Neon\Runtime\Runtime.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="SDK\memcury.h" />
-    <ClInclude Include="SDK\SDK.h" />
+    <ClInclude Include="SDK\include\SDK.h" />
+    <ClInclude Include="SDK\include\sdk\CoreObject_classes.h" />
+    <ClInclude Include="SDK\include\sdk\KismetLogLibrary.h" />
+    <ClInclude Include="SDK\include\sdk\KismetMemoryLibrary.h" />
+    <ClInclude Include="SDK\include\sdk\KismetPropertyLibrary.h" />
+    <ClInclude Include="SDK\include\sdk\Math.h" />
+    <ClInclude Include="SDK\include\sdk\memcury.h" />
+    <ClInclude Include="SDK\include\sdk\Memory.h" />
+    <ClInclude Include="SDK\include\sdk\Offsets.h" />
+    <ClInclude Include="SDK\include\sdk\Version.h" />
+    <ClInclude Include="SDK\include\UnrealContainers.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
@@ -192,6 +201,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="FortniteGame\FortInventory\Header\FortInventory.h" />
+    <Content Include="SDK\FortSDK.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

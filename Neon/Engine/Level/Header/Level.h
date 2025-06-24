@@ -12,14 +12,14 @@ public:
     DEFINE_MEMBER(UWorld*, ULevel, OwningWorld);
 public:
     static ULevel* GetLevel(AActor* Actor) {
-        auto Outer = Actor->Outer;
+        auto Outer = Actor->GetOuter();
 
         while (Outer)
         {
-            if (Outer->Class == ULevel::StaticClass())
+            if (Outer->GetClass() == ULevel::StaticClass())
                 return (ULevel*)Outer;
             else
-                Outer = Outer->Outer;
+                Outer = Outer->GetOuter();
         }
         return nullptr;
     }

@@ -9,7 +9,7 @@ class UGameplayAbility : public UObject
 {
     
 };
-struct FPredictionKey final : public UObject
+struct FPredictionKey final
 {
 public:
     DEFINE_MEMBER(int16_t, FPredictionKey, Current)  
@@ -23,7 +23,7 @@ struct FGameplayAbilitySpecHandle
 struct FGameplayAbilitySpec : public FFastArraySerializerItem
 {
     DEFINE_MEMBER(FGameplayAbilitySpecHandle, FGameplayAbilitySpec, Handle);
-    DEFINE_BOOL(FGameplayAbilitySpec, InputPressed);
+    DEFINE_MEMBER(uint8, FGameplayAbilitySpec, InputPressed);
 };
 
 struct FGameplayAbilitySpecContainer : public FFastArraySerializer

@@ -23,31 +23,29 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
     if (!bSetup)
     {
         bSetup = true;
-        UFortPlaylistAthena* Playlist = (UFortPlaylistAthena*)TUObjectArray::FindObject("Playlist_DefaultSolo");
+        UFortPlaylistAthena* Playlist = (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_DefaultSolo");
 
         if (Fortnite_Version >= 6.10)
         {
             static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameState, "CurrentPlaylistInfo");
-
+            
             FPlaylistPropertyArray& CurrentPlaylistInfoPtr = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
             CurrentPlaylistInfoPtr.SetBasePlaylist(Playlist);
             CurrentPlaylistInfoPtr.SetOverridePlaylist(Playlist);
-            int32 ReplicationKey = CurrentPlaylistInfoPtr.GetPlaylistReplicationKey() + 1;
-            CurrentPlaylistInfoPtr.SetPlaylistReplicationKey(ReplicationKey);
+            CurrentPlaylistInfoPtr.SetPlaylistReplicationKey(CurrentPlaylistInfoPtr.GetPlaylistReplicationKey() + 1);
             CurrentPlaylistInfoPtr.MarkArrayDirty();
 
             GameState->SetCurrentPlaylistId(Playlist->GetPlaylistId());
             GameMode->SetCurrentPlaylistId(Playlist->GetPlaylistId());
             GameMode->SetCurrentPlaylistName(Playlist->GetPlaylistName());
-
+        
             GameState->OnRep_CurrentPlaylistId();
             GameState->OnRep_CurrentPlaylistInfo();
 
-            int32 RequiredPlayerCount = 1;
-            GameMode->SetWarmupRequiredPlayerCount(RequiredPlayerCount);
-        }
+            GameMode->SetWarmupRequiredPlayerCount(1);
+        } else
         {
-			GameState->Get<L"CurrentPlaylistData">() = Playlist;
+            GameState->Set("FortGameStateAthena", "CurrentPlaylistData", Playlist);
             
             GameState->SetCurrentPlaylistId(Playlist->GetPlaylistId());
             GameMode->SetCurrentPlaylistId(Playlist->GetPlaylistId());
@@ -66,7 +64,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 
     if (!UWorld::GetWorld()->GetNetDriver())
     {
-        FName GameNetDriver = Conv_StringToName(L"GameNetDriver");
+        FName GameNetDriver = UKismetStringLibrary::GetDefaultObj()->CallFunc<FName>("KismetStringLibrary","Conv_StringToName",FString(L"GameNetDriver"));
         UNetDriver* NetDriver = nullptr;
 
         if (Fortnite_Version >= 16.40)
@@ -85,7 +83,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
         if (UWorld::GetWorld()->GetNetDriver())
         {
             UWorld::GetWorld()->GetNetDriver()->SetNetDriverName(GameNetDriver);
-            UWorld::GetWorld()->GetNetDriver()->Get<L"World">() = World;
+            UWorld::GetWorld()->GetNetDriver()->Set<UWorld*>("NetDriver", "World", UWorld::GetWorld());
 
             FURL URL{};
             URL.Port = 7777;
@@ -124,7 +122,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 
 APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer, AActor* StartSpot)
 {
-    static const UClass* PlayerPawnClass = (UClass*)TUObjectArray::FindObject("PlayerPawn_Athena_C");
+    static const UClass* PlayerPawnClass = (UClass*)GUObjectArray.FindObject("PlayerPawn_Athena_C");
 
     if (!PlayerPawnClass)
     {
@@ -134,7 +132,7 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
 
     if (GameMode)
     {
-		GameMode->Get<L"DefaultPawnClass", const UClass*>() = PlayerPawnClass;
+        GameMode->Set("GameModeBase", "DefaultPawnClass", PlayerPawnClass);
     }
     else
     {
@@ -142,24 +140,7 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         return nullptr;
     }
 
-        struct ParamsStruct { FTransform ReturnValue; } Transform{};
-    StartSpot->Call(L"GetTransform", &Transform);
-
-    struct GameModeBase_SpawnDefaultPawnAtTransform final
-{
-public:
-	class AController*                            NewPlayer;                                         // 0x0000(0x0008)(Parm, ZeroConstructor, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	uint8                                         Pad_8[0x8];                                        // 0x0008(0x0008)(Fixing Size After Last Property [ Dumper-7 ])
-	struct FTransform                             SpawnTransform;                                    // 0x0010(0x0060)(ConstParm, Parm, OutParm, ReferenceParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	class APawn*                                  ReturnValue;                                       // 0x0070(0x0008)(Parm, OutParm, ZeroConstructor, ReturnParm, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	uint8                                         Pad_78[0x8];                                       // 0x0078(0x0008)(Fixing Struct Size After Last Property [ Dumper-7 ])
-    } Params{
-		.NewPlayer = NewPlayer,
-		.SpawnTransform = Transform.ReturnValue,
-    };
-    GameMode->Call(L"SpawnDefaultPawnAtTransform", &Params);
-
-    auto Pawn = Params.ReturnValue;
+    auto Pawn = GameMode->CallFunc<APawn*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer,  StartSpot->CallFunc<FTransform>("Actor", "GetTransform"));;
 
   /*  for (auto& I : GameMode->Get<TArray<FItemAndCount>>("FortGameModeZone", "StartingItems"))
     {
@@ -169,7 +150,7 @@ public:
     	AFortInventory::GiveItem(NewPlayer, Item , Count, 1, 1);
     } */
     
-    if (FNVer <= 8.50) {
+    if (Fortnite_Version.GetMajorVersion() <= 8.50) {
 
     }
     else {

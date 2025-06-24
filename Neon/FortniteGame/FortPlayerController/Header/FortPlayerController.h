@@ -25,7 +25,7 @@ public:
     DEFINE_MEMBER(UFortWeaponMeleeItemDefinition*, UAthenaPickaxeItemDefinition, WeaponDefinition);
 };
 
-struct FFortAthenaLoadout final : public UObject
+struct FFortAthenaLoadout final 
 {
 public:
     DEFINE_MEMBER(UAthenaCharacterItemDefinition, FFortAthenaLoadout, Character);
