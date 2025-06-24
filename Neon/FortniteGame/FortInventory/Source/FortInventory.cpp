@@ -43,7 +43,7 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry());
     ItemInstancesOffsetPtr.Add(BP);
 
- //   Update(PlayerController, BP->GetItemEntry());
+    Update(PlayerController, BP->GetItemEntry());
 
     return BP;
 }

@@ -145,10 +145,6 @@ class FName
         }
 
         FString ToString() const;
-
-    bool operator<(const FName& other) const {
-        return ComparisonIndex < other.ComparisonIndex;
-    }
 };
 
 /** Mask for all object flags */
@@ -156,71 +152,72 @@ class FName
         (EObjectFlags)0xffffffff ///< All flags, used mainly for error checking
 
 class FUObjectArray;
-    class UObjectBase
-    {
-    public:
+class UObjectBase
+{
+      public:
         friend class UObjectBaseUtility;
         friend class FUObjectArray;
 
-        bool IsValidLowLevel() const
-        {
-            if (this == nullptr)
+        public:
+
+            bool IsValidLowLevel() const
             {
-                UE_LOG( LogUObjectBase, Warning,
-                        "NULL Object" );
-                return false;
+                if (this == nullptr)
+                {
+                            UE_LOG( LogUObjectBase, Warning,
+                                    "NULL Object" );
+                        return false;
+                }
+                if (!ClassPrivate)
+                {
+                        UE_LOG( LogUObjectBase, Warning,
+                                "Object is not registered" );
+                        return false;
+                }
+                return this->InternalIndex > 0;
             }
-            if (!ClassPrivate)
-            {
-                UE_LOG( LogUObjectBase, Warning,
-                        "Object is not registered" );
-                return false;
+            bool IsValidLowLevelFast( bool bRecursive = true ) const;
+            
+
+
+            /**
+             * Returns the unique ID of the object...these are reused so it is
+             *only unique while the object is alive. Useful as a tag.
+             **/
+            FORCEINLINE uint32 GetUniqueID() const {
+                    return (uint32)InternalIndex;
             }
-            return this->InternalIndex > 0;
-        }
-   
-        bool IsValidLowLevelFast( bool bRecursive = true ) const;
 
-        /**
-         * Returns the unique ID of the object...these are reused so it is
-         * only unique while the object is alive. Useful as a tag.
-         **/
-        FORCEINLINE uint32 GetUniqueID() const {
-            return (uint32)InternalIndex;
-        }
+            /** Returns the UClass that defines the fields of this object */
+            FORCEINLINE class UClass *GetClass() const { return ClassPrivate; }
 
-        /** Returns the UClass that defines the fields of this object */
-        FORCEINLINE class UClass *GetClass() const { return ClassPrivate; }
+            /** Returns the UObject this object resides in */
+            FORCEINLINE class UObject *GetOuter() const { return OuterPrivate; }
 
-        /** Returns the UObject this object resides in */
-        FORCEINLINE class UObject *GetOuter() const { return OuterPrivate; }
+            /** Returns the logical name of this object */
+            FORCEINLINE FName GetFName() const { return NamePrivate; }
+                    FORCEINLINE void** GetVTable() const { return VTable; }
+        private:
 
-        /** Returns the logical name of this object */
-        FORCEINLINE FName GetFName() const { return NamePrivate; }
+          void **VTable;
 
-        /** Returns the VTable pointer */
-        FORCEINLINE void** GetVTable() const { return VTable; }
+          /** Flags used to track and report various object states. This needs to be 8 byte aligned on 32-bit 
+            platforms to reduce memory waste */
+          EObjectFlags ObjectFlags;
 
-    private:
-        void** VTable;
+          /** Index into GObjectArray...very private. */
+          int32 InternalIndex;
 
-        /** Flags used to track and report various object states. This needs to be 8 byte aligned on 32-bit 
-          platforms to reduce memory waste */
-        EObjectFlags ObjectFlags;
+          /** Class the object belongs to. */
+          class UClass *ClassPrivate;
 
-        /** Index into GObjectArray...very private. */
-        int32 InternalIndex;
+          /** Name of this object */
+          FName NamePrivate;
 
-        /** Class the object belongs to. */
-        class UClass *ClassPrivate;
+          /** Object this object resides in. */
+          UObject *OuterPrivate;
+};
 
-        /** Name of this object */
-        FName NamePrivate;
-
-        /** Object this object resides in. */
-        UObject *OuterPrivate;
-    };
-    
 /**
  * Flags describing a class.
  */
@@ -504,8 +501,7 @@ class UObjectBaseUtility : public UObjectBase
 
     class UClass;
 
-    
-    #define DECLARE_STATIC_CLASS(ClassName) \
+#define DECLARE_STATIC_CLASS(ClassName) \
 static UClass* StaticClass() \
 { \
 return StaticClassImpl(#ClassName + 1); \
@@ -517,12 +513,14 @@ static UObject* GetDefaultObj() \
 return ClassName::StaticClass()->GetClassDefaultObject(); \
 } \
 
+
 class UObject : public UObjectBaseUtility {
       public:
         void ProcessEvent( class UFunction *Function, void *Parms ) const;
 
+        /*Theres no checks on this so make sure you check the offset is not equal to 0 or you are positive that this is going to be found*/
         template <typename T>
-        T Get( const std::string &ClassName, const std::string &PropName );
+        T& Get( const std::string &ClassName, const std::string &PropName );
 
         template<typename T>
         void Set( const std::string &ClassName, const std::string &PropName, const T& Value );
@@ -535,7 +533,7 @@ class UObject : public UObjectBaseUtility {
 public:
     DECLARE_STATIC_CLASS(UObject);
 };
-    
+
 class UField : public UObject
 {
       public:
@@ -691,8 +689,6 @@ class UStruct : public UField
         bool IsChildOf( const UStruct *SomeBase ) const;
 };
 
-    
-
 class UClass : public UStruct
 {
       public:
@@ -708,68 +704,6 @@ class UClass : public UStruct
         }
 };
 
-    template<typename ClassType>
-    class TSubclassOf
-    {
-        class UClass* ClassPtr;
-
-    public:
-        TSubclassOf() = default;
-
-        inline TSubclassOf(UClass* Class)
-            : ClassPtr(Class)
-        {
-        }
-
-        inline UClass* Get()
-        {
-            return ClassPtr;
-        }
-
-        inline operator UClass* () const
-        {
-            return ClassPtr;
-        }
-
-        template<typename Target, typename = std::enable_if<std::is_base_of_v<Target, ClassType>, bool>::type>
-        inline operator TSubclassOf<Target>() const
-        {
-            return ClassPtr;
-        }
-
-        inline UClass* operator->()
-        {
-            return ClassPtr;
-        }
-
-        inline TSubclassOf& operator=(UClass* Class)
-        {
-            ClassPtr = Class;
-
-            return *this;
-        }
-
-        inline bool operator==(const TSubclassOf& Other) const
-        {
-            return ClassPtr == Other.ClassPtr;
-        }
-
-        inline bool operator!=(const TSubclassOf& Other) const
-        {
-            return ClassPtr != Other.ClassPtr;
-        }
-
-        inline bool operator==(UClass* Other) const
-        {
-            return ClassPtr == Other;
-        }
-
-        inline bool operator!=(UClass* Other) const
-        {
-            return ClassPtr != Other;
-        }
-    };
-    
 #define RESULT_PARAM Z_Param__Result
 #define RESULT_DECL void *const RESULT_PARAM
 
@@ -1397,7 +1331,7 @@ class FUObjectArray {
 
 template<typename T> T* Cast(SDK::UObject* Base) {
         if ( Base->IsA( T::StaticClass() ) ) {
-                return reinterpret_cast<T *>( Base );
+                return static_cast<T *>( Base );
         }
 
         return nullptr;
@@ -1471,25 +1405,52 @@ static void SetBool( void *Obj, const SDK::UBoolProperty *Prop, bool b ) {
                 }                                                              \
         }
 
-#define DEFINE_MEMBER(Ret,ClassName, PropName) \
-inline Ret Get##PropName() { \
-static int PropOffset = -1; \
-if (PropOffset == -1 ) {                                 \
-    PropOffset = SDK::PropLibrary->GetPropertyByName(        \
-                    ( #ClassName + 1 ), #PropName ).Offset; \
-} \
-return *reinterpret_cast<Ret *>( uintptr_t( this ) + PropOffset);\
-}\
-inline void Set##PropName(Ret Value) { \
-static int PropOffset = -1;                            \
-                        if ( PropOffset == -1 ) {                              \
-                                PropOffset =                                   \
-                                    SDK::PropLibrary                           \
-                                        ->GetPropertyByName(                   \
-                                            ( #ClassName + 1 ), #PropName )    \
-                                        .Offset;                               \
-                        }                                                      \
-                        *reinterpret_cast<Ret *>( uintptr_t( this ) +   \
-                                                         PropOffset ) = Value;         \
-}
+
+#define DEFINE_MEMBER( Ret, ClassName, PropName )                              \
+        inline Ret &Get##PropName() {                                          \
+                static int PropOffset = -1;                                    \
+                if ( PropOffset == -1 ) {                                      \
+                        PropOffset = SDK::PropLibrary                          \
+                                         ->GetPropertyByName(                  \
+                                             ( #ClassName + 1 ), #PropName )   \
+                                         .Offset;                              \
+                }                                                              \
+                return *reinterpret_cast<Ret *>( uintptr_t( this ) +           \
+                                                 PropOffset );                 \
+        }                                                                      \
+        inline void Set##PropName( Ret Value ) {                               \
+                static int PropOffset = -1;                                    \
+                if ( PropOffset == -1 ) {                                      \
+                        PropOffset = SDK::PropLibrary                          \
+                                         ->GetPropertyByName(                  \
+                                             ( #ClassName + 1 ), #PropName )   \
+                                         .Offset;                              \
+                }                                                              \
+                *reinterpret_cast<Ret *>( uintptr_t( this ) + PropOffset ) =   \
+                    Value;                                                     \
+        }
+
+#define DEFINE_PTR( Type, ClassName, PropName )                                \
+        inline Type *Get##PropName() {                                         \
+                static int PropOffset = -1;                                    \
+                if ( PropOffset == -1 ) {                                      \
+                        PropOffset = SDK::PropLibrary                          \
+                                         ->GetPropertyByName(                  \
+                                             ( #ClassName + 1 ), #PropName )   \
+                                         .Offset;                              \
+                }                                                              \
+                return *reinterpret_cast<Type **>( uintptr_t( this ) +          \
+                                                  PropOffset );                \
+        }                                                                      \
+        inline void Set##PropName( Type* Value ) {                              \
+                static int PropOffset = -1;                                    \
+                if ( PropOffset == -1 ) {                                      \
+                        PropOffset = SDK::PropLibrary                          \
+                                         ->GetPropertyByName(                  \
+                                             ( #ClassName + 1 ), #PropName )   \
+                                         .Offset;                              \
+                }                                                              \
+                *reinterpret_cast<Type **>( uintptr_t( this ) + PropOffset ) =  \
+                    Value;                                                     \
+        }
 

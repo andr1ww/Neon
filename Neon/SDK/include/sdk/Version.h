@@ -127,7 +127,7 @@ namespace SDK
             }
 
             inline int GetMajorVersion() const {
-                return Major;
+                    return Major;
             };
     };
     }

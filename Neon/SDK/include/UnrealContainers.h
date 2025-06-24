@@ -647,7 +647,6 @@ template <typename T> struct TTupleBaseElement {
                 template<typename... Args>
                 TTupleBase(Args&&... args) : TTupleBaseElement<Types>(std::forward<Args>(args))... {}
         };
-
         template <typename... Types> 
         struct TTuple : TTupleBase<Types...> {  
         public:
@@ -660,6 +659,7 @@ template <typename T> struct TTupleBaseElement {
                 template<typename... Args>
                 TTuple(Args&&... args) : TTupleBase<Types...>(std::forward<Args>(args)...) {}
         };
+
 
 template <typename KeyType, typename ValueType>
 using TPair = TTuple<KeyType, ValueType>;
@@ -803,18 +803,6 @@ class TBitArray {
                 return (uint32 *)AllocatorInstance.GetAllocation();
         }
 
-        FORCEINLINE bool IsValidIndex(int32 Index) const {
-                return Index >= 0 && Index < NumBits;
-        }
-
-        FORCEINLINE bool operator[](int32 Index) const {
-                check(IsValidIndex(Index));
-                const int32 WordIndex = Index / NumBitsPerDWORD;
-                const int32 BitIndex = Index % NumBitsPerDWORD;
-                const uint32 Word = GetData()[WordIndex];
-                return (Word & (1u << BitIndex)) != 0;
-        }
-
       private:
         TInlineAllocator<4>::ForElementType<int32> AllocatorInstance;
         int32 NumBits;
@@ -869,57 +857,32 @@ class TBitArray {
         void Reset() { NumBits = 0; }
 };
 
-        template <typename InElementType> class TSparseArray {
-        private:
-                typedef TSparseArrayElementOrFreeListLink<
-                    TAlignedBytes<sizeof(InElementType), alignof(InElementType)>>
-                    FElementOrFreeListLink;
+template <typename InElementType> class TSparseArray {
+      private:
+        typedef TSparseArrayElementOrFreeListLink<
+            TAlignedBytes<sizeof( InElementType ), alignof( InElementType )>>
+            FElementOrFreeListLink;
 
-        public:
-                FElementOrFreeListLink &GetData(int32 Index) {
-                        return ((FElementOrFreeListLink *)Data.GetData())[Index];
-                }
+      public:
+        /** Accessor for the element or free list data. */
+        FElementOrFreeListLink &GetData( int32 Index ) {
+                return ( (FElementOrFreeListLink *)Data.GetData() )[Index];
+        }
 
-                const FElementOrFreeListLink &GetData(int32 Index) const {
-                        return ((FElementOrFreeListLink *)Data.GetData())[Index];
-                }
+        /** Accessor for the element or free list data. */
+        const FElementOrFreeListLink &GetData( int32 Index ) const {
+                return ( (FElementOrFreeListLink *)Data.GetData() )[Index];
+        }
 
-    
-                int32 Num() const {
-                        return Data.Num() - NumFreeIndices;
-                }
-    
-                int32 GetMaxIndex() const {
-                        return Data.Num();
-                }
-    
-                bool IsValidIndex(int32 Index) const {
-                        return Index >= 0 && Index < Data.Num() && AllocationFlags[Index];
-                }
-    
-                bool IsAllocated(int32 Index) const {
-                        return IsValidIndex(Index);
-                }
-    
-                InElementType& operator[](int32 Index) {
-                        check(IsValidIndex(Index));
-return *reinterpret_cast<InElementType*>(&GetData(Index).ElementData);
-                }
-    
-                const InElementType& operator[](int32 Index) const {
-                        check(IsValidIndex(Index));
-return *reinterpret_cast<InElementType*>(&GetData(Index).ElementData);
-                }
+      private:
+        typedef TArray<FElementOrFreeListLink> DataType;
+        DataType Data;
+        typedef TBitArray AllocationBitArrayType;
+        TBitArray AllocationFlags;
+        int32 FirstFreeIndex;
+        int32 NumFreeIndices;
+};
 
-        private:
-                typedef TArray<FElementOrFreeListLink> DataType;
-                DataType Data;
-                typedef TBitArray AllocationBitArrayType;
-                TBitArray AllocationFlags;
-                int32 FirstFreeIndex;
-                int32 NumFreeIndices;
-        };
-        
 template <typename InElementType> class TSetElement {
       private:
         template <typename SetDataType> friend class TSet;
@@ -930,174 +893,27 @@ template <typename InElementType> class TSetElement {
         int32 HashIndex;
 };
 
-template <typename InElementType> 
-class TSet {
-public:
-    typedef InElementType ElementType;
+template <typename InElementType> class TSet {
+      public:
+        typedef InElementType ElementType;
 
-private:
-    typedef TSetElement<InElementType> SetElementType;
+      private:
+        typedef TSetElement<InElementType> SetElementType;
 
-public:
-    FORCEINLINE TSet() : HashSize(0) {}
+      public:
+        /** Initialization constructor. */
+        FORCEINLINE TSet() : HashSize( 0 ) {}
 
-private:
-    typedef TSparseArray<SetElementType> ElementArrayType;
-    using HashType = TInlineAllocator<1>::ForElementType<int32>;
+      private:
+        typedef TSparseArray<SetElementType> ElementArrayType;
+        using HashType = TInlineAllocator<1>::ForElementType<int32>;
 
-    ElementArrayType Elements;
-    mutable HashType Hash;
-    mutable int32 HashSize;
+        ElementArrayType Elements;
 
-public:
-    class Iterator
-    {
-    private:
-        ElementArrayType* ElementsPtr;
-        int32 CurrentIndex;
+        mutable HashType Hash;
+        mutable int32 HashSize;
 
-    public:
-        Iterator(ElementArrayType* InElements, int32 InIndex) 
-            : ElementsPtr(InElements), CurrentIndex(InIndex)
-        {
-            while (CurrentIndex < ElementsPtr->GetMaxIndex() && !ElementsPtr->IsAllocated(CurrentIndex))
-            {
-                ++CurrentIndex;
-            }
-        }
-
-        InElementType& operator*()
-        {
-            return (*ElementsPtr)[CurrentIndex].Value;
-        }
-
-        const InElementType& operator*() const
-        {
-            return (*ElementsPtr)[CurrentIndex].Value;
-        }
-
-        InElementType* operator->()
-        {
-            return &((*ElementsPtr)[CurrentIndex].Value);
-        }
-
-        const InElementType* operator->() const
-        {
-            return &((*ElementsPtr)[CurrentIndex].Value);
-        }
-
-            Iterator& operator++()
-        {
-                ++CurrentIndex;
-                while (CurrentIndex < ElementsPtr->Num() && !ElementsPtr->IsValidIndex(CurrentIndex))
-                {
-                        ++CurrentIndex;
-                }
-                return *this;
-        }
-
-
-        Iterator operator++(int)
-        {
-            Iterator temp = *this;
-            ++(*this);
-            return temp;
-        }
-
-        bool operator==(const Iterator& Other) const
-        {
-            return CurrentIndex == Other.CurrentIndex;
-        }
-
-        bool operator!=(const Iterator& Other) const
-        {
-            return !(*this == Other);
-        }
-    };
-
-    class ConstIterator
-    {
-    private:
-        const ElementArrayType* ElementsPtr;
-        int32 CurrentIndex;
-
-    public:
-        ConstIterator(const ElementArrayType* InElements, int32 InIndex) 
-            : ElementsPtr(InElements), CurrentIndex(InIndex)
-        {
-            while (CurrentIndex < ElementsPtr->GetMaxIndex() && !ElementsPtr->IsAllocated(CurrentIndex))
-            {
-                ++CurrentIndex;
-            }
-        }
-
-        const InElementType& operator*() const
-        {
-            return (*ElementsPtr)[CurrentIndex].Value;
-        }
-
-        const InElementType* operator->() const
-        {
-            return &((*ElementsPtr)[CurrentIndex].Value);
-        }
-
-            ConstIterator& operator++()
-        {
-                ++CurrentIndex;
-                while (CurrentIndex < ElementsPtr->Num() && !ElementsPtr->IsValidIndex(CurrentIndex))
-                {
-                        ++CurrentIndex;
-                }
-                return *this;
-        }
-
-        ConstIterator operator++(int)
-        {
-            ConstIterator temp = *this;
-            ++(*this);
-            return temp;
-        }
-
-        bool operator==(const ConstIterator& Other) const
-        {
-            return CurrentIndex == Other.CurrentIndex;
-        }
-
-        bool operator!=(const ConstIterator& Other) const
-        {
-            return !(*this == Other);
-        }
-    };
-
-    Iterator begin()
-    {
-        return Iterator(&Elements, 0);
-    }
-
-    Iterator end()
-    {
-        return Iterator(&Elements, Elements.GetMaxIndex());
-    }
-
-    ConstIterator begin() const
-    {
-        return ConstIterator(&Elements, 0);
-    }
-
-    ConstIterator end() const
-    {
-        return ConstIterator(&Elements, Elements.GetMaxIndex());
-    }
-
-    int32 Num() const
-    {
-        return Elements.Num();
-    }
-
-    bool IsEmpty() const
-    {
-        return Elements.Num() == 0;
-    }
+      public:
 };
 
 template <typename KeyType, typename ValueType> class TMapBase {
@@ -1187,7 +1003,7 @@ class FString {
 
       public:
         FString( const wchar_t *Str ) {
-                const uint32 NullTerminatedLength = 
+                const uint32 NullTerminatedLength =
                     static_cast<uint32>( wcslen( Str ) + 0x1 );
 
                 Data.Data = ( const_cast<wchar_t *>( Str ) );

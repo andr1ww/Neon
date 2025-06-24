@@ -31,6 +31,7 @@
 #include "UnrealContainers.h"
 #include "sdk/CoreObject_classes.h"
 #include "sdk/KismetPropertyLibrary.h"
+#include "sdk/Engine_classes.h"
 
 namespace SDK 
 {
@@ -45,26 +46,19 @@ extern FFortniteVersion Fortnite_Version;
 }
 
 template <class T>
-T SDK::UObject::Get( const std::string &ClassName,
-                     const std::string &PropName ) {
-        SDK::FPropertyInfo PropInfo =
-            PropLibrary->GetPropertyByName( ClassName,
-                                                           PropName );
-
-        if ( PropInfo.Offset != -1 ) {
-                return *reinterpret_cast<T *>(
-                    reinterpret_cast<uintptr_t>( this ) + PropInfo.Offset );
-        } else {
-                UE_LOG( LogGetterSetter, Log, "Failed to get %s from class %s",
-                        PropName.c_str(), ClassName.c_str() );
-
-                if constexpr ( std::is_pointer<T>::value )
-                        return nullptr;
-                else
-                        return T{};
-        }
+T& SDK::UObject::Get(const std::string &ClassName, const std::string &PropName) {
+    SDK::FPropertyInfo PropInfo = PropLibrary->GetPropertyByName(ClassName, PropName);
+    
+    if (PropInfo.Offset != -1) {
+        return *reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(this) + PropInfo.Offset);
+    } else {
+        UE_LOG(LogGetterSetter, Log, "Failed to get %s from class %s", 
+               PropName.c_str(), ClassName.c_str());
+        
+        static T defaultValue = T{};
+        return defaultValue;
+    }
 }
-
 static std::vector<std::string> GetParamNames( SDK::UFunction *fn ) {
         std::vector<std::string> ParamNames;
         std::unordered_set<std::string> Seen;

@@ -142,7 +142,7 @@ void UNetDriver::ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TAr
     
     TArray<AActor*> ActorsToRemove;
 
-    for (auto& ActorInfo : NetworkObjectList.ActiveNetworkObjects)
+/*    for (auto& ActorInfo : NetworkObjectList.ActiveNetworkObjects)
     {
         auto Actor = ActorInfo->Actor;
 
@@ -185,6 +185,8 @@ void UNetDriver::ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TAr
         RemoveNetworkActor(Driver, Actor);
     }
     ActorsToRemove.Free();
+
+    */
 }
 
 
@@ -267,7 +269,7 @@ int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSecond
     const float ServerTickTime = 1.0f / GetMaxTickRate(UFortEngine::GetGameEngine(), DeltaSeconds);
     ServerReplicateActors_BuildConsiderList(NetDriver, ConsiderList, ServerTickTime);
 
-    for (int32 i = 0; i < NetDriver->GetClientConnections().Num(); i++)
+   /* for (int32 i = 0; i < NetDriver->GetClientConnections().Num(); i++)
     {
         UNetConnection* Connection = NetDriver->GetClientConnections()[i];
         if (!Connection || !Connection->GetViewTarget() || !Connection->GetPlayerController()) {
@@ -298,7 +300,7 @@ int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSecond
                 UActorChannel* Channel = (UActorChannel*)CreateChannel(Connection, &ActorName, EChannelCreateFlags::OpenedLocally, -1);
             }
         }
-    }
+    } */
 
     for (APlayerController* Controller : ControllersToAdjust) {
         SendClientAdjustment(Controller);
