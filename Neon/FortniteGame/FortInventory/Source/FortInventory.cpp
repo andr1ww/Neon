@@ -26,7 +26,7 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
     FFortItemList& Inventory = WorldInventory->GetInventory();
     
-    WorldInventory->Set("FortInventory", "bRequiresLocalUpdate", true);
+    WorldInventory->SetbRequiresLocalUpdate(true);
     WorldInventory->HandleInventoryLocalUpdate();
 
     Inventory.MarkItemDirty(Entry);
@@ -37,13 +37,13 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
 {
     if (!PlayerController || !Def) return nullptr;
 
-    UFortWorldItem* BP = Def->CallFunc<UFortWorldItem*>("FortItemDefinition", "CreateTemporaryItemInstanceBP", Count, Level);
+    UFortWorldItem* BP = Cast<UFortWorldItem>(Def->CreateTemporaryItemInstanceBP(Count, Level));
     if (!BP) {
         UE_LOG(LogNeon, Log, "Failed to create temporary item instance");
         return nullptr;
     }
     
-    auto ItemEntry = BP->GetItemEntry();
+    auto& ItemEntry = BP->GetItemEntry();
     ItemEntry.SetCount(Count);
     ItemEntry.SetLoadedAmmo(LoadedAmmo);
     ItemEntry.SetLevel(Level);
