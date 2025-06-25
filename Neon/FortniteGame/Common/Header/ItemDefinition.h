@@ -31,12 +31,12 @@ public:
             return nullptr;
         }
         
-        auto Flgs = Func->FunctionFlags();
-        Func->FunctionFlags() |= 0x400;
+        /*auto Flgs = Func->FunctionFlags();
+        Func->FunctionFlags() |= 0x400;*/
 
         ProcessEvent(Func, &Params);
 
-        Func->FunctionFlags() = Flgs;
+        //Func->FunctionFlags() = Flgs;
 
         return Params.ReturnValue;
     }
