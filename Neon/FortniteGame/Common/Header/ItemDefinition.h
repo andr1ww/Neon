@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "pch.h"
+#include "Neon/Runtime/Runtime.h"
 
 class UFortItemDefinition : public UObject
 {
@@ -19,16 +20,11 @@ public:
         Params.Count = Count;
         Params.Level = Level;
     
-        static SDK::UFunction* Func = nullptr;
+        static UFunction* Func = nullptr;
 
-        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortItemDefinition", "CreateTemporaryItemInstanceBP");
-
-        if (Func == nullptr)
-            Func = Info.Func;
         if (!Func)
         {
-            UE_LOG(LogNeon, Fatal, "Failed to find function CreateTemporaryItemInstanceBP in FortItemDefinition");
-            return nullptr;
+            Func = Runtime::StaticFindObject<UFunction>("/Script/FortniteGame.FortItemDefinition.CreateTemporaryItemInstanceBP");
         }
         
         /*auto Flgs = Func->FunctionFlags();
