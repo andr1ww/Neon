@@ -27,7 +27,11 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
 
 UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level)
 {
-    if (!PlayerController || !Def || !Count || !Level) return nullptr;
+    if (!PlayerController || !Def || !Count || !Level)
+    {
+        UE_LOG(LogNeon, Fatal, "Invalid parameters for GiveItem: PlayerController: %p, Def: %p, Count: %d, Level: %d", PlayerController, Def, Count, Level);
+        return nullptr;
+    }
 
     UFortWorldItem* BP = Def->CreateTemporaryItemInstanceBP(Count, Level);
     UE_LOG(LogNeon, Log, "BP: %s", BP->GetFName().ToString().ToString().c_str());
@@ -59,9 +63,6 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
 
 void UFortItem::SetOwningControllerForTemporaryItem(AFortPlayerControllerAthena* InController)
 {
-
-
-
     static SDK::UFunction* Func = nullptr;
 
     SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortItem", "SetOwningControllerForTemporaryItem");
@@ -88,3 +89,4 @@ void UFortItem::SetOwningControllerForTemporaryItem(AFortPlayerControllerAthena*
 
     Func->FunctionFlags() = Flgs;
 }
+

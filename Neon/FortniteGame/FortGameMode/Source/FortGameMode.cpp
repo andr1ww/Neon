@@ -149,11 +149,11 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         auto StartingItem = FKismetMemoryLibrary(&I, FItemAndCountSize, sizeof(FItemAndCount)).GetInitalizedMemory<FItemAndCount>();
     	auto Item = StartingItem->GetItem();
 
-    	//AFortInventory::GiveItem(NewPlayer, Item , 1, 1, 1);
+    	AFortInventory::GiveItem(NewPlayer, Item , StartingItem->GetCount(), 1, 1);
     } 
     
     if (Fortnite_Version.GetMajorVersion() <= 8.50) {
-
+    
     }
     else {
         auto Pickaxe = NewPlayer->GetCosmeticLoadoutPC().GetPickaxe();

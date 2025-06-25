@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "../Header/FortPlayerController.h"
 
+#include "Engine/Guid/Header/Guid.h"
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
 #include "Neon/Finder/Header/Finder.h"
 
@@ -18,4 +19,28 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
     //static UFortAbilitySet* AbilitySet = (UFortAbilitySet*)GUObjectArray.FindObject("GAS_AthenaPlayer");
   //  UAbilitySystemComponent::GiveAbilitySet(PlayerController->GetPlayerState()->GetAbilitySystemComponent(), AbilitySet);
 }
+
+void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+    FGuid ItemGuid;
+    Stack.StepCompiledIn(&ItemGuid);
+    Stack.IncrementCode();
+    if (!PlayerController) return;
+
+    FFortItemEntry* Entry = nullptr;
+
+    for (auto& Item : PlayerController->GetWorldInventory()->GetInventory().GetReplicatedEntries())
+    {
+        if (Item.GetItemGuid() == ItemGuid)
+        {
+            Entry = &Item;
+            break;
+        }
+    }
+
+    if (!Entry) return;
+    UFortWeaponItemDefinition* ItemDefinition = Cast<UFortWeaponItemDefinition>(Entry->GetItemDefinition());
+    PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "EquipWeaponDefinition", ItemDefinition, ItemGuid, Entry->GetTrackerGuid(), false);
+}
+
  

@@ -260,17 +260,23 @@ namespace Runtime
 		return -1;
 	}
 
-	template<auto ClassFunc, typename T = void*>
-	__forceinline static void Exec(const char* _Name, void* _Detour, T& _Orig = nullptrForHook) {
-		UClass* ClassName = ClassFunc();
-		if (!ClassName) return;
-    
-		UObject* DefaultObj = ClassName->GetClassDefaultObject();
-		UFunction* Function = DefaultObj->GetFunction(_Name);
+	template <typename T>
+inline T* StaticFindObject(std::string ObjectPath, UClass* Class = UObject::StaticClass()) {
+		return (T*)Funcs::StaticFindObject(Class, nullptr, std::wstring(ObjectPath.begin(), ObjectPath.end()).c_str(), false);
+	}
+
+	__forceinline static void Exec(const char* _Name, void* _Detour, void** original = nullptr) {
+		UFunction* Function = StaticFindObject<UFunction>(_Name);
 		if (!Function) return;
-		if (!std::is_same_v<T, void*>)
-			_Orig = (T)Function->GetNativeFunc();
+		
+		if (original)
+		{
+			*original = Function->GetNativeFunc();
+		}
+		
 		Function->SetNativeFunc(reinterpret_cast<FNativeFuncPtr>(_Detour));
+
+		UE_LOG(LogNeon, Log, "Hooked function: %s", _Name);
 	}
 
 	template <typename _Ct>
@@ -328,11 +334,6 @@ namespace Runtime
 
 		VirtualProtect(address, sizeof(uint32_t), oldProtect, &oldProtect);
 		return true;
-	}
-	    
-	template <typename T>
-	inline T* StaticFindObject(std::string ObjectPath, UClass* Class = UObject::StaticClass()) {
-		return (T*)Funcs::StaticFindObject(Class, nullptr, std::wstring(ObjectPath.begin(), ObjectPath.end()).c_str(), false);
 	}
 
 	__forceinline static void HookVFT(void** _Vt, uint32_t _Ind, void* _Detour)

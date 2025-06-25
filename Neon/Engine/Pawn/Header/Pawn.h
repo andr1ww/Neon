@@ -3,7 +3,7 @@
 
 #include "Engine/Actor/Header/Actor.h"
 
-class APawn : AActor
+class APawn : public AActor
 {
     
 };

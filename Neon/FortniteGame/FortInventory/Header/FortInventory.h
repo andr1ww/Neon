@@ -2,6 +2,7 @@
 #include "pch.h"
 
 #include "Engine/Array/Header/Array.h"
+#include "Engine/Guid/Header/Guid.h"
 #include "FortniteGame/Common/Header/ItemDefinition.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 
@@ -12,6 +13,8 @@ struct FFortItemEntry : public FFastArraySerializerItem
     DEFINE_MEMBER(int32, FFortItemEntry, Count);
     DEFINE_MEMBER(int32, FFortItemEntry, LoadedAmmo);
     DEFINE_MEMBER(int32, FFortItemEntry, Level);
+    DEFINE_MEMBER(FGuid, FFortItemEntry, ItemGuid);
+    DEFINE_MEMBER(FGuid, FFortItemEntry, TrackerGuid);
     DEFINE_PTR(UFortItemDefinition, FFortItemEntry, ItemDefinition);
 };
 
@@ -31,6 +34,15 @@ class UFortWorldItem : public UFortItem
 {
 public:
     DEFINE_MEMBER(FFortItemEntry, UFortWorldItem, ItemEntry);
+};
+
+class UFortWorldItemDefinition : public UFortItemDefinition
+{
+};
+
+class UFortWeaponItemDefinition : public UFortWorldItemDefinition
+{
+    
 };
 
 class AFortInventory : public AActor

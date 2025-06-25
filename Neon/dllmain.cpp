@@ -92,7 +92,8 @@ void Main()
 	
 	Runtime::Hook<&AFortGameModeAthena::StaticClass>("ReadyToStartMatch", AFortGameModeAthena::ReadyToStartMatch, ReadyToStartMatchOriginal);
 	Runtime::Hook<&AFortGameModeAthena::StaticClass>("SpawnDefaultPawnFor", AFortGameModeAthena::SpawnDefaultPawnFor);
-	Runtime::Exec<&AFortPlayerControllerAthena::StaticClass>("ServerAcknowledgePossession", AFortPlayerControllerAthena::ServerAcknowledgePossession);
+	Runtime::Exec("/Script/Engine.PlayerController.ServerAcknowledgePossession", AFortPlayerControllerAthena::ServerAcknowledgePossession);
+	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerExecuteInventoryItem", AFortPlayerControllerAthena::ServerExecuteInventoryItem);
 
 	int InternalServerTryActivateAbilityIndex = 0;
 
