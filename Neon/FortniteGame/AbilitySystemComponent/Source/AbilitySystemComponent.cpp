@@ -53,32 +53,38 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
 void UAbilitySystemComponent::GiveAbility(UAbilitySystemComponent* AbilitySystemComponent, UClass* Ability)
 {
     if (!Ability || !Ability->GetClassDefaultObject()) return;
-    FGameplayAbilitySpec Spec{};
     
-    using ConstructSpecFunc = void (*)(
-        FGameplayAbilitySpec*,
-        UGameplayAbility*,
-        int,
-        int,
-        UObject*
-        );
-
+    int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
+    FGameplayAbilitySpec* Spec = (FGameplayAbilitySpec*)VirtualAlloc(0, GameplayAbilitySpecSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     
-    using GiveAbilityFunc = FGameplayAbilitySpecHandle * (__fastcall*)(
+    if (!Spec) return;
+    
+    new(Spec) FGameplayAbilitySpec();
+    
+    using GiveAbilityFunc = FGameplayAbilitySpecHandle(__fastcall*)(
         UAbilitySystemComponent*,
-        FGameplayAbilitySpecHandle*,
-        FGameplayAbilitySpec
-        );
-
-
-    if (Finder->ConstructSpec())
-    {
-        ((ConstructSpecFunc)Finder->ConstructSpec())(&Spec, (UGameplayAbility*)Ability->GetClassDefaultObject(), 1, -1, nullptr);
-    } 
+        FGameplayAbilitySpecHandle*, 
+        const FGameplayAbilitySpec&
+    );
+    
+    Spec->MostRecentArrayReplicationKey = -1;
+    Spec->ReplicationID = -1;
+    Spec->ReplicationKey = -1;
+    Spec->GetHandle().Handle = rand();
+    Spec->SetAbility((UGameplayAbility*)Ability->GetClassDefaultObject());
+    Spec->SetSourceObject(nullptr);
+    Spec->SetInputID(-1);
+    Spec->SetLevel(1);
+    
+    FGameplayAbilitySpecHandle Handle = Spec->GetHandle();
+    
     if (Finder->GiveAbility())
     {
-        ((GiveAbilityFunc)uint64_t(Finder->GiveAbility()))(AbilitySystemComponent, &Spec.GetHandle(), Spec);
+        ((GiveAbilityFunc)Finder->GiveAbility())(AbilitySystemComponent, &Handle, *Spec);
     }
+    
+    Spec->~FGameplayAbilitySpec();
+    VirtualFree(Spec, 0, MEM_RELEASE);
 }
 
 void UAbilitySystemComponent::GiveAbilitySet(UAbilitySystemComponent* AbilitySystemComponent, UFortAbilitySet* Set)

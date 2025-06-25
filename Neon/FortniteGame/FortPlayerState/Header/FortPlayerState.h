@@ -8,7 +8,12 @@ class UFortHeroType : public UObject
     
 };
 
-class AFortPlayerStateAthena : public UObject
+class AFortPlayerStateZone : public UObject
+{
+    
+};
+
+class AFortPlayerStateAthena : public AFortPlayerStateZone
 {
 public:
     DEFINE_MEMBER(UFortHeroType, AFortPlayerStateAthena, HeroType);

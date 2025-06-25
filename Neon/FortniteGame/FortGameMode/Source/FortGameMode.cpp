@@ -142,15 +142,18 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
 
     auto Pawn = GameMode->CallFunc<APawn*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer,  StartSpot->CallFunc<FTransform>("Actor", "GetTransform"));;
 
-   for (auto& I : GameMode->GetStartingItems())
+    for (auto I : GameMode->GetStartingItems())
     {
-       /*I is not properly indexed to a element size so we will resize it manually*/
         int32 FItemAndCountSize = StaticClassImpl("ItemAndCount")->GetSize();
-        auto StartingItem = FKismetMemoryLibrary(&I, FItemAndCountSize, sizeof(FItemAndCount)).GetInitalizedMemory<FItemAndCount>();
-    	auto Item = StartingItem->GetItem();
-
-    	AFortInventory::GiveItem(NewPlayer, Item , StartingItem->GetCount(), 1, 1);
-    } 
+        auto Item = FKismetMemoryLibrary(&I, FItemAndCountSize, sizeof(FItemAndCount)).GetInitalizedMemory<FItemAndCount>();
+        
+        if (!Item) {
+            UE_LOG(LogNeon, Fatal, "StartingItem is null in SpawnDefaultPawnFor!");
+            return Pawn;
+        }
+    
+        AFortInventory::GiveItem(NewPlayer, Item->GetItem(), Item->GetCount(), 1, 1);
+    }
     
     if (Fortnite_Version.GetMajorVersion() <= 8.50) {
     

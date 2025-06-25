@@ -40,6 +40,33 @@ class FKismetMemoryLibrary {
                 return nullptr;
             return static_cast<T *>(m_data);
         };
+
+    // In header:
+    template <typename T>
+    T* AtPtr(int32_t Size) {
+        if (m_data == nullptr) {
+            m_status = 0;
+            return nullptr;
+        }
+    
+        if (Size <= 0) {
+            m_status = 0;
+            return nullptr;
+        }
+    
+        if (Size > sizeof(T)) {
+            ResizeVirtualMemory(sizeof(T), Size);
+            if (m_data == nullptr) {
+                m_status = 0;
+                return nullptr;
+            }
+        }
+    
+        m_status = 1;
+        return static_cast<T*>(m_data);
+    }
+
+    
         uint64_t GetAddress() const;
         template <typename T> T GetAddress() const {
                 return *reinterpret_cast<T *>( m_address );

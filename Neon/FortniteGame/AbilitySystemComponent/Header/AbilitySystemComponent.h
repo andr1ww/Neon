@@ -21,11 +21,22 @@ struct FGameplayAbilitySpecHandle
    int Handle;
 };
 
-struct FGameplayAbilitySpec : public FFastArraySerializerItem
+class IInterface : public UObject
+{
+};
+
+class IAbilitySystemInterface : public IInterface
+{
+};
+
+struct FGameplayAbilitySpec final : public FFastArraySerializerItem
 {
     DEFINE_MEMBER(FGameplayAbilitySpecHandle, FGameplayAbilitySpec, Handle);
     DEFINE_MEMBER(uint8, FGameplayAbilitySpec, InputPressed);
-    DEFINE_MEMBER(UGameplayAbility, FGameplayAbilitySpec, Ability);
+    DEFINE_PTR(UGameplayAbility, FGameplayAbilitySpec, Ability);
+    DEFINE_PTR(UObject, FGameplayAbilitySpec, SourceObject);
+    DEFINE_MEMBER(int32, FGameplayAbilitySpec, Level);
+    DEFINE_MEMBER(int32, FGameplayAbilitySpec, InputID);
 };
 
 struct FGameplayAbilitySpecContainer : public FFastArraySerializer

@@ -654,21 +654,31 @@ uint64 UFinder::GiveAbilityAndActivateOnce()
     return 0;
 }
 
+uint64 UFinder::GetInterfaceAddress()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+    
+    if (Engine_Version <= 4.21)
+        return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC 20 33 FF 48 8B DA 48 8B F1 48").Get(); 
+
+    return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC 20 33 DB 48 8B FA 48 8B F1 48 85 D2 0F 84 ? ? ? ? 8B 82 ? ? ? ? C1 E8").Get();
+}
+
 uint64 UFinder::GiveAbility()
 {
     static uint64 CachedResult = 0;
     if (CachedResult != 0)
         return CachedResult;
 
-    if (Engine_Version <= 4.20)
-         return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 56 57 41 56 48 83 EC 20 83 B9").Get();
-    if (Engine_Version == 4.21 || Engine_Version == 4.23)
-         return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 48 89 7C 24 ? 41 56 48 83 EC 20 83 B9 ? ? ? ? ? 49 8B E8 4C 8B F2").Get();
-    if (Engine_Version == 5.00)
-        return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 56 48 83 EC 20 8B 81 ? ? ? ? 49 8B E8 4C").Get(); 
-    
-    Memcury::Scanner addr = Memcury::Scanner(GiveAbilityAndActivateOnce());
-    
-    return CachedResult = Memcury::Scanner(FindBytes(addr, { 0xE8 }, 500, 0, true)).RelativeOffset(1).Get();
+    Memcury::Scanner Scanner = Memcury::Scanner::FindPattern("E8 ? ? ? ? 8B D3 49 8B CE E8 ? ? ? ? 48 8B 4D");
+    if (!Scanner.Get())
+    {
+        Scanner = Memcury::Scanner::FindPattern("E8 ? ? ? ? 8B 5D ? 48 8B CE", true);
+    }
+    CachedResult = Scanner.RelativeOffset(1).Get();
+
+    return CachedResult;
 }
 

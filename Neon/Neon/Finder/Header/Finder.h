@@ -92,6 +92,8 @@ public:
     uint64 GiveAbility();
 
     uint64 GiveAbilityAndActivateOnce();
+
+    uint64 GetInterfaceAddress();
 };
 
 inline UFinder* Finder;

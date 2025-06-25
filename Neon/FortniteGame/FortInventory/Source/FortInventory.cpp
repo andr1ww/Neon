@@ -27,7 +27,7 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
 
 UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level)
 {
-    if (!PlayerController || !Def || !Count || !Level)
+    if (!PlayerController || !Def || !Level)
     {
         UE_LOG(LogNeon, Fatal, "Invalid parameters for GiveItem: PlayerController: %p, Def: %p, Count: %d, Level: %d", PlayerController, Def, Count, Level);
         return nullptr;
