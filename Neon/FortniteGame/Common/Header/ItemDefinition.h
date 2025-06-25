@@ -4,7 +4,7 @@
 class UFortItemDefinition : public UObject
 {
 public:
-    static class UFortWorldItem* CreateTemporaryItemInstanceBP(int32 Count, int32 Level)
+    class UFortWorldItem* CreateTemporaryItemInstanceBP(int32 Count, int32 Level)
     {
         struct FortItemDefinition_CreateTemporaryItemInstanceBP final
         {
@@ -34,7 +34,7 @@ public:
         auto Flgs = Func->FunctionFlags();
         Func->FunctionFlags() |= 0x400;
 
-        SDK::StaticClassImpl("FortItemDefinition")->GetClassDefaultObject()->ProcessEvent(Func, &Params);
+        ProcessEvent(Func, &Params);
 
         Func->FunctionFlags() = Flgs;
 
