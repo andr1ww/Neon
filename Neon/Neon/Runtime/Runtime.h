@@ -344,6 +344,17 @@ inline T* StaticFindObject(std::string ObjectPath, UClass* Class = UObject::Stat
 		VirtualProtect(_Vt + _Ind, 8, _Vo, &_Vo);
 	}
 	
+	inline void* ResizeVirtualMemory(void* oldMemory, SIZE_T oldSize, SIZE_T newSize)
+	{
+		void* newMemory = VirtualAlloc(nullptr, newSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+		if (!newMemory)
+			return nullptr;
+
+		memcpy(newMemory, oldMemory, oldSize);
+		VirtualFree(oldMemory, 0, MEM_RELEASE);
+		return newMemory;
+	}
+	
 	template<typename Ct, typename Ot = void*>
 	__forceinline static void ExecVFT(const char* Name, void* Detour, Ot& Orig = nullptrForHook) {
 		auto Fn = StaticFindObject<UFunction>(Name);

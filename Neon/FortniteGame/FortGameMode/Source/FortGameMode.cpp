@@ -145,8 +145,8 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
     for (auto I : GameMode->GetStartingItems())
     {
         int32 FItemAndCountSize = StaticClassImpl("ItemAndCount")->GetSize();
-        auto Item = FKismetMemoryLibrary(&I, FItemAndCountSize, sizeof(FItemAndCount)).GetInitalizedMemory<FItemAndCount>();
-        
+        auto Item = (FItemAndCount*)Runtime::ResizeVirtualMemory(&I, sizeof(FItemAndCount), FItemAndCountSize);
+
         if (!Item) {
             UE_LOG(LogNeon, Fatal, "StartingItem is null in SpawnDefaultPawnFor!");
             return Pawn;

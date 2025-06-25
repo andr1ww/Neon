@@ -15,7 +15,7 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
     for (int i = 0; i < AbilitySystemComponent->GetActivatableAbilities().GetItems().Num(); i++) {
         FGameplayAbilitySpec& CurrentSpec = AbilitySystemComponent->GetActivatableAbilities().GetItems()[i];
         int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
-        FGameplayAbilitySpec* Spec = FKismetMemoryLibrary(&CurrentSpec, GameplayAbilitySpecSize, sizeof(FGameplayAbilitySpec)).GetInitalizedMemory<FGameplayAbilitySpec>();
+        FGameplayAbilitySpec* Spec = (FGameplayAbilitySpec*)Runtime::ResizeVirtualMemory(&CurrentSpec, sizeof(FGameplayAbilitySpec), GameplayAbilitySpecSize);
         
         if (Spec->GetHandle().Handle == Handle.Handle)
         {
@@ -26,6 +26,7 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
 
     if (!Spec)
     {
+        UE_LOG(LogNeon, Log, "AbilitySystemComponent::InternalServerTryActivateAbility: Spec not found for Handle: %d", Handle.Handle);
         GetDefaultObj()->CallFunc<void>("AbilitySystemComponent", "ClientActivateAbilityFailed", Handle, PredictionKey.GetCurrent());
         return;
     }
