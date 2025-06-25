@@ -13,6 +13,7 @@ public:
     DEFINE_MEMBER(UFortHeroType, UAthenaCharacterItemDefinition, HeroDefinition);
 };
 
+
 class UFortWeaponMeleeItemDefinition : public UFortItemDefinition
 {
     

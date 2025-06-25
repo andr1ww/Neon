@@ -52,10 +52,10 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
     FFortItemList& Inventory = WorldInventory->GetInventory();
     
-    Inventory.GetReplicatedEntries().Add(ItemEntry);
-    Inventory.GetItemInstances().Add(BP);
+    //Inventory.GetReplicatedEntries().Add(ItemEntry);
+    //Inventory.GetItemInstances().Add(BP);
 
-    Update(PlayerController, &ItemEntry);
+    //Update(PlayerController, &ItemEntry);
 
     return BP;
 }

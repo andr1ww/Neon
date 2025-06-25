@@ -90,6 +90,8 @@ public:
     uint64 ConstructSpec();
 
     uint64 GiveAbility();
+
+    uint64 GiveAbilityAndActivateOnce();
 };
 
 inline UFinder* Finder;

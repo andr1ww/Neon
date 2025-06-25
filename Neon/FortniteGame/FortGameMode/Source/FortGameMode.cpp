@@ -142,7 +142,7 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
 
     auto Pawn = GameMode->CallFunc<APawn*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer,  StartSpot->CallFunc<FTransform>("Actor", "GetTransform"));;
 
-    for (auto& I : GameMode->GetStartingItems())
+  /* for (auto& I : GameMode->GetStartingItems())
     {
     	auto Count = I.GetCount();
     	auto Item = I.GetItem();
@@ -157,8 +157,8 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         auto Pickaxe = NewPlayer->GetCosmeticLoadoutPC().GetPickaxe();
         auto WeaponDef = Pickaxe->GetWeaponDefinition();
         
-     //   AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 0, 1); 
-    }
+        AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 0, 1); 
+    } */
     
     return Pawn;
 }

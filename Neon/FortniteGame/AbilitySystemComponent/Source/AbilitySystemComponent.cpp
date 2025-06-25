@@ -51,6 +51,7 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
 
 void UAbilitySystemComponent::GiveAbility(UAbilitySystemComponent* AbilitySystemComponent, UClass* Ability)
 {
+    if (!Ability || !Ability->GetClassDefaultObject()) return;
     FGameplayAbilitySpec Spec{};
     
     using ConstructSpecFunc = void (*)(
@@ -61,15 +62,33 @@ void UAbilitySystemComponent::GiveAbility(UAbilitySystemComponent* AbilitySystem
         UObject*
         );
 
-    using GiveAbilityFunc = FGameplayAbilitySpecHandle * (__fastcall*)(
-        UAbilitySystemComponent*,
-        FGameplayAbilitySpecHandle*,
-        FGameplayAbilitySpec
-        );
+    if (Finder->ConstructSpec())
+    {
+        ((ConstructSpecFunc)Finder->ConstructSpec())(&Spec, (UGameplayAbility*)Ability->GetClassDefaultObject(), 1, -1, nullptr);
+    } else
+    {
+        static auto Level = Runtime::GetOffsetStruct("GameplayAbilitySpec", "Level");
+        static auto Source = Runtime::GetOffsetStruct("GameplayAbilitySpec", "SourceObject");
+        static auto Input = Runtime::GetOffsetStruct("GameplayAbilitySpec", "InputID");
 
-    ((ConstructSpecFunc)uint64_t(Finder->ConstructSpec()))(&Spec, (UGameplayAbility*)Ability->GetClassDefaultObject(), 1, -1, nullptr);
-    FGameplayAbilitySpecHandle SpecHandle = Spec.GetHandle();
-    ((GiveAbilityFunc)uint64_t(Finder->GiveAbility()))(AbilitySystemComponent, &SpecHandle, Spec);
+        Spec.ReplicationKey = -1;
+        Spec.ReplicationID = -1;
+        Spec.MostRecentArrayReplicationKey = -1;
+
+        Spec.GetHandle().Handle = std::rand(); 
+        Spec.SetAbility(*(UGameplayAbility*)Ability->GetClassDefaultObject()); 
+
+        *(int*)((reinterpret_cast<uint8_t*>(&Spec)) + Level) = 1;
+        *(int*)((reinterpret_cast<uint8_t*>(&Spec)) + Input) = -1;
+        *(UObject**)((reinterpret_cast<uint8_t*>(&Spec)) + Source) = nullptr;
+    }
+    
+    if (Finder->GiveAbility())
+    {
+        FGameplayAbilitySpecHandle Handle;
+        
+        ((FGameplayAbilitySpecHandle * (__fastcall*)(UAbilitySystemComponent*, FGameplayAbilitySpecHandle*, FGameplayAbilitySpec)) Finder->GiveAbility())(AbilitySystemComponent, &Handle, Spec);
+    }
 }
 
 void UAbilitySystemComponent::GiveAbilitySet(UAbilitySystemComponent* AbilitySystemComponent, UFortAbilitySet* Set)
@@ -85,6 +104,19 @@ void UAbilitySystemComponent::GiveAbilitySet(UAbilitySystemComponent* AbilitySys
                 }
                 UE_LOG(LogNeon, Log, "Ability[%d]: %s", i, Class->GetFName().ToString().ToString().c_str());
                 GiveAbility(AbilitySystemComponent, Class);
+            }
+        }
+
+        for (int i = 0; i < Set->GetPassiveGameplayEffects().Num(); i++) {
+            if (Set->GetPassiveGameplayEffects().IsValidIndex(i))
+            {
+                FGameplayEffectApplicationInfo& EffectInfo = Set->GetPassiveGameplayEffects()[i];
+                if (!EffectInfo.GetGameplayEffect()) {
+                    continue;
+                }
+                UE_LOG(LogNeon, Log, "Passive Effect[%d]: %s", i, EffectInfo.GetGameplayEffect()->GetFName().ToString().ToString().c_str());
+                FGameplayEffectContextHandle EffectContext{}; 
+                AbilitySystemComponent->CallFunc<void>("AbilitySystemComponent", "BP_ApplyGameplayEffectToSelf", EffectInfo.GetGameplayEffect(), EffectInfo.Level, EffectContext);
             }
         }
     }

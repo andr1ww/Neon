@@ -9,7 +9,8 @@
 struct FItemAndCount final 
 {
 public:
-    DEFINE_MEMBER(int32, FItemAndCount, Count);
+    DEFINE_MEMBER(int, FItemAndCount, Count);
+    unsigned char                                      Pad_8[0x4];                                  
     DEFINE_PTR(UFortItemDefinition, FItemAndCount, Item);
 };
 
