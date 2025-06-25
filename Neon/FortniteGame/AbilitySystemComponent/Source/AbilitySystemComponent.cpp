@@ -79,7 +79,12 @@ void UAbilitySystemComponent::GiveAbilitySet(UAbilitySystemComponent* AbilitySys
         for (int i = 0; i < Set->GetGameplayAbilities().Num(); i++) {
             if (Set->GetGameplayAbilities().IsValidIndex(i))
             {
-                GiveAbility(AbilitySystemComponent, Set->GetGameplayAbilities()[i]);
+                UClass* Class = Set->GetGameplayAbilities()[i];
+                if (!Class) {
+                    continue;
+                }
+                UE_LOG(LogNeon, Log, "Ability[%d]: %s", i, Class->GetFName().ToString().ToString().c_str());
+                GiveAbility(AbilitySystemComponent, Class);
             }
         }
     }

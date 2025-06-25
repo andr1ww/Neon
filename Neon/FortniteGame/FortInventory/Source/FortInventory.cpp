@@ -20,7 +20,7 @@ void AFortInventory::HandleInventoryLocalUpdate()
     Func->FunctionFlags() = Flgs;
 }
 
-void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry Entry)
+void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry* Entry)
 {
     if (!PlayerController) return;
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
@@ -29,7 +29,7 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
     WorldInventory->SetbRequiresLocalUpdate(true);
     WorldInventory->HandleInventoryLocalUpdate();
 
-    Inventory.MarkItemDirty(Entry);
+    Inventory.MarkItemDirty(*Entry);
     Inventory.MarkArrayDirty();
 }
 
@@ -55,7 +55,7 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     Inventory.GetReplicatedEntries().Add(ItemEntry);
     Inventory.GetItemInstances().Add(BP);
 
-    Update(PlayerController, ItemEntry);
+    Update(PlayerController, &ItemEntry);
 
     return BP;
 }
@@ -83,7 +83,7 @@ void UFortItem::SetOwningControllerForTemporaryItem(AFortPlayerControllerAthena*
     auto Flgs = Func->FunctionFlags();
     Func->FunctionFlags() |= 0x400;
     
-    SDK::StaticClassImpl("FortItem")->GetClassDefaultObject()->ProcessEvent(Func, &Params);
+    this->ProcessEvent(Func, &Params);
 
     Func->FunctionFlags() = Flgs;
 }

@@ -3,5 +3,5 @@
 
 AActor* AController::GetViewTarget()
 {
-    this->CallFunc<AActor*>("AController","GetViewTarget");
+	return nullptr;
 }
