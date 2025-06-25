@@ -99,12 +99,12 @@ void Main()
 
 	if (Engine_Version > 4.20)
 	{
-		static auto OnRep_ReplicatedAnimMontageFn = (UFunction*)GUObjectArray.FindObject("OnRep_ReplicatedAnimMontage");
-		InternalServerTryActivateAbilityIndex = (Runtime::GetFunctionIdx(OnRep_ReplicatedAnimMontageFn) - 8) / 8;
+		static auto OnRep_ReplicatedAnimMontageFn = Runtime::StaticFindObject<UFunction>("/Script/GameplayAbilities.AbilitySystemComponent.OnRep_ReplicatedAnimMontage");
+		InternalServerTryActivateAbilityIndex = (Runtime::GetVTableIndex(OnRep_ReplicatedAnimMontageFn) - 8) / 8;
 		UE_LOG(LogNeon, Log, "InternalServerTryActivateAbilityIndex: 0x%x", InternalServerTryActivateAbilityIndex);
 	}
 	
-	Runtime::Every<UAbilitySystemComponent>(InternalServerTryActivateAbilityIndex, UAbilitySystemComponent::InternalServerTryActivateAbility);
+	Runtime::HookVFT(UAbilitySystemComponent::GetDefaultObj()->GetVTable(), InternalServerTryActivateAbilityIndex, UAbilitySystemComponent::InternalServerTryActivateAbility);
 
 	Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
 	Runtime::Hook(Finder->DispatchRequest(), UNetDriver::DispatchRequest, (void**)&DispatchRequestOriginal);

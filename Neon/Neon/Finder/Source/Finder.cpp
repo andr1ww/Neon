@@ -573,22 +573,7 @@ uint64 UFinder::InternalTryActivateAbility()
     if (CachedResult != 0)
         return CachedResult;
     
-    auto Addrr = Memcury::Scanner::FindStringRef(L"InternalTryActivateAbility called with invalid Handle! ASC: %s. AvatarActor: %s", true, 0, Fortnite_Version >= 16).Get(); // checked 16.40
-
-    for (int i = 0; i < 1000; i++)
-    {
-        if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x8B && *(uint8_t*)(uint8_t*)(Addrr - i + 2) == 0xC4)
-        {
-            CachedResult = Addrr - i;
-        }
-
-        if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x4C && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(Addrr - i + 2) == 0x4C)
-        {
-            CachedResult = - i;
-        }
-    }
-	
-    return CachedResult;
+    return CachedResult = Memcury::Scanner::FindStringRef(L"InternalTryActivateAbility called with invalid Handle! ASC: %s. AvatarActor: %s").ScanFor({ 0x4C, 0x89 }, false).Get();
 }
 
 uint64 UFinder::ConstructSpec()

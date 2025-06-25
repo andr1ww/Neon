@@ -24,7 +24,7 @@ class FKismetMemoryLibrary {
             HMODULE m_ModuleBase );
 
        void
-           ResizeVirtualMemory(int32_t OldSize, int32_t NewSize);
+    ResizeVirtualMemory(int32_t OldSize, int32_t NewSize);
 
        
 
