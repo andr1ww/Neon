@@ -100,11 +100,11 @@ void Main()
 	if (Engine_Version > 4.20)
 	{
 		static auto OnRep_ReplicatedAnimMontageFn = Runtime::StaticFindObject<UFunction>("/Script/GameplayAbilities.AbilitySystemComponent.OnRep_ReplicatedAnimMontage");
-		InternalServerTryActivateAbilityIndex = (Runtime::GetVTableIndex(OnRep_ReplicatedAnimMontageFn) - 8) / 8;
+		InternalServerTryActivateAbilityIndex = Runtime::GetVTableIndex(OnRep_ReplicatedAnimMontageFn) - 1;
 		UE_LOG(LogNeon, Log, "InternalServerTryActivateAbilityIndex: 0x%x", InternalServerTryActivateAbilityIndex);
 	}
 	
-	Runtime::HookVFT(UAbilitySystemComponent::GetDefaultObj()->GetVTable(), InternalServerTryActivateAbilityIndex, UAbilitySystemComponent::InternalServerTryActivateAbility);
+	Runtime::VFTHook(SDK::StaticClassImpl("FortAbilitySystemComponentAthena")->GetClassDefaultObject()->GetVTable(), InternalServerTryActivateAbilityIndex, UAbilitySystemComponent::InternalServerTryActivateAbility);
 
 	Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
 	Runtime::Hook(Finder->DispatchRequest(), UNetDriver::DispatchRequest, (void**)&DispatchRequestOriginal);

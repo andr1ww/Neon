@@ -7,14 +7,17 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
     UAbilitySystemComponent* AbilitySystemComponent, 
     FGameplayAbilitySpecHandle Handle, 
     bool InputPressed, 
-    FPredictionKey& PredictionKey, 
+    FPredictionKey PredictionKey, 
     FGameplayEventData* TriggerEventData)
 {
     UE_LOG(LogNeon, Log, "InternalServerTryActivateAbility");
     FGameplayAbilitySpec* Spec = nullptr;
     for (int i = 0; i < AbilitySystemComponent->GetActivatableAbilities().GetItems().Num(); i++) {
         FGameplayAbilitySpec& CurrentSpec = AbilitySystemComponent->GetActivatableAbilities().GetItems()[i];
-        if (CurrentSpec.GetHandle().Handle == Handle.Handle)
+        int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
+        FGameplayAbilitySpec* Spec = FKismetMemoryLibrary(&CurrentSpec, GameplayAbilitySpecSize, sizeof(FGameplayAbilitySpec)).GetInitalizedMemory<FGameplayAbilitySpec>();
+        
+        if (Spec->GetHandle().Handle == Handle.Handle)
         {
             Spec = &CurrentSpec;
             break; 
