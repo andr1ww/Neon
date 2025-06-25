@@ -43,7 +43,7 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
         return nullptr;
     }
     
-    auto& ItemEntry = BP->GetItemEntry();
+    auto ItemEntry = BP->GetItemEntry();
     ItemEntry.SetCount(Count);
     ItemEntry.SetLoadedAmmo(LoadedAmmo);
     ItemEntry.SetLevel(Level);
