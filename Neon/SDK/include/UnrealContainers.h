@@ -481,66 +481,50 @@ template <typename InElementType> class TArray {
                 return false;
         }
 
-        FORCEINLINE void ResizeGrow( int32 OldNum ) {
-                ArrayMax = DefaultCalculateSlackGrow(
-                    ArrayNum, ArrayMax, sizeof( ElementType ), false );
-                ElementType *OldData = Data;
-                if ( ArrayMax ) {
-                        Data = (ElementType *)FMemory::Realloc(
-                            Data,
-                            ( ArrayMax = ArrayNum + OldNum ) *
-                                sizeof( ElementType ),
-                            alignof( ElementType ) );
+        FORCEINLINE void ResizeGrow(int32 ElementSize = sizeof(ElementType)) {
+            Data = (ElementType*)FMemory::Realloc(Data, (ArrayMax = 1 + ArrayNum) * ElementSize, 0);
+        }
 
-                        if ( OldData && OldNum ) {
-                                const int32 NumCopiedElements =
-                                    FMath::Min( ArrayMax, OldNum );
-                                memcpy( Data, OldData,
-                                        NumCopiedElements *
-                                            sizeof( ElementType ) );
-                        }
+        FORCEINLINE int32 AddUnitalized(int32 Count = 1, int32 ElementSize = sizeof(ElementType)) {
+            if (Count >= 0) {
+                if ((ArrayNum + Count) > ArrayMax) {
+                    ResizeGrow(ElementSize);
                 }
+
+                return ArrayNum;
+            }
         }
 
-        FORCEINLINE int32 AddUnitalized( int32 Count = 1 ) {
-                if ( Count >= 0 ) {
-                        const int32 OldNum = ArrayNum;
-                        if ( ( ArrayNum += Count ) > ArrayMax ) {
-                                ResizeGrow( OldNum );
-                        }
+        FORCEINLINE int32 Emplace(InElementType& Item,
+            int32 ElementSize = sizeof(ElementType)) {
+            const int32 Index = AddUnitalized(1, ElementSize);
+            memcpy_s((InElementType*)(__int64(Data) +
+                (ArrayNum * ElementSize)),
+                ElementSize, (void*)&Item, ElementSize);
+            ArrayNum++;
 
-                        return OldNum;
-                }
+            return ArrayNum -1;
         }
 
-        FORCEINLINE int32 Emplace( InElementType &Item,
-                                   int32 ElementSize = sizeof( ElementType ) ) {
-                const int32 Index = AddUnitalized( 1 );
-                memcpy_s( (InElementType *)( __int64( Data ) +
-                                             ( ArrayNum * ElementSize ) ),
-                          ElementSize, (void *)&Item, ElementSize );
+        FORCEINLINE int32 Emplace(const InElementType& Item,
+            int32 ElementSize = sizeof(ElementType)) {
+            const int32 Index = AddUnitalized(1, ElementSize);
+            memcpy_s((InElementType*)(__int64(Data) +
+                (ArrayNum * ElementSize)),
+                ElementSize, (void*)&Item, ElementSize);
+            ArrayNum++;
 
-                return Index;
+            return ArrayNum - 1;
         }
 
-        FORCEINLINE int32 Emplace( const InElementType &Item,
-                                   int32 ElementSize = sizeof( ElementType ) ) {
-                const int32 Index = AddUnitalized( 1 );
-                memcpy_s( (InElementType *)( __int64( Data ) +
-                                             ( ArrayNum * ElementSize ) ),
-                          ElementSize, (void *)&Item, ElementSize );
-
-                return Index;
-        }
-
-        FORCEINLINE ElementType &
-        Emplace_GetRef( InElementType &Item,
-                        int32 ElementSize = sizeof( ElementType ) ) {
-                const int32 Index = AddUnitalized( 1 );
-                memcpy_s( (InElementType *)( __int64( Data ) +
-                                             ( ArrayNum * ElementSize ) ),
-                          ElementSize, (void *)&Item, ElementSize );
-                return Data[Index];
+        FORCEINLINE ElementType&
+            Emplace_GetRef(InElementType& Item,
+                int32 ElementSize = sizeof(ElementType)) {
+            const int32 Index = AddUnitalized(1, ElementSize);
+            memcpy_s((InElementType*)(__int64(Data) +
+                (ArrayNum * ElementSize)),
+                ElementSize, (void*)&Item, ElementSize);
+            return Data[ArrayNum - 1];
         }
 
         FORCEINLINE int32 Add( InElementType &Item,

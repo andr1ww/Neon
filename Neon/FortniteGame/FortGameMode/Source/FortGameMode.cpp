@@ -144,9 +144,12 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
 
    for (auto& I : GameMode->GetStartingItems())
     {
-    	auto Item = I.GetItem();
+       /*I is not properly indexed to a element size so we will resize it manually*/
+        int32 FItemAndCountSize = StaticClassImpl("ItemAndCount")->GetSize();
+        auto StartingItem = FKismetMemoryLibrary(&I, FItemAndCountSize, sizeof(FItemAndCount)).GetInitalizedMemory<FItemAndCount>();
+    	auto Item = StartingItem->GetItem();
 
-    	AFortInventory::GiveItem(NewPlayer, Item , 1, 1, 1);
+    	//AFortInventory::GiveItem(NewPlayer, Item , 1, 1, 1);
     } 
     
     if (Fortnite_Version.GetMajorVersion() <= 8.50) {
@@ -155,8 +158,7 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
     else {
         auto Pickaxe = NewPlayer->GetCosmeticLoadoutPC().GetPickaxe();
         auto WeaponDef = Pickaxe->GetWeaponDefinition();
-        
-     //   AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 0, 1); 
+        AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 0, 1); 
     } 
     
     return Pawn;

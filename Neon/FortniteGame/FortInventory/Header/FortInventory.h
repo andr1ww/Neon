@@ -39,7 +39,7 @@ public:
     DEFINE_MEMBER(FFortItemList, AFortInventory, Inventory);
     DEFINE_BOOL(AFortInventory, bRequiresLocalUpdate);
 public:
-    static void HandleInventoryLocalUpdate();
-    static void Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry* Entry);
+    void HandleInventoryLocalUpdate();
+    void Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry* Entry);
     static UObject* GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level);
 };

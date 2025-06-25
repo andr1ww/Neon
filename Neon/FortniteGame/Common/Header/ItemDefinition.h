@@ -9,27 +9,25 @@ public:
     {
         static UFunction* Func = Runtime::StaticFindObject<UFunction>("/Script/FortniteGame.FortItemDefinition.CreateTemporaryItemInstanceBP");
 
-        if (Func)
+        struct FortItemDefinition_CreateTemporaryItemInstanceBP final
         {
-            size_t ParmsSize = 0x10;
-            void* Parms = ::malloc(ParmsSize);
+        public:
+            int32                                         Count;                                             // 0x0000(0x0004)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            int32                                         Level;                                             // 0x0004(0x0004)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            UFortWorldItem* ReturnValue;                                       // 0x0008(0x0008)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        };
 
-            if (Parms)
-            {
-                memset(Parms, 0, ParmsSize);
+        FortItemDefinition_CreateTemporaryItemInstanceBP Parms{};
+        Parms.Count = Count;
+        Parms.Level = Level;
 
-                *(int32*)(__int64(Parms) + 0x0) = Count;
-                *(int32*)(__int64(Parms) + 0x4) = Level;
+        auto Flgs = Func->FunctionFlags();
+        Func->FunctionFlags() |= 0x400;
 
-                ProcessEvent(Func, &Parms);
+        this->ProcessEvent(Func, &Parms);
 
-                UFortWorldItem* ReturnValue = *(UFortWorldItem**)(__int64(&Parms) + 0x8);
-                ::free(Parms);
+        Func->FunctionFlags() = Flgs;
 
-                return ReturnValue;
-            }
-        }
-
-        return nullptr;
+        return Parms.ReturnValue;
     }
 };

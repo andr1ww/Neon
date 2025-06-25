@@ -5,17 +5,12 @@ void AFortInventory::HandleInventoryLocalUpdate()
 {
     static SDK::UFunction* Func = nullptr;
 
-    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortInventory", "HandleInventoryLocalUpdate");
-
-    if (Func == nullptr)
-        Func = Info.Func;
-    if (!Func)
-        return;
+    Func = SDK::PropLibrary->GetFunctionByName("FortInventory", "HandleInventoryLocalUpdate").Func;
 
     auto Flgs = Func->FunctionFlags();
     Func->FunctionFlags() |= 0x400;
     
-    SDK::StaticClassImpl("FortInventory")->GetClassDefaultObject()->ProcessEvent(Func, nullptr);
+    this->ProcessEvent(Func, nullptr);
 
     Func->FunctionFlags() = Flgs;
 }
@@ -23,14 +18,11 @@ void AFortInventory::HandleInventoryLocalUpdate()
 void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry* Entry)
 {
     if (!PlayerController) return;
-    AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
-    FFortItemList& Inventory = WorldInventory->GetInventory();
-    
-    WorldInventory->SetbRequiresLocalUpdate(true);
-    WorldInventory->HandleInventoryLocalUpdate();
+    this->SetbRequiresLocalUpdate(true);
+    this->HandleInventoryLocalUpdate();
 
-    Inventory.MarkItemDirty(*Entry);
-    Inventory.MarkArrayDirty();
+    this->GetInventory().MarkItemDirty(*Entry);
+    this->GetInventory().MarkArrayDirty();
 }
 
 UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level)
@@ -53,33 +45,23 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
 
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
     FFortItemList& Inventory = WorldInventory->GetInventory();
+    TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
+    TArray<UFortItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
     
-
-    static int ReplicatedEntriesOffset = Runtime::GetOffsetStruct("FortItemList", "ReplicatedEntries");
-    TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = *reinterpret_cast<TArray<FFortItemEntry>*>(reinterpret_cast<__int64>(&Inventory) + ReplicatedEntriesOffset);
-
-    static int ItemInstancesOffset = Runtime::GetOffsetStruct("FortItemList", "ItemInstances");
-    TArray<UFortItem*>& ItemInstancesOffsetPtr = *reinterpret_cast<TArray<UFortItem*>*>(reinterpret_cast<__int64>(&Inventory) + ItemInstancesOffset);
-    
-    ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry());
+    static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
+    ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry(), StructSize);
     ItemInstancesOffsetPtr.Add(BP);
 
-    Update(PlayerController, &ItemEntry);
+    WorldInventory->Update(PlayerController, &ItemEntry);
 
     return BP;
 }
 
 void UFortItem::SetOwningControllerForTemporaryItem(AFortPlayerControllerAthena* InController)
 {
-    struct FortItem_SetOwningControllerForTemporaryItem final
-    {
-    public:
-        class AFortPlayerControllerAthena*                  InController;                                      // 0x0000(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    };
 
-    FortItem_SetOwningControllerForTemporaryItem Params{};
 
-    Params.InController = InController;
+
     static SDK::UFunction* Func = nullptr;
 
     SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortItem", "SetOwningControllerForTemporaryItem");
@@ -88,6 +70,16 @@ void UFortItem::SetOwningControllerForTemporaryItem(AFortPlayerControllerAthena*
         Func = Info.Func;
     if (!Func)
         return;
+
+    struct FortItem_SetOwningControllerForTemporaryItem final
+    {
+    public:
+        class AFortPlayerControllerAthena* InController;                                      // 0x0000(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    };
+
+    FortItem_SetOwningControllerForTemporaryItem Params{};
+
+    Params.InController = InController;
 
     auto Flgs = Func->FunctionFlags();
     Func->FunctionFlags() |= 0x400;

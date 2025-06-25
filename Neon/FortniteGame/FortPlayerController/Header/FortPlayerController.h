@@ -36,13 +36,14 @@ class AFortPlayerController : public APlayerController
 {
 public:
     DEFINE_PTR(AFortInventory, AFortPlayerController, WorldInventory);
+    DEFINE_MEMBER(FFortAthenaLoadout, AFortPlayerController, CosmeticLoadoutPC);
 };
 
 class AFortPlayerControllerAthena : public AFortPlayerController 
 {
 public:
     DEFINE_PTR(AFortPlayerStateAthena, AFortPlayerControllerAthena, PlayerState);
-    DEFINE_MEMBER(FFortAthenaLoadout, AFortPlayerControllerAthena, CosmeticLoadoutPC);
+
     DEFINE_BOOL(AFortPlayerControllerAthena, bHasServerFinishedLoading);
 public:
     static void ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
