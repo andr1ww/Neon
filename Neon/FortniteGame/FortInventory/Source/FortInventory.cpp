@@ -33,17 +33,19 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
     Inventory.MarkArrayDirty();
 }
 
-UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int Count, int LoadedAmmo, int Level)
+UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level)
 {
-    if (!PlayerController || !Def) return nullptr;
+    if (!PlayerController || !Def || !Count || !Level) return nullptr;
 
     UFortWorldItem* BP = Def->CreateTemporaryItemInstanceBP(Count, Level);
+    UE_LOG(LogNeon, Log, "BP: %s", BP->GetFName().ToString().ToString().c_str());
+    
     if (!BP) {
         UE_LOG(LogNeon, Log, "Failed to create temporary item instance");
         return nullptr;
     }
     
-    auto ItemEntry = BP->GetItemEntry();
+    auto& ItemEntry = BP->GetItemEntry();
     ItemEntry.SetCount(Count);
     ItemEntry.SetLoadedAmmo(LoadedAmmo);
     ItemEntry.SetLevel(Level);
@@ -52,10 +54,17 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
     FFortItemList& Inventory = WorldInventory->GetInventory();
     
-    //Inventory.GetReplicatedEntries().Add(ItemEntry);
-    //Inventory.GetItemInstances().Add(BP);
 
-    //Update(PlayerController, &ItemEntry);
+    static int ReplicatedEntriesOffset = Runtime::GetOffsetStruct("FortItemList", "ReplicatedEntries");
+    TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = *reinterpret_cast<TArray<FFortItemEntry>*>(reinterpret_cast<__int64>(&Inventory) + ReplicatedEntriesOffset);
+
+    static int ItemInstancesOffset = Runtime::GetOffsetStruct("FortItemList", "ItemInstances");
+    TArray<UFortItem*>& ItemInstancesOffsetPtr = *reinterpret_cast<TArray<UFortItem*>*>(reinterpret_cast<__int64>(&Inventory) + ItemInstancesOffset);
+    
+    ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry());
+    ItemInstancesOffsetPtr.Add(BP);
+
+    Update(PlayerController, &ItemEntry);
 
     return BP;
 }

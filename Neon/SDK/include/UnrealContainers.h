@@ -332,6 +332,7 @@ template <typename InElementType> class TArray {
          * Constructor, initializes element number counters.
          */
         FORCEINLINE TArray() : Data( nullptr ), ArrayNum( 0 ), ArrayMax( 0 ) {}
+
       protected:
         ElementType *Data;
         int32 ArrayNum;
@@ -512,39 +513,52 @@ template <typename InElementType> class TArray {
                 }
         }
 
-        FORCEINLINE int32 Emplace( InElementType &Item ) {
+        FORCEINLINE int32 Emplace( InElementType &Item,
+                                   int32 ElementSize = sizeof( ElementType ) ) {
                 const int32 Index = AddUnitalized( 1 );
-                Data[Index] = Item;
+                memcpy_s( (InElementType *)( __int64( Data ) +
+                                             ( ArrayNum * ElementSize ) ),
+                          ElementSize, (void *)&Item, ElementSize );
 
                 return Index;
         }
 
-        FORCEINLINE int32 Emplace( const InElementType &Item ) {
+        FORCEINLINE int32 Emplace( const InElementType &Item,
+                                   int32 ElementSize = sizeof( ElementType ) ) {
                 const int32 Index = AddUnitalized( 1 );
-                Data[Index] = Item;
+                memcpy_s( (InElementType *)( __int64( Data ) +
+                                             ( ArrayNum * ElementSize ) ),
+                          ElementSize, (void *)&Item, ElementSize );
 
                 return Index;
         }
 
-        FORCEINLINE ElementType &Emplace_GetRef( InElementType &Item ) {
+        FORCEINLINE ElementType &
+        Emplace_GetRef( InElementType &Item,
+                        int32 ElementSize = sizeof( ElementType ) ) {
                 const int32 Index = AddUnitalized( 1 );
-                Data[Index] = Item;
+                memcpy_s( (InElementType *)( __int64( Data ) +
+                                             ( ArrayNum * ElementSize ) ),
+                          ElementSize, (void *)&Item, ElementSize );
                 return Data[Index];
         }
 
-        FORCEINLINE int32 Add( InElementType &Item ) {
+        FORCEINLINE int32 Add( InElementType &Item,
+                               int32 ElementSize = sizeof( ElementType ) ) {
                 if ( &Item )
-                        return Emplace( Item );
+                        return Emplace( Item, ElementSize );
         }
 
-        FORCEINLINE int32 Add( const ElementType &Item ) {
+        FORCEINLINE int32 Add( const ElementType &Item, int32 ElementSize = sizeof(ElementType) ) {
                 if ( &Item )
-                        return Emplace( Item );
+                        return Emplace( Item,ElementSize );
         }
 
-        FORCEINLINE ElementType &Add_GetRef( ElementType &Item ) {
+        FORCEINLINE ElementType &
+        Add_GetRef( ElementType &Item,
+                    int32 ElementSize = sizeof( ElementType ) ) {
                 if ( &Item ) {
-                        return Emplace_GetRef( Item );
+                        return Emplace_GetRef( Item,ElementSize );
                 }
         }
 
@@ -583,7 +597,6 @@ template <typename InElementType> class TArray {
                 Data = nullptr;
         }
 
-
         typedef TIndexedContainerIterator<TArray, ElementType, SizeType>
             TIterator;
         typedef TIndexedContainerIterator<const TArray, const ElementType,
@@ -621,10 +634,11 @@ template <typename InElementType> class TArray {
                 return RangedForIteratorType( ArrayNum, GetData() + Num() );
         }
         FORCEINLINE RangedForConstIteratorType end() const {
-                return RangedForConstIteratorType( ArrayNum, GetData() + Num() );
+                return RangedForConstIteratorType( ArrayNum,
+                                                   GetData() + Num() );
         }
 };
-
+        
 template <typename T> struct TTupleBaseElement {
         TTupleBaseElement( TTupleBaseElement && ) = default;
         TTupleBaseElement( const TTupleBaseElement & ) = default;

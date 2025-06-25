@@ -41,5 +41,5 @@ public:
 public:
     static void HandleInventoryLocalUpdate();
     static void Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry* Entry);
-    static UObject* GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int Count, int LoadedAmmo, int Level);
+    static UObject* GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level);
 };
