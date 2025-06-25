@@ -40,14 +40,14 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
         const FGameplayEventData*
     );
 
-    auto InternalTryActivate = reinterpret_cast<TryActivateFunc>(Finder->InternalTryActivateAbility());
+   auto InternalTryActivate = reinterpret_cast<TryActivateFunc>(Finder->InternalTryActivateAbility());
     if (!InternalTryActivate(AbilitySystemComponent, Handle, PredictionKey, &InstancedAbility, nullptr, TriggerEventData))
     {
         GetDefaultObj()->CallFunc<void>("AbilitySystemComponent", "ClientActivateAbilityFailed", Handle, PredictionKey.GetCurrent());
         Spec->SetInputPressed(false);
     }
     
-    AbilitySystemComponent->GetActivatableAbilities().MarkItemDirty(*Spec);
+    AbilitySystemComponent->GetActivatableAbilities().MarkItemDirty(*Spec); 
 }
 
 void UAbilitySystemComponent::GiveAbility(UAbilitySystemComponent* AbilitySystemComponent, UClass* Ability)
@@ -77,8 +77,7 @@ void UAbilitySystemComponent::GiveAbility(UAbilitySystemComponent* AbilitySystem
     } 
     if (Finder->GiveAbility())
     {
-        FGameplayAbilitySpecHandle SpecHandle = Spec.GetHandle();
-        ((GiveAbilityFunc)uint64_t(Finder->GiveAbility()))(AbilitySystemComponent, &SpecHandle, Spec);
+        ((GiveAbilityFunc)uint64_t(Finder->GiveAbility()))(AbilitySystemComponent, &Spec.GetHandle(), Spec);
     }
 }
 
