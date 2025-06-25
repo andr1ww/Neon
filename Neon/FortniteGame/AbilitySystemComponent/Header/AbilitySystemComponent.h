@@ -18,7 +18,7 @@ public:
 
 struct FGameplayAbilitySpecHandle
 {
-   int32 Handle;
+   int Handle;
 };
 
 struct FGameplayAbilitySpec : public FFastArraySerializerItem

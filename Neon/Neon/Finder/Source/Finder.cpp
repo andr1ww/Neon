@@ -596,12 +596,8 @@ uint64 UFinder::ConstructSpec()
     static uint64 CachedResult = 0;
     if (CachedResult != 0)
         return CachedResult;
-
-    if (Engine_Version == 4.24)
-    {
-        CachedResult = Memcury::Scanner::FindPattern("80 61 29 F8 48 8B 44 24 ?").Get();
-    }
-    else if (Engine_Version == 4.25)
+    
+    if (Engine_Version == 4.25)
     {
         auto ba = Memcury::Scanner::FindPattern("48 8B 44 24 ? 80 61 29 F8 80 61 31 FE 48 89 41 20 33 C0 89 41", false).Get();
         if (!ba)
@@ -666,7 +662,7 @@ uint64 UFinder::GiveAbility()
 
     if (Engine_Version <= 4.20)
          return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 56 57 41 56 48 83 EC 20 83 B9").Get();
-    if (Engine_Version == 4.21)
+    if (Engine_Version == 4.21 || Engine_Version == 4.23)
          return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 48 89 7C 24 ? 41 56 48 83 EC 20 83 B9 ? ? ? ? ? 49 8B E8 4C 8B F2").Get();
     if (Engine_Version == 5.00)
         return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 56 48 83 EC 20 8B 81 ? ? ? ? 49 8B E8 4C").Get(); 
