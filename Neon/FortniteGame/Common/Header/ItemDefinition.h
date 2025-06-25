@@ -7,9 +7,9 @@ class UFortItemDefinition : public UObject
 public:
     class UFortWorldItem* CreateTemporaryItemInstanceBP(int32 Count, int32 Level)
     {
-        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortItemDefinition", "CreateTemporaryItemInstanceBP");
+        static UFunction* Func = Runtime::StaticFindObject<UFunction>("/Script/FortniteGame.FortItemDefinition.CreateTemporaryItemInstanceBP");
 
-        if (Info.Func)
+        if (Func)
         {
             size_t ParmsSize = 0x10;//Info.Func->GetParmsSize();
             void* Parms = ::malloc(ParmsSize);
@@ -21,9 +21,9 @@ public:
                 *(int32*)(__int64(Parms) + 0x0) = Count;
                 *(int32*)(__int64(Parms) + 0x4) = Level;
 
-                ProcessEvent(Info.Func, Parms);
+                ProcessEvent(Func, &Parms);
 
-                UFortWorldItem* ReturnValue = *(UFortWorldItem**)(__int64(Parms) + 0x8);
+                UFortWorldItem* ReturnValue = *(UFortWorldItem**)(__int64(&Parms) + 0x8);
                 ::free(Parms);
 
                 return ReturnValue;
