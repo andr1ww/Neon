@@ -11,6 +11,7 @@
 
 bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 {
+    UE_LOG(LogNeon, Log, __FUNCTION__);
     AFortGameStateAthena* GameState = GameMode->GetGameState();
     if (!GameState)
     {

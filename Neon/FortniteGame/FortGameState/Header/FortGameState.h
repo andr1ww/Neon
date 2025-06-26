@@ -8,7 +8,7 @@
 class AFortGameStateAthena : public SDK::UObject
 {
 public:
-    DEFINE_MEMBER(FPlaylistPropertyArray, AFortGameStateAthena, CurrentPlaylistInfo)
+    DEFINE_PTR(FPlaylistPropertyArray, AFortGameStateAthena, CurrentPlaylistInfo)
     DEFINE_MEMBER(UFortPlaylistAthena*, AFortGameStateAthena, CurrentPlaylistData)
     void OnRep_CurrentPlaylistId();
     void OnRep_CurrentPlaylistData();

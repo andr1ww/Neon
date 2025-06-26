@@ -40,6 +40,10 @@ uint64 UFinder::GIsClient()
 
 uint64 UFinder::StaticFindObject()
 {
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+    
     if (Engine_Version == 500)
     {
         auto addr = Memcury::Scanner::FindPattern("40 55 53 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 45 33 F6 4C 8B E1 45 0F B6 E9 49 8B F8 41 8B C6", false).Get();
@@ -47,7 +51,7 @@ uint64 UFinder::StaticFindObject()
         if (!addr)
             addr = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 4C 89 64 24 ? 55 41 55 41 57 48 8B EC 48 83 EC 60 45 8A E1 4C 8B E9 48 83 FA").Get(); // 20.00
 
-        return addr;
+        return CachedResult = addr;
     }
 
     if (Engine_Version >= 427) 
@@ -55,31 +59,36 @@ uint64 UFinder::StaticFindObject()
         if (Fortnite_Version.GetMajorVersion() < 18)
         {
             if (Fortnite_Version == 16.50)
-                return Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC 60 45 33 ED 45 8A F9 44 38 2D ? ? ? ? 49 8B F8 48 8B F2 4C 8B E1").Get();
+                 return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC 60 45 33 ED 45 8A F9 44 38 2D ? ? ? ? 49 8B F8 48 8B F2 4C 8B E1").Get();
 		
-            return Memcury::Scanner::FindPattern("40 55 53 57 41 54 41 55 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85").Get();
+             return CachedResult = Memcury::Scanner::FindPattern("40 55 53 57 41 54 41 55 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85").Get();
         }
         else
-            return Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC 60 45 33 ED 45 8A F9 44 38 2D ? ? ? ? 49 8B F8 48 8B").Get();
+             return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC 60 45 33 ED 45 8A F9 44 38 2D ? ? ? ? 49 8B F8 48 8B").Get();
     }
 
     if (Engine_Version == 4.16)
-        return Memcury::Scanner::FindPattern("4C 8B DC 57 48 81 EC ? ? ? ? 80 3D ? ? ? ? ? 49 89 6B F0 49 89 73 E8").Get();
+         return CachedResult = Memcury::Scanner::FindPattern("4C 8B DC 57 48 81 EC ? ? ? ? 80 3D ? ? ? ? ? 49 89 6B F0 49 89 73 E8").Get();
 
     if (Engine_Version == 4.19)
     {
         auto iasdfk = Memcury::Scanner::FindPattern("4C 8B DC 49 89 5B 08 49 89 6B 18 49 89 73 20 57 41 56 41 57 48 83 EC 60 80 3D", false).Get();
 
         if (!iasdfk)
-            return Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 55 57 41 54 41 56 41 57 48 8B EC 48 83 EC 60 80 3D ? ? ? ? ? 45 0F B6 F1 49 8B F8").Get();
+             CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 55 57 41 54 41 56 41 57 48 8B EC 48 83 EC 60 80 3D ? ? ? ? ? 45 0F B6 F1 49 8B F8").Get();
 
-        return iasdfk;
+         return CachedResult = iasdfk;
     }
-
+    
     auto Addr = Memcury::Scanner::FindStringRef(L"Illegal call to StaticFindObject() while serializing object data!", true, 1, Engine_Version >= 427);
     auto Final = FindBytes(Addr, { 0x48, 0x89, 0x5C }, 255, 0, true, 0, false); 
 
-    return Final;
+    if (Final == 0)
+    {
+        Final = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 55 57 41 56 48 8B EC 48 83 EC ? 33 DB 4C 8B F1").Get();
+    }
+    
+    return CachedResult = Final;
 }
 
 
@@ -248,7 +257,17 @@ uint64 UFinder::GetMaxTickRate()
 
 uint64 UFinder::DispatchRequest()
 {
-    return Memcury::Scanner::FindStringRef(L"MCP-Profile: Dispatching request to %s").ScanFor({ 0x48,0x89,0x5C }, false).Get();
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+    
+    auto Scanner = Memcury::Scanner::FindStringRef(L"MCP-Profile: Dispatching request to %s");
+    if (Scanner.Get())
+    {
+         CachedResult = Scanner.ScanFor({ 0x48,0x89,0x5C }, false).Get();
+    } 
+    
+    return CachedResult;
 }  
 
 uint64 UFinder::CreateNetDriver()

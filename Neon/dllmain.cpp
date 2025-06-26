@@ -52,6 +52,11 @@ void InitNullsAndRetTrues() {
 		NullFuncs.push_back(Addr.ScanFor({ 0x48, 0x89, 0x5C }, false, 0, 1, 2000).Get());
 	}
 
+	if (Fortnite_Version == 23.50)
+	{
+		NullFuncs.push_back(Memcury::Scanner::FindPattern("40 53 48 83 EC ? 48 8B 01 48 8B D9 FF 90 ? ? ? ? 48 85 C0 74 ? F6 80 ? ? ? ? ? 74").Get());
+	}
+
 	NullFuncs.push_back(Finder->KickPlayer());
 	RetTrueFuncs.push_back(Finder->WorldNetMode());
 	RetTrueFuncs.push_back(Finder->WorldGetNetMode());
@@ -84,10 +89,17 @@ void Main()
 
 	MH_Initialize();
 	Sleep(5000);
-	
-	*(bool*)(Finder->GIsClient()) = false; 
-	*(bool*)(Finder->GIsClient() + 1) = true;
 
+	if (Finder->GIsClient())
+	{
+		*(bool*)(Finder->GIsClient()) = false; 
+		*(bool*)(Finder->GIsClient() + 1) = true;
+	} else
+	{
+		*(bool*)(IMAGEBASE + 0xEBD8A4C) = false; 
+		*(bool*)(IMAGEBASE + 0xEBD8A4C + 1) = true; 
+	}
+	
 	InitNullsAndRetTrues();
 	
 	Runtime::Hook<&AFortGameModeAthena::StaticClass>("ReadyToStartMatch", AFortGameModeAthena::ReadyToStartMatch, ReadyToStartMatchOriginal);
@@ -108,8 +120,11 @@ void Main()
 	Runtime::VFTHook(SDK::StaticClassImpl("FortAbilitySystemComponentAthena")->GetClassDefaultObject()->GetVTable(), InternalServerTryActivateAbilityIndex, UAbilitySystemComponent::InternalServerTryActivateAbility);
 
 	Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
-	Runtime::Hook(Finder->DispatchRequest(), UNetDriver::DispatchRequest, (void**)&DispatchRequestOriginal);
-	
+	if (Finder->DispatchRequest())
+	{
+		Runtime::Hook(Finder->DispatchRequest(), UNetDriver::DispatchRequest, (void**)&DispatchRequestOriginal);
+	}
+
 	UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
 	FString WorldName;
 	if (Fortnite_Version <= 10.40)
@@ -129,6 +144,10 @@ void Main()
 	}
     
 	ExecuteConsoleCommand(UWorld::GetWorld(), WorldName, nullptr);
+	if (Fortnite_Version >= 19.10)
+	{
+		ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortUIDirector", nullptr);
+	}
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,

@@ -316,6 +316,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             reinterpret_cast<void(*)(UReplicationDriver*)>(NetDriver->GetReplicationDriver()->GetVTable()[Finder->RepDriverServerReplicateActors()])(NetDriver->GetReplicationDriver());
         } else
         {
+            UE_LOG(LogNeon, Log, __FUNCTION__);
             ServerReplicateActors(NetDriver, DeltaSeconds);
         }
     }
