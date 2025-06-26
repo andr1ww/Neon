@@ -142,10 +142,11 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
 
     auto Pawn = GameMode->CallFunc<APawn*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer,  StartSpot->CallFunc<FTransform>("Actor", "GetTransform"));;
 
-    for (auto I : GameMode->GetStartingItems())
+    auto StartingItemsArray = GameMode->GetStartingItems();
+    int32 FItemAndCountSize = StaticClassImpl("ItemAndCount")->GetSize();
+    for (int i = 0; i < StartingItemsArray.Num(); i++)
     {
-        int32 FItemAndCountSize = StaticClassImpl("ItemAndCount")->GetSize();
-        auto Item = (FItemAndCount*)Runtime::ResizeVirtualMemory(&I, sizeof(FItemAndCount), FItemAndCountSize);
+	auto Item = (FItemAndCount*) ((uint8*) StartingItemsArray.GetData() + (i * FItemAndCountSize));
 
         if (!Item) {
             UE_LOG(LogNeon, Fatal, "StartingItem is null in SpawnDefaultPawnFor!");
