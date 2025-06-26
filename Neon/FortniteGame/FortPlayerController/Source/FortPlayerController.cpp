@@ -102,7 +102,7 @@ void AFortPlayerControllerAthena::ServerPlayEmoteItem(AFortPlayerControllerAthen
         Spec->ReplicationKey = -1;
         Spec->GetHandle().Handle = rand();
         Spec->SetAbility(Ability);
-        Spec->SetSourceObject(nullptr);
+        Spec->SetSourceObject(Asset);
         Spec->SetInputID(-1);
         Spec->SetLevel(1);
     
