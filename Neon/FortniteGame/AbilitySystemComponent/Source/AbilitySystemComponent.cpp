@@ -10,6 +10,9 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
     FPredictionKey& PredictionKey, 
     FGameplayEventData* TriggerEventData)
 {
+    UE_LOG(LogNeon, Log, "AbilitySystemComponent::InternalServerTryActivateAbility: Handle: %d, InputPressed: %d, PredictionKey: %p, TriggerEventData: %p", 
+           Handle.Handle, InputPressed, &PredictionKey, TriggerEventData);
+    
     FGameplayAbilitySpec* Spec = nullptr;
     auto& ActivatableAbilities = AbilitySystemComponent->GetActivatableAbilities();
     auto& Items = ActivatableAbilities.GetItems();

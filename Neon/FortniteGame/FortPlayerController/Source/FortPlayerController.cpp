@@ -57,4 +57,62 @@ void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControll
     }
 }
 
+void AFortPlayerControllerAthena::ServerPlayEmoteItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+    UFortMontageItemDefinitionBase* Asset;
+    Stack.StepCompiledIn(&Asset);
+    Stack.IncrementCode();
+
+    UAbilitySystemComponent* AbilitySystemComponent = PlayerController->GetPlayerState()->GetAbilitySystemComponent();
+    UGameplayAbility* Ability = nullptr;
+
+    if (Cast<UAthenaSprayItemDefinition>(Asset))
+    {
+        static auto SprayAbility = UGAB_Spray_Generic_C::GetDefaultObj();
+        Ability = Cast<UGameplayAbility>(SprayAbility);
+    }
+    
+    if (auto Dance = Cast<UAthenaDanceItemDefinition>(Asset))
+    {
+        PlayerController->GetMyFortPawn()->SetbMovingEmote(Dance->GetbMovingEmote());
+        PlayerController->GetMyFortPawn()->SetbMovingEmoteForwardOnly(Dance->GetbMoveForwardOnly());
+        PlayerController->GetMyFortPawn()->SetEmoteWalkSpeed(Dance->GetWalkForwardSpeed());
+        static auto EmoteAbility = UGAB_Emote_Generic_C::GetDefaultObj();
+        Ability = Cast<UGameplayAbility>(EmoteAbility);
+    }
+    
+    if (Ability)
+    {
+        int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
+        FGameplayAbilitySpec* Spec = (FGameplayAbilitySpec*)VirtualAlloc(0, GameplayAbilitySpecSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    
+        if (!Spec) return;
+    
+        new(Spec) FGameplayAbilitySpec();
+    
+        using GiveAbilityFunc = FGameplayAbilitySpecHandle(__fastcall*)(
+            UAbilitySystemComponent*,
+            FGameplayAbilitySpecHandle*, 
+            const FGameplayAbilitySpec&,
+            FGameplayEventData*
+        );
+        
+        Spec->MostRecentArrayReplicationKey = -1;
+        Spec->ReplicationID = -1;
+        Spec->ReplicationKey = -1;
+        Spec->GetHandle().Handle = rand();
+        Spec->SetAbility(Ability);
+        Spec->SetSourceObject(nullptr);
+        Spec->SetInputID(-1);
+        Spec->SetLevel(1);
+    
+        FGameplayAbilitySpecHandle Handle = Spec->GetHandle();
+    
+        if (Finder->GiveAbilityAndActivateOnce())
+        {
+            ((GiveAbilityFunc)Finder->GiveAbilityAndActivateOnce())(AbilitySystemComponent, &Handle, *Spec, nullptr);
+        }
+    }
+}
+
  

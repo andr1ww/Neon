@@ -17,5 +17,5 @@ class AFortPlayerStateAthena : public AFortPlayerStateZone
 {
 public:
     DEFINE_MEMBER(UFortHeroType, AFortPlayerStateAthena, HeroType);
-    DEFINE_MEMBER(UAbilitySystemComponent*, AFortPlayerStateAthena, AbilitySystemComponent);
+    DEFINE_PTR(UAbilitySystemComponent, AFortPlayerStateAthena, AbilitySystemComponent);
 };

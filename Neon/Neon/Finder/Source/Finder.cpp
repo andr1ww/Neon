@@ -611,6 +611,10 @@ uint64 UFinder::ConstructSpec()
 
 uint64 UFinder::GiveAbilityAndActivateOnce()
 {
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+    
     if (Engine_Version == 4.26)
     {
         auto sig1 = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC 40 49 8B 40 10 49 8B D8 48 8B FA 48 8B F1", false).Get();
@@ -618,25 +622,25 @@ uint64 UFinder::GiveAbilityAndActivateOnce()
         if (!sig1)
             sig1 = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC 40 49 8B 40 10 49").Get(); // 15.50
 
-        return sig1;
+        return CachedResult = sig1;
     }
 
-    auto Addrr = Memcury::Scanner::FindStringRef(L"GiveAbilityAndActivateOnce called on ability %s on the client, not allowed!", true, 0, Engine_Version >= 500).Get();
+    auto Addrr = Memcury::Scanner::FindStringRef(L"GiveAbilityAndActivateOnce called on ability %s on the client, not allowed!", true, 0, Engine_Version >= 5.00).Get();
 
     for (int i = 0; i < 1000; i++)
     {
         if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x40 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x55)
         {
-            return Addrr - i;
+            return CachedResult = Addrr - i;
         }
 
         if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(Addrr - i + 2) == 0x5C)
         {
-            return Addrr - i;
+            return CachedResult = Addrr - i;
         }
     }
 
-    return 0;
+    return CachedResult = 0;
 }
 
 uint64 UFinder::GetInterfaceAddress()
