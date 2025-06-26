@@ -28,17 +28,27 @@ void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControll
     if (!PlayerController) return;
 
     FFortItemEntry* Entry = nullptr;
+    AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+    FFortItemList& Inventory = WorldInventory->GetInventory();
+    TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
+    int32 FortItemEntrySize = StaticClassImpl("FortItemEntry")->GetSize();
 
-    for (auto& Item : PlayerController->GetWorldInventory()->GetInventory().GetReplicatedEntries())
+    for (int32 i = 0; i < ReplicatedEntriesOffsetPtr.Num(); i++)
     {
-        if (Item.GetItemGuid() == ItemGuid)
+        auto Item = (FFortItemEntry*) ((uint8*) ReplicatedEntriesOffsetPtr.GetData() + (i * FortItemEntrySize));
+        if (Item->GetItemGuid() == ItemGuid)
         {
-            Entry = &Item;
+            Entry = Item;
             break;
         }
     }
 
-    if (!Entry) return;
+    if (!Entry)
+    {
+        UE_LOG(LogNeon, Warning, "ServerExecuteInventoryItem: Entry not found!");
+        return;
+    }
+    
     UFortWeaponItemDefinition* ItemDefinition = Cast<UFortWeaponItemDefinition>(Entry->GetItemDefinition());
     if (Fortnite_Version.GetMajorVersion() >= 19.00) {
         PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "EquipWeaponDefinition", ItemDefinition, ItemGuid, Entry->GetTrackerGuid(), false);

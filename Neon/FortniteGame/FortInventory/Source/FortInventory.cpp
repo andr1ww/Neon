@@ -34,7 +34,6 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     }
 
     UFortWorldItem* BP = Def->CreateTemporaryItemInstanceBP(Count, Level);
-    UE_LOG(LogNeon, Log, "BP: %s", BP->GetFName().ToString().ToString().c_str());
     
     if (!BP) {
         UE_LOG(LogNeon, Log, "Failed to create temporary item instance");

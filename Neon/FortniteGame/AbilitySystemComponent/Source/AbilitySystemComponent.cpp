@@ -7,10 +7,9 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
     UAbilitySystemComponent* AbilitySystemComponent, 
     FGameplayAbilitySpecHandle Handle, 
     bool InputPressed, 
-    FPredictionKey PredictionKey, 
+    FPredictionKey& PredictionKey, 
     FGameplayEventData* TriggerEventData)
 {
-    UE_LOG(LogNeon, Log, "InternalServerTryActivateAbility");
     FGameplayAbilitySpec* Spec = nullptr;
     auto& ActivatableAbilities = AbilitySystemComponent->GetActivatableAbilities();
     auto& Items = ActivatableAbilities.GetItems();
@@ -28,14 +27,13 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
     if (!Spec)
     {
         UE_LOG(LogNeon, Log, "AbilitySystemComponent::InternalServerTryActivateAbility: Spec not found for Handle: %d", Handle.Handle);
-        GetDefaultObj()->CallFunc<void>("AbilitySystemComponent", "ClientActivateAbilityFailed", Handle, PredictionKey.GetCurrent());
         return;
     }
 
     Spec->SetInputPressed(InputPressed);
 
     UGameplayAbility* InstancedAbility = nullptr;
-
+    
     using TryActivateFunc = bool (*)(
         UAbilitySystemComponent*, 
         FGameplayAbilitySpecHandle, 
@@ -44,15 +42,14 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
         void*, 
         const FGameplayEventData*
     );
-
-   auto InternalTryActivate = reinterpret_cast<TryActivateFunc>(Finder->InternalTryActivateAbility());
+    
+    auto InternalTryActivate = reinterpret_cast<TryActivateFunc>(Finder->InternalTryActivateAbility());
     if (!InternalTryActivate(AbilitySystemComponent, Handle, PredictionKey, &InstancedAbility, nullptr, TriggerEventData))
     {
-        GetDefaultObj()->CallFunc<void>("AbilitySystemComponent", "ClientActivateAbilityFailed", Handle, PredictionKey.GetCurrent());
         Spec->SetInputPressed(false);
     }
     
-    AbilitySystemComponent->GetActivatableAbilities().MarkItemDirty(*Spec); 
+    AbilitySystemComponent->GetActivatableAbilities().MarkItemDirty(*Spec);
 }
 
 void UAbilitySystemComponent::GiveAbility(UAbilitySystemComponent* AbilitySystemComponent, UClass* Ability)
@@ -103,7 +100,6 @@ void UAbilitySystemComponent::GiveAbilitySet(UAbilitySystemComponent* AbilitySys
                 if (!Class) {
                     continue;
                 }
-                UE_LOG(LogNeon, Log, "Ability[%d]: %s", i, Class->GetFName().ToString().ToString().c_str());
                 GiveAbility(AbilitySystemComponent, Class);
             }
         }
@@ -115,7 +111,6 @@ void UAbilitySystemComponent::GiveAbilitySet(UAbilitySystemComponent* AbilitySys
                 if (!EffectInfo.GetGameplayEffect()) {
                     continue;
                 }
-                UE_LOG(LogNeon, Log, "Passive Effect[%d]: %s", i, EffectInfo.GetGameplayEffect()->GetFName().ToString().ToString().c_str());
                 FGameplayEffectContextHandle EffectContext{}; 
                 AbilitySystemComponent->CallFunc<void>("AbilitySystemComponent", "BP_ApplyGameplayEffectToSelf", EffectInfo.GetGameplayEffect(), EffectInfo.Level, EffectContext);
             }

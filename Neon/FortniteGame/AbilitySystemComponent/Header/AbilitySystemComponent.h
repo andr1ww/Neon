@@ -4,16 +4,22 @@
 #include "Engine/Array/Header/Array.h"
 #include "Neon/Runtime/Runtime.h"
 
-using FGameplayEventData = char[0xB0]; 
+struct Pad10 { char Pad[0x10]; };
+struct Pad18 { char Pad[0x18]; };
+struct PadA8 { char Pad[0xA8]; };
+struct PadB0 { char Pad[0xB0]; };
+
+using FGameplayEventData = PadB0; 
 
 class UGameplayAbility : public UObject
 {
     
 };
+
 struct FPredictionKey final
 {
 public:
-    DEFINE_MEMBER(int16_t, FPredictionKey, Current)  
+    uint8_t Pad[0x10]; 
 };
 
 struct FGameplayAbilitySpecHandle
@@ -69,7 +75,7 @@ class UAbilitySystemComponent : public UObject
 public:
     DEFINE_MEMBER(FGameplayAbilitySpecContainer, UAbilitySystemComponent, ActivatableAbilities);
 public:
-    static void InternalServerTryActivateAbility(UAbilitySystemComponent*, FGameplayAbilitySpecHandle, bool, FPredictionKey, FGameplayEventData*);
+    static void InternalServerTryActivateAbility(UAbilitySystemComponent*, FGameplayAbilitySpecHandle, bool, FPredictionKey&, FGameplayEventData*);
     static void GiveAbility(UAbilitySystemComponent* AbilitySystemComponent, UClass* Ability);
     static void GiveAbilitySet(UAbilitySystemComponent* AbilitySystemComponent, UFortAbilitySet* Set);
 public:
