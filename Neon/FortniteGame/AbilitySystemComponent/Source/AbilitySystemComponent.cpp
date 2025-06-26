@@ -12,14 +12,15 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
 {
     UE_LOG(LogNeon, Log, "InternalServerTryActivateAbility");
     FGameplayAbilitySpec* Spec = nullptr;
-    for (int i = 0; i < AbilitySystemComponent->GetActivatableAbilities().GetItems().Num(); i++) {
-        FGameplayAbilitySpec& CurrentSpec = AbilitySystemComponent->GetActivatableAbilities().GetItems()[i];
-        int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
-        FGameplayAbilitySpec* Spec = (FGameplayAbilitySpec*)Runtime::ResizeVirtualMemory(&CurrentSpec, sizeof(FGameplayAbilitySpec), GameplayAbilitySpecSize);
+    auto& ActivatableAbilities = AbilitySystemComponent->GetActivatableAbilities();
+    auto& Items = ActivatableAbilities.GetItems();
+    int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
+    for (int i = 0; i < Items.Num(); i++) {
+        auto CurrentSpec = (FGameplayAbilitySpec*) ((uint8*) Items.GetData() + (i * GameplayAbilitySpecSize));
         
-        if (Spec->GetHandle().Handle == Handle.Handle)
+        if (CurrentSpec->GetHandle().Handle == Handle.Handle)
         {
-            Spec = &CurrentSpec;
+            Spec = CurrentSpec;
             break; 
         }
     }

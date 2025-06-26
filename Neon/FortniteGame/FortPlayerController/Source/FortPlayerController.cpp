@@ -40,7 +40,11 @@ void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControll
 
     if (!Entry) return;
     UFortWeaponItemDefinition* ItemDefinition = Cast<UFortWeaponItemDefinition>(Entry->GetItemDefinition());
-    PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "EquipWeaponDefinition", ItemDefinition, ItemGuid, Entry->GetTrackerGuid(), false);
+    if (Fortnite_Version.GetMajorVersion() >= 19.00) {
+        PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "EquipWeaponDefinition", ItemDefinition, ItemGuid, Entry->GetTrackerGuid(), false);
+    } else {
+        PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "EquipWeaponDefinition", ItemDefinition, ItemGuid);
+    }
 }
 
  
