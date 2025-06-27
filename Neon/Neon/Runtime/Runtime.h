@@ -252,7 +252,7 @@ namespace Runtime
 			for (int i = 0; i < 4000; i++) {
 				if (*((uint8*)Addr + i) == 0xFF && (*((uint8*)Addr + i + 1) == 0x90 || *((uint8*)Addr + i + 1) == 0x93 || *((uint8*)Addr + i + 1) == 0xA0)) {
 					auto VTIndex = *(uint32_t*)(Addr + i + 2);
-					UE_LOG(LogNeon, Log, "VTable Index for %s: %d", Func->GetFName().ToString().ToString().c_str(), VTIndex / 8);
+					UE_LOG(LogNeon, Log, "VTable Index for %s: %x", Func->GetFName().ToString().ToString().c_str(), VTIndex / 8);
 					return VTIndex / 8;
 				}
 			}
