@@ -145,6 +145,10 @@ class FName
         }
 
         FString ToString() const;
+
+    bool operator<(const FName& other) const {
+        return ComparisonIndex < other.ComparisonIndex;
+    }
 };
 
 /** Mask for all object flags */
