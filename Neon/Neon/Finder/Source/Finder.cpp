@@ -209,6 +209,11 @@ uint64 UFinder::PauseBeaconRequests()
 
 uint64 UFinder::SetWorld()
 {
+    if (Fortnite_Version >= 23.00)
+    {
+        return Memcury::Scanner::FindPattern("E8 ? ? ? ? 48 8D 8B ? ? ? ? 48 8B D7 E8 ? ? ? ? 48 85 FF 0F 84 ? ? ? ? 83 64 24").RelativeOffset(1).Get();
+    }
+    
     if (Fortnite_Version.GetMajorVersion() == 18)
     { 
         return uint64(UNetDriver::GetDefaultObj()->GetVTable()[0x73]);
@@ -454,7 +459,7 @@ uint64 UFinder::GameSessionPatch()
 
 uint64 UFinder::GetWorldContextFromObject()
 {
-    Memcury::Scanner Scanner = Memcury::Scanner::FindPattern("E8 ? ? ? ? 48 85 C0 75 ? E8 ? ? ? ? 4C 8B C3 48 8B D0 48 8B CE");
+    Memcury::Scanner Scanner = Memcury::Scanner::FindPattern("E8 ? ? ? ? 48 85 C0 74 ? 4C 63 B0");
     if (Scanner.Get())
         return Scanner.RelativeOffset(1).Get();
 }

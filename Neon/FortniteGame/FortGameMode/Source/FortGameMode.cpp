@@ -9,14 +9,14 @@
 #include "Neon/Finder/Header/Finder.h"
 #include "Neon/Runtime/Runtime.h"
 
-bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
+bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFrame& Stack, bool* Result)
 {
+    Stack.IncrementCode();
     UE_LOG(LogNeon, Log, __FUNCTION__);
     AFortGameStateAthena* GameState = GameMode->GetGameState();
     if (!GameState)
     {
-        ReadyToStartMatchOriginal(GameMode);
-        return false;
+        return *Result = false;
     }
     
     static bool bSetup = false;
@@ -59,8 +59,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 
     if (!GameState->GetMapInfo())
     {
-        ReadyToStartMatchOriginal(GameMode);
-        return false;
+        return *Result = false;
     }
 
     if (!UWorld::GetWorld()->GetNetDriver())
@@ -113,12 +112,12 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
             AFortPlayerControllerAthena* PlayerController = AlivePlayers[i];
             if (PlayerController->GetbHasServerFinishedLoading())
             {
-                return true;
+                return *Result = true;
             }
         }
     }
     
-    return ReadyToStartMatchOriginal(GameMode);
+    return *Result = false;
 }
 
 APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer, AActor* StartSpot)
