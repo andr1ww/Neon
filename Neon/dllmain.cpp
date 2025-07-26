@@ -10,8 +10,12 @@
 
 static inline std::vector<uint64_t> NullFuncs = {};
 static inline std::vector<uint64_t> RetTrueFuncs = {};
+static inline std::vector<uint64_t> FuncsTo85 = {};
 
 void InitNullsAndRetTrues() {
+	if (Fortnite_Version >= 23)
+		NullFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ? 4C 8B E2 4C 8B F1").Get());
+	
 	if (Fortnite_Version == 0) NullFuncs.push_back(Memcury::Scanner::FindPattern("48 89 54 24 ? 48 89 4C 24 ? 55 53 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 8B 41 08 C1 E8 05").Get());
 	else if (Fortnite_Version >= 3.3 && Fortnite_Version <= 4.5) NullFuncs.push_back(Memcury::Scanner::FindPattern("48 8B C4 57 48 81 EC ? ? ? ? 4C 8B 82 ? ? ? ? 48 8B F9 0F 29 70 E8 0F 29 78 D8").Get());
 	else if (Fortnite_Version == 4.1) NullFuncs.push_back(Memcury::Scanner::FindPattern("4C 8B DC 55 49 8D AB ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 49 89 5B 10 48 8D 05 ? ? ? ? 48 8B 1D ? ? ? ? 49 89 73 18 33 F6 40").Get());
@@ -72,6 +76,17 @@ void InitNullsAndRetTrues() {
 		NullFuncs.push_back(Memcury::Scanner::FindPattern("48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 55 48 8D 68 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 83 64 24").Get());
 	}
 
+	if (Fortnite_Version >= 23.00)
+	{
+		uintptr_t rawAddress = Memcury::Scanner::FindPattern("0F 84 ? ? ? ? 48 8D 15 ? ? ? ? 48 8D 4C 24 ? E8 ? ? ? ? 80 3D").Get();
+
+		uintptr_t Offset = rawAddress - IMAGEBASE; 
+		Offset = Offset + 1;                  
+		uintptr_t Addr = Offset + IMAGEBASE;  
+
+		FuncsTo85.push_back(Addr);
+	}
+	
 	for (auto& Func : NullFuncs) {
 		if (Func == 0x0) continue;
 		Runtime::Patch(Func, 0xC3);
@@ -81,6 +96,13 @@ void InitNullsAndRetTrues() {
 		if (Func == 0x0) continue;
 		Runtime::Hook(Func, RetTrue);
 	}
+	
+	for (auto& Func : FuncsTo85)
+	{
+		if (Func == 0x0) continue;
+		Runtime::Patch(Func, 0x85);
+	}
+	
 }
 
 void Main()

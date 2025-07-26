@@ -5,6 +5,10 @@
 
 uint64_t UFinder::WorldNetMode()
 {
+    if (Fortnite_Version == 23.50)
+    {
+        return Memcury::Scanner::FindPattern("48 83 EC ? 48 83 79 ? ? 74 ? B8").Get();
+    }
     auto Addr = Memcury::Scanner::FindStringRef(L"PREPHYSBONES");
 
     auto BeginningFunction = FindBytes(Addr, { 0x40, 0x55 }, 1000, 0, true);
@@ -342,6 +346,8 @@ uint64 UFinder::ApplyCharacterCustomization()
 
 uint64 UFinder::KickPlayer()
 {
+    if (Fortnite_Version >= 23.00)
+        return Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 49 8B F0 48 8B DA 48 85 D2 74 ? 48 83 BA").Get();
     if (Engine_Version == 4.16) // <1.8
         return Memcury::Scanner::FindPattern("40 53 56 48 81 EC ? ? ? ? 48 8B DA 48 8B F1 E8 ? ? ? ? 48 8B 06 48 8B CE").Get(); // postlogin
     if (Fortnite_Version.GetMajorVersion() == 18)
@@ -508,6 +514,9 @@ uint64 UFinder::CallPreReplication()
     if (CachedResult != 0)
         return CachedResult;
 
+    if (Fortnite_Version.GetMajorVersion() >= 23)
+        return CachedResult = Memcury::Scanner::FindPattern("48 85 D2 0F 84 ? ? ? ? 48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 56 41 57 48 8B EC 48 83 EC ? F6 41").Get();
+    
     if (Engine_Version == 4.16)
         CachedResult = Memcury::Scanner::FindPattern("48 85 D2 0F 84 ? ? ? ? 48 8B C4 55 57 41 57 48 8D 68 A1 48 81 EC").Get();
     else if (Engine_Version == 4.19)
@@ -518,8 +527,6 @@ uint64 UFinder::CallPreReplication()
         CachedResult = Memcury::Scanner::FindPattern("48 85 D2 0F 84 ? ? ? ? 48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC 40 F6 41 58 30 48 8B EA 48 8B D9 40 B6 01").Get();
     else if (Fortnite_Version.GetMajorVersion() >= 21)
         CachedResult = Memcury::Scanner::FindPattern("48 85 D2 0F 84 ? ? ? ? 48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC 40 F6 41 58 30 4C 8B F2").Get();
-    else if (Fortnite_Version.GetMajorVersion() >= 23)
-        CachedResult = Memcury::Scanner::FindPattern("48 85 D2 0F 84 ? ? ? ? 48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 56 41 57 48 8B EC 48 83 EC ? F6 41").Get();
 
     return CachedResult;
 }
@@ -555,7 +562,7 @@ uint64 UFinder::DemoReplicateActor()
 uint64 UFinder::WorldGetNetMode()
 {
     if (Fortnite_Version.GetMajorVersion() >= 20)
-        return Memcury::Scanner::FindPattern("48 83 EC ? 48 83 79 ? ? 74 ? B8").Get();
+        return Memcury::Scanner::FindPattern("48 83 EC ? 48 8B 01 FF 90 ? ? ? ? 84 C0 75").Get();
 
     return Memcury::Scanner::FindPattern("48 83 EC ? 48 83 79 ? ? 74 ? B8").Get();
 }

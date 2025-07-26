@@ -12,7 +12,6 @@
 bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFrame& Stack, bool* Result)
 {
     Stack.IncrementCode();
-    UE_LOG(LogNeon, Log, __FUNCTION__);
     AFortGameStateAthena* GameState = GameMode->GetGameState();
     if (!GameState)
     {
@@ -42,7 +41,8 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         
             GameState->OnRep_CurrentPlaylistId();
             GameState->OnRep_CurrentPlaylistInfo();
-
+            GameState->CallFunc<void>("FortGameStateAthena","OnRep_AdditionalPlaylistLevelsStreamed");
+            
             GameMode->SetWarmupRequiredPlayerCount(1);
         } else
         {
@@ -106,15 +106,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
 
     if (GameMode->GetAlivePlayers().Num() > 0)
     {
-        auto AlivePlayers = GameMode->GetAlivePlayers();
-        for (int i = 0; i < AlivePlayers.Num(); i++)
-        {
-            AFortPlayerControllerAthena* PlayerController = AlivePlayers[i];
-            if (PlayerController->GetbHasServerFinishedLoading())
-            {
-                return *Result = true;
-            }
-        }
+        return *Result = GameMode->GetbWorldIsReady() && GameMode->GetAlivePlayers().Num() >= 1;
     }
     
     return *Result = false;

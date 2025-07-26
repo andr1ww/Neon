@@ -24,14 +24,14 @@ public:
 class UPlayer : public UObject
 {
 public:
-    DEFINE_MEMBER(APlayerController*, UPlayer, PlayerController);
+    DEFINE_PTR(APlayerController, UPlayer, PlayerController);
 };
 
 class UNetConnection : public UPlayer
 {
 public:
-    DEFINE_MEMBER(AActor*, UNetConnection, OwningActor);
-    DEFINE_MEMBER(AActor*, UNetConnection, ViewTarget);
+    DEFINE_PTR(AActor, UNetConnection, OwningActor);
+    DEFINE_PTR(AActor, UNetConnection, ViewTarget);
     DEFINE_MEMBER(SDK::TArray<class UChildConnection*>, UNetConnection, Children);
 };
 
@@ -43,7 +43,7 @@ static TSet<FName>* GetClientVisibleLevelNames(UNetConnection* NetConnection)
 class UChildConnection : public UNetConnection
 {
 public:
-    DEFINE_MEMBER(UNetConnection*, UChildConnection, Parent);
+    DEFINE_PTR(UNetConnection, UChildConnection, Parent);
 };
 
 class UReplicationDriver : public UObject
@@ -268,20 +268,19 @@ struct FActorDestructionInfo
 struct FNetViewer final
 {
 public:
-    class UNetConnection*                         Connection;                                        // 0x0000(0x0008)(ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    class AActor*                                 InViewer;                                          // 0x0008(0x0008)(ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    class AActor*                                 ViewTarget;                                        // 0x0010(0x0008)(ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    struct FVector                                ViewLocation;                                      // 0x0018(0x0018)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    struct FVector                                ViewDir;                                           // 0x0030(0x0018)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    DEFINE_PTR(UNetConnection, FNetViewer, Connection);
+    DEFINE_PTR(AActor, FNetViewer, InViewer);
+    DEFINE_PTR(AActor, FNetViewer, ViewTarget);
+    DEFINE_MEMBER(FVector, FNetViewer, ViewLocation);
+    DEFINE_MEMBER(FVector, FNetViewer, ViewDir);
 };
-
 
 class UNetDriver : public UObject
 {
 public:
     DEFINE_MEMBER(FName, UNetDriver, NetDriverName);
     DEFINE_PTR(UReplicationDriver, UNetDriver, ReplicationDriver);
-    DEFINE_MEMBER(TArray<class UNetConnection*>, UNetDriver, ClientConnections);
+    DEFINE_MEMBER(TArray<UNetConnection*>, UNetDriver, ClientConnections);
 public:
     bool InitListen(UWorld* Networknotify, FURL URL, bool bReuseAddressAndPort);
     void SetWorld(UWorld* World);
@@ -323,8 +322,8 @@ public:
     static int32 ServerReplicateActors(UNetDriver* NetDriver, float DeltaSeconds);
     static int32 ServerReplicateActors_PrepConnections(UNetDriver*, float DeltaSeconds);
     static void ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TArray<AActor*>& OutConsiderList, const float ServerTickTime);
-    static int32 ServerReplicateActors_ProcessActors(UNetDriver*, UNetConnection* Connection, TArray<AActor*>& Actors);
-    static bool IsActorRelevantToConnection(const AActor* Actor, const TArray<FNetViewer>& ConnectionViewers);
+    static void ServerReplicateActors_ProcessActors(UNetDriver*, UNetConnection* Connection, TArray<AActor*>& Actors);
+    static bool IsActorRelevantToConnection(AActor* Actor, TArray<FNetViewer>& ConnectionViewers);
     static UNetConnection* IsActorOwnedByAndRelevantToConnection(const AActor* Actor, const TArray<FNetViewer>& ConnectionViewers, bool& bOutHasNullViewTarget);
 public:
     DECLARE_STATIC_CLASS(UNetDriver);
@@ -334,24 +333,39 @@ public:
 inline void (*TickFlushOriginal)(UNetDriver*, float DeltaSeconds);
 inline void (*DispatchRequestOriginal)(__int64 a1, __int64* a2, int a3);
 
-static bool ReplicateToClient(UNetDriver* Driver, AActor* Actor, UNetConnection* Client) {
-    if (!Client || !Actor) {
+#pragma check_stack(off)
+#pragma runtime_checks("", off)
+#pragma optimize("", off)
+static bool ReplicateToClient(UNetDriver* Driver, AActor* Actor, UNetConnection* Client)
+{
+    if (!Client || !Actor || !Driver) {
         return false;
     }
+    
     if (Actor->IsA(APlayerController::StaticClass()) && Client->GetPlayerController() && Actor != Client->GetPlayerController()) {
         return false;
     }
  
-    bool (*DemoReplicateActor)(UNetDriver *, AActor *, UNetConnection *, bool) = decltype(DemoReplicateActor)(Finder->DemoReplicateActor());
+    static bool (*DemoReplicateActor)(UNetDriver*, AActor*, UNetConnection*, bool) = nullptr;
+    
+    if (!DemoReplicateActor) {
+        DemoReplicateActor = decltype(DemoReplicateActor)(Finder->DemoReplicateActor());
+    }
+    
+    if (!DemoReplicateActor || IsBadCodePtr((FARPROC)DemoReplicateActor) != 0) {
+        UE_LOG(LogNeon, Error, "Invalid DemoReplicateActor function pointer");
+        return false;
+    }
+    
     DemoReplicateActor(Driver, Actor, Client, false);
-	
+    
     return true;
 }
 
 class ULocalPlayer : public UObject
 {
 public:
-    DEFINE_MEMBER(APlayerController*, ULocalPlayer, PlayerController);
+    DEFINE_PTR(APlayerController, ULocalPlayer, PlayerController);
 public:
     DECLARE_STATIC_CLASS(ULocalPlayer);
     DECLARE_DEFAULT_OBJECT(ULocalPlayer);
@@ -380,12 +394,12 @@ struct FLevelCollection
 class UWorld : public UObject
 {
 public:
-    DEFINE_MEMBER(AFortGameStateAthena*, UWorld, GameState);
-    DEFINE_MEMBER(UGameInstance*, UWorld, OwningGameInstance);
-    DEFINE_MEMBER(UNetDriver*, UWorld, NetDriver);
+    DEFINE_PTR(AFortGameStateAthena, UWorld, GameState);
+    DEFINE_PTR(UGameInstance, UWorld, OwningGameInstance);
+    DEFINE_PTR(UNetDriver, UWorld, NetDriver);
     DEFINE_MEMBER(SDK::TArray<struct FLevelCollection>, UWorld, LevelCollections);
-    DEFINE_MEMBER(ULevel*, UWorld, CurrentLevelPendingVisibility);
-    DEFINE_MEMBER(ULevel*, UWorld, CurrentLevelPendingInvisibility);
+    DEFINE_PTR(ULevel, UWorld, CurrentLevelPendingVisibility);
+    DEFINE_PTR(ULevel, UWorld, CurrentLevelPendingInvisibility);
 public:
     DECLARE_STATIC_CLASS(UWorld);
     DECLARE_DEFAULT_OBJECT(UWorld);

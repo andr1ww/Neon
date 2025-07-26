@@ -9,7 +9,7 @@ class UWorld;
 class ULevel : public UObject
 {
 public:
-    DEFINE_MEMBER(UWorld*, ULevel, OwningWorld);
+    DEFINE_PTR(UWorld, ULevel, OwningWorld);
 public:
     static ULevel* GetLevel(AActor* Actor) {
         auto Outer = Actor->GetOuter();

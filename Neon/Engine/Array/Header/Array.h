@@ -70,8 +70,8 @@ public:
 struct FPlaylistPropertyArray : public FFastArraySerializer
 {
 public:
-    DEFINE_MEMBER(UFortPlaylistAthena*, FPlaylistPropertyArray, BasePlaylist);
-    DEFINE_MEMBER(UFortPlaylistAthena*, FPlaylistPropertyArray, OverridePlaylist);
+    DEFINE_PTR(UFortPlaylistAthena, FPlaylistPropertyArray, BasePlaylist);
+    DEFINE_PTR(UFortPlaylistAthena, FPlaylistPropertyArray, OverridePlaylist);
     DEFINE_MEMBER(int32, FPlaylistPropertyArray, PlaylistReplicationKey);
 public:
     DECLARE_STATIC_CLASS(FPlaylistPropertyArray);
