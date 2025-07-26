@@ -67,6 +67,11 @@ void InitNullsAndRetTrues() {
 		RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 8B C4 48 89 58 08 48 89 70 10 48 89 78 18 4C 89 60 20 55 41 56 41 57 48 8B EC 48 83 EC 60 49 8B D9 45 8A").Get());
 	}
 
+	if (Fortnite_Version == 23.50)
+	{
+		NullFuncs.push_back(Memcury::Scanner::FindPattern("48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 55 48 8D 68 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 83 64 24").Get());
+	}
+
 	for (auto& Func : NullFuncs) {
 		if (Func == 0x0) continue;
 		Runtime::Patch(Func, 0xC3);

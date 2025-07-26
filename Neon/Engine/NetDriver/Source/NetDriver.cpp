@@ -315,7 +315,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
         } else
         {
             UE_LOG(LogNeon, Log, __FUNCTION__);
-            ServerReplicateActors(NetDriver, DeltaSeconds);
+         //   ServerReplicateActors(NetDriver, DeltaSeconds);
         }
     }
     
@@ -328,7 +328,6 @@ bool UNetDriver::InitListen(UWorld* NetWorkNotify, FURL URL, bool bReuseAddressA
     FString Error;
 
     UWorld* World = UWorld::GetWorld();
-    printf("Valid World: %d", World ? 1 : 0);
     return InitListen(this, World, URL, bReuseAddressAndPort, Error);
 }
 

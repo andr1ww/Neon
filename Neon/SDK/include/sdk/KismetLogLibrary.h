@@ -198,11 +198,30 @@ inline void UELogWImpl( FLogCategory &Category, ELogLevel Level, const wchar_t *
         ResetConsoleColor();
 }
 
-#define UE_LOG( Category, Verbosity, Format, ... )                             \
-        UELogImpl( Category, Verbosity, Format, ##__VA_ARGS__ )
+inline void UE_LOG_DISPATCH(FLogCategory& Category, ELogLevel Level, const char* Format, ...) {
+        va_list args;
+        va_start(args, Format);
+    
+        char buffer[2048];
+        vsnprintf(buffer, sizeof(buffer), Format, args);
+        va_end(args);
+    
+        UELogImpl(Category, Level, "%s", buffer);
+}
 
-#define UE_LOG_W( Category, VerbosityLevel, Format, ... )                      \
-        UELogWImpl( Category, VerbosityLevel, Format, ##__VA_ARGS__)
+inline void UE_LOG_DISPATCH(FLogCategory& Category, ELogLevel Level, const wchar_t* Format, ...) {
+        va_list args;
+        va_start(args, Format);
+    
+        wchar_t buffer[2048];
+        vswprintf(buffer, sizeof(buffer) / sizeof(wchar_t), Format, args);
+        va_end(args);
+    
+        UELogWImpl(Category, Level, L"%s", buffer);
+}
+
+#define UE_LOG( Category, Verbosity, Format, ... )                             \
+UE_LOG_DISPATCH( Category, Verbosity, Format, ##__VA_ARGS__ )
 
 DEFINE_LOG_CATEGORY( LogUObjectBase );
 DEFINE_LOG_CATEGORY( LogFortSDK );
