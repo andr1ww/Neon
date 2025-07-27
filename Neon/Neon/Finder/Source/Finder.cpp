@@ -269,6 +269,11 @@ uint64 UFinder::DispatchRequest()
     static uint64 CachedResult = 0;
     if (CachedResult != 0)
         return CachedResult;
+
+    if (Fortnite_Version >= 23.00)
+    {
+        return CachedResult = Memcury::Scanner::FindPattern("48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 55 41 56 41 57 48 8D 68 ? 48 81 EC ? ? ? ? 80 3D ? ? ? ? ? 48 8D 3D").Get();
+    }
     
     auto Scanner = Memcury::Scanner::FindStringRef(L"MCP-Profile: Dispatching request to %s");
     if (Scanner.Get())

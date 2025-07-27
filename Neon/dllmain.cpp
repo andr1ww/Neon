@@ -73,6 +73,7 @@ void InitNullsAndRetTrues() {
 
 	if (Fortnite_Version == 23.50)
 	{
+		RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 54 41 55 41 56 41 57 48 81 EC ? ? ? ? 4C 8B D1").Get());
 		NullFuncs.push_back(Memcury::Scanner::FindPattern("48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 55 48 8D 68 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 83 64 24").Get());
 	}
 
@@ -107,6 +108,10 @@ void InitNullsAndRetTrues() {
 
 void Main()
 {
+	std::cin.tie(0);
+	std::cout.tie(0);
+	std::ios_base::sync_with_stdio(false);
+	
 	AllocConsole();
 	FILE* File = nullptr;
 	freopen_s(&File, "CONOUT$", "w+", stdout);
@@ -177,20 +182,16 @@ void Main()
 	}
 }
 
-BOOL APIENTRY DllMain( HMODULE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved
-                     )
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 {
-    switch (ul_reason_for_call)
-    {
-    case DLL_PROCESS_ATTACH:
-		CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)Main, nullptr, 0, nullptr);
-    case DLL_THREAD_ATTACH:
-    case DLL_THREAD_DETACH:
-    case DLL_PROCESS_DETACH:
-        break;
-    }
-    return TRUE;
-}
+	switch (reason)
+	{
+	case DLL_PROCESS_ATTACH:
+		CreateThread(0, 0, (LPTHREAD_START_ROUTINE)Main, 0, 0, 0);
+		break;
+	case DLL_PROCESS_DETACH:
+		break;
+	}
 
+	return TRUE;
+}

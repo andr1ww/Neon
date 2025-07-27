@@ -96,4 +96,4 @@ public:
     uint64 GetInterfaceAddress();
 };
 
-inline UFinder* Finder;
+inline UFinder* Finder = new UFinder();

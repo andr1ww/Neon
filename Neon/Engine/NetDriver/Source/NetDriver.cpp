@@ -6,9 +6,6 @@
 #include "Engine/Level/Header/Level.h"
 #include "Engine/UEngine/Header/UEngine.h"
 #include "Neon/Finder/Header/Finder.h"
-#pragma check_stack(off)
-#pragma runtime_checks("", off)
-#pragma optimize("", off)
 
 UWorld* UWorld::GetWorld()
 {
@@ -151,22 +148,7 @@ void UNetDriver::ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TAr
     static void (*CallPreReplication)(AActor* Actor, UNetDriver* Driver) = decltype(CallPreReplication)(Finder->CallPreReplication());
     static void (*RemoveNetworkActor)(UNetDriver*, AActor*) = decltype(RemoveNetworkActor)(Finder->RemoveNetworkActor());
 
-    __int64 DriverAddress = __int64(Driver);
-    
-    auto NetworkObjectListSharedPtr = (class TSharedPtr<FNetworkObjectList>*)(DriverAddress + 0x720);
-    if (!NetworkObjectListSharedPtr) {
-        return;
-    }
-    
-    if (!NetworkObjectListSharedPtr->Object) {
-        return;
-    }
-    
-    TSharedPtr<FNetworkObjectList> LocalNetworkObjectListRef = *NetworkObjectListSharedPtr;
-    auto NetworkObjectList = LocalNetworkObjectListRef.Get();
-    if (!NetworkObjectList) {
-        return;
-    }
+    auto NetworkObjectList = *(*(class TSharedPtr<FNetworkObjectList>*)(__int64(Driver) + 0x720));
     
     UWorld* World = UWorld::GetWorld();
     if (!World) {
@@ -174,7 +156,7 @@ void UNetDriver::ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TAr
     }
     
     const float CurrentTime = UGameplayStatics::GetTimeSeconds(World);
-    for (auto& ActorInfo : NetworkObjectList->ActiveNetworkObjects)
+    for (auto& ActorInfo : NetworkObjectList.ActiveNetworkObjects)
     {
         if (!ActorInfo.Get()) {
             continue;
@@ -184,32 +166,9 @@ void UNetDriver::ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TAr
         if (!Actor) {
             continue;
         }
-        
-        ENetRole RemoteRole = Actor->Get<ENetRole>("Actor", "RemoteRole");
-        if (RemoteRole == ENetRole::ROLE_None) {
-            continue;
-        }
-        
-        ENetDormancy NetDormancy = Actor->Get<ENetDormancy>("Actor", "NetDormancy");
-        if (NetDormancy == ENetDormancy::DORM_Initial) {
-            continue;
-        }
 
-        ULevel* Level = ULevel::GetLevel(Actor);
-        if (!Level) {
-            continue;
-        }
+        ActorInfo->bPendingNetUpdate = true;
         
-        UWorld* LevelWorld = Level->GetOwningWorld();
-        if (!LevelWorld) {
-            continue;
-        }
-        
-        if (Level == LevelWorld->GetCurrentLevelPendingVisibility() || 
-            Level == LevelWorld->GetCurrentLevelPendingInvisibility()) {
-            continue;
-        }
-
         if (!ActorInfo->bPendingNetUpdate) {
             float NetUpdateFrequency = Actor->Get<float>("Actor", "NetUpdateFrequency");
             if (NetUpdateFrequency <= 0.0f) {
@@ -219,93 +178,40 @@ void UNetDriver::ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TAr
             ActorInfo->NextUpdateTime = CurrentTime + FRand() * ServerTickTime + NextUpdateDelta;
             ActorInfo->LastNetUpdateTimeStamp = CurrentTime;
         }
-
-        ActorInfo->bPendingNetUpdate = true;
         
         OutConsiderList.Add(Actor);
         
-        if (CallPreReplication) {
-            CallPreReplication(Actor, Driver);
-        }
+        CallPreReplication(Actor, Driver);
     }
 }
-
-#pragma check_stack(off)
-#pragma runtime_checks("", off)
-#pragma optimize("", off)
+ 
 void UNetDriver::ServerReplicateActors_ProcessActors(UNetDriver* Driver, UNetConnection* Connection, TArray<AActor*>& Actors) 
 {
-    static bool (*DemoReplicateActor)(UNetDriver*, AActor*, UNetConnection*, bool) = decltype(DemoReplicateActor)(Finder->DemoReplicateActor());
-
-    if (!Connection || !Driver) {
+    if (!Driver) {
         return;
     }
+
+    static bool (*DemoReplicateActor)(UNetDriver*, AActor*, UNetConnection*, bool) = nullptr;
     
+    if (!DemoReplicateActor) {
+        if (!Finder) {
+            return;
+        }
+        
+        SDK::uint64 FuncPtr = Finder->DemoReplicateActor();
+        if (!FuncPtr) {
+            return;
+        }
+        
+        DemoReplicateActor = reinterpret_cast<bool(*)(UNetDriver*, AActor*, UNetConnection*, bool)>(FuncPtr);
+    }
+
     const int32 ActorCount = Actors.Num();
     if (ActorCount <= 0) {
         return;
     }
     
-    TArray<FNetViewer> ConnectionViewers;
-    
-    if (Connection->GetPlayerController() || Connection->GetViewTarget())
-    {
-        FNetViewer MainViewer{};
-        MainViewer.SetConnection(Connection);
-        MainViewer.SetInViewer(Connection->GetPlayerController());
-    
-        AActor* ViewTarget = Connection->GetViewTarget();
-        MainViewer.SetViewTarget(ViewTarget);
-    
-        if (ViewTarget)
-        {
-            MainViewer.SetViewLocation(ViewTarget->GetActorLocation());
-        }
-        else
-        {
-            if (Connection->GetPlayerController())
-            {
-                MainViewer.SetViewLocation(Connection->GetPlayerController()->GetActorLocation());
-            }
-            else
-            {
-                MainViewer.SetViewLocation(FVector(0,0,0));
-            }
-        }
-    
-        ConnectionViewers.Add(MainViewer);
-    }
-    
-    const int32 ChildCount = Connection->GetChildren().Num();
-    for (int32 ChildIdx = 0; ChildIdx < ChildCount; ChildIdx++) {
-        UNetConnection* ChildConnection = Connection->GetChildren()[ChildIdx];
-        if (ChildConnection && (ChildConnection->GetPlayerController() || ChildConnection->GetViewTarget()))
-        {
-            FNetViewer ChildViewer{};
-            ChildViewer.SetConnection(ChildConnection);
-            ChildViewer.SetInViewer(ChildConnection->GetPlayerController());
-        
-            AActor* ChildViewTarget = ChildConnection->GetViewTarget();
-            ChildViewer.SetViewTarget(ChildViewTarget);
-        
-            if (ChildViewTarget)
-            {
-                ChildViewer.SetViewLocation(ChildViewTarget->GetActorLocation());
-            }
-            else if (ChildConnection->GetPlayerController())
-            {
-                ChildViewer.SetViewLocation(ChildConnection->GetPlayerController()->GetActorLocation());
-            }
-            else
-            {
-                ChildViewer.SetViewLocation(FVector(0,0,0));
-            }
-        
-            ConnectionViewers.Add(ChildViewer);
-        }
-    }
-    
-    if (ConnectionViewers.Num() == 0) {
+    if (!Connection) {
         return;
     }
     
@@ -317,11 +223,14 @@ void UNetDriver::ServerReplicateActors_ProcessActors(UNetDriver* Driver, UNetCon
             continue;
         }
 
+        if (Actor->IsA(APlayerController::StaticClass()) && Connection->GetPlayerController() && Actor != Connection->GetPlayerController()) {
+            continue;
+        }
+
         DemoReplicateActor(Driver, Actor, Connection, false);
     }
 }
 
-#pragma runtime_checks("", off)
 int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSeconds)
 {
     ++NetDriver->ReplicationFrame();
@@ -331,13 +240,11 @@ int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSecond
         return 0;
     }
 
-    static float (*GetMaxTickRate)(UGameEngine*, float DeltaSeconds) = decltype(GetMaxTickRate)(Finder->GetMaxTickRate());
     static void (*SendClientAdjustment)(APlayerController*) = decltype(SendClientAdjustment)(Finder->SendClientAdjustment());
 
     TArray<AActor*> ConsiderList;
-    TArray<APlayerController*> ControllersToAdjust;
 
-    const float ServerTickTime = 1.0f / GetMaxTickRate(UFortEngine::GetGameEngine(), DeltaSeconds);
+    const float ServerTickTime = 1.0f / 30.f; // GetMaxTickRate(UFortEngine::GetGameEngine(), DeltaSeconds);
     ServerReplicateActors_BuildConsiderList(NetDriver, ConsiderList, ServerTickTime);
     
     for (int32 i = 0; i < NetDriver->GetClientConnections().Num(); i++)
@@ -346,14 +253,11 @@ int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSecond
         if (!Connection || !Connection->GetViewTarget() || !Connection->GetPlayerController()) {
             continue;
         }
-       
-        ControllersToAdjust.Add(Connection->GetPlayerController());
+        SendClientAdjustment(Connection->GetPlayerController());
         ServerReplicateActors_ProcessActors(NetDriver, Connection, ConsiderList);
-    } 
-
-    for (APlayerController* Controller : ControllersToAdjust) {
-        SendClientAdjustment(Controller);
     }
+
+    return ConsiderList.Num();
 }
 
 void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)

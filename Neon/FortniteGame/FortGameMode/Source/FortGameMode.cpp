@@ -103,11 +103,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             GameState->OnRep_CurrentPlaylistInfo();
         }
     }
-
-    if (GameMode->GetAlivePlayers().Num() > 0)
-    {
-        return *Result = GameMode->GetbWorldIsReady() && GameMode->GetAlivePlayers().Num() >= 1;
-    }
     
     return *Result = false;
 }
