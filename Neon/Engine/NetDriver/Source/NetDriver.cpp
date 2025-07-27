@@ -166,9 +166,32 @@ void UNetDriver::ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TAr
         if (!Actor) {
             continue;
         }
-
-        ActorInfo->bPendingNetUpdate = true;
         
+        ENetRole RemoteRole = Actor->Get<ENetRole>("Actor", "RemoteRole");
+        if (RemoteRole == ENetRole::ROLE_None) {
+            continue;
+        }
+        
+        ENetDormancy NetDormancy = Actor->Get<ENetDormancy>("Actor", "NetDormancy");
+        if (NetDormancy == ENetDormancy::DORM_Initial) {
+            continue;
+        }
+
+        ULevel* Level = ULevel::GetLevel(Actor);
+        if (!Level) {
+            continue;
+        }
+        
+        UWorld* LevelWorld = Level->GetOwningWorld();
+        if (!LevelWorld) {
+            continue;
+        }
+        
+        if (Level == LevelWorld->GetCurrentLevelPendingVisibility() || 
+            Level == LevelWorld->GetCurrentLevelPendingInvisibility()) {
+            continue;
+            }
+
         if (!ActorInfo->bPendingNetUpdate) {
             float NetUpdateFrequency = Actor->Get<float>("Actor", "NetUpdateFrequency");
             if (NetUpdateFrequency <= 0.0f) {
@@ -178,32 +201,53 @@ void UNetDriver::ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TAr
             ActorInfo->NextUpdateTime = CurrentTime + FRand() * ServerTickTime + NextUpdateDelta;
             ActorInfo->LastNetUpdateTimeStamp = CurrentTime;
         }
+
+        ActorInfo->bPendingNetUpdate = true;
         
         OutConsiderList.Add(Actor);
         
         CallPreReplication(Actor, Driver);
     }
 }
- 
+
+static UActorChannel* FindActorChannelRef(UNetConnection* Connection, AActor* Actor) {
+    static UActorChannel* (*CreateChannel)(UNetConnection*, FName*, EChannelCreateFlags, int32_t) = decltype(CreateChannel)(IMAGEBASE + 0x1194D48);
+    static void (*SetChannelActor)(UChannel*, AActor*) = decltype(SetChannelActor)(IMAGEBASE + 0x10AABAC);
+    for (UChannel* Channel : Connection->GetOpenChannels()) {
+        if (Channel->GetClass() == UActorChannel::StaticClass()) {
+            if (Cast<UActorChannel>(Channel)->GetActor() == Actor) return Cast<UActorChannel>(Channel);
+        }
+    }
+    FName ActorName = UKismetStringLibrary::GetDefaultObj()->CallFunc<FName>("KismetStringLibrary","Conv_StringToName",FString(L"Actor"));
+    UActorChannel* Channel = CreateChannel(Connection, &ActorName, EChannelCreateFlags::OpenedLocally, -1);
+    if (Channel) {
+        SetChannelActor(Channel, Actor);
+        Channel->SetConnection(Connection);
+        return Channel;
+    }
+}
+
+static bool ReplicateToClient(UNetDriver* Driver, AActor* Actor, UNetConnection* Client) {
+    static void (*CallPreReplication)(AActor * Actor, UNetDriver * Driver) = decltype(CallPreReplication)(IMAGEBASE + 0x9CC9E34);
+    static void (*ReplicateActor)(UActorChannel * Ch) = decltype(ReplicateActor)(IMAGEBASE + 0x9DEACC0);
+    if (!Client || !Actor) {
+        return false;
+    }
+    
+    auto Ch = FindActorChannelRef(Client, Actor);
+    if (!Ch) {
+        return false;
+    }
+    CallPreReplication(Actor, Driver);
+    ReplicateActor(Ch); 
+	
+    return true;
+}
+
 void UNetDriver::ServerReplicateActors_ProcessActors(UNetDriver* Driver, UNetConnection* Connection, TArray<AActor*>& Actors) 
 {
     if (!Driver) {
         return;
-    }
-
-    static bool (*DemoReplicateActor)(UNetDriver*, AActor*, UNetConnection*, bool) = nullptr;
-    
-    if (!DemoReplicateActor) {
-        if (!Finder) {
-            return;
-        }
-        
-        SDK::uint64 FuncPtr = Finder->DemoReplicateActor();
-        if (!FuncPtr) {
-            return;
-        }
-        
-        DemoReplicateActor = reinterpret_cast<bool(*)(UNetDriver*, AActor*, UNetConnection*, bool)>(FuncPtr);
     }
 
     const int32 ActorCount = Actors.Num();
@@ -227,7 +271,7 @@ void UNetDriver::ServerReplicateActors_ProcessActors(UNetDriver* Driver, UNetCon
             continue;
         }
 
-        DemoReplicateActor(Driver, Actor, Connection, false);
+        ReplicateToClient(Driver, Actor, Connection);
     }
 }
 

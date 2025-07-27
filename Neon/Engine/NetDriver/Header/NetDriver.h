@@ -33,6 +33,7 @@ public:
     DEFINE_PTR(AActor, UNetConnection, OwningActor);
     DEFINE_PTR(AActor, UNetConnection, ViewTarget);
     DEFINE_MEMBER(SDK::TArray<class UChildConnection*>, UNetConnection, Children);
+    DEFINE_MEMBER(TArray<class UChannel*>, UNetConnection, OpenChannels);
 };
 
 static TSet<FName>* GetClientVisibleLevelNames(UNetConnection* NetConnection)
@@ -55,13 +56,13 @@ public:
 class UChannel : public UObject
 {
 public:
-
+    DEFINE_PTR(UNetConnection, UChannel, Connection);
 };
 
 class UActorChannel : public UChannel
 {
 public:
-
+    DEFINE_PTR(AActor, UActorChannel, Actor);
 };
 
 enum class ENetDormancy : uint8
@@ -332,35 +333,6 @@ public:
 
 inline void (*TickFlushOriginal)(UNetDriver*, float DeltaSeconds);
 inline void (*DispatchRequestOriginal)(__int64 a1, __int64* a2, int a3);
-
-#pragma check_stack(off)
-#pragma runtime_checks("", off)
-#pragma optimize("", off)
-static bool ReplicateToClient(UNetDriver* Driver, AActor* Actor, UNetConnection* Client)
-{
-    if (!Client || !Actor || !Driver) {
-        return false;
-    }
-    
-    if (Actor->IsA(APlayerController::StaticClass()) && Client->GetPlayerController() && Actor != Client->GetPlayerController()) {
-        return false;
-    }
- 
-    static bool (*DemoReplicateActor)(UNetDriver*, AActor*, UNetConnection*, bool) = nullptr;
-    
-    if (!DemoReplicateActor) {
-        DemoReplicateActor = decltype(DemoReplicateActor)(Finder->DemoReplicateActor());
-    }
-    
-    if (!DemoReplicateActor || IsBadCodePtr((FARPROC)DemoReplicateActor) != 0) {
-        UE_LOG(LogNeon, Error, "Invalid DemoReplicateActor function pointer");
-        return false;
-    }
-    
-    DemoReplicateActor(Driver, Actor, Client, false);
-    
-    return true;
-}
 
 class ULocalPlayer : public UObject
 {
