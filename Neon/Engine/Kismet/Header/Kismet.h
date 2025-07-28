@@ -49,12 +49,3 @@ class TScriptInterface : public FScriptInterface
 {
 public:
 };
-
-class UFortKismetLibrary : public UObject
-{
-public:
-
-public:
-    DECLARE_STATIC_CLASS(UFortKismetLibrary);
-    DECLARE_DEFAULT_OBJECT(UFortKismetLibrary);
-};

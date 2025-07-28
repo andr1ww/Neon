@@ -2,6 +2,7 @@
 #include "pch.h"
 
 #include "Engine/Array/Header/Array.h"
+#include "Engine/Float/Header/Float.h"
 #include "Engine/Guid/Header/Guid.h"
 #include "FortniteGame/Common/Header/ItemDefinition.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
@@ -38,6 +39,8 @@ public:
 
 class UFortWorldItemDefinition : public UFortItemDefinition
 {
+public:
+    DEFINE_MEMBER(FScalableFloat, UFortWorldItemDefinition, MaxStackSize)
 };
 
 class UFortWeaponItemDefinition : public UFortWorldItemDefinition

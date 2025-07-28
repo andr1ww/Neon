@@ -4,6 +4,7 @@
 #include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/FortGameState/Header/FortGameState.h"
+#include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
 
 void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
                                       float Damage,
@@ -40,4 +41,14 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     if (!DamageTagEntry) {
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
+
+    auto ResourceDefinition = UFortKismetLibrary::K2_GetResourceItemDefinition(BuildingActor->Get<EFortResourceType>("BuildingSMActor", "ResourceType"));
+    if (!ResourceDefinition) {
+        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
+    }
+
+    const int MaxStackSize = ResourceDefinition->GetMaxStackSize().Value;
+    int ResourceAmount = 0;
+
+    
 }
