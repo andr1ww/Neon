@@ -716,6 +716,11 @@ uint64 UFinder::GiveAbilityAndActivateOnce()
     static uint64 CachedResult = 0;
     if (CachedResult != 0)
         return CachedResult;
+
+    if (Fortnite_Version >= 12.41)
+    {
+        return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 48 8B EC 48 83 EC ? 49 8B 40").Get();
+    }
     
     if (Engine_Version == 4.26)
     {
@@ -726,7 +731,7 @@ uint64 UFinder::GiveAbilityAndActivateOnce()
 
         return CachedResult = sig1;
     }
-
+    
     auto Addrr = Memcury::Scanner::FindStringRef(L"GiveAbilityAndActivateOnce called on ability %s on the client, not allowed!", true, 0, Engine_Version >= 5.00).Get();
 
     for (int i = 0; i < 1000; i++)
