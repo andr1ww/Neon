@@ -61,4 +61,6 @@ static void ExecuteConsoleCommand(SDK::UObject* WorldContextObject, const SDK::F
     SDK::StaticClassImpl("KismetSystemLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &Params);
 }
 
+#define DefHookOg(_Rt, _Name, ...) static inline _Rt (*_Name##OG)(##__VA_ARGS__); static _Rt _Name(##__VA_ARGS__);
+
 #endif //PCH_H

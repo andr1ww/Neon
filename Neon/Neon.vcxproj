@@ -159,10 +159,12 @@
     <ClInclude Include="Engine\UEngine\Header\UEngine.h" />
     <ClInclude Include="Engine\Vector\Header\Vector.h" />
     <ClInclude Include="FortniteGame\AbilitySystemComponent\Header\AbilitySystemComponent.h" />
+    <ClInclude Include="FortniteGame\BuildingSMActor\Header\BuildingSMActor.h" />
     <ClInclude Include="FortniteGame\Common\Header\ItemDefinition.h" />
     <ClInclude Include="FortniteGame\FortAthenaMapInfo\Header\FortAthenaMapInfo.h" />
     <ClInclude Include="FortniteGame\FortGameMode\Header\FortGameMode.h" />
     <ClInclude Include="FortniteGame\FortGameState\Header\FortGameState.h" />
+    <ClInclude Include="FortniteGame\FortKismetLibrary\Header\FortKismetLibrary.h" />
     <ClInclude Include="FortniteGame\FortPlayerController\Header\FortPlayerController.h" />
     <ClInclude Include="FortniteGame\FortPlayerPawn\Header\FortPlayerPawn.h" />
     <ClInclude Include="FortniteGame\FortPlayerState\Header\FortPlayerState.h" />
@@ -191,6 +193,7 @@
     <ClCompile Include="Engine\PlayerController\Source\PlayerController.cpp" />
     <ClCompile Include="Engine\UEngine\Source\UEngine.cpp" />
     <ClCompile Include="FortniteGame\AbilitySystemComponent\Source\AbilitySystemComponent.cpp" />
+    <ClCompile Include="FortniteGame\BuildingSMActor\Source\BuildingSMActor.cpp" />
     <ClCompile Include="FortniteGame\FortGameMode\Source\FortGameMode.cpp" />
     <ClCompile Include="FortniteGame\FortGameState\Source\FortGameState.cpp" />
     <ClCompile Include="FortniteGame\FortInventory\Source\FortInventory.cpp" />
@@ -206,6 +209,9 @@
   <ItemGroup>
     <Content Include="FortniteGame\FortInventory\Header\FortInventory.h" />
     <Content Include="SDK\FortSDK.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="FortniteGame\FortKismetLibrary\Source\" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
