@@ -3,7 +3,7 @@
 #include "../Finder/Header/Finder.h"
 
 namespace Funcs {
-	static inline auto StaticFindObject = (SDK::UObject* (*)(SDK::UClass*, SDK::UObject*, const wchar_t*, bool)) (uint64_t(Finder->StaticFindObject()));
+	static inline auto StaticFindObject = (SDK::UObject* (*)(SDK::UClass*, SDK::UObject*, const wchar_t*, bool)) (uint64_t(Addresses::StaticFindObject));
 };
 
 

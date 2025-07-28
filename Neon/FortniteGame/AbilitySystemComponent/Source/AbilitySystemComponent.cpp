@@ -43,7 +43,7 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
         const FGameplayEventData*
     );
     
-    auto InternalTryActivate = reinterpret_cast<TryActivateFunc>(Finder->InternalTryActivateAbility());
+    auto InternalTryActivate = reinterpret_cast<TryActivateFunc>(Addresses::InternalTryActivateAbility);
     if (!InternalTryActivate(AbilitySystemComponent, Handle, PredictionKey, &InstancedAbility, nullptr, TriggerEventData))
     {
         Spec->SetInputPressed(false);
@@ -80,9 +80,9 @@ void UAbilitySystemComponent::GiveAbility(UAbilitySystemComponent* AbilitySystem
     
     FGameplayAbilitySpecHandle Handle = Spec->GetHandle();
     
-    if (Finder->GiveAbility())
+    if (Addresses::GiveAbility)
     {
-        ((GiveAbilityFunc)Finder->GiveAbility())(AbilitySystemComponent, &Handle, *Spec);
+        ((GiveAbilityFunc)Addresses::GiveAbility)(AbilitySystemComponent, &Handle, *Spec);
     }
     
     Spec->~FGameplayAbilitySpec();
