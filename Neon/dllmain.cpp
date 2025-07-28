@@ -122,6 +122,8 @@ void Main()
 	MH_Initialize();
 	Sleep(5000);
 
+	UE_LOG(LogNeon, Log, "ApplyCharacterCustomization: 0x%x", Finder->ApplyCharacterCustomization() - IMAGEBASE);
+
 	if (Finder->GIsClient())
 	{
 		*(bool*)(Finder->GIsClient()) = false; 
@@ -165,7 +167,7 @@ void Main()
 	}
 	else if (Fortnite_Version <= 18.40 && Fortnite_Version >= 10.40)
 	{
-		WorldName = L"open Apollo_Terain";
+		WorldName = L"open Apollo_Terrain";
 	}
 	else if (Fortnite_Version <= 22.40 && Fortnite_Version >= 19.00)
 	{

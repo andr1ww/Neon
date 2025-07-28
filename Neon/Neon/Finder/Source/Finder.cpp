@@ -213,19 +213,70 @@ uint64 UFinder::PauseBeaconRequests()
 
 uint64 UFinder::SetWorld()
 {
+    if (Fortnite_Version.GetMajorVersion() < 14)
+    {
+        return Memcury::Scanner::FindStringRef(L"AOnlineBeaconHost::InitHost failed")
+            .ScanFor({ 0x48, 0x8B, 0xD0, 0xE8 }, false)
+            .RelativeOffset(4)
+            .Get();
+    }
+    
     if (Fortnite_Version >= 23.00)
     {
         return Memcury::Scanner::FindPattern("E8 ? ? ? ? 48 8D 8B ? ? ? ? 48 8B D7 E8 ? ? ? ? 48 85 FF 0F 84 ? ? ? ? 83 64 24").RelativeOffset(1).Get();
     }
+
+    int SetWorldI = 0;
+
+    switch (Fortnite_Version.GetMajorVersion())
+    {
+    case 13:
+        SetWorldI = 0x70;
+        break;
+    case 14:
+    case 15:
+        if (Fortnite_Version <= 15.2)
+            SetWorldI = 0x71;
+        else if (Fortnite_Version >= 15.3 && Fortnite_Version.GetMajorVersion() < 18)
+            SetWorldI = 0x72;
+        break;
+    case 18:
+        SetWorldI = 0x73;
+        break;
+    case 19:
+    case 20:
+        if (Fortnite_Version.GetMajorVersion() == 20)
+            SetWorldI = 0x7B;
+        else
+            SetWorldI = 0x7A;
+        break;
+    case 21:
+        SetWorldI = 0x7C;
+        break;
+    case 22:
+    case 23:
+        SetWorldI = 0x7B;
+        break;
+    case 24:
+        SetWorldI = 0x7D;
+        break;
+    default:
+        break;
+    }
     
+    if (Fortnite_Version.GetMajorVersion() == 14)
+    {
+        return uint64(UNetDriver::GetDefaultObj()->GetVTable()[0x5E]);
+    }
     if (Fortnite_Version.GetMajorVersion() == 18)
     { 
         return uint64(UNetDriver::GetDefaultObj()->GetVTable()[0x73]);
     }
-    if (Fortnite_Version.GetMajorVersion() == 19)
+
+    if (SetWorldI != 0)
     {
-        return uint64(UNetDriver::GetDefaultObj()->GetVTable()[0x7A]);
-    }
+        return uint64(UNetDriver::GetDefaultObj()->GetVTable()[SetWorldI]);
+    } 
 
     if (Engine_Version >= 4.26)
         return Memcury::Scanner::FindPattern("40 55 56 41 56 48 8B EC 48 83 EC ? 48 89 5C 24", true).Get();
