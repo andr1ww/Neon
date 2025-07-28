@@ -4,6 +4,7 @@
 #include "Engine/Level/Header/Level.h"
 #include "Engine/ObjectPtr/Header/ObjectPtr.h"
 #include "Engine/PlayerController/Header/PlayerController.h"
+#include "FortniteGame/FortGameMode/Header/FortGameMode.h"
 #include "FortniteGame/FortGameState/Header/FortGameState.h"
 #include "Neon/Finder/Header/Finder.h"
 
@@ -370,6 +371,7 @@ public:
     DEFINE_MEMBER(SDK::TArray<struct FLevelCollection>, UWorld, LevelCollections);
     DEFINE_PTR(ULevel, UWorld, CurrentLevelPendingVisibility);
     DEFINE_PTR(ULevel, UWorld, CurrentLevelPendingInvisibility);
+    DEFINE_PTR(AFortGameModeAthena, UWorld, AuthorityGameMode);
 public:
     DECLARE_STATIC_CLASS(UWorld);
     DECLARE_DEFAULT_OBJECT(UWorld);

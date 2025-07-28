@@ -79,12 +79,32 @@ public:
     DECLARE_STATIC_CLASS(UGAB_Spray_Generic_C);
 };
 
+class UActorComponent final : public UObject
+{
+public:
+    AActor* GetOwner()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("ActorComponent", "GetOwner");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return nullptr;
+        AActor* Owner;
+        
+        SDK::StaticClassImpl("ActorComponent")->GetClassDefaultObject()->ProcessEvent(Func, &Owner);
+    }
+};
+
+
 class AFortPlayerControllerAthena : public AFortPlayerController 
 {
 public:
     DEFINE_PTR(AFortPlayerStateAthena, AFortPlayerControllerAthena, PlayerState);
     DEFINE_BOOL(AFortPlayerControllerAthena, bHasServerFinishedLoading);
 public:
+    static void ServerAttemptAircraftJump(UActorComponent* Comp, FFrame& Stack);
     static void ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerPlayEmoteItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);

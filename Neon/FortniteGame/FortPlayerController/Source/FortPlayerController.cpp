@@ -2,6 +2,7 @@
 #include "../Header/FortPlayerController.h"
 
 #include "Engine/Guid/Header/Guid.h"
+#include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
 #include "Neon/Finder/Header/Finder.h"
 
@@ -114,5 +115,25 @@ void AFortPlayerControllerAthena::ServerPlayEmoteItem(AFortPlayerControllerAthen
         }
     }
 }
+
+void AFortPlayerControllerAthena::ServerAttemptAircraftJump(UActorComponent* Comp, FFrame& Stack)
+{
+    FRotator Rotation;
+    Stack.StepCompiledIn(&Rotation);
+    Stack.IncrementCode();
+    
+    auto PlayerController = (AFortPlayerControllerAthena*)Comp->CallFunc<AActor*>("ActorComponent", "GetOwner", Comp);
+    auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
+
+    if (PlayerController && GameMode)
+    {
+        GameMode->CallFunc<void>("GameModeBase", "RestartPlayer", PlayerController);
+        PlayerController->Set("Controller", "ControlRotation", Rotation);
+
+        PlayerController->GetMyFortPawn()->CallFunc<void>("FortPlayerPawn", "BeginSkydiving", true);
+        PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "SetHealth", 100);
+    }
+}
+
 
  
