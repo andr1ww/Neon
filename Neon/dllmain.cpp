@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include "Engine/HTTP/Header/HTTP.h"
 #include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
@@ -151,7 +152,7 @@ void Main()
 	Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
 	if (Finder->DispatchRequest())
 	{
-		Runtime::Hook(Finder->DispatchRequest(), UNetDriver::DispatchRequest, (void**)&DispatchRequestOriginal);
+		Runtime::Hook(Finder->DispatchRequest(), HTTP::DispatchRequest, (void**)&HTTP::DispatchRequestOriginal);
 	}
 
 	UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);

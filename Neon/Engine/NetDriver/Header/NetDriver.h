@@ -7,7 +7,6 @@
 #include "FortniteGame/FortGameState/Header/FortGameState.h"
 #include "Neon/Finder/Header/Finder.h"
 
-
 struct FURL
 {
 public:
@@ -318,7 +317,6 @@ public:
     
         return *reinterpret_cast<int32*>(__int64(this) + RepFrameOffset);
     }
-    static void DispatchRequest(__int64 a1, __int64* a2, int a3);
     // Replication
     static int32 ServerReplicateActors(UNetDriver* NetDriver, float DeltaSeconds);
     static int32 ServerReplicateActors_PrepConnections(UNetDriver*, float DeltaSeconds);
@@ -332,7 +330,6 @@ public:
 };
 
 inline void (*TickFlushOriginal)(UNetDriver*, float DeltaSeconds);
-inline void (*DispatchRequestOriginal)(__int64 a1, __int64* a2, int a3);
 
 class ULocalPlayer : public UObject
 {

@@ -336,9 +336,3 @@ void UNetDriver::SetWorld(UWorld* World)
         SetWorld = decltype(SetWorld)(Finder->SetWorld());
     return SetWorld(this, World);
 }
-
-void UNetDriver::DispatchRequest(__int64 a1, __int64* a2, int a3)
-{
-    if (Fortnite_Version < 8.01) *(int*)(__int64(a2) + (Fortnite_Version < 4.2 ? 0x60 : 0x28)) = 3;
-    return DispatchRequestOriginal(a1, a2, 3);
-}

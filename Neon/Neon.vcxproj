@@ -146,6 +146,7 @@
     <ClInclude Include="Engine\Array\Header\Array.h" />
     <ClInclude Include="Engine\GameplayStatics\Header\GameplayStatics.h" />
     <ClInclude Include="Engine\Guid\Header\Guid.h" />
+    <ClInclude Include="Engine\HTTP\Header\HTTP.h" />
     <ClInclude Include="Engine\Kismet\Header\Kismet.h" />
     <ClInclude Include="Engine\Level\Header\Level.h" />
     <ClInclude Include="Engine\NetDriver\Header\NetDriver.h" />
@@ -185,6 +186,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Engine\Actor\Source\Actor.cpp" />
     <ClCompile Include="Engine\GameplayStatics\Source\GameplayStatics.cpp" />
+    <ClCompile Include="Engine\HTTP\Source\HTTP.cpp" />
     <ClCompile Include="Engine\NetDriver\Source\NetDriver.cpp" />
     <ClCompile Include="Engine\PlayerController\Source\PlayerController.cpp" />
     <ClCompile Include="Engine\UEngine\Source\UEngine.cpp" />
