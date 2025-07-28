@@ -129,7 +129,7 @@ void Main()
 	} else
 	{
 		*(bool*)(IMAGEBASE + 0xEBD8A4C) = false; 
-		*(bool*)(IMAGEBASE + 0xEBD8A4C + 1) = true; 
+		*(bool*)(IMAGEBASE + 0xEBD8A4C + 1) = true; // 23.50
 	}
 	
 	InitNullsAndRetTrues();
