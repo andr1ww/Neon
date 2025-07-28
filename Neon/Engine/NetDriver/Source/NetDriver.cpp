@@ -306,6 +306,11 @@ int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSecond
 
 void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 {
+    if (GetAsyncKeyState(VK_F5) & 0x1) {
+        ExecuteConsoleCommand(UWorld::GetWorld(), L"startaircraft", nullptr);
+        Sleep(400);
+    }
+    
     if (NetDriver->GetClientConnections().Num() > 0)
     {
         if (Finder->RepDriverServerReplicateActors() && Fortnite_Version.GetMajorVersion() <= 20)

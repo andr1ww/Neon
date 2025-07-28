@@ -131,7 +131,6 @@ void AFortPlayerControllerAthena::ServerAttemptAircraftJump(UActorComponent* Com
         PlayerController->Set("Controller", "ControlRotation", Rotation);
 
         PlayerController->GetMyFortPawn()->CallFunc<void>("FortPlayerPawn", "BeginSkydiving", true);
-        PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "SetHealth", 100);
     }
 }
 
