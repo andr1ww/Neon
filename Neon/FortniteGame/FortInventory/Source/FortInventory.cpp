@@ -29,7 +29,7 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
 
 UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level)
 {
-    if (!PlayerController || !Def || !Level)
+    if (!PlayerController || !Def)
     {
         UE_LOG(LogNeon, Fatal, "Invalid parameters for GiveItem: PlayerController: %p, Def: %p, Count: %d, Level: %d", PlayerController, Def, Count, Level);
         return nullptr;
@@ -107,7 +107,7 @@ void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFort
         }
     }
     
-    if (entry && *entry) (*entry)->GetItemEntry() = Entry;
+    if (entry && *entry) (*entry)->SetItemEntry(Entry);
     
     WorldInventory->SetbRequiresLocalUpdate(true);
     WorldInventory->HandleInventoryLocalUpdate();

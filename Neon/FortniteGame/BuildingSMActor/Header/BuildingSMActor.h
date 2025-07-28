@@ -36,7 +36,8 @@ public:
 
 class ABuildingActor : public AActor
 {
-    
+public:
+    DEFINE_MEMBER(bool, ABuildingActor, bPlayerPlaced);
 };
 
 class ABuildingSMActor : public ABuildingActor

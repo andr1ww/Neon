@@ -20,14 +20,21 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
     
     if (!BuildingActor || !Controller || !GameState)
+    {
+        UE_LOG(LogNeon, Log, "Invalid Params in OnDamageServer!");
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
+    }
 
-    if (BuildingActor->Get<bool>("BuildingActor", "bPlayerPlaced") || BuildingActor->CallFunc<float>("BuildingActor", "GetHealth") <= 1.0f)
+    if (BuildingActor->GetbPlayerPlaced() == true || BuildingActor->CallFunc<float>("BuildingActor", "GetHealth") <= 1.0f)
+    {
+        UE_LOG(LogNeon, Log, "BuildingActor is player placed or has low health, skipping resource collection.");
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
-
+    }
+    
     if (!DamageCauser || 
     !DamageCauser->IsA<AFortWeapon>() || 
     !static_cast<AFortWeapon*>(DamageCauser)->GetWeaponData()->IsA<UFortWeaponMeleeItemDefinition>()) {
+        UE_LOG(LogNeon, Log, "DamageCauser is not a melee weapon, skipping resource collection.");
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
 
@@ -41,11 +48,13 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     }
 
     if (!DamageTagEntry) {
+        UE_LOG(LogNeon, Log, "DamageTags do not contain a pickaxe tag, skipping resource collection.");
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
 
     auto ResourceDefinition = UFortKismetLibrary::K2_GetResourceItemDefinition(BuildingActor->Get<EFortResourceType>("BuildingSMActor", "ResourceType"));
     if (!ResourceDefinition) {
+        UE_LOG(LogNeon, Log, "KismetLibrary::K2_GetResourceItemDefinition() failed.");
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
 
@@ -55,12 +64,16 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     UCurveTable* ResourceCurveTable = nullptr;
     
     if (BuildingActor->GetBuildingResourceAmountOverride().RowName.GetComparisonIndex() > 0) {
-        ResourceCurveTable = Runtime::StaticFindObject<UCurveTable>(
+        UE_LOG(LogNeon, Log, "GetBuildingResourceAmountOverride");
+        if (BuildingActor->GetBuildingResourceAmountOverride().CurveTable) {
+            ResourceCurveTable = BuildingActor->GetBuildingResourceAmountOverride().CurveTable;
+        } else {
+            ResourceCurveTable = Runtime::StaticFindObject<UCurveTable>(
                 "/Game/Athena/Balance/DataTables/AthenaResourceRates.AthenaResourceRates");
-    
-        float BaseResourceValue = 0.0f;
+        }
+        
         EEvaluateCurveTableResult Result;
-        UDataTableFunctionLibrary::EvaluateCurveTableRow(
+        float Out = UDataTableFunctionLibrary::EvaluateCurveTableRow(
             ResourceCurveTable,
             BuildingActor->GetBuildingResourceAmountOverride().RowName,
             0.0f,
@@ -68,7 +81,9 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
             &Result    
         );
         
-        ResourceAmount = static_cast<int>(round(BaseResourceValue * (Damage / BuildingActor->CallFunc<float>("BuildingActor", "GetMaxHealth"))));
+        float RC = Out / (BuildingActor->CallFunc<float>("BuildingActor", "GetMaxHealth") / Damage);
+
+        ResourceAmount = round(RC);
     }
 
     UE_LOG(LogNeon, Log, "ResourceAmount: %d", ResourceAmount);
@@ -115,8 +130,6 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
                 EFortPickupSpawnSource::Unset,
                 Controller->GetMyFortPawn()
             );
-        
-            InventoryEntry->GetCount() = MaxStackSize;
         }
     
         AFortInventory::ReplaceEntry(Controller, *InventoryEntry);
@@ -146,5 +159,5 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         false
     );
     
-    return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
+  //  return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
 }

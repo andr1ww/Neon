@@ -26,6 +26,7 @@ public:
     static float EvaluateCurveTableRow(UCurveTable* CurveTable, FName RowName, float InXY,
         const FString& ContextString = FString(), EEvaluateCurveTableResult* OutResult = nullptr)
     {
+        UE_LOG(LogNeon, Log, "EvaluateCurveTableRow");
         static SDK::UFunction* Func = nullptr;
         SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("DataTableFunctionLibrary", "EvaluateCurveTableRow");
 
@@ -41,7 +42,6 @@ public:
         Params{CurveTable, RowName, InXY, Erm, Ok, ContextString}; // ts param stolen from rbot
 
         SDK::StaticClassImpl("DataTableFunctionLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &Params);
-
         
         if (OutResult)
             *OutResult = Params.OutResult;
