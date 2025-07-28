@@ -114,7 +114,7 @@ void Main()
 	freopen_s(&File, "CONOUT$", "w+", stderr);
 	SetConsoleTitleA("Neon | Setting up");
 	SDK::Init();
-	Finder->Init();
+	INIT;
 	MH_Initialize();
 	Sleep(5000);
 
