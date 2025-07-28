@@ -11,7 +11,7 @@ class AFortInventory;
 class UAthenaCharacterItemDefinition : public UObject 
 {
 public:
-    DEFINE_MEMBER(UFortHeroType, UAthenaCharacterItemDefinition, HeroDefinition);
+    DEFINE_PTR(UFortHeroType, UAthenaCharacterItemDefinition, HeroDefinition);
 };
 
 
