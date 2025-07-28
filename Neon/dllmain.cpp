@@ -108,22 +108,17 @@ void InitNullsAndRetTrues() {
 
 void Main()
 {
-	std::cin.tie(0);
-	std::cout.tie(0);
-	std::ios_base::sync_with_stdio(false);
-	
 	AllocConsole();
 	FILE* File = nullptr;
 	freopen_s(&File, "CONOUT$", "w+", stdout);
 	freopen_s(&File, "CONOUT$", "w+", stderr);
 	SetConsoleTitleA("Neon | Setting up");
 	SDK::Init();
-
+	Offsets::FMemory__Realloc = Memcury::Scanner::FindPattern("48 89 5C 24 08 48 89 74 24 10 57 48 83 EC ? 48 8B F1 41 8B D8 48 8B 0D ? ? ? ?").Get();
+	
 	MH_Initialize();
 	Sleep(5000);
-
-	UE_LOG(LogNeon, Log, "ApplyCharacterCustomization: 0x%x", Finder->ApplyCharacterCustomization() - IMAGEBASE);
-
+	
 	if (Finder->GIsClient())
 	{
 		*(bool*)(Finder->GIsClient()) = false; 
