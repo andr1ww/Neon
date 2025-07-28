@@ -14,8 +14,8 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
     if (!PlayerController) return;
     PlayerController->SetAcknowledgedPawn(PawnToAcknowledge);
     PlayerController->GetPlayerState()->SetHeroType(PlayerController->GetCosmeticLoadoutPC().GetCharacter()->GetHeroDefinition());
-    void* (*ApplyCharacterCustomization)(AFortPlayerStateAthena*, APawn*) = decltype(ApplyCharacterCustomization)(Addresses::ApplyCharacterCustomization);
-    ApplyCharacterCustomization(PlayerController->GetPlayerState(), PawnToAcknowledge);
+    void* (*ApplyCharacterCustomization)(AFortPlayerStateAthena*, APawn*) = decltype(ApplyCharacterCustomization)(Finder->ApplyCharacterCustomization());
+ //   ApplyCharacterCustomization(PlayerController->GetPlayerState(), PawnToAcknowledge);
     static UFortAbilitySet* AbilitySet = (UFortAbilitySet*)GUObjectArray.FindObject("GAS_AthenaPlayer");
     UAbilitySystemComponent::GiveAbilitySet(PlayerController->GetPlayerState()->GetAbilitySystemComponent(), AbilitySet);
 }
@@ -108,9 +108,9 @@ void AFortPlayerControllerAthena::ServerPlayEmoteItem(AFortPlayerControllerAthen
     
         FGameplayAbilitySpecHandle Handle = Spec->GetHandle();
     
-        if (Addresses::GiveAbilityAndActivateOnce)
+        if (Finder->GiveAbilityAndActivateOnce())
         {
-            ((GiveAbilityFunc)Addresses::GiveAbilityAndActivateOnce)(AbilitySystemComponent, &Handle, *Spec, nullptr);
+            ((GiveAbilityFunc)Finder->GiveAbilityAndActivateOnce())(AbilitySystemComponent, &Handle, *Spec, nullptr);
         }
     }
 }

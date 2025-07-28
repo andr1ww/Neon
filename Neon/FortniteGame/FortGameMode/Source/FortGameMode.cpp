@@ -69,13 +69,13 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
 
         if (Fortnite_Version >= 16.40)
         {
-            static void* (*GetWorldContextFromObject)(UEngine*, UWorld*) = decltype(GetWorldContextFromObject)(Addresses::GetWorldContextFromObject);
+            static void* (*GetWorldContextFromObject)(UEngine*, UWorld*) = decltype(GetWorldContextFromObject)(Finder->GetWorldContextFromObject());
             void* WorldContext = GetWorldContextFromObject(UEngine::GetEngine(), UWorld::GetWorld());
-            static UNetDriver* (*CreateNetDriver_Local)(UEngine*, void* WorldContext, FName) = decltype(CreateNetDriver_Local)(Addresses::CreateNetDriverLocal);
+            static UNetDriver* (*CreateNetDriver_Local)(UEngine*, void* WorldContext, FName) = decltype(CreateNetDriver_Local)(Finder->CreateNetDriverLocal());
             NetDriver = CreateNetDriver_Local(UEngine::GetEngine(), WorldContext, GameNetDriver);
         } else
         {
-			NetDriver = ((UNetDriver * (*)(UObject*, UObject*, FName)) Addresses::CreateNetDriver)(UEngine::GetEngine(), UWorld::GetWorld(), GameNetDriver);
+			NetDriver = ((UNetDriver * (*)(UObject*, UObject*, FName)) Finder->CreateNetDriver())(UEngine::GetEngine(), UWorld::GetWorld(), GameNetDriver);
         }
         
         UWorld::GetWorld()->SetNetDriver(NetDriver);
@@ -140,7 +140,7 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
             return Pawn;
         }
     
-  //      AFortInventory::GiveItem(NewPlayer, Item->GetItem(), Item->GetCount(), 1, 1);
+        AFortInventory::GiveItem(NewPlayer, Item->GetItem(), Item->GetCount(), 1, 1);
     }
     
     if (Fortnite_Version.GetMajorVersion() <= 8.50) {
@@ -149,7 +149,7 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
     else {
         auto Pickaxe = NewPlayer->GetCosmeticLoadoutPC().GetPickaxe();
         auto WeaponDef = Pickaxe->GetWeaponDefinition();
-//        AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 0, 1); 
+        AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 0, 1); 
     } 
     
     return Pawn;

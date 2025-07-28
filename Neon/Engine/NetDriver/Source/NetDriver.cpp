@@ -145,8 +145,8 @@ void UNetDriver::ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TAr
         return;
     }
     
-    static void (*CallPreReplication)(AActor* Actor, UNetDriver* Driver) = decltype(CallPreReplication)(Addresses::CallPreReplication);
-    static void (*RemoveNetworkActor)(UNetDriver*, AActor*) = decltype(RemoveNetworkActor)(Addresses::RemoveNetworkActor);
+    static void (*CallPreReplication)(AActor* Actor, UNetDriver* Driver) = decltype(CallPreReplication)(Finder->CallPreReplication());
+    static void (*RemoveNetworkActor)(UNetDriver*, AActor*) = decltype(RemoveNetworkActor)(Finder->RemoveNetworkActor());
 
     auto NetworkObjectList = *(*(class TSharedPtr<FNetworkObjectList>*)(__int64(Driver) + 0x720));
     
@@ -284,7 +284,7 @@ int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSecond
         return 0;
     }
 
-    static void (*SendClientAdjustment)(APlayerController*) = decltype(SendClientAdjustment)(Addresses::SendClientAdjustment);
+    static void (*SendClientAdjustment)(APlayerController*) = decltype(SendClientAdjustment)(Finder->SendClientAdjustment());
 
     TArray<AActor*> ConsiderList;
 
@@ -308,9 +308,9 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 {
     if (NetDriver->GetClientConnections().Num() > 0)
     {
-        if (Addresses::RepDriverServerReplicateActors && Fortnite_Version.GetMajorVersion() <= 20)
+        if (Finder->RepDriverServerReplicateActors() && Fortnite_Version.GetMajorVersion() <= 20)
         {
-            reinterpret_cast<void(*)(UReplicationDriver*)>(NetDriver->GetReplicationDriver()->GetVTable()[Addresses::RepDriverServerReplicateActors])(NetDriver->GetReplicationDriver());
+            reinterpret_cast<void(*)(UReplicationDriver*)>(NetDriver->GetReplicationDriver()->GetVTable()[Finder->RepDriverServerReplicateActors()])(NetDriver->GetReplicationDriver());
         } else
         {
             ServerReplicateActors(NetDriver, DeltaSeconds);
@@ -322,7 +322,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 
 bool UNetDriver::InitListen(UWorld* NetWorkNotify, FURL URL, bool bReuseAddressAndPort)
 {
-    static bool (*InitListen)(UNetDriver*, UWorld*, FURL&, bool, FString&) = decltype(InitListen)(Addresses::InitListen);
+    static bool (*InitListen)(UNetDriver*, UWorld*, FURL&, bool, FString&) = decltype(InitListen)(Finder->InitListen());
     FString Error;
 
     UWorld* World = UWorld::GetWorld();
@@ -333,7 +333,7 @@ void UNetDriver::SetWorld(UWorld* World)
 {
     static void (*SetWorld)(UNetDriver*, UWorld*) = nullptr;
     if (!SetWorld)
-        SetWorld = decltype(SetWorld)(Addresses::SetWorld);
+        SetWorld = decltype(SetWorld)(Finder->SetWorld());
     return SetWorld(this, World);
 }
 

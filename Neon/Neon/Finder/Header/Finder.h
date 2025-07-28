@@ -1,38 +1,6 @@
 #pragma once
 #include "pch.h"
 
-namespace Addresses {
-    extern uint64_t WorldNetMode;
-    extern uint64_t GIsClient;
-    extern uint64_t TickFlush;
-    extern uint64_t InitHost;
-    extern uint64_t PauseBeaconRequests;
-    extern uint64_t SetWorld;
-    extern uint64_t GetMaxTickRate;
-    extern uint64_t DispatchRequest;
-    extern uint64_t CreateNetDriver;
-    extern uint64_t ProcessEvent;
-    extern uint64_t ApplyCharacterCustomization;
-    extern uint64_t KickPlayer;
-    extern uint64_t InitListen;
-    extern uint64_t GameSessionPatch;
-    extern uint64_t GetWorldContextFromObject;
-    extern uint64_t CreateNetDriverLocal;
-    extern uint64_t CreateChannel;
-    extern uint64_t SendClientAdjustment;
-    extern uint64_t CallPreReplication;
-    extern uint64_t RemoveNetworkActor;
-    extern uint64_t DemoReplicateActor;
-    extern uint64_t WorldGetNetMode;
-    extern uint64_t RepDriverServerReplicateActors;
-    extern uint64_t StaticFindObject;
-    extern uint64_t InternalTryActivateAbility;
-    extern uint64_t ConstructSpec;
-    extern uint64_t GiveAbility;
-    extern uint64_t GiveAbilityAndActivateOnce;
-    extern uint64_t GetInterfaceAddress;
-}
-
 class UFinder {
 public:
     static inline uintptr_t FindBytes(Memcury::Scanner& Scanner,
@@ -69,40 +37,63 @@ public:
         return -1;
     }
 
-    void Init();
+    uint64_t WorldNetMode();
 
-private:
-    uint64_t FindWorldNetMode();
-    uint64_t FindGIsClient();
-    uint64_t FindTickFlush();
-    uint64_t FindInitHost();
-    uint64_t FindPauseBeaconRequests();
-    uint64_t FindSetWorld();
-    uint64_t FindGetMaxTickRate();
-    uint64_t FindDispatchRequest();
-    uint64_t FindCreateNetDriver();
-    uint64_t FindProcessEvent();
-    uint64_t FindApplyCharacterCustomization();
-    uint64_t FindKickPlayer();
-    uint64_t FindInitListen();
-    uint64_t FindGameSessionPatch();
-    uint64_t FindGetWorldContextFromObject();
-    uint64_t FindCreateNetDriverLocal();
-    uint64_t FindCreateChannel();
-    uint64_t FindSendClientAdjustment();
-    uint64_t FindCallPreReplication();
-    uint64_t FindRemoveNetworkActor();
-    uint64_t FindDemoReplicateActor();
-    uint64_t FindWorldGetNetMode();
-    uint64_t FindRepDriverServerReplicateActors();
-    uint64_t FindStaticFindObject();
-    uint64_t FindInternalTryActivateAbility();
-    uint64_t FindConstructSpec();
-    uint64_t FindGiveAbility();
-    uint64_t FindGiveAbilityAndActivateOnce();
-    uint64_t FindGetInterfaceAddress();
+    uint64 GIsClient();
+
+    uint64 TickFlush();
+
+    uint64 InitHost();
+
+    uint64 PauseBeaconRequests();
+
+    uint64 SetWorld();
+
+    uint64 GetMaxTickRate();
+
+    uint64 DispatchRequest();
+
+    uint64 CreateNetDriver();
+
+    uint64 ProcessEvent();
+
+    uint64 ApplyCharacterCustomization();
+
+    uint64 KickPlayer();
+
+    uint64 InitListen();
+
+    uint64 GameSessionPatch();
+
+    uint64 GetWorldContextFromObject();
+
+    uint64 CreateNetDriverLocal();
+
+    uint64 CreateChannel();
+
+    uint64 SendClientAdjustment();
+
+    uint64 CallPreReplication();
+
+    uint64 RemoveNetworkActor();
+
+    uint64 DemoReplicateActor();
+
+    uint64 WorldGetNetMode();
+
+    uint64 RepDriverServerReplicateActors();
+
+    uint64 StaticFindObject();
+
+    uint64 InternalTryActivateAbility();
+
+    uint64 ConstructSpec();
+
+    uint64 GiveAbility();
+
+    uint64 GiveAbilityAndActivateOnce();
+
+    uint64 GetInterfaceAddress();
 };
 
 inline UFinder* Finder = new UFinder();
-
-#define INIT Finder->Init()

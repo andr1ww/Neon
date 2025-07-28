@@ -61,9 +61,9 @@ void InitNullsAndRetTrues() {
 		NullFuncs.push_back(Memcury::Scanner::FindPattern("40 53 48 83 EC ? 48 8B 01 48 8B D9 FF 90 ? ? ? ? 48 85 C0 74 ? F6 80 ? ? ? ? ? 74").Get());
 	}
 
-	NullFuncs.push_back(Addresses::KickPlayer);
-	RetTrueFuncs.push_back(Addresses::WorldNetMode);
-	RetTrueFuncs.push_back(Addresses::WorldGetNetMode);
+	NullFuncs.push_back(Finder->KickPlayer());
+	RetTrueFuncs.push_back(Finder->WorldNetMode());
+	RetTrueFuncs.push_back(Finder->WorldGetNetMode());
 	
 	if (Fortnite_Version == 0) RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 57 41 56 41 57 48 81 EC ? ? ? ? 48 8B 01 49 8B E9 45 0F B6 F8").Get());
 	else if (Fortnite_Version >= 16.40) {
@@ -108,20 +108,24 @@ void InitNullsAndRetTrues() {
 
 void Main()
 {
+	std::cin.tie(0);
+	std::cout.tie(0);
+	std::ios_base::sync_with_stdio(false);
+	
 	AllocConsole();
 	FILE* File = nullptr;
 	freopen_s(&File, "CONOUT$", "w+", stdout);
 	freopen_s(&File, "CONOUT$", "w+", stderr);
 	SetConsoleTitleA("Neon | Setting up");
 	SDK::Init();
-	INIT;
+
 	MH_Initialize();
 	Sleep(5000);
 
-	if (Addresses::GIsClient)
+	if (Finder->GIsClient())
 	{
-		*(bool*)(Addresses::GIsClient) = false; 
-		*(bool*)(Addresses::GIsClient + 1) = true;
+		*(bool*)(Finder->GIsClient()) = false; 
+		*(bool*)(Finder->GIsClient() + 1) = true;
 	} else
 	{
 		*(bool*)(IMAGEBASE + 0xEBD8A4C) = false; 
@@ -147,10 +151,10 @@ void Main()
 	
 	Runtime::VFTHook(SDK::StaticClassImpl("FortAbilitySystemComponentAthena")->GetClassDefaultObject()->GetVTable(), InternalServerTryActivateAbilityIndex, UAbilitySystemComponent::InternalServerTryActivateAbility);
 
-	Runtime::Hook(Addresses::TickFlush, UNetDriver::TickFlush, (void**)&TickFlushOriginal);
-	if (Addresses::DispatchRequest)
+	Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
+	if (Finder->DispatchRequest())
 	{
-		Runtime::Hook(Addresses::DispatchRequest, UNetDriver::DispatchRequest, (void**)&DispatchRequestOriginal);
+		Runtime::Hook(Finder->DispatchRequest(), UNetDriver::DispatchRequest, (void**)&DispatchRequestOriginal);
 	}
 
 	UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
@@ -161,7 +165,7 @@ void Main()
 	}
 	else if (Fortnite_Version <= 18.40 && Fortnite_Version >= 10.40)
 	{
-		WorldName = L"open Apollo_Terrain";
+		WorldName = L"open Apollo_Terain";
 	}
 	else if (Fortnite_Version <= 22.40 && Fortnite_Version >= 19.00)
 	{
