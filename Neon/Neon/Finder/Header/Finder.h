@@ -94,6 +94,8 @@ public:
     uint64 GiveAbilityAndActivateOnce();
 
     uint64 GetInterfaceAddress();
+
+    uint64 OnDamageServer();
 };
 
 inline UFinder* Finder = new UFinder();

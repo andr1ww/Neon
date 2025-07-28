@@ -4,6 +4,7 @@
 #include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
+#include "FortniteGame/BuildingSMActor/Header/BuildingSMActor.h"
 #include "FortniteGame/FortGameMode/Header/FortGameMode.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "Neon/Finder/Header/Finder.h"
@@ -138,6 +139,7 @@ void Main()
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerExecuteInventoryItem", AFortPlayerControllerAthena::ServerExecuteInventoryItem);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerPlayEmoteItem", AFortPlayerControllerAthena::ServerPlayEmoteItem);
 	Runtime::Exec("/Script/FortniteGame.FortControllerComponent_Aircraft.ServerAttemptAircraftJump", AFortPlayerControllerAthena::ServerAttemptAircraftJump);
+	Runtime::Hook(Finder->OnDamageServer(), ABuildingSMActor::OnDamageServer, (void**)&ABuildingSMActor::OnDamageServerOG);
 	
 	int InternalServerTryActivateAbilityIndex = 0;
 
