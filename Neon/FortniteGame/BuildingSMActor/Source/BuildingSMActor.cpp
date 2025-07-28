@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "../Header/BuildingSMActor.h"
 
+#include "Engine/DataTable/Header/DataTable.h"
 #include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/FortGameState/Header/FortGameState.h"
@@ -50,5 +51,32 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     const int MaxStackSize = ResourceDefinition->GetMaxStackSize().Value;
     int ResourceAmount = 0;
 
+    UCurveTable* ResourceCurveTable = nullptr;
     
+    if (BuildingActor->GetBuildingResourceAmountOverride().RowName.GetComparisonIndex() > 0) {
+        ResourceCurveTable = Runtime::StaticFindObject<UCurveTable>(
+                "/Game/Athena/Balance/DataTables/AthenaResourceRates.AthenaResourceRates");
+    
+        float BaseResourceValue = 0.0f;
+        EEvaluateCurveTableResult Result;
+        UDataTableFunctionLibrary::EvaluateCurveTableRow(
+            ResourceCurveTable,
+            BuildingActor->GetBuildingResourceAmountOverride().RowName,
+            0.0f,
+            FString(),  
+            &Result    
+        );
+        
+        ResourceAmount = static_cast<int>(round(BaseResourceValue * (Damage / BuildingActor->CallFunc<float>("BuildingActor", "GetMaxHealth"))));
+    }
+
+    if (ResourceAmount <= 0)
+    {
+        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
+    }
+
+    bool bIsWeakspot = Damage == 100.0f;
+    Controller->CallFunc<void>("FortPlayerController", "ClientReportDamagedResourceBuilding", BuildingActor, BuildingActor->Get<EFortResourceType>("BuildingSMActor", "ResourceType"), ResourceAmount, false, bIsWeakspot);
+
+    return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
 }

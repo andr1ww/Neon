@@ -381,11 +381,6 @@ uint64 UFinder::ApplyCharacterCustomization()
     static uint64 CachedResult = 0;
     if (CachedResult != 0)
         return CachedResult;
-
-    if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
-    {
-        return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 4C 89 44 24 ? 48 89 54 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 49 8B 00").Get();
-    }
     
     Memcury::Scanner Scanner = Memcury::Scanner::FindPattern("48 8B C4 48 89 50 ? 55 57 48 8D 68 ? 48 81 EC ? ? ? ? 80 B9");
     CachedResult = Scanner.Get();

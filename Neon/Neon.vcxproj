@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClInclude Include="Engine\Actor\Header\Actor.h" />
     <ClInclude Include="Engine\Array\Header\Array.h" />
+    <ClInclude Include="Engine\DataTable\Header\DataTable.h" />
     <ClInclude Include="Engine\GameplayStatics\Header\GameplayStatics.h" />
     <ClInclude Include="Engine\Guid\Header\Guid.h" />
     <ClInclude Include="Engine\HTTP\Header\HTTP.h" />
