@@ -780,14 +780,12 @@ uint64 UFinder::GiveAbility()
 
 uint64 UFinder::OnDamageServer()
 {
-    static uint64 CachedResult = 0;
-    if (CachedResult != 0)
-        return CachedResult;
-
     auto Addr = Memcury::FindFunction(L"OnDamageServer", 
-        Engine_Version == FEngineVersion(4, 16) ? std::vector<uint8_t>{ 0x4C, 0x89, 0x4C } : 
-        Engine_Version == FEngineVersion(4, 19) || Engine_Version >= FEngineVersion(4, 27) ? std::vector<uint8_t>{ 0x48, 0x8B, 0xC4 } : std::vector<uint8_t>{ 0x40, 0x55 }
+        Fortnite_Version <= 1.9 ? std::vector<uint8_t>{ 0x4C, 0x89, 0x4C } : 
+        Fortnite_Version <= 2.4 || Fortnite_Version >= 19.00 ? std::vector<uint8_t>{ 0x48, 0x8B, 0xC4 } : std::vector<uint8_t>{ 0x40, 0x55 }
     );
+
+    UE_LOG(LogNeon, Log, "Addr: 0x%x", Addr - IMAGEBASE);
 
     return Addr;
 }

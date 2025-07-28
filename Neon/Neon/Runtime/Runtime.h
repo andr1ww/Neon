@@ -243,7 +243,7 @@ namespace Runtime
 		auto ValidateRef = Memcury::Scanner::FindStringRef(std::wstring(ValidateName.begin(), ValidateName.end()).c_str(), false);
 
 		auto Addr = ValidateRef.Get();
-
+ 
 		if (!Addr) {
 			Addr = __int64(Func->GetNativeFunc());
 		}

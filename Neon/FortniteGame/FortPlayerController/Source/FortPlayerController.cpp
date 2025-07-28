@@ -4,6 +4,7 @@
 #include "Engine/Guid/Header/Guid.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
+#include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
 #include "Neon/Finder/Header/Finder.h"
 
 void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) 
@@ -15,8 +16,15 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
     if (!PlayerController) return;
     PlayerController->SetAcknowledgedPawn(PawnToAcknowledge);
     PlayerController->GetPlayerState()->SetHeroType(PlayerController->GetCosmeticLoadoutPC().GetCharacter()->GetHeroDefinition());
-    void* (*ApplyCharacterCustomization)(AFortPlayerStateAthena*, APawn*) = decltype(ApplyCharacterCustomization)(Finder->ApplyCharacterCustomization());
-    ApplyCharacterCustomization(PlayerController->GetPlayerState(), PawnToAcknowledge);
+    if (Fortnite_Version <= 10.40)
+    {
+        void* (*ApplyCharacterCustomization)(AFortPlayerStateAthena*, APawn*) = decltype(ApplyCharacterCustomization)(Finder->ApplyCharacterCustomization());
+        ApplyCharacterCustomization(PlayerController->GetPlayerState(), PawnToAcknowledge);
+    } else
+    {
+        UFortKismetLibrary::GetDefaultObj()->CallFunc<void>("FortKismetLibrary", "UpdatePlayerCustomCharacterPartsVisualization", PlayerController->GetPlayerState());    
+    }
+    
     static UFortAbilitySet* AbilitySet = (UFortAbilitySet*)GUObjectArray.FindObject("GAS_AthenaPlayer");
     UAbilitySystemComponent::GiveAbilitySet(PlayerController->GetPlayerState()->GetAbilitySystemComponent(), AbilitySet);
 }

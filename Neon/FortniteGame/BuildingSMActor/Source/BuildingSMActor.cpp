@@ -16,6 +16,7 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
                                       AActor* DamageCauser,
                                       FGameplayEffectContextHandle Context)
 {
+    UE_LOG(LogNeon, Log, "Called");
     AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
     
     if (!BuildingActor || !Controller || !GameState)
@@ -48,7 +49,7 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
 
-    const int MaxStackSize = ResourceDefinition->GetMaxStackSize().Value;
+    const float MaxStackSize = ResourceDefinition->GetMaxStackSize().Value;
     int ResourceAmount = 0;
 
     UCurveTable* ResourceCurveTable = nullptr;
@@ -70,13 +71,80 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         ResourceAmount = static_cast<int>(round(BaseResourceValue * (Damage / BuildingActor->CallFunc<float>("BuildingActor", "GetMaxHealth"))));
     }
 
+    UE_LOG(LogNeon, Log, "ResourceAmount: %d", ResourceAmount);
+
     if (ResourceAmount <= 0)
     {
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
+    
+    const FVector PlayerLocation = Controller->GetPawn()->CallFunc<FVector>("Actor", "K2_GetActorLocation");
+    
+    AFortInventory* Inventory = nullptr;
 
-    bool bIsWeakspot = Damage == 100.0f;
-    Controller->CallFunc<void>("FortPlayerController", "ClientReportDamagedResourceBuilding", BuildingActor, BuildingActor->Get<EFortResourceType>("BuildingSMActor", "ResourceType"), ResourceAmount, false, bIsWeakspot);
+    if (!Inventory) Inventory = Controller->GetWorldInventory();
 
+    if (!Inventory)
+    {
+        return; 
+    }
+
+    FFortItemList& IInventory = Inventory->GetInventory();
+    TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = IInventory.GetReplicatedEntries();
+    FFortItemEntry* InventoryEntry = nullptr;
+
+    for (int32 i = 0; i < ReplicatedEntriesOffsetPtr.Num(); i++)
+    {
+        if (ReplicatedEntriesOffsetPtr[i].GetItemDefinition() == ResourceDefinition)
+        {
+            InventoryEntry = &ReplicatedEntriesOffsetPtr[i];
+            break;
+        }
+    }
+    
+    if (InventoryEntry != nullptr) {
+        InventoryEntry->SetCount(InventoryEntry->GetCount() + ResourceAmount);
+    
+        if (InventoryEntry->GetCount() > MaxStackSize) {
+            AFortInventory::SpawnPickup(
+                PlayerLocation, 
+                ResourceDefinition, 
+                InventoryEntry->GetCount() - MaxStackSize, 
+                0,
+                EFortPickupSourceTypeFlag::Tossed, 
+                EFortPickupSpawnSource::Unset,
+                Controller->GetMyFortPawn()
+            );
+        
+            InventoryEntry->GetCount() = MaxStackSize;
+        }
+    
+        AFortInventory::ReplaceEntry(Controller, *InventoryEntry);
+    } else if (ResourceAmount > 0) {
+        if (ResourceAmount > MaxStackSize) {
+            AFortInventory::SpawnPickup(
+                PlayerLocation, 
+                ResourceDefinition, 
+                ResourceAmount - MaxStackSize, 
+                0,
+                EFortPickupSourceTypeFlag::Tossed, 
+                EFortPickupSpawnSource::Unset,
+                Controller->GetMyFortPawn()
+            );
+        
+            ResourceAmount = MaxStackSize;
+        }
+    
+        AFortInventory::GiveItem(Controller, ResourceDefinition, ResourceAmount, 0, 0);
+    }
+    
+    Controller->CallFunc<void>("FortPlayerController", "ClientReportDamagedResourceBuilding",
+        BuildingActor, 
+        BuildingActor, 
+        ResourceAmount, 
+        false, 
+        false
+    );
+    
     return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
 }

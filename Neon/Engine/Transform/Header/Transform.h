@@ -19,4 +19,5 @@ struct FTransform {
         : Rotation(InRotation), Translation(InTranslation), Scale3D(InScale3D) {
     }
 
+    FTransform(FVector loc, FQuat rot, FVector scale = { 1, 1, 1 }) : Translation(loc), Rotation(rot), Scale3D(scale) {}
 };
