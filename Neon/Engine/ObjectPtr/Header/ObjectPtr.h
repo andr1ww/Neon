@@ -11,7 +11,10 @@ public:
     : ObjectIndex(Index), ObjectSerialNumber(SerialNumber)
     {}
 
-    FWeakObjectPtr(UObject*);
+    FWeakObjectPtr(UObjectBase* Object) {
+        ObjectIndex = Object->GetUniqueID();
+        ObjectSerialNumber = GUObjectArray.IndexToObject(ObjectIndex)->SerialNumber;
+    }
 	
 public:
     class UObject* Get() const;

@@ -6,6 +6,7 @@
 class UGameplayStatics : public UObject
 {
 public:
+	static TArray<AActor*> GetAllActorsOfClass(const UObject* World, UClass* ActorClass);
 	static float GetTimeSeconds(UWorld* World);
 public:
 	DECLARE_STATIC_CLASS(UGameplayStatics);
