@@ -656,11 +656,37 @@ template <typename T> struct TTupleBaseElement {
     
                 template<typename... Args>
                 TTuple(Args&&... args) : TTupleBase<Types...>(std::forward<Args>(args)...) {}
+
+                template<int Index>
+  auto& Get() {
+                        if constexpr (Index == 0) {
+                                return static_cast<TTupleBaseElement<typename std::tuple_element<0, std::tuple<Types...>>::type>*>(this)->Value;
+                        } else if constexpr (Index == 1) {
+                                return static_cast<TTupleBaseElement<typename std::tuple_element<1, std::tuple<Types...>>::type>*>(this)->Value;
+                        }
+                }
         };
 
+        template <typename KeyType, typename ValueType>
+        struct TPair {
+        KeyType Key;
+        ValueType Value;
 
-template <typename KeyType, typename ValueType>
-using TPair = TTuple<KeyType, ValueType>;
+        TPair() = default;
+        TPair(const KeyType& InKey, const ValueType& InValue) : Key(InKey), Value(InValue) {}
+        TPair(TPair&&) = default;
+        TPair(const TPair&) = default;
+        TPair& operator=(TPair&&) = default;
+        TPair& operator=(const TPair&) = default;
+
+        bool operator==(const TPair& Other) const {
+                return Key == Other.Key && Value == Other.Value;
+        }
+
+        bool operator!=(const TPair& Other) const {
+                return !(*this == Other);
+        }
+};
 
 /** Allocated elements are overlapped with free element info in the element
  * list. */
@@ -1123,20 +1149,39 @@ template <typename KeyType, typename ValueType> class TMapBase {
         ElementSetType Pairs;
 };
 
-template <typename InKeyType, typename InValueType>
-class TMap : TMapBase<InKeyType, InValueType> {
-      public:
-        typedef InKeyType KeyType;
-        typedef InValueType ValueType;
+        template <typename InKeyType, typename InValueType>
+        class TMap : TMapBase<InKeyType, InValueType> {
+        public:
+                typedef InKeyType KeyType;
+                typedef InValueType ValueType;
+                typedef typename TMapBase<InKeyType, InValueType>::ElementType ElementType;
 
-        TMap() = default;
-        TMap( TMap && ) = default;
-        TMap( const TMap & ) = default;
-        TMap &operator=( TMap && ) = default;
-        TMap &operator=( const TMap & ) = default;
+                TMap() = default;
+                TMap( TMap && ) = default;
+                TMap( const TMap & ) = default;
+                TMap &operator=( TMap && ) = default;
+                TMap &operator=( const TMap & ) = default;
 
-      public:
-};
+                auto begin() -> decltype(this->Pairs.begin()) {
+                        return this->Pairs.begin();
+                }
+    
+                auto end() -> decltype(this->Pairs.end()) {
+                        return this->Pairs.end();
+                }
+    
+                auto begin() const -> decltype(this->Pairs.begin()) {
+                        return this->Pairs.begin();
+                }
+    
+                auto end() const -> decltype(this->Pairs.end()) {
+                        return this->Pairs.end();
+                }
+
+                int32 Num() const {
+                        return this->Pairs.Num();
+                }
+        };
 
 #define UE_PTRDIFF_TO_INT32( argument ) static_cast<int32>( argument )
 #define UE_PTRDIFF_TO_UINT32( argument ) static_cast<uint32>( argument )

@@ -140,6 +140,7 @@ void Main()
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerPlayEmoteItem", AFortPlayerControllerAthena::ServerPlayEmoteItem);
 	Runtime::Exec("/Script/FortniteGame.FortControllerComponent_Aircraft.ServerAttemptAircraftJump", AFortPlayerControllerAthena::ServerAttemptAircraftJump);
 	Runtime::Hook(Finder->OnDamageServer(), ABuildingSMActor::OnDamageServer, (void**)&ABuildingSMActor::OnDamageServerOG);
+	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerCreateBuildingActor", AFortPlayerControllerAthena::ServerCreateBuildingActor);
 	
 	int InternalServerTryActivateAbilityIndex = 0;
 

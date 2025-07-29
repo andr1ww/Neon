@@ -100,6 +100,8 @@ public:
     uint64 OnDamageServer();
 
     uint64 SpawnBot();
+
+    uint64 CantBuild();
 };
 
 inline UFinder* Finder = new UFinder();

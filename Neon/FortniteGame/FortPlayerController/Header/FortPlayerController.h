@@ -109,6 +109,7 @@ public:
     static void ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerPlayEmoteItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
+    static void ServerCreateBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
 };
 
 class AAIController : public AController

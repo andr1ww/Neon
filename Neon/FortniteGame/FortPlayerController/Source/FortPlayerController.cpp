@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "../Header/FortPlayerController.h"
 
+#include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "Engine/Guid/Header/Guid.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
@@ -140,6 +141,107 @@ void AFortPlayerControllerAthena::ServerAttemptAircraftJump(UActorComponent* Com
         PlayerController->Set("Controller", "ControlRotation", Rotation);
 
         PlayerController->GetMyFortPawn()->CallFunc<void>("FortPlayerPawn", "BeginSkydiving", true);
+    }
+}
+
+void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+    FCreateBuildingActorData CreateBuildingData;
+    Stack.StepCompiledIn(&CreateBuildingData);
+    Stack.IncrementCode();
+
+    UClass* BuildingClass = nullptr;
+    auto& ClassLookup = UWorld::GetWorld()->GetGameState()->GetAllPlayerBuildableClassesIndexLookup();
+    for (auto& Pair : ClassLookup) {
+        if (Pair.Value == CreateBuildingData.BuildingClassHandle) {
+            BuildingClass = Pair.Key;
+            break;
+        }
+    }
+
+    if (!BuildingClass)
+    {
+        UE_LOG(LogNeon, Log, "No building class");
+        return;
+    }
+
+    if (!BuildingClass->GetClassDefaultObject()->IsA<ABuildingActor>())
+    {
+        UE_LOG(LogNeon, Log, "wrong building class");
+        return;
+    }
+
+    TArray<AActor*> ExistingBuildings;
+    char PlacementResultFlag;
+    static auto CantBuild = (__int64 (*)(UWorld*, UObject*, FVector, FRotator, bool, TArray<AActor*>*, char*))(Finder->CantBuild());
+    bool bCanBuild = !CantBuild(UWorld::GetWorld(), BuildingClass, CreateBuildingData.GetBuildLoc(), 
+                 CreateBuildingData.GetBuildRot(), CreateBuildingData.bMirrored, 
+                 &ExistingBuildings, &PlacementResultFlag);
+        
+    if (!bCanBuild)
+    {
+        UE_LOG(LogNeon, Log, "CantBuild");
+        return;
+    }
+
+    UE_LOG(LogNeon, Log, "Ok: %s", BuildingClass->GetFName().ToString().ToString().c_str());
+
+    if (!PlayerController->Get<bool>("FortPlayerController", "bBuildFree")) {
+        auto* Resource = UFortKismetLibrary::K2_GetResourceItemDefinition(
+            ((ABuildingSMActor*)BuildingClass->GetClassDefaultObject())->GetResourceType());
+
+        UE_LOG(LogNeon, Log, "Resource: %s", Resource->GetFName().ToString().ToString().c_str());
+       
+        FFortItemEntry* ItemEntry = nullptr;
+        AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+        FFortItemList& Inventory = WorldInventory->GetInventory();
+        TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
+
+        for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); ++i)
+        {
+            if (ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemDefinition() == Resource)
+            {
+                UE_LOG(LogNeon, Log, "Ok");
+                ItemEntry = &ItemInstancesOffsetPtr[i]->GetItemEntry();
+                break;
+            }
+        }
+        
+        UE_LOG(LogNeon, Log, "ItemEntry: %p, Count: %d", ItemEntry, ItemEntry ? ItemEntry->GetCount() : 0);
+        
+        if (!ItemEntry || ItemEntry->GetCount() < 10)
+            return;
+           
+        ItemEntry->SetCount(ItemEntry->GetCount() - 10);
+        if (ItemEntry->GetCount() <= 0) {
+         //   AFortInventory::Remove(PlayerController, ItemEntry->GetItemGuid());
+        } else {
+            AFortInventory::ReplaceEntry(PlayerController, *ItemEntry);
+        }
+    }
+
+    UE_LOG(LogNeon, Log, "OK");
+
+    for (auto* Building : ExistingBuildings) {
+        if (Building) Building->CallFunc<void>("Actor", "K2_DestroyActor");
+    }
+
+    auto* BuildingActor = UGameplayStatics::SpawnActor<ABuildingSMActor>(BuildingClass, CreateBuildingData.GetBuildLoc(), 
+                                             CreateBuildingData.GetBuildRot(), PlayerController);
+   
+    if (ABuildingSMActor* BuildingSMActor = (ABuildingSMActor*)BuildingActor) {
+        UE_LOG(LogNeon, Log, "FUck ");
+        BuildingSMActor->SetbPlayerPlaced(true);
+        BuildingSMActor->CallFunc<void>("BuildingActor", "InitializeKismetSpawnedBuildingActor", BuildingSMActor, PlayerController, true, nullptr);
+
+        if (AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState()) {
+            BuildingSMActor->CallFunc<void>("BuildingActor", "PlacedByPlayer", PlayerState);
+            //  BuildingSMActor->SetTeamIndex(PlayerState->GetTeamIndex());
+            //  BuildingSMActor->SetTeam(EFortTeam(BuildingSMActor->GetTeamIndex()));
+        }
+
+        PlayerController->Set("FortPlayerControllerAthena", "BuildingsCreated", 
+            PlayerController->Get<int32>("FortPlayerControllerAthena", "BuildingsCreated") + 1);
     }
 }
 

@@ -7,3 +7,7 @@ struct FVector {
     FVector() : X(0), Y(0), Z(0) {}
     FVector(float x, float y, float z) : X(x), Y(y), Z(z) {}
 };
+
+struct FVector_NetQuantize10 final : public FVector
+{
+};
