@@ -56,8 +56,11 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry(), StructSize);
     ItemInstancesOffsetPtr.Add(BP);
 
-    WorldInventory->Update(PlayerController, &ItemEntry);
-
+    if (WorldInventory)
+    {
+        WorldInventory->Update(PlayerController, &ItemEntry);
+    }
+    
     return BP;
 }
 
