@@ -87,6 +87,17 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 GameState->CallFunc<void>("FortGameState", "OnRep_AdditionalPlaylistLevelsStreamed");
                 GameState->CallFunc<void>("FortGameState", "OnFinishedStreamingAdditionalPlaylistLevel");
             }
+
+            if (Fortnite_Version == 12.41)
+            {
+                ABuildingFoundation* JerkyFoundation = Runtime::StaticFindObject<ABuildingFoundation>("/Game/Athena/Apollo/Maps/Apollo_POI_Foundations.Apollo_POI_Foundations.PersistentLevel.LF_Athena_POI_19x19_2");
+                JerkyFoundation->SetDynamicFoundationType(EDynamicFoundationType::Static);
+                JerkyFoundation->SetbServerStreamedInLevel(true);
+                JerkyFoundation->CallFunc<void>("BuildingFoundation", "OnRep_ServerStreamedInLevel");
+                JerkyFoundation->GetDynamicFoundationRepData().SetEnabledState(EDynamicFoundationEnabledState::Enabled);
+                JerkyFoundation->CallFunc<void>("BuildingFoundation", "OnRep_DynamicFoundationRepData");
+                JerkyFoundation->CallFunc<void>("BuildingFoundation", "SetDynamicFoundationEnabled", true);
+            }
             
             if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
             {

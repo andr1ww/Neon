@@ -311,6 +311,42 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
         Sleep(400);
     }
     
+    if (GetAsyncKeyState(VK_F6) & 0x1)
+    {
+        static std::string Loader = std::string();
+        static std::string StartEventPath = std::string();
+        static std::string OnReadyPath = std::string();
+        static bool bStartedEvent = false;
+        if (!bStartedEvent)
+        {
+            if (Fortnite_Version == 12.41)
+            {
+                Loader = "/CycloneJerky/Gameplay/BP_Jerky_Loader.BP_Jerky_Loader_C";
+                StartEventPath = "/CycloneJerky/Gameplay/BP_Jerky_Loader.BP_Jerky_Loader_C.startevent";
+            } else if (Fortnite_Version == 12.61)
+            {
+                Loader = "/Fritter/BP_Fritter_Loader.BP_Fritter_Loader_C";
+                StartEventPath = "/Fritter/BP_Fritter_Loader.BP_Fritter_Loader_C.startevent";
+            }
+        
+            TArray<AActor*> ret = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), Runtime::StaticFindObject<UClass>(Loader));
+        
+            if (ret.Num() == 0) {
+                return;
+            }
+            auto Loader = ret[0];
+        
+            auto StartEvent = Runtime::StaticFindObject<UFunction>(StartEventPath);
+            struct StartEventParams {
+                float _Maybe_StartTime;
+            };
+            StartEventParams Parms{};
+            Parms._Maybe_StartTime = 0.f;
+            Loader->ProcessEvent(StartEvent, &Parms);
+            bStartedEvent = true;
+        }
+    }
+    
     if (NetDriver->GetClientConnections().Num() > 0)
     {
         if (Finder->RepDriverServerReplicateActors() && Fortnite_Version.GetMajorVersion() <= 20)

@@ -7,6 +7,7 @@
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "FortniteGame/FortServerBotManager/Header/FortServerBotManager.h"
 #include "Engine/ObjectPtr/Header/ObjectPtr.h"
+#include "FortniteGame/BuildingSMActor/Header/BuildingSMActor.h"
 
 class AFortGameStateAthena;
 class UFortItemDefinition;
@@ -105,6 +106,44 @@ public:
     uint8                                         bInitiallyLoaded : 1;                              // 0x0148(0x0001)(BitIndex: 0x00, PropSize: 0x0001 (Edit, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic))
     uint8                                         bInitiallyVisible : 1;                             // 0x0148(0x0001)(BitIndex: 0x01, PropSize: 0x0001 (Edit, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic))
     uint8                                         Pad_6BF[0x7];                                      // 0x0149(0x0007)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
+enum class EDynamicFoundationEnabledState : uint8
+{
+    Unknown                                  = 0,
+    Enabled                                  = 1,
+    Disabled                                 = 2,
+    EDynamicFoundationEnabledState_MAX       = 3,
+};
+
+// Enum FortniteGame.EDynamicFoundationType
+// NumValues: 0x0005
+enum class EDynamicFoundationType : uint8
+{
+    Static                                   = 0,
+    StartEnabled_Stationary                  = 1,
+    StartEnabled_Dynamic                     = 2,
+    StartDisabled                            = 3,
+    EDynamicFoundationType_MAX               = 4,
+};
+
+// 0x001C (0x001C - 0x0000)
+struct FDynamicBuildingFoundationRepData final
+{
+public:
+    struct FRotator                               Rotation;                                          // 0x0000(0x000C)(ZeroConstructor, IsPlainOldData, NoDestructor, NativeAccessSpecifierPublic)
+    struct FVector                                Translation;    
+DEFINE_MEMBER(EDynamicFoundationEnabledState, FDynamicBuildingFoundationRepData, EnabledState);                                  // 0x000C(0x000C)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    uint8                                         Pad_1D3B[0x3];                                     // 0x0019(0x0003)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
+class ABuildingFoundation : public ABuildingSMActor
+{
+public:
+    DEFINE_MEMBER(EDynamicFoundationType, ABuildingFoundation, DynamicFoundationType);
+    DEFINE_MEMBER(bool, ABuildingFoundation, bServerStreamedInLevel);
+    DEFINE_MEMBER(FDynamicBuildingFoundationRepData, ABuildingFoundation, DynamicFoundationRepData);
+    DEFINE_MEMBER(EDynamicFoundationEnabledState, ABuildingFoundation, FoundationEnabledState);
 };
 
 class AFortGameModeAthena : public AFortGameMode
