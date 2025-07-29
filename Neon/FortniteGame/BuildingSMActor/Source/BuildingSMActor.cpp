@@ -21,18 +21,18 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     if (!BuildingActor || !Controller || !GameState)
     {
         UE_LOG(LogNeon, Log, "Invalid Params in OnDamageServer!");
-        return;
+        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
 
     if (BuildingActor->GetbPlayerPlaced() == true || BuildingActor->CallFunc<float>("BuildingActor", "GetHealth") <= 1.0f)
     {
-        return;
+        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
     
     if (!DamageCauser || 
     !DamageCauser->IsA<AFortWeapon>() || 
     !static_cast<AFortWeapon*>(DamageCauser)->GetWeaponData()->IsA<UFortWeaponMeleeItemDefinition>()) {
-        return;
+        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
 
     static FName PickaxeTag = UKismetStringLibrary::GetDefaultObj()->CallFunc<FName>("KismetStringLibrary","Conv_StringToName", FString(L"Weapon.Melee.Impact.Pickaxe"));
@@ -45,12 +45,12 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     }
 
     if (!DamageTagEntry) {
-        return;
+        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
 
     auto ResourceDefinition = UFortKismetLibrary::K2_GetResourceItemDefinition(BuildingActor->GetResourceType());
     if (!ResourceDefinition) {
-        return;
+        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
 
     const float MaxStackSize = ResourceDefinition->GetMaxStackSize().Value;
@@ -82,7 +82,7 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
 
     if (ResourceAmount <= 0)
     {
-        return;
+        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
     
     const FVector PlayerLocation = Controller->GetPawn()->CallFunc<FVector>("Actor", "K2_GetActorLocation");
@@ -93,7 +93,7 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
 
     if (!Inventory)
     {
-        return; 
+        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
 
     FFortItemList& IInventory = Inventory->GetInventory();
@@ -160,13 +160,5 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         Damage == 100.f
     );
 
-    return OnDamageServerOG(BuildingActor, 
-                             Damage, 
-                             DamageTags, 
-                             Momentum, 
-                             HitInfo, 
-                             Controller, 
-                             DamageCauser, 
-                             Context);
-                             
+    return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
 }
