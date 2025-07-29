@@ -110,3 +110,13 @@ public:
     static void ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerPlayEmoteItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
 };
+
+class AAIController : public AController
+{
+    
+};
+
+class AFortAthenaAIBotController : public AAIController
+{
+    
+};

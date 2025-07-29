@@ -787,3 +787,29 @@ uint64 UFinder::OnDamageServer()
     
     return Addr;
 }
+
+uint64 UFinder::StaticLoadObject()
+{
+    auto Addr = Memcury::Scanner::FindStringRef(L"STAT_LoadObject", false).Get();
+
+    if (!Addr)
+    {
+        auto StrRef = Memcury::Scanner::FindStringRef(L"Calling StaticLoadObject during PostLoad may result in hitches during streaming.");
+        return FindBytes(StrRef, { 0x40, 0x55 }, 1000, 0, true);
+    }
+
+    for (int i = 0; i < 400; i++)
+    {
+        if (*(uint8_t*)(uint8_t*)(Addr - i) == 0x4C && *(uint8_t*)(uint8_t*)(Addr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(Addr - i + 2) == 0x4C)
+        {
+            return Addr - i;
+        }
+
+        if (*(uint8_t*)(uint8_t*)(Addr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addr - i + 1) == 0x8B && *(uint8_t*)(uint8_t*)(Addr - i + 2) == 0xC4)
+        {
+            return Addr - i;
+        }
+    }
+
+    return 0;
+}

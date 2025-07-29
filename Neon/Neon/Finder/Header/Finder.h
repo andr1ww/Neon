@@ -85,6 +85,8 @@ public:
 
     uint64 StaticFindObject();
 
+    uint64 StaticLoadObject();
+
     uint64 InternalTryActivateAbility();
 
     uint64 ConstructSpec();

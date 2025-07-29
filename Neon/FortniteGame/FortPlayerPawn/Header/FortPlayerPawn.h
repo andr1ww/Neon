@@ -23,3 +23,8 @@ class AFortPlayerPawn : public AFortPawn
 {
 
 };
+
+class ADefaultPawn : public APawn
+{
+    
+};

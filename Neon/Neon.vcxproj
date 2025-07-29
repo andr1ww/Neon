@@ -200,6 +200,7 @@
     <ClCompile Include="FortniteGame\FortInventory\Source\FortInventory.cpp" />
     <ClCompile Include="FortniteGame\FortKismetLibrary\Source\FortKismetLibrary.cpp" />
     <ClCompile Include="FortniteGame\FortPlayerController\Source\FortPlayerController.cpp" />
+    <ClCompile Include="FortniteGame\FortServerBotManager\Source\FortServerBotManager.cpp" />
     <ClCompile Include="Neon\Finder\Source\Finder.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -213,9 +214,6 @@
     <Content Include="FortniteGame\FortInventory\Header\FortInventory.h" />
     <Content Include="FortniteGame\FortServerBotManager\Header\FortServerBotManager.h" />
     <Content Include="SDK\FortSDK.lib" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="FortniteGame\FortServerBotManager\Source\" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

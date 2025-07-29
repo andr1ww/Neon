@@ -7,6 +7,14 @@
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "FortniteGame/FortServerBotManager/Header/FortServerBotManager.h"
 
+class AFortGameStateAthena;
+class UFortItemDefinition;
+class AFortPlayerControllerAthena;
+class AFortAIDirector;
+class AFortAIGoalManager;
+class AFortAthenaMutator_Bots;
+class UFortServerBotManagerAthena;
+
 struct FItemAndCount final 
 {
 public:
