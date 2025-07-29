@@ -18,6 +18,11 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     {
         return *Result = false;
     }
+
+    if (!GameState->GetMapInfo())
+    {
+        return *Result = false;
+    }
     
     static bool bSetup = false;
 
@@ -57,7 +62,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     FVector Loc{};
                     FRotator Rot{};
                     bool Success = false;
-                    ULevelStreamingDynamic::LoadLevelInstanceBySoftObjectPtr(UWorld::GetWorld(), AdditionalLevels[i], Loc, Rot, &Success, FString());
+                    ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary","Conv_NameToString",AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName), Loc, Rot, &Success, FString());
                     FAdditionalLevelStreamed NewLevel{};
                     NewLevel.bIsServerOnly = false;
                     NewLevel.LevelName = AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName;
@@ -75,7 +80,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     FVector Loc{};
                     FRotator Rot{};
                     bool Success = false;
-                    ULevelStreamingDynamic::LoadLevelInstanceBySoftObjectPtr(UWorld::GetWorld(), AdditionalServerLevels[i], Loc, Rot, &Success, FString());
+                    ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary","Conv_NameToString",AdditionalServerLevels[i].SoftObjectPtr.ObjectID.AssetPathName), Loc, Rot, &Success, FString());
                     FAdditionalLevelStreamed NewLevel{};
                     NewLevel.bIsServerOnly = true;
                     NewLevel.LevelName = AdditionalServerLevels[i].SoftObjectPtr.ObjectID.AssetPathName;
@@ -132,12 +137,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             GameState->OnRep_CurrentPlaylistData();
         }
     }
-
-    if (!GameState->GetMapInfo())
-    {
-        return *Result = false;
-    }
-
+    
     if (!UWorld::GetWorld()->GetNetDriver())
     {
         FName GameNetDriver = UKismetStringLibrary::GetDefaultObj()->CallFunc<FName>("KismetStringLibrary","Conv_StringToName",FString(L"GameNetDriver"));

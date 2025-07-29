@@ -161,7 +161,7 @@ void Main()
 
 	if (Finder->SpawnBot())
 	{
-		Runtime::Hook(Finder->SpawnBot(), UFortServerBotManagerAthena::SpawnBot);
+	//	Runtime::Hook(Finder->SpawnBot(), UFortServerBotManagerAthena::SpawnBot);
 	}
 
 	UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
