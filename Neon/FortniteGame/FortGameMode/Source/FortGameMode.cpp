@@ -57,7 +57,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     FVector Loc{};
                     FRotator Rot{};
                     bool Success = false;
-                    ((ULevelStreamingDynamic*)ULevelStreamingDynamic::StaticClass()->GetClassDefaultObject())->CallFunc<void>("LevelStreamingDynamic", "LoadLevelInstanceBySoftObjectPtr", UWorld::GetWorld(), AdditionalLevels[i], Loc, Rot, &Success, FString());
+                    ULevelStreamingDynamic::LoadLevelInstanceBySoftObjectPtr(UWorld::GetWorld(), AdditionalLevels[i], Loc, Rot, &Success, FString());
                     FAdditionalLevelStreamed NewLevel{};
                     NewLevel.bIsServerOnly = false;
                     NewLevel.LevelName = AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName;
@@ -75,7 +75,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     FVector Loc{};
                     FRotator Rot{};
                     bool Success = false;
-                    ((ULevelStreamingDynamic*)ULevelStreamingDynamic::StaticClass()->GetClassDefaultObject())->CallFunc<void>("LevelStreamingDynamic", "LoadLevelInstanceBySoftObjectPtr", UWorld::GetWorld(), AdditionalServerLevels[i], Loc, Rot, &Success, FString());
+                    ULevelStreamingDynamic::LoadLevelInstanceBySoftObjectPtr(UWorld::GetWorld(), AdditionalServerLevels[i], Loc, Rot, &Success, FString());
                     FAdditionalLevelStreamed NewLevel{};
                     NewLevel.bIsServerOnly = true;
                     NewLevel.LevelName = AdditionalServerLevels[i].SoftObjectPtr.ObjectID.AssetPathName;
@@ -108,8 +108,10 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 UE_LOG(LogNeon, Log, "Server Bot Manager Spawned: %s", GameMode->GetServerBotManager()->GetFName().ToString().ToString().c_str());
                 
                 BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
-//                BotMutator->SetCachedGameMode(GameMode);
-  //              BotMutator->SetCachedGameState(GameState);
+                GameMode->GetServerBotManager()->SetCachedBotMutator(BotMutator);
+                GameMode->SetServerBotManagerClass(UFortServerBotManagerAthena::StaticClass());
+                BotMutator->Set("FortAthenaMutator", "CachedGameMode", GameMode);
+                BotMutator->Set("FortAthenaMutator", "CachedGameState", GameState);
 
                 AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
                 GameMode->SetAIDirector(AIDirector);

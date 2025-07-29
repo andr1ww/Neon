@@ -100,12 +100,57 @@ public:
     }
 };
 
-class ULevelStreamingDynamic final : public UObject
+class ULevelStreamingDynamic : public UObject
 {
 public:
     uint8                                         bInitiallyLoaded : 1;                              // 0x0148(0x0001)(BitIndex: 0x00, PropSize: 0x0001 (Edit, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic))
     uint8                                         bInitiallyVisible : 1;                             // 0x0148(0x0001)(BitIndex: 0x01, PropSize: 0x0001 (Edit, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic))
     uint8                                         Pad_6BF[0x7];                                      // 0x0149(0x0007)(Fixing Struct Size After Last Property [ Dumper-7 ])
+public:
+     static ULevelStreamingDynamic* LoadLevelInstanceBySoftObjectPtr(class UObject* WorldContextObject, TSoftObjectPtr<class UWorld> Level, const struct FVector& Location, const struct FRotator& Rotation, bool* bOutSuccess, const class FString& OptionalLevelNameOverride)
+     {
+         UE_LOG(LogNeon, Log, "LoadLevelInstanceBySoftObjectPtr");
+         static SDK::UFunction* Func = nullptr;
+         SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("LevelStreamingDynamic", "LoadLevelInstanceBySoftObjectPtr");
+
+         if (Func == nullptr)
+             Func = Info.Func;
+         if (!Func)
+             return nullptr;
+    
+         struct LevelStreamingDynamic_LoadLevelInstanceBySoftObjectPtr final
+         {
+         public:
+             class UObject*                                WorldContextObject;                                // 0x0000(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+             TSoftObjectPtr<class UWorld>                  Level;                                             // 0x0008(0x0028)(Parm, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+             struct FVector                                Location;                                          // 0x0030(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+             struct FRotator                               Rotation;                                          // 0x003C(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, NativeAccessSpecifierPublic)
+             bool                                          bOutSuccess;                                       // 0x0048(0x0001)(Parm, OutParm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+             uint8                                         Pad_6C1[0x7];                                      // 0x0049(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
+             class FString                                 OptionalLevelNameOverride;                         // 0x0050(0x0010)(Parm, ZeroConstructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+             class ULevelStreamingDynamic*                 ReturnValue;                                       // 0x0060(0x0008)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+         };
+
+         LevelStreamingDynamic_LoadLevelInstanceBySoftObjectPtr Parms{};
+
+         Parms.WorldContextObject = WorldContextObject;
+         Parms.Level = Level;
+         Parms.Location = Location;
+         Parms.Rotation = Rotation;
+         Parms.OptionalLevelNameOverride = OptionalLevelNameOverride;
+    
+         SDK::StaticClassImpl("LevelStreamingDynamic")->GetClassDefaultObject()->ProcessEvent(Func, &Parms);
+
+         UE_LOG(LogNeon, Log, "I mean we called?");
+    
+         if (bOutSuccess != nullptr)
+             *bOutSuccess = Parms.bOutSuccess;
+         
+         return Parms.ReturnValue;
+     }
+public:
+    DECLARE_STATIC_CLASS(ULevelStreamingDynamic)
+    DECLARE_DEFAULT_OBJECT(ULevelStreamingDynamic)
 };
 
 enum class EDynamicFoundationEnabledState : uint8
@@ -154,6 +199,7 @@ public:
     DEFINE_MEMBER(TArray<FItemAndCount>, AFortGameModeAthena, StartingItems);
     DEFINE_MEMBER(TArray<AFortPlayerControllerAthena*>, AFortGameModeAthena, AlivePlayers);
     DEFINE_PTR(UFortServerBotManagerAthena, AFortGameModeAthena, ServerBotManager);
+    DEFINE_MEMBER(TSubclassOf<class UFortServerBotManagerAthena>, AFortGameModeAthena, ServerBotManagerClass);
     DEFINE_PTR(AFortAIDirector, AFortGameModeAthena, AIDirector);
     DEFINE_PTR(AFortAIGoalManager, AFortGameModeAthena, AIGoalManager);
 public:

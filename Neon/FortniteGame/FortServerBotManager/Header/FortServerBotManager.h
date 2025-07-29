@@ -21,8 +21,7 @@ class AFortAIDirector : public AActor
 class AFortAthenaMutator : public AActor
 {
 public:
-    DEFINE_PTR(AFortGameModeAthena, AFortAthenaMutator, CachedGameMode);
-    DEFINE_PTR(AFortGameStateAthena, AFortAthenaMutator, CachedGameState);
+
 };
 
 class AFortAthenaMutator_SpawningPolicyBase : public AFortAthenaMutator
@@ -92,6 +91,7 @@ class UFortServerBotManagerAthena : public UObject
 public:
     DEFINE_PTR(AFortGameModeAthena, UFortServerBotManagerAthena, CachedGameMode);
     DEFINE_PTR(AFortGameStateAthena, UFortServerBotManagerAthena, CachedGameState);
+    DEFINE_PTR(AFortAthenaMutator_Bots, UFortServerBotManagerAthena, CachedBotMutator);
 public:
     DefHookOg(AFortPlayerPawn*, SpawnBot, UFortServerBotManagerAthena *BotManager, FVector SpawnLoc, FRotator SpawnRot, UFortAthenaAIBotCustomizationData *BotData, FFortAthenaAIBotRunTimeCustomizationData &RuntimeBotData);
 public:
