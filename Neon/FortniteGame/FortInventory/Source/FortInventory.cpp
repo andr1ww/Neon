@@ -114,10 +114,13 @@ void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFort
 
         for (int32 i = 0; i < ReplicatedEntriesOffsetPtr.Num(); i++)
         {
-            if (ReplicatedEntriesOffsetPtr[i].GetItemGuid() == Entry.GetItemGuid())
+            static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
+            auto ReplicatedEntry = (FFortItemEntry*) ((uint8*) Items.GetData() + (i * StructSize));
+        
+            if (ReplicatedEntry->GetItemGuid() == Entry.GetItemGuid())
             {
                 UE_LOG(LogNeon, Log, "FoundEntry[%d]", i);
-                ReplicatedEntriesOffsetPtr[i] = Entry;
+                *ReplicatedEntry = Entry;
                 break;
             }
         }
