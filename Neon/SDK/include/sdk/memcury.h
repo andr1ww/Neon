@@ -1344,7 +1344,7 @@ namespace Memcury
         }
     }
     
-    inline uintptr_t FindFunction(const wchar_t* Name, const std::vector<uint8_t>& Bytes = std::vector<uint8_t>{ 0x48, 0x89, 0x5C }, int skip = 0, bool bWarnStringNotFound = true) // credit ender & me
+    inline uintptr_t FindFunction(const wchar_t* Name, const std::vector<uint8_t>& Bytes = std::vector<uint8_t>{ 0x48, 0x89, 0x5C }, int skip = 0, bool bWarnStringNotFound = true) 
     {
         auto StringRef = Memcury::Scanner::FindStringRef(Name, true, skip);
 

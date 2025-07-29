@@ -147,24 +147,26 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         
             ResourceAmount = MaxStackSize;
         }
-    
+
+        UE_LOG(LogNeon, Log, "Giving");
         AFortInventory::GiveItem(Controller, ResourceDefinition, ResourceAmount, 0, 0);
     }
-    
+        
     Controller->CallFunc<void>("FortPlayerController", "ClientReportDamagedResourceBuilding",
         BuildingActor, 
-        BuildingActor, 
+        BuildingActor->GetResourceType(), 
         ResourceAmount, 
         false, 
         Damage == 100.f
     );
 
-    return OnDamageServerOG(BuildingActor, 
-                            Damage, 
-                            DamageTags, 
-                            Momentum, 
-                            HitInfo, 
-                            Controller, 
-                            DamageCauser, 
-                            Context);
+/*    return OnDamageServerOG(BuildingActor, 
+                             Damage, 
+                             DamageTags, 
+                             Momentum, 
+                             HitInfo, 
+                             Controller, 
+                             DamageCauser, 
+                             Context);
+                             */
 }

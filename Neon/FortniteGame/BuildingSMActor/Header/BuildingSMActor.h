@@ -47,8 +47,6 @@ public:
     DEFINE_MEMBER(FCurveTableRowHandle, ABuildingSMActor, BuildingResourceAmountOverride)
     DEFINE_MEMBER(EFortResourceType, ABuildingSMActor, ResourceType)
 public:
-    static void OnDamageServer(ABuildingSMActor*, float, FGameplayTagContainer, FVector, FHitResult, AFortPlayerControllerAthena*, AActor*, FGameplayEffectContextHandle);
+    DefHookOg(void, OnDamageServer, ABuildingSMActor*, float, FGameplayTagContainer, FVector, FHitResult, AFortPlayerControllerAthena*, AActor*, FGameplayEffectContextHandle);
 };
 
-
-static inline void (*OnDamageServerOG)(ABuildingSMActor *, float, FGameplayTagContainer, FVector, FHitResult, AFortPlayerControllerAthena *, AActor *, FGameplayEffectContextHandle);

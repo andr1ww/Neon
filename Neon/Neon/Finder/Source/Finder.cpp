@@ -784,8 +784,6 @@ uint64 UFinder::OnDamageServer()
         Fortnite_Version <= 1.9 ? std::vector<uint8_t>{ 0x4C, 0x89, 0x4C } : 
         Fortnite_Version <= 2.4 || Fortnite_Version >= 19.00 ? std::vector<uint8_t>{ 0x48, 0x8B, 0xC4 } : std::vector<uint8_t>{ 0x40, 0x55 }
     );
-
-    UE_LOG(LogNeon, Log, "Addr: 0x%x", Addr - IMAGEBASE);
-
+    
     return Addr;
 }
