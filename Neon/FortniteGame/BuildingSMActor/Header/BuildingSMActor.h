@@ -4,6 +4,7 @@
 #include "Engine/Actor/Header/Actor.h"
 #include "Engine/DataTable/Header/DataTable.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
+#include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
 
 class UFortWeaponItemDefinition;
 class AFortPlayerControllerAthena;
@@ -44,9 +45,10 @@ class ABuildingSMActor : public ABuildingActor
 {
 public:
     DEFINE_MEMBER(FCurveTableRowHandle, ABuildingSMActor, BuildingResourceAmountOverride)
+    DEFINE_MEMBER(EFortResourceType, ABuildingSMActor, ResourceType)
 public:
     static void OnDamageServer(ABuildingSMActor*, float, FGameplayTagContainer, FVector, FHitResult, AFortPlayerControllerAthena*, AActor*, FGameplayEffectContextHandle);
 };
 
 
-inline void (*OnDamageServerOG)(ABuildingSMActor*, float, FGameplayTagContainer, FVector, FHitResult, AFortPlayerControllerAthena*, AActor*, FGameplayEffectContextHandle);
+static inline void (*OnDamageServerOG)(ABuildingSMActor *, float, FGameplayTagContainer, FVector, FHitResult, AFortPlayerControllerAthena *, AActor *, FGameplayEffectContextHandle);

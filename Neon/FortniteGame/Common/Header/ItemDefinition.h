@@ -2,6 +2,19 @@
 #include "pch.h"
 #include "Neon/Runtime/Runtime.h"
 
+enum class EFortResourceType : uint8
+{
+    Wood                                     = 0,
+    Stone                                    = 1,
+    Metal                                    = 2,
+    Permanite                                = 3,
+    GoldCurrency                             = 4,
+    Ingredient                               = 5,
+    None                                     = 6,
+    EFortResourceType_MAX                    = 7,
+};
+
+
 class UFortItemDefinition : public UObject
 {
 public:

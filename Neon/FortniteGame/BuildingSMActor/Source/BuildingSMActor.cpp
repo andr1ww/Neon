@@ -5,7 +5,6 @@
 #include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/FortGameState/Header/FortGameState.h"
-#include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
 
 void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
                                       float Damage,
@@ -22,20 +21,20 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     if (!BuildingActor || !Controller || !GameState)
     {
         UE_LOG(LogNeon, Log, "Invalid Params in OnDamageServer!");
-        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
+        return;
     }
 
     if (BuildingActor->GetbPlayerPlaced() == true || BuildingActor->CallFunc<float>("BuildingActor", "GetHealth") <= 1.0f)
     {
         UE_LOG(LogNeon, Log, "BuildingActor is player placed or has low health, skipping resource collection.");
-        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
+        return;
     }
     
     if (!DamageCauser || 
     !DamageCauser->IsA<AFortWeapon>() || 
     !static_cast<AFortWeapon*>(DamageCauser)->GetWeaponData()->IsA<UFortWeaponMeleeItemDefinition>()) {
         UE_LOG(LogNeon, Log, "DamageCauser is not a melee weapon, skipping resource collection.");
-        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
+        return;
     }
 
     static FName PickaxeTag = UKismetStringLibrary::GetDefaultObj()->CallFunc<FName>("KismetStringLibrary","Conv_StringToName", FString(L"Weapon.Melee.Impact.Pickaxe"));
@@ -49,13 +48,13 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
 
     if (!DamageTagEntry) {
         UE_LOG(LogNeon, Log, "DamageTags do not contain a pickaxe tag, skipping resource collection.");
-        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
+        return;
     }
 
-    auto ResourceDefinition = UFortKismetLibrary::K2_GetResourceItemDefinition(BuildingActor->Get<EFortResourceType>("BuildingSMActor", "ResourceType"));
+    auto ResourceDefinition = UFortKismetLibrary::K2_GetResourceItemDefinition(BuildingActor->GetResourceType());
     if (!ResourceDefinition) {
         UE_LOG(LogNeon, Log, "KismetLibrary::K2_GetResourceItemDefinition() failed.");
-        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
+        return;
     }
 
     const float MaxStackSize = ResourceDefinition->GetMaxStackSize().Value;
@@ -72,13 +71,10 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
                 "/Game/Athena/Balance/DataTables/AthenaResourceRates.AthenaResourceRates");
         }
         
-        EEvaluateCurveTableResult Result;
         float Out = UDataTableFunctionLibrary::EvaluateCurveTableRow(
             ResourceCurveTable,
             BuildingActor->GetBuildingResourceAmountOverride().RowName,
-            0.0f,
-            FString(),  
-            &Result    
+            0.0f
         );
         
         float RC = Out / (BuildingActor->CallFunc<float>("BuildingActor", "GetMaxHealth") / Damage);
@@ -90,7 +86,7 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
 
     if (ResourceAmount <= 0)
     {
-        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
+        return;
     }
     
     const FVector PlayerLocation = Controller->GetPawn()->CallFunc<FVector>("Actor", "K2_GetActorLocation");
@@ -105,26 +101,33 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     }
 
     FFortItemList& IInventory = Inventory->GetInventory();
-    TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = IInventory.GetReplicatedEntries();
+    TArray<UFortWorldItem*>& ItemInstances = IInventory.GetItemInstances();
+    UFortWorldItem* WorldItem = nullptr;
     FFortItemEntry* InventoryEntry = nullptr;
 
-    for (int32 i = 0; i < ReplicatedEntriesOffsetPtr.Num(); i++)
+    for (int32 i = 0; i < ItemInstances.Num(); i++)
     {
-        if (ReplicatedEntriesOffsetPtr[i].GetItemDefinition() == ResourceDefinition)
+        if (ItemInstances[i] && ItemInstances[i]->GetItemEntry().GetItemDefinition() == ResourceDefinition)
         {
-            InventoryEntry = &ReplicatedEntriesOffsetPtr[i];
+            WorldItem = ItemInstances[i];
+            InventoryEntry = &ItemInstances[i]->GetItemEntry();
             break;
         }
     }
     
     if (InventoryEntry != nullptr) {
-        InventoryEntry->SetCount(InventoryEntry->GetCount() + ResourceAmount);
+        int32 NewCount = InventoryEntry->GetCount() + ResourceAmount;
+        InventoryEntry->SetCount(NewCount);
+        UE_LOG(LogNeon, Log, "NewCount: %d", NewCount);
     
-        if (InventoryEntry->GetCount() > MaxStackSize) {
+        if (NewCount > MaxStackSize) {
+            int32 OverflowAmount = NewCount - MaxStackSize;
+            InventoryEntry->SetCount(MaxStackSize);
+            
             AFortInventory::SpawnPickup(
                 PlayerLocation, 
                 ResourceDefinition, 
-                InventoryEntry->GetCount() - MaxStackSize, 
+                OverflowAmount, 
                 0,
                 EFortPickupSourceTypeFlag::Tossed, 
                 EFortPickupSpawnSource::Unset,
@@ -133,6 +136,7 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         }
     
         AFortInventory::ReplaceEntry(Controller, *InventoryEntry);
+        WorldItem->SetItemEntry(*InventoryEntry);
     } else if (ResourceAmount > 0) {
         if (ResourceAmount > MaxStackSize) {
             AFortInventory::SpawnPickup(
@@ -156,8 +160,6 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         BuildingActor, 
         ResourceAmount, 
         false, 
-        false
+        Damage == 100.f
     );
-    
-  //  return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
 }

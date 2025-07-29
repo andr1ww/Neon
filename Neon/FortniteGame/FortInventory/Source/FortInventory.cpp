@@ -96,18 +96,18 @@ void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFort
     FFortItemList& Inventory = WorldInventory->GetInventory();
     TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
     
-    UFortWorldItem** entry = nullptr;
+    UFortWorldItem* entry = nullptr;
     
     for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); i++)
     {
         if (ItemInstancesOffsetPtr[i] && ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemGuid() == Entry.GetItemGuid())
         {
-            entry = &ItemInstancesOffsetPtr[i];
+            entry = ItemInstancesOffsetPtr[i];
             break;
         }
     }
     
-    if (entry && *entry) (*entry)->SetItemEntry(Entry);
+    entry->SetItemEntry(Entry);
     
     WorldInventory->SetbRequiresLocalUpdate(true);
     WorldInventory->HandleInventoryLocalUpdate();
