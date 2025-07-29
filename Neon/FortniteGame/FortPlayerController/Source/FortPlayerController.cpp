@@ -29,40 +29,41 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
     UAbilitySystemComponent::GiveAbilitySet(PlayerController->GetPlayerState()->GetAbilitySystemComponent(), AbilitySet);
 }
 
-void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
-{
+void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) {
     FGuid ItemGuid;
     Stack.StepCompiledIn(&ItemGuid);
     Stack.IncrementCode();
+    
     if (!PlayerController) return;
-
-    FFortItemEntry* Entry = nullptr;
+    
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
     FFortItemList& Inventory = WorldInventory->GetInventory();
-    TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
-    int32 FortItemEntrySize = StaticClassImpl("FortItemEntry")->GetSize();
-
-    for (int32 i = 0; i < ReplicatedEntriesOffsetPtr.Num(); i++)
-    {
-        auto Item = (FFortItemEntry*) ((uint8*) ReplicatedEntriesOffsetPtr.GetData() + (i * FortItemEntrySize));
-        if (Item->GetItemGuid() == ItemGuid)
-        {
+    TArray<FFortItemEntry>& ReplicatedEntries = Inventory.GetReplicatedEntries();
+    
+    FFortItemEntry* Entry = nullptr;
+    uint8* Data = (uint8*)ReplicatedEntries.GetData();
+    int32 Count = ReplicatedEntries.Num();
+    static int32 FortItemEntrySize = StaticClassImpl("FortItemEntry")->GetSize();
+    
+    for (int32 i = 0; i < Count; ++i) {
+        auto Item = (FFortItemEntry*)(Data + (i * FortItemEntrySize));
+        if (Item->GetItemGuid() == ItemGuid) {
             Entry = Item;
             break;
         }
     }
-
-    if (!Entry)
-    {
-        UE_LOG(LogNeon, Warning, "ServerExecuteInventoryItem: Entry not found!");
+    
+    if (!Entry) {
         return;
     }
     
     UFortWeaponItemDefinition* ItemDefinition = Cast<UFortWeaponItemDefinition>(Entry->GetItemDefinition());
+    AFortPawn* MyFortPawn = PlayerController->GetMyFortPawn();
+    
     if (Fortnite_Version.GetMajorVersion() >= 19.00) {
-        PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "EquipWeaponDefinition", ItemDefinition, ItemGuid, Entry->GetTrackerGuid(), false);
+        MyFortPawn->CallFunc<void>("FortPawn", "EquipWeaponDefinition", ItemDefinition, ItemGuid, Entry->GetTrackerGuid(), false);
     } else {
-        PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "EquipWeaponDefinition", ItemDefinition, ItemGuid);
+        MyFortPawn->CallFunc<void>("FortPawn", "EquipWeaponDefinition", ItemDefinition, ItemGuid);
     }
 }
 
