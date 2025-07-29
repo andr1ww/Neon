@@ -213,7 +213,7 @@ uint64 UFinder::PauseBeaconRequests()
 
 uint64 UFinder::SetWorld()
 {
-    if (Fortnite_Version.GetMajorVersion() < 14)
+    if (Fortnite_Version <= 13.00)
     {
         return Memcury::Scanner::FindStringRef(L"AOnlineBeaconHost::InitHost failed")
             .ScanFor({ 0x48, 0x8B, 0xD0, 0xE8 }, false)
