@@ -109,7 +109,6 @@ public:
 public:
     static ULevelStreamingDynamic* LoadLevelInstance(class UObject* WorldContextObject, const class FString& LevelName, const struct FVector& Location, const struct FRotator& Rotation, bool* bOutSuccess, const class FString& OptionalLevelNameOverride)
      {
-         UE_LOG(LogNeon, Log, "LoadLevelInstanceBySoftObjectPtr");
          static SDK::UFunction* Func = nullptr;
          SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("LevelStreamingDynamic", "LoadLevelInstance");
 
