@@ -104,6 +104,8 @@ public:
     uint64 SpawnActor();
     
     uint64 CantBuild();
+
+    uint64 ReplaceBuildingActor();
 };
 
 inline UFinder* Finder = new UFinder();

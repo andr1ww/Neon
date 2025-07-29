@@ -839,3 +839,22 @@ uint64 UFinder::CantBuild()
 
     return CachedResult;
 }
+
+uint64 UFinder::ReplaceBuildingActor()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+
+    auto StringRef = Memcury::Scanner::FindStringRef(L"STAT_Fort_BuildingSMActorReplaceBuildingActor", false);
+
+    if (!StringRef.Get()) 
+    {
+        return CachedResult = Memcury::Scanner::FindPattern("4C 89 44 24 ? 55 56 57 41 55 41 56 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 45").Get(); 
+    }
+
+    auto BytesToFind = Engine_Version == 4.20 || (Engine_Version == 4.21 && Fortnite_Version < 6.30) || Engine_Version >= 4.27 ? std::vector<uint8_t>{ 0x48, 0x8B, 0xC4 }
+    : std::vector<uint8_t>{ 0x4C, 0x8B };
+
+    return CachedResult = FindBytes(StringRef, BytesToFind, 1000, 0, true);
+}

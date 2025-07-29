@@ -142,6 +142,7 @@ void Main()
 	Runtime::Hook(Finder->OnDamageServer(), ABuildingSMActor::OnDamageServer, (void**)&ABuildingSMActor::OnDamageServerOG);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerCreateBuildingActor", AFortPlayerControllerAthena::ServerCreateBuildingActor);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerBeginEditingBuildingActor", AFortPlayerControllerAthena::ServerBeginEditingBuildingActor);
+	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerEditBuildingActor", AFortPlayerControllerAthena::ServerEditBuildingActor);
 
 	int InternalServerTryActivateAbilityIndex = 0;
 

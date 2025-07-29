@@ -255,5 +255,39 @@ void AFortPlayerControllerAthena::ServerBeginEditingBuildingActor(AFortPlayerCon
     if (!ItemEntry)
         return;
 
-    PlayerController->CallFunc<void>("FortPlayerController", "ServerExecuteInventoryItem", ItemEntry->GetItemGuid());
+    BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", PlayerController->GetPlayerState());
+    BuildingSMActor->CallFunc<void>("BuildingSMActor", "OnRep_EditingPlayer");
+
+    PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "EquipWeaponDefinition", ItemEntry->GetItemDefinition(), ItemEntry->GetItemGuid());
+
+    AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->GetMyFortPawn()->Get<AFortWeapon*>("FortPawn", "CurrentWeapon"));
+    if (EditingTool)
+    {
+        EditingTool->Set("FortWeap_EditingTool", "EditActor", BuildingSMActor);
+        EditingTool->CallFunc<void>("FortWeap_EditingTool", "OnRep_EditActor");
+    }
+}
+
+void AFortPlayerControllerAthena::ServerEditBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+    ABuildingSMActor* BuildingSMActor;
+    TSubclassOf<ABuildingSMActor> NewClass;
+    uint8 RotationIterations;
+    bool bMirrored;
+    Stack.StepCompiledIn(&BuildingSMActor);
+    Stack.StepCompiledIn(&NewClass);
+    Stack.StepCompiledIn(&RotationIterations);
+    Stack.StepCompiledIn(&bMirrored);
+
+    if (!PlayerController || !BuildingSMActor || !BuildingSMActor || !BuildingSMActor->IsA<ABuildingSMActor>() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex"))
+        return;
+
+    BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", nullptr);
+    BuildingSMActor->CallFunc<void>("BuildingSMActor", "OnRep_EditingPlayer");
+
+    static auto ReplaceBuildingActor = (ABuildingSMActor * (*)(ABuildingSMActor*, unsigned int, UObject*, unsigned int, int, bool, AFortPlayerController*))(Finder->ReplaceBuildingActor());
+
+    ABuildingSMActor* NewBuild = ReplaceBuildingActor(BuildingSMActor, 1, NewClass, BuildingSMActor->Get<int32>("BuildingActor", "CurrentBuildingLevel"), RotationIterations, bMirrored, PlayerController);
+
+    if (NewBuild) NewBuild->SetbPlayerPlaced(true);
 }

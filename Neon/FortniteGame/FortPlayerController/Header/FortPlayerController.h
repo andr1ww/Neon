@@ -109,8 +109,13 @@ enum class EFortTeam : uint8
     MAX                                      = 255,
 };
 
-class UFortEditToolItemDefinition final : public UObject
+class UFortEditToolItemDefinition : public UObject
 {
+};
+
+class AFortWeap_EditingTool : public UObject
+{
+    
 };
 
 class AFortPlayerControllerAthena : public AFortPlayerController 
@@ -125,6 +130,7 @@ public:
     static void ServerPlayEmoteItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerCreateBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerBeginEditingBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
+    static void ServerEditBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
 };
 
 class AAIController : public AController
