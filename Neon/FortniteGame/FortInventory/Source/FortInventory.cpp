@@ -95,9 +95,10 @@ void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFort
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
     FFortItemList& Inventory = WorldInventory->GetInventory();
     TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
-    
+    TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
+
     UFortWorldItem* entry = nullptr;
-    
+
     for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); i++)
     {
         if (ItemInstancesOffsetPtr[i] && ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemGuid() == Entry.GetItemGuid())
@@ -106,13 +107,26 @@ void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFort
             break;
         }
     }
-    
-    entry->SetItemEntry(Entry);
+
+    if (entry)
+    {
+        entry->SetItemEntry(Entry);
+
+        for (int32 i = 0; i < ReplicatedEntriesOffsetPtr.Num(); i++)
+        {
+            if (ReplicatedEntriesOffsetPtr[i].GetItemGuid() == Entry.GetItemGuid())
+            {
+                ReplicatedEntriesOffsetPtr[i] = Entry;
+                break;
+            }
+        }
+    }
     
     WorldInventory->SetbRequiresLocalUpdate(true);
     WorldInventory->HandleInventoryLocalUpdate();
-    WorldInventory->GetInventory().MarkItemDirty(Entry);
-    WorldInventory->GetInventory().MarkArrayDirty();
+    WorldInventory->CallFunc<void>("Actor", "ForceNetUpdate");
+    Inventory.MarkItemDirty(Entry);
+    Inventory.MarkArrayDirty();
 }
 
 FFortItemEntry AFortInventory::MakeItemEntry(UFortItemDefinition* ItemDefinition, int32 Count, int32 Level) {

@@ -26,14 +26,12 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
 
     if (BuildingActor->GetbPlayerPlaced() == true || BuildingActor->CallFunc<float>("BuildingActor", "GetHealth") <= 1.0f)
     {
-        UE_LOG(LogNeon, Log, "BuildingActor is player placed or has low health, skipping resource collection.");
         return;
     }
     
     if (!DamageCauser || 
     !DamageCauser->IsA<AFortWeapon>() || 
     !static_cast<AFortWeapon*>(DamageCauser)->GetWeaponData()->IsA<UFortWeaponMeleeItemDefinition>()) {
-        UE_LOG(LogNeon, Log, "DamageCauser is not a melee weapon, skipping resource collection.");
         return;
     }
 
@@ -47,13 +45,11 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     }
 
     if (!DamageTagEntry) {
-        UE_LOG(LogNeon, Log, "DamageTags do not contain a pickaxe tag, skipping resource collection.");
         return;
     }
 
     auto ResourceDefinition = UFortKismetLibrary::K2_GetResourceItemDefinition(BuildingActor->GetResourceType());
     if (!ResourceDefinition) {
-        UE_LOG(LogNeon, Log, "KismetLibrary::K2_GetResourceItemDefinition() failed.");
         return;
     }
 
@@ -162,4 +158,13 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         false, 
         Damage == 100.f
     );
+
+    return OnDamageServerOG(BuildingActor, 
+                            Damage, 
+                            DamageTags, 
+                            Momentum, 
+                            HitInfo, 
+                            Controller, 
+                            DamageCauser, 
+                            Context);
 }
