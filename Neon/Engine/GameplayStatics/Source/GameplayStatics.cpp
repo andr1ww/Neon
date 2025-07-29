@@ -180,3 +180,20 @@ UObject* UGameplayStatics::SpawnObject(TSubclassOf<class UObject> ObjectClass, c
     
     return UGameplayStatics_SpawnObject_Params.ReturnValue;
 }
+
+AActor* UGameplayStatics::SpawnActorOG(UClass* Class, FVector Loc, FRotator Rot, AActor* Owner)
+{
+    UWorld* World = UWorld::GetWorld();
+    if (!World || !Class) 
+        return nullptr;
+    
+    FActorSpawnParameters addr{};
+
+    addr.Owner = Owner;
+    addr.bDeferConstruction = false;
+    addr.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    
+    FTransform Transform(Loc, FRotToQuat(Rot));
+    
+    return ((AActor * (*)(UWorld*, UClass*, FTransform const*, FActorSpawnParameters*))(Finder->SpawnActor()))(UWorld::GetWorld(), Class, &Transform, &addr);
+}

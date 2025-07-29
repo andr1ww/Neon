@@ -64,5 +64,8 @@ public:
     DEFINE_MEMBER(EFortResourceType, ABuildingSMActor, ResourceType)
 public:
     DefHookOg(void, OnDamageServer, ABuildingSMActor*, float, FGameplayTagContainer, FVector, FHitResult, AFortPlayerControllerAthena*, AActor*, FGameplayEffectContextHandle);
+public:
+    DECLARE_STATIC_CLASS(ABuildingSMActor)
+    DECLARE_DEFAULT_OBJECT(ABuildingSMActor)
 };
 

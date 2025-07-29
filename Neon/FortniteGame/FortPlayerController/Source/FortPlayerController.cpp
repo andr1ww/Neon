@@ -161,13 +161,11 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
 
     if (!BuildingClass)
     {
-        UE_LOG(LogNeon, Log, "No building class");
         return;
     }
 
     if (!BuildingClass->GetClassDefaultObject()->IsA<ABuildingActor>())
     {
-        UE_LOG(LogNeon, Log, "wrong building class");
         return;
     }
 
@@ -180,18 +178,14 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
         
     if (!bCanBuild)
     {
-        UE_LOG(LogNeon, Log, "CantBuild");
         return;
     }
-
-    UE_LOG(LogNeon, Log, "Ok: %s", BuildingClass->GetFName().ToString().ToString().c_str());
-
-    if (!PlayerController->Get<bool>("FortPlayerController", "bBuildFree")) {
+    
+    if (!PlayerController->Get<bool>("FortPlayerController", "bBuildFree"))
+    {
         auto* Resource = UFortKismetLibrary::K2_GetResourceItemDefinition(
             ((ABuildingSMActor*)BuildingClass->GetClassDefaultObject())->GetResourceType());
-
-        UE_LOG(LogNeon, Log, "Resource: %s", Resource->GetFName().ToString().ToString().c_str());
-       
+        
         FFortItemEntry* ItemEntry = nullptr;
         AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
         FFortItemList& Inventory = WorldInventory->GetInventory();
@@ -201,41 +195,32 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
         {
             if (ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemDefinition() == Resource)
             {
-                UE_LOG(LogNeon, Log, "Ok");
                 ItemEntry = &ItemInstancesOffsetPtr[i]->GetItemEntry();
                 break;
             }
         }
         
-        UE_LOG(LogNeon, Log, "ItemEntry: %p, Count: %d", ItemEntry, ItemEntry ? ItemEntry->GetCount() : 0);
-        
         if (!ItemEntry || ItemEntry->GetCount() < 10)
             return;
            
         ItemEntry->SetCount(ItemEntry->GetCount() - 10);
-        if (ItemEntry->GetCount() <= 0) {
-         //   AFortInventory::Remove(PlayerController, ItemEntry->GetItemGuid());
-        } else {
-            AFortInventory::ReplaceEntry(PlayerController, *ItemEntry);
-        }
+        AFortInventory::ReplaceEntry(PlayerController, *ItemEntry);
     }
-
-    UE_LOG(LogNeon, Log, "OK");
-
+    
     for (auto* Building : ExistingBuildings) {
         if (Building) Building->CallFunc<void>("Actor", "K2_DestroyActor");
     }
 
-    auto* BuildingActor = UGameplayStatics::SpawnActor<ABuildingSMActor>(BuildingClass, CreateBuildingData.GetBuildLoc(), 
+    auto BuildingActor = UGameplayStatics::SpawnActorOG<ABuildingSMActor>(BuildingClass, CreateBuildingData.GetBuildLoc(), 
                                              CreateBuildingData.GetBuildRot(), PlayerController);
    
-    if (ABuildingSMActor* BuildingSMActor = (ABuildingSMActor*)BuildingActor) {
+    if (ABuildingSMActor* BuildingSMActor = BuildingActor) {
         UE_LOG(LogNeon, Log, "FUck ");
         BuildingSMActor->SetbPlayerPlaced(true);
-        BuildingSMActor->CallFunc<void>("BuildingActor", "InitializeKismetSpawnedBuildingActor", BuildingSMActor, PlayerController, true, nullptr);
+        BuildingSMActor->CallFunc<void>("BuildingActor", "InitializeKismetSpawnedBuildingActor", BuildingSMActor, PlayerController, true);
 
         if (AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState()) {
-            BuildingSMActor->CallFunc<void>("BuildingActor", "PlacedByPlayer", PlayerState);
+         //   BuildingSMActor->CallFunc<void>("BuildingActor", "PlacedByPlayer", PlayerState);
             //  BuildingSMActor->SetTeamIndex(PlayerState->GetTeamIndex());
             //  BuildingSMActor->SetTeam(EFortTeam(BuildingSMActor->GetTeamIndex()));
         }

@@ -12,6 +12,26 @@ enum class ESpawnActorCollisionHandlingMethod : uint8
 	DontSpawnIfColliding
 };
 
+struct FActorSpawnParameters
+{
+public:
+	FName Name;
+
+	AActor* Template;
+	AActor* Owner;
+	APawn* Instigator;
+	ULevel* OverrideLevel;
+	ESpawnActorCollisionHandlingMethod SpawnCollisionHandlingOverride;
+
+private:
+	uint8	bRemoteOwned : 1;
+public:
+	uint8	bNoFail : 1;
+	uint8	bDeferConstruction : 1;
+	uint8	bAllowDuringConstructionScript : 1;
+	EObjectFlags ObjectFlags;
+};
+
 class UGameplayStatics : public UObject
 {
 public:
@@ -21,6 +41,15 @@ public:
 	static AActor* BeginDeferredActorSpawnFromClass(const UObject* WorldContextObject, UClass* ActorClass, const FTransform& SpawnTransform, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::Undefined, AActor* Owner = nullptr);
 	static UObject* SpawnObject(TSubclassOf<class UObject> ObjectClass, class UObject* Param_Outer);
 
+	static AActor* SpawnActorOG(UClass* Class, FVector Loc, FRotator Rot = FRotator(0,0,0), AActor* Owner = nullptr);
+	static AActor* SpawnActorOG(UClass* Class, FTransform Transform, AActor* Owner = nullptr);
+    
+	template <typename T>
+	static T* SpawnActorOG(UClass* Class, FVector Loc, FRotator Rot =  FRotator(0,0,0), AActor* Owner = nullptr)
+	{
+		return static_cast<T*>(SpawnActorOG(Class, Loc, Rot, Owner));
+	}
+	
 	static AActor* SpawnActor(UClass* Class, FTransform& Transform, AActor* Owner = nullptr);
 	static AActor* SpawnActor(UClass* Class, FVector& Loc, FRotator& Rot, AActor* Owner = nullptr);
     

@@ -765,28 +765,32 @@ uint64 UFinder::OnDamageServer()
 
 uint64 UFinder::StaticLoadObject()
 {
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+
     auto Addr = Memcury::Scanner::FindStringRef(L"STAT_LoadObject", false).Get();
 
     if (!Addr)
     {
         auto StrRef = Memcury::Scanner::FindStringRef(L"Calling StaticLoadObject during PostLoad may result in hitches during streaming.");
-        return FindBytes(StrRef, { 0x40, 0x55 }, 1000, 0, true);
+        return CachedResult = FindBytes(StrRef, { 0x40, 0x55 }, 1000, 0, true);
     }
 
     for (int i = 0; i < 400; i++)
     {
         if (*(uint8_t*)(uint8_t*)(Addr - i) == 0x4C && *(uint8_t*)(uint8_t*)(Addr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(Addr - i + 2) == 0x4C)
         {
-            return Addr - i;
+            return CachedResult = Addr - i;
         }
 
         if (*(uint8_t*)(uint8_t*)(Addr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addr - i + 1) == 0x8B && *(uint8_t*)(uint8_t*)(Addr - i + 2) == 0xC4)
         {
-            return Addr - i;
+            return CachedResult = Addr - i;
         }
     }
 
-    return 0;
+    return CachedResult = 0;
 }
 
 uint64 UFinder::SpawnBot()
@@ -795,6 +799,26 @@ uint64 UFinder::SpawnBot()
     {
         return Memcury::Scanner::FindPattern("48 8B C4 55 53 56 57 41 54 41 55 41 56 41 57 48 8D A8 ? ? ? ? 48 81 EC ? ? ? ? 0F 29 70 ? 0F 29 78 ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 4C 8B AD ? ? ? ? 49 8B F9").Get();
     }
+}
+
+uint64 UFinder::SpawnActor()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+
+    if (Engine_Version >= 427)
+    {
+        auto stat = Memcury::Scanner::FindStringRef(L"STAT_SpawnActorTime");
+        return CachedResult = FindBytes(stat, { 0x48, 0x8B, 0xC4 }, 3000, 0, true);
+    }
+
+    auto Addr = Memcury::Scanner::FindStringRef(L"SpawnActor failed because no class was specified");
+
+    if (Engine_Version >= 416 && Fortnite_Version <= 3.3)
+        return CachedResult = FindBytes(Addr, { 0x40, 0x55 }, 3000, 0, true);
+
+    return CachedResult = FindBytes(Addr, { 0x4C, 0x8B, 0xDC }, 3000, 0, true);
 }
 
 uint64 UFinder::CantBuild()
