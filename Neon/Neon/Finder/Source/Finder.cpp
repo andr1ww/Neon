@@ -228,41 +228,44 @@ uint64 UFinder::SetWorld()
 
     int SetWorldI = 0;
 
-    switch (Fortnite_Version.GetMajorVersion())
-    {
-    case 13:
+    if (Fortnite_Version >= FFortniteVersion(13, 0) && Fortnite_Version < FFortniteVersion(14, 0)) {
         SetWorldI = 0x70;
-        break;
-    case 14:
-    case 15:
-        if (Fortnite_Version <= 15.2)
-            SetWorldI = 0x71;
-        else if (Fortnite_Version >= 15.3 && Fortnite_Version.GetMajorVersion() < 18)
-            SetWorldI = 0x72;
-        break;
-    case 18:
-        SetWorldI = 0x73;
-        break;
-    case 19:
-    case 20:
-        if (Fortnite_Version.GetMajorVersion() == 20)
-            SetWorldI = 0x7B;
-        else
-            SetWorldI = 0x7A;
-        break;
-    case 21:
-        SetWorldI = 0x7C;
-        break;
-    case 22:
-    case 23:
-        SetWorldI = 0x7B;
-        break;
-    case 24:
-        SetWorldI = 0x7D;
-        break;
-    default:
-        break;
     }
+    else if (Fortnite_Version >= FFortniteVersion(14, 0) && Fortnite_Version <= FFortniteVersion(15, 2)) {
+        SetWorldI = 0x71;
+    }
+    else if (Fortnite_Version >= FFortniteVersion(15, 3) && Fortnite_Version < FFortniteVersion(18, 0)) {
+        SetWorldI = 0x72;
+    }
+    else if (Fortnite_Version >= FFortniteVersion(18, 0) && Fortnite_Version < FFortniteVersion(19, 0)) {
+        SetWorldI = 0x73;
+    }
+    else if (Fortnite_Version >= FFortniteVersion(19, 0) && Fortnite_Version < FFortniteVersion(20, 0)) {
+        SetWorldI = 0x7A;
+    }
+    else if (Fortnite_Version >= FFortniteVersion(20, 0) && Fortnite_Version < FFortniteVersion(21, 0)) {
+        SetWorldI = 0x7B;
+    }
+    else if (Fortnite_Version >= FFortniteVersion(21, 0) && Fortnite_Version < FFortniteVersion(22, 0)) {
+        SetWorldI = 0x7C;
+    }
+    else if (Fortnite_Version >= FFortniteVersion(22, 0) && Fortnite_Version < FFortniteVersion(24, 0)) {
+        SetWorldI = 0x7B; 
+    }
+    else if (Fortnite_Version >= FFortniteVersion(24, 0) && Fortnite_Version < FFortniteVersion(25, 0)) {
+        SetWorldI = 0x7D;
+    }
+    else if (Fortnite_Version >= FFortniteVersion(25, 0)) {
+        SetWorldI = 0x7D;
+    }
+    else {
+        SetWorldI = 0x70;
+    }
+
+    if (SetWorldI != 0)
+    {
+        return uint64(UNetDriver::GetDefaultObj()->GetVTable()[SetWorldI]);
+    } 
     
     if (Fortnite_Version.GetMajorVersion() == 14)
     {
@@ -272,12 +275,7 @@ uint64 UFinder::SetWorld()
     { 
         return uint64(UNetDriver::GetDefaultObj()->GetVTable()[0x73]);
     }
-
-    if (SetWorldI != 0)
-    {
-        return uint64(UNetDriver::GetDefaultObj()->GetVTable()[SetWorldI]);
-    } 
-
+    
     if (Engine_Version >= 4.26)
         return Memcury::Scanner::FindPattern("40 55 56 41 56 48 8B EC 48 83 EC ? 48 89 5C 24", true).Get();
     
