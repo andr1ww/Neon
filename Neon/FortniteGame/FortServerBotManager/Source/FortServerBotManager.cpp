@@ -16,27 +16,29 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
         BotData->GetCharacterCustomization()->GetCustomizationLoadout().SetCharacter(Runtime::StaticLoadObject<UAthenaCharacterItemDefinition>("/Game/Athena/Items/Cosmetics/Characters/CID_NPC_Athena_Commando_M_HenchmanGood.CID_NPC_Athena_Commando_M_HenchmanGood"));
     }
 
-    AActor* SpawnLocator = UGameplayStatics::SpawnActor<ADefaultPawn>(SpawnLoc, SpawnRot);
-    AFortPlayerPawn* Ret = FBotMutator::Get()->SpawnBot(BotData->GetPawnClass(), SpawnLocator, SpawnLoc, SpawnRot, true);
-    AFortAthenaAIBotController* Controller = (AFortAthenaAIBotController*)Ret->GetController();
-
-    Controller->Set("FortAthenaAIBotController", "CosmeticLoadoutBC",BotData->GetCharacterCustomization()->GetCustomizationLoadout());
-    for (int32 i = 0; i < BotData->GetCharacterCustomization()->GetCustomizationLoadout().GetCharacter()->GetHeroDefinition()->GetSpecializations().Num(); i++)
+    AFortPlayerPawn* Ret = SpawnBotOG(BotManager, SpawnLoc, SpawnRot, BotData, RuntimeBotData);
+    if (Ret)
     {
-        UFortHeroSpecialization* Spec = Runtime::StaticLoadObject<UFortHeroSpecialization>(UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary","Conv_NameToString", BotData->GetCharacterCustomization()->GetCustomizationLoadout().GetCharacter()->GetHeroDefinition()->GetSpecializations()[i].SoftObjectPtr.ObjectID.AssetPathName).ToString());
+        AFortAthenaAIBotController* Controller = (AFortAthenaAIBotController*)Ret->GetController();
 
-        if (Spec)
+        Controller->Set("FortAthenaAIBotController", "CosmeticLoadoutBC",BotData->GetCharacterCustomization()->GetCustomizationLoadout());
+        for (int32 i = 0; i < BotData->GetCharacterCustomization()->GetCustomizationLoadout().GetCharacter()->GetHeroDefinition()->GetSpecializations().Num(); i++)
         {
-            for (int32 i = 0; i < Spec->GetCharacterParts().Num(); i++)
+            UFortHeroSpecialization* Spec = Runtime::StaticLoadObject<UFortHeroSpecialization>(UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary","Conv_NameToString", BotData->GetCharacterCustomization()->GetCustomizationLoadout().GetCharacter()->GetHeroDefinition()->GetSpecializations()[i].SoftObjectPtr.ObjectID.AssetPathName).ToString());
+
+            if (Spec)
             {
-                UCustomCharacterPart* Part = Runtime::StaticLoadObject<UCustomCharacterPart>(UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary","Conv_NameToString", Spec->GetCharacterParts()[i].SoftObjectPtr.ObjectID.AssetPathName).ToString());
-                Ret->CallFunc<void>("FortPlayerPawn", "ServerChoosePart", Part->GetCharacterPartType(), Part);
+                for (int32 i = 0; i < Spec->GetCharacterParts().Num(); i++)
+                {
+                    UCustomCharacterPart* Part = Runtime::StaticLoadObject<UCustomCharacterPart>(UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary","Conv_NameToString", Spec->GetCharacterParts()[i].SoftObjectPtr.ObjectID.AssetPathName).ToString());
+                    Ret->CallFunc<void>("FortPlayerPawn", "ServerChoosePart", Part->GetCharacterPartType(), Part);
+                }
             }
         }
-    }
 
-    Ret->SetCosmeticLoadout(&BotData->GetCharacterCustomization()->GetCustomizationLoadout());
-    Ret->CallFunc<void>("FortPlayerPawn", "OnRep_CosmeticLoadout");
+        Ret->SetCosmeticLoadout(&BotData->GetCharacterCustomization()->GetCustomizationLoadout());
+        Ret->CallFunc<void>("FortPlayerPawn", "OnRep_CosmeticLoadout");
     
-    return Ret;
+        return Ret;
+    }
 }

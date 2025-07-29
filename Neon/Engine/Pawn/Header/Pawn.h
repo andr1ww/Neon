@@ -9,5 +9,5 @@ class AController;
 class APawn : public AActor
 {
 public:
-    DEFINE_PTR(AController*, APawn, Controller);
+    DEFINE_PTR(AController, APawn, Controller);
 };
