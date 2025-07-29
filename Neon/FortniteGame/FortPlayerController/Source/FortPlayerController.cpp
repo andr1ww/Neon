@@ -203,8 +203,11 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
         if (!ItemEntry || ItemEntry->GetCount() < 10)
             return;
            
-        ItemEntry->SetCount(ItemEntry->GetCount() - 10);
-        AFortInventory::ReplaceEntry(PlayerController, *ItemEntry);
+        if (ItemEntry->GetCount() > 0)
+        {
+            ItemEntry->SetCount(ItemEntry->GetCount() - 10);
+            AFortInventory::ReplaceEntry(PlayerController, *ItemEntry);
+        }
     }
     
     for (auto* Building : ExistingBuildings) {
@@ -215,10 +218,9 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
                                              CreateBuildingData.GetBuildRot(), PlayerController);
    
     if (ABuildingSMActor* BuildingSMActor = BuildingActor) {
-        UE_LOG(LogNeon, Log, "FUck ");
         BuildingSMActor->SetbPlayerPlaced(true);
         BuildingSMActor->CallFunc<void>("BuildingActor", "InitializeKismetSpawnedBuildingActor", BuildingSMActor, PlayerController, true);
-
+        
         if (AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState()) {
             BuildingSMActor->Set("BuildingActor", "TeamIndex", PlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex"));
             BuildingSMActor->Set("BuildingActor", "Team", EFortTeam(BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex")));
