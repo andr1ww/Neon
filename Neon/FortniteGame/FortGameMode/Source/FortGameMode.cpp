@@ -105,16 +105,18 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 GameMode->GetServerBotManager()->SetCachedGameMode(GameMode);
                 GameMode->GetServerBotManager()->SetCachedGameState(GameState);
 
-              //  BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
-             //   BotMutator->SetCachedGameMode(GameMode);
-           //     BotMutator->SetCachedGameState(GameState);
+                UE_LOG(LogNeon, Log, "Server Bot Manager Spawned: %s", GameMode->GetServerBotManager()->GetFName().ToString().ToString().c_str());
+                
+                BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
+//                BotMutator->SetCachedGameMode(GameMode);
+  //              BotMutator->SetCachedGameState(GameState);
 
-        //        AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
-          //      GameMode->SetAIDirector(AIDirector);
-            //    AIDirector->CallFunc<void>("FortAIDirector", "Activate");
+                AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
+                GameMode->SetAIDirector(AIDirector);
+                AIDirector->CallFunc<void>("FortAIDirector", "Activate");
 
-              //  AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
-              //  GameMode->SetAIGoalManager(AIGoalManager);
+                AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
+                GameMode->SetAIGoalManager(AIGoalManager);
             }
         } else
         {
