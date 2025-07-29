@@ -220,9 +220,8 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
         BuildingSMActor->CallFunc<void>("BuildingActor", "InitializeKismetSpawnedBuildingActor", BuildingSMActor, PlayerController, true);
 
         if (AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState()) {
-         //   BuildingSMActor->CallFunc<void>("BuildingActor", "PlacedByPlayer", PlayerState);
-            //  BuildingSMActor->SetTeamIndex(PlayerState->GetTeamIndex());
-            //  BuildingSMActor->SetTeam(EFortTeam(BuildingSMActor->GetTeamIndex()));
+            BuildingSMActor->Set("BuildingActor", "TeamIndex", PlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex"));
+            BuildingSMActor->Set("BuildingActor", "Team", EFortTeam(BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex")));
         }
 
         PlayerController->Set("FortPlayerControllerAthena", "BuildingsCreated", 

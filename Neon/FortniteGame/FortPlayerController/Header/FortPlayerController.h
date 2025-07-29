@@ -98,6 +98,15 @@ public:
     }
 };
 
+enum class EFortTeam : uint8
+{
+    Spectator                                = 0,
+    HumanCampaign                            = 1,
+    Monster                                  = 2,
+    HumanPvP_Team1                           = 3,
+    HumanPvP_Team2                           = 4,
+    MAX                                      = 255,
+};
 
 class AFortPlayerControllerAthena : public AFortPlayerController 
 {
