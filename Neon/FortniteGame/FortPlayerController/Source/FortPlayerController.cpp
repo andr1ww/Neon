@@ -328,3 +328,36 @@ void AFortPlayerControllerAthena::ServerEndEditingBuildingActor(AFortPlayerContr
 
     // TODO: BuildingsEdited++ i cba rn
 }
+
+void AFortPlayerControllerAthena::ServerRepairBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+    ABuildingSMActor* BuildingSMActor;
+    Stack.StepCompiledIn(&BuildingSMActor);
+    Stack.IncrementCode();
+
+    auto Price = (int32)std::floor((10.f * (1.f - BuildingSMActor->CallFunc<float>("BuildingActor", "GetHealthPercent"))) * 0.75f);
+    auto Resource = UFortKismetLibrary::K2_GetResourceItemDefinition(BuildingSMActor->GetResourceType());
+
+    FFortItemEntry* ItemEntry = nullptr;
+    AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+    FFortItemList& Inventory = WorldInventory->GetInventory();
+    TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
+
+    for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); ++i)
+    {
+        if (ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemDefinition() == Resource)
+        {
+            ItemEntry = &ItemInstancesOffsetPtr[i]->GetItemEntry();
+            break;
+        }
+    }
+
+    if (ItemEntry)
+    {
+        ItemEntry->SetCount(ItemEntry->GetCount() - Price);
+        AFortInventory::ReplaceEntry(PlayerController, *ItemEntry);
+
+        BuildingSMActor->CallFunc<void>("BuildingSMActor", "RepairBuilding", PlayerController, Price);
+    }
+}
+

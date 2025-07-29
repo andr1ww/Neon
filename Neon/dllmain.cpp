@@ -144,6 +144,7 @@ void Main()
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerBeginEditingBuildingActor", AFortPlayerControllerAthena::ServerBeginEditingBuildingActor);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerEditBuildingActor", AFortPlayerControllerAthena::ServerEditBuildingActor);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerEndEditingBuildingActor", AFortPlayerControllerAthena::ServerEndEditingBuildingActor);
+	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerRepairBuildingActor", AFortPlayerControllerAthena::ServerRepairBuildingActor);
 
 	int InternalServerTryActivateAbilityIndex = 0;
 

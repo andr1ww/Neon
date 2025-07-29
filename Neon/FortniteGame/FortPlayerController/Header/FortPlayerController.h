@@ -132,6 +132,7 @@ public:
     static void ServerBeginEditingBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerEditBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerEndEditingBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
+    static void ServerRepairBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
 };
 
 class AAIController : public AController
