@@ -51,6 +51,12 @@ class UFortMontageItemDefinitionBase : public UObject
     
 };
 
+class UFortAthenaAIBotInventoryItems final : public UObject
+{
+public:
+    DEFINE_MEMBER(TArray<UFortItemDefinition*>, UFortAthenaAIBotInventoryItems, Items);
+};
+
 class UAthenaDanceItemDefinition : public UFortMontageItemDefinitionBase
 {
 public:
@@ -119,5 +125,7 @@ class AAIController : public AController
 
 class AFortAthenaAIBotController : public AAIController
 {
-    
+public:
+    DEFINE_PTR(AFortInventory, AFortAthenaAIBotController, Inventory);
+    DEFINE_PTR(UFortAthenaAIBotInventoryItems, AFortAthenaAIBotController, StartupInventory);
 };

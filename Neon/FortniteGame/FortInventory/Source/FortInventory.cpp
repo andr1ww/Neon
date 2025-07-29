@@ -61,6 +61,41 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     return BP;
 }
 
+UObject* AFortInventory::GiveItem(AFortAthenaAIBotController* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level)
+{
+    if (!PlayerController || !Def || Count == 0)
+    {
+        UE_LOG(LogNeon, Fatal, "Invalid parameters for GiveItem: PlayerController: %p, Def: %p, Count: %d, Level: %d", PlayerController, Def, Count, Level);
+        return nullptr;
+    }
+
+    UFortWorldItem* BP = Def->CreateTemporaryItemInstanceBP(Count, Level);
+
+    if (!BP) {
+        UE_LOG(LogNeon, Log, "Failed to create temporary item instance");
+        return nullptr;
+    }
+
+    auto& ItemEntry = BP->GetItemEntry();
+    ItemEntry.SetCount(Count);
+    ItemEntry.SetLoadedAmmo(LoadedAmmo);
+    ItemEntry.SetLevel(Level);
+    ItemEntry.SetItemDefinition(Def);
+
+    AFortInventory* WorldInventory = PlayerController->GetInventory();
+    FFortItemList& Inventory = WorldInventory->GetInventory();
+    TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
+    TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
+
+    static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
+    ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry(), StructSize);
+    ItemInstancesOffsetPtr.Add(BP);
+
+    WorldInventory->Update((AFortPlayerControllerAthena*)PlayerController, &ItemEntry);
+
+    return BP;
+}
+
 AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry& Entry, EFortPickupSourceTypeFlag SourceTypeFlag, EFortPickupSpawnSource SpawnSource, AFortPlayerPawn* Pawn, int OverrideCount, bool Toss, bool RandomRotation, bool bCombine)
 {
     if (OverrideCount != -1)

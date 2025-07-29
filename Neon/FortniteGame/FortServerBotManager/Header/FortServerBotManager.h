@@ -84,6 +84,7 @@ class UFortAthenaAIBotCustomizationData final : public UObject
 public:
     DEFINE_MEMBER(TSubclassOf<class AFortPlayerPawn>, UFortAthenaAIBotCustomizationData, PawnClass);
     DEFINE_PTR(UFortAthenaAIBotCharacterCustomization, UFortAthenaAIBotCustomizationData, CharacterCustomization);
+	DEFINE_PTR(UFortAthenaAIBotInventoryItems, UFortAthenaAIBotCustomizationData, StartupInventory);
 };
 
 class UFortServerBotManagerAthena : public UObject
