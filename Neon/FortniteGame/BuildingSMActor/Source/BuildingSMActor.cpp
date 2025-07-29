@@ -160,7 +160,7 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         Damage == 100.f
     );
 
-/*    return OnDamageServerOG(BuildingActor, 
+    return OnDamageServerOG(BuildingActor, 
                              Damage, 
                              DamageTags, 
                              Momentum, 
@@ -168,5 +168,5 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
                              Controller, 
                              DamageCauser, 
                              Context);
-                             */
+                             
 }
