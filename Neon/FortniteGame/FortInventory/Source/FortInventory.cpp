@@ -23,8 +23,7 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
     this->SetbRequiresLocalUpdate(true);
     this->HandleInventoryLocalUpdate();
 
-    this->GetInventory().MarkItemDirty(*Entry);
-    this->GetInventory().MarkArrayDirty();
+    Entry ? this->GetInventory().MarkItemDirty(*Entry) : this->GetInventory().MarkArrayDirty();
 }
 
 UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level)
