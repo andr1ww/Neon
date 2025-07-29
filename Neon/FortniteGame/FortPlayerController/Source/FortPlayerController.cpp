@@ -220,9 +220,8 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
         BuildingSMActor->CallFunc<void>("BuildingActor", "InitializeKismetSpawnedBuildingActor", BuildingSMActor, PlayerController, true);
 
         if (AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState()) {
-         //   BuildingSMActor->CallFunc<void>("BuildingActor", "PlacedByPlayer", PlayerState);
-            //  BuildingSMActor->SetTeamIndex(PlayerState->GetTeamIndex());
-            //  BuildingSMActor->SetTeam(EFortTeam(BuildingSMActor->GetTeamIndex()));
+            BuildingSMActor->Set("BuildingActor", "TeamIndex", PlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex"));
+            BuildingSMActor->Set("BuildingActor", "Team", EFortTeam(BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex")));
         }
 
         PlayerController->Set("FortPlayerControllerAthena", "BuildingsCreated", 
@@ -230,5 +229,135 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
     }
 }
 
+void AFortPlayerControllerAthena::ServerBeginEditingBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+    ABuildingSMActor* BuildingSMActor;
+    Stack.StepCompiledIn(&BuildingSMActor);
+    Stack.IncrementCode();
 
- 
+    if (!PlayerController || !PlayerController->GetMyFortPawn() || !BuildingSMActor || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex"))
+        return;
+
+    FFortItemEntry* ItemEntry = nullptr;
+    AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+    FFortItemList& Inventory = WorldInventory->GetInventory();
+    TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
+
+    for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); ++i)
+    {
+        if (ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemDefinition()->IsA<UFortEditToolItemDefinition>())
+        {
+            ItemEntry = &ItemInstancesOffsetPtr[i]->GetItemEntry();
+            break;
+        }
+    }
+
+    if (!ItemEntry)
+        return;
+
+    BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", PlayerController->GetPlayerState());
+    BuildingSMActor->CallFunc<void>("BuildingSMActor", "OnRep_EditingPlayer");
+
+    PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "EquipWeaponDefinition", ItemEntry->GetItemDefinition(), ItemEntry->GetItemGuid());
+
+    AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->GetMyFortPawn()->Get<AFortWeapon*>("FortPawn", "CurrentWeapon"));
+    if (EditingTool)
+    {
+        EditingTool->Set("FortWeap_EditingTool", "EditActor", BuildingSMActor);
+        EditingTool->CallFunc<void>("FortWeap_EditingTool", "OnRep_EditActor");
+    }
+}
+
+void AFortPlayerControllerAthena::ServerEditBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+    ABuildingSMActor* BuildingSMActor;
+    TSubclassOf<ABuildingSMActor> NewClass;
+    uint8 RotationIterations;
+    bool bMirrored;
+    Stack.StepCompiledIn(&BuildingSMActor);
+    Stack.StepCompiledIn(&NewClass);
+    Stack.StepCompiledIn(&RotationIterations);
+    Stack.StepCompiledIn(&bMirrored);
+
+    if (!PlayerController || !BuildingSMActor || !BuildingSMActor || !BuildingSMActor->IsA<ABuildingSMActor>() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
+
+    BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", nullptr);
+    BuildingSMActor->CallFunc<void>("BuildingSMActor", "OnRep_EditingPlayer");
+
+    static auto ReplaceBuildingActor = (ABuildingSMActor * (*)(ABuildingSMActor*, unsigned int, UObject*, unsigned int, int, bool, AFortPlayerController*))(Finder->ReplaceBuildingActor());
+
+    ABuildingSMActor* NewBuild = ReplaceBuildingActor(BuildingSMActor, 1, NewClass, BuildingSMActor->Get<int32>("BuildingActor", "CurrentBuildingLevel"), RotationIterations, bMirrored, PlayerController);
+
+    if (NewBuild) NewBuild->SetbPlayerPlaced(true);
+}
+
+void AFortPlayerControllerAthena::ServerEndEditingBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+    ABuildingSMActor* BuildingSMActor;
+    Stack.StepCompiledIn(&BuildingSMActor);
+    Stack.IncrementCode();
+
+    if (!PlayerController || !BuildingSMActor || !BuildingSMActor || !BuildingSMActor->IsA<ABuildingSMActor>() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
+
+    FFortItemEntry* ItemEntry = nullptr;
+    AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+    FFortItemList& Inventory = WorldInventory->GetInventory();
+    TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
+
+    for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); ++i)
+    {
+        if (ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemDefinition()->IsA<UFortEditToolItemDefinition>())
+        {
+            ItemEntry = &ItemInstancesOffsetPtr[i]->GetItemEntry();
+            break;
+        }
+    }
+
+    if (!ItemEntry)
+        return;
+
+    AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->GetMyFortPawn()->Get<AFortWeapon*>("FortPawn", "CurrentWeapon"));
+    PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "EquipWeaponDefinition", ItemEntry->GetItemDefinition(), ItemEntry->GetItemGuid());
+    
+    if (EditingTool)
+    {
+        EditingTool->Set("FortWeap_EditingTool", "EditActor", nullptr);
+        EditingTool->Set("FortWeap_EditingTool", "bEditConfirmed", true);
+        EditingTool->CallFunc<void>("FortWeap_EditingTool", "OnRep_EditActor");
+    }
+
+    // TODO: BuildingsEdited++ i cba rn
+}
+
+void AFortPlayerControllerAthena::ServerRepairBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+    ABuildingSMActor* BuildingSMActor;
+    Stack.StepCompiledIn(&BuildingSMActor);
+    Stack.IncrementCode();
+
+    auto Price = (int32)std::floor((10.f * (1.f - BuildingSMActor->CallFunc<float>("BuildingActor", "GetHealthPercent"))) * 0.75f);
+    auto Resource = UFortKismetLibrary::K2_GetResourceItemDefinition(BuildingSMActor->GetResourceType());
+
+    FFortItemEntry* ItemEntry = nullptr;
+    AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+    FFortItemList& Inventory = WorldInventory->GetInventory();
+    TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
+
+    for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); ++i)
+    {
+        if (ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemDefinition() == Resource)
+        {
+            ItemEntry = &ItemInstancesOffsetPtr[i]->GetItemEntry();
+            break;
+        }
+    }
+
+    if (ItemEntry)
+    {
+        ItemEntry->SetCount(ItemEntry->GetCount() - Price);
+        AFortInventory::ReplaceEntry(PlayerController, *ItemEntry);
+
+        BuildingSMActor->CallFunc<void>("BuildingSMActor", "RepairBuilding", PlayerController, Price);
+    }
+}
+

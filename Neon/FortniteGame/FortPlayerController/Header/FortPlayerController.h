@@ -8,6 +8,7 @@
 #include "FortniteGame/Common/Header/ItemDefinition.h"
 
 class AFortInventory;
+class UFortWeaponItemDefinition;
 
 class UAthenaCharacterItemDefinition : public UObject 
 {
@@ -104,6 +105,24 @@ public:
     }
 };
 
+enum class EFortTeam : uint8
+{
+    Spectator                                = 0,
+    HumanCampaign                            = 1,
+    Monster                                  = 2,
+    HumanPvP_Team1                           = 3,
+    HumanPvP_Team2                           = 4,
+    MAX                                      = 255,
+};
+
+class UFortEditToolItemDefinition : public UObject
+{
+};
+
+class AFortWeap_EditingTool : public UObject
+{
+    
+};
 
 class AFortPlayerControllerAthena : public AFortPlayerController 
 {
@@ -116,6 +135,10 @@ public:
     static void ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerPlayEmoteItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerCreateBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
+    static void ServerBeginEditingBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
+    static void ServerEditBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
+    static void ServerEndEditingBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
+    static void ServerRepairBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
 };
 
 class AAIController : public AController

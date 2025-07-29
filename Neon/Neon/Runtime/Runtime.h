@@ -59,7 +59,7 @@ public:
 	void* MostRecentProperty;
 	uint8_t* MostRecentPropertyAddress;
 	uint8_t _Padding1[0x40];
-	UField* PropertyChainForCompiledIn;
+	FField* PropertyChainForCompiledIn;
 
 public:
 	void StepCompiledIn(void* const Result, bool ForceExplicitProp = false)
@@ -73,9 +73,9 @@ public:
 		}
 		else
 		{
-			UField* _Prop = PropertyChainForCompiledIn;
+			FField* _Prop = PropertyChainForCompiledIn;
 			PropertyChainForCompiledIn = _Prop->Next;
-			((void (*)(FFrame*, void* const, UField*))(ExplicitPropPattern))(this, Result, _Prop); 
+			((void (*)(FFrame*, void* const, FField*))(ExplicitPropPattern))(this, Result, _Prop); 
 		}
 	}
 	
@@ -93,9 +93,9 @@ public:
 		}
 		else
 		{
-			UField* _Prop = PropertyChainForCompiledIn;
+			FField* _Prop = PropertyChainForCompiledIn;
 			PropertyChainForCompiledIn = _Prop->Next;
-			((void (*)(FFrame*, void* const, UField*))(ExplicitPropPattern))(this, &TempVal, _Prop); 
+			((void (*)(FFrame*, void* const, FField*))(ExplicitPropPattern))(this, &TempVal, _Prop); 
 		}
 
 		return MostRecentPropertyAddress ? *(T*)MostRecentPropertyAddress : TempVal;
