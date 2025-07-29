@@ -19,7 +19,7 @@ public:
 struct FHitResult final
 {
 public:
-	struct Padding[0x88]; // 0xe8 on LWC builds
+	uint8_t Padding[0x88]; // 0xe8 on LWC builds
 };
 
 struct FGameplayTagContainer final
