@@ -319,11 +319,11 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
         static bool bStartedEvent = false;
         if (!bStartedEvent)
         {
-            if (Fortnite_Version == 12.41)
+            if (Fortnite_Version >= 12.40 && Fortnite_Version <= 12.50)
             {
                 Loader = "/CycloneJerky/Gameplay/BP_Jerky_Loader.BP_Jerky_Loader_C";
                 StartEventPath = "/CycloneJerky/Gameplay/BP_Jerky_Loader.BP_Jerky_Loader_C.startevent";
-            } else if (Fortnite_Version == 12.61)
+            } else if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.60)
             {
                 Loader = "/Fritter/BP_Fritter_Loader.BP_Fritter_Loader_C";
                 StartEventPath = "/Fritter/BP_Fritter_Loader.BP_Fritter_Loader_C.startevent";
