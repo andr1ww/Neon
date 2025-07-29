@@ -228,43 +228,20 @@ uint64 UFinder::SetWorld()
 
     int SetWorldI = 0;
 
-    if (Fortnite_Version >= FFortniteVersion(13, 0) && Fortnite_Version < FFortniteVersion(14, 0)) {
-        SetWorldI = 0x70;
-    }
-    else if (Fortnite_Version >= FFortniteVersion(14, 0) && Fortnite_Version <= FFortniteVersion(15, 2)) {
-        SetWorldI = 0x71;
-    }
-    else if (Fortnite_Version >= FFortniteVersion(15, 3) && Fortnite_Version < FFortniteVersion(18, 0)) {
-        SetWorldI = 0x72;
-    }
-    else if (Fortnite_Version >= FFortniteVersion(18, 0) && Fortnite_Version < FFortniteVersion(19, 0)) {
-        SetWorldI = 0x73;
-    }
-    else if (Fortnite_Version >= FFortniteVersion(19, 0) && Fortnite_Version < FFortniteVersion(20, 0)) {
-        SetWorldI = 0x7A;
-    }
-    else if (Fortnite_Version >= FFortniteVersion(20, 0) && Fortnite_Version < FFortniteVersion(21, 0)) {
-        SetWorldI = 0x7B;
-    }
-    else if (Fortnite_Version >= FFortniteVersion(21, 0) && Fortnite_Version < FFortniteVersion(22, 0)) {
-        SetWorldI = 0x7C;
-    }
-    else if (Fortnite_Version >= FFortniteVersion(22, 0) && Fortnite_Version < FFortniteVersion(24, 0)) {
-        SetWorldI = 0x7B; 
-    }
-    else if (Fortnite_Version >= FFortniteVersion(24, 0) && Fortnite_Version < FFortniteVersion(25, 0)) {
-        SetWorldI = 0x7D;
-    }
-    else if (Fortnite_Version >= FFortniteVersion(25, 0)) {
-        SetWorldI = 0x7D;
-    }
-    else {
-        SetWorldI = 0x70;
-    }
+    int VTIndex = 0;
+    
+    int Season = (int) std::floor(std::stod(Fortnite_Version.ToString()));
+    if (Season == 13) VTIndex = 0x70;
+    else if (Season == 14 || Fortnite_Version <= 15.2) VTIndex = 0x71;
+    else if (Fortnite_Version >= 15.3 && Season < 18) VTIndex = 0x72;
+    else if (Season == 18) VTIndex = 0x73;
+    else if (Season >= 19 && Season < 21) VTIndex = 0x7A;
+    if (Season == 20) VTIndex = 0x7B;
+    if (Season >= 21) VTIndex = 0x7C;
 
     if (SetWorldI != 0)
     {
-        return uint64(UNetDriver::GetDefaultObj()->GetVTable()[SetWorldI]);
+        return uint64(UNetDriver::GetDefaultObj()->GetVTable()[VTIndex]);
     } 
     
     if (Fortnite_Version.GetMajorVersion() == 14)
