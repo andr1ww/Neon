@@ -61,11 +61,11 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     return BP;
 }
 
-UObject* AFortInventory::GiveItem(AFortAthenaAIBotController* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level)
+UObject* AFortInventory::GiveItem(AFortAthenaAIBotController* Controller, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level)
 {
-    if (!PlayerController || !Def || Count == 0)
+    if (!Controller || !Def || Count == 0)
     {
-        UE_LOG(LogNeon, Fatal, "Invalid parameters for GiveItem: PlayerController: %p, Def: %p, Count: %d, Level: %d", PlayerController, Def, Count, Level);
+        UE_LOG(LogNeon, Fatal, "Invalid parameters for GiveItem: PlayerController: %p, Def: %p, Count: %d, Level: %d", Controller, Def, Count, Level);
         return nullptr;
     }
 
@@ -82,7 +82,7 @@ UObject* AFortInventory::GiveItem(AFortAthenaAIBotController* PlayerController, 
     ItemEntry.SetLevel(Level);
     ItemEntry.SetItemDefinition(Def);
 
-    AFortInventory* WorldInventory = PlayerController->GetInventory();
+    AFortInventory* WorldInventory = Controller->GetInventory();
     FFortItemList& Inventory = WorldInventory->GetInventory();
     TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
     TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
@@ -91,7 +91,7 @@ UObject* AFortInventory::GiveItem(AFortAthenaAIBotController* PlayerController, 
     ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry(), StructSize);
     ItemInstancesOffsetPtr.Add(BP);
 
-    WorldInventory->Update((AFortPlayerControllerAthena*)PlayerController, &ItemEntry);
+    WorldInventory->Update((AFortPlayerControllerAthena*)Controller, &ItemEntry);
 
     return BP;
 }

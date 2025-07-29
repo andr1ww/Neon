@@ -51,7 +51,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
         }
 
         for (int32 i = 0; i < BotData->GetStartupInventory()->GetItems().Num(); i++) {
-
+            
         }
 
         return Ret;

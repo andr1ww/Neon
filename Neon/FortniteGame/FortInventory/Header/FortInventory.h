@@ -10,7 +10,7 @@
 #include "FortniteGame/FortPlayerPawn/Header/FortPlayerPawn.h"
 
 class AFortPlayerControllerAthena;
-class AFortAthenaAIBotControllerAthena;
+class AFortAthenaAIBotController;
 class AFortPlayerController;
 
 struct FFortItemEntry : public FFastArraySerializerItem
@@ -104,7 +104,7 @@ public:
     void HandleInventoryLocalUpdate();
     void Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry* Entry);
     static UObject* GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level);
-    static UObject* GiveItem(AFortAthenaAIBotControllerAthena* Controller, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level);
+    static UObject* GiveItem(AFortAthenaAIBotController* Controller, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level);
     static void ReplaceEntry(AFortPlayerController*, FFortItemEntry&);
     static void Remove(AFortPlayerController* PlayerController, FGuid Guid, int AmountToRemove = -1);
     static AFortPickupAthena* SpawnPickup(FVector, FFortItemEntry&, EFortPickupSourceTypeFlag SourceTypeFlag = EFortPickupSourceTypeFlag::Tossed, EFortPickupSpawnSource SpawnSource = EFortPickupSpawnSource::Unset, AFortPlayerPawn* Pawn = nullptr, int OverrideCount = -1, bool Toss = true, bool RandomRotation = true, bool bCombine = true);
