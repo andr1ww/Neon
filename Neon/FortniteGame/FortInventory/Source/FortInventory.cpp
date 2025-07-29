@@ -115,7 +115,7 @@ void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFort
         for (int32 i = 0; i < ReplicatedEntriesOffsetPtr.Num(); i++)
         {
             static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
-            auto ReplicatedEntry = (FFortItemEntry*) ((uint8*) Items.GetData() + (i * StructSize));
+            auto ReplicatedEntry = (FFortItemEntry*) ((uint8*) ReplicatedEntriesOffsetPtr.GetData() + (i * StructSize));
         
             if (ReplicatedEntry->GetItemGuid() == Entry.GetItemGuid())
             {
