@@ -159,6 +159,11 @@ void Main()
 		Runtime::Hook(Finder->DispatchRequest(), HTTP::DispatchRequest, (void**)&HTTP::DispatchRequestOriginal);
 	}
 
+	if (Finder->SpawnBot())
+	{
+		//Runtime::Hook(Finder->SpawnBot(), UFortServerBotManagerAthena::SpawnBot);
+	}
+
 	UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
 	FString WorldName;
 	if (Fortnite_Version <= 10.40)

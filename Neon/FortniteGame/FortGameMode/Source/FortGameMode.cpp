@@ -46,22 +46,64 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             
             GameMode->SetWarmupRequiredPlayerCount(1);
 
+            static int AdditionalLevelsOffset = Runtime::GetOffset(Playlist, "AdditionalLevels");
+            static int AdditionalLevelsServerOffset = Runtime::GetOffset(Playlist, "AdditionalLevelsServerOnly");
+
+            if (AdditionalLevelsOffset != -1)
+            {
+                auto AdditionalLevels = *reinterpret_cast<TArray<TSoftObjectPtr<UWorld>>*>(__int64(Playlist) + AdditionalLevelsOffset);
+                for (size_t i = 0; i < AdditionalLevels.Num(); i++)
+                {
+                    FVector Loc{};
+                    FRotator Rot{};
+                    bool Success = false;
+                    ((ULevelStreamingDynamic*)ULevelStreamingDynamic::StaticClass()->GetClassDefaultObject())->CallFunc<void>("LevelStreamingDynamic", "LoadLevelInstanceBySoftObjectPtr", UWorld::GetWorld(), AdditionalLevels[i], Loc, Rot, &Success, FString());
+                    FAdditionalLevelStreamed NewLevel{};
+                    NewLevel.bIsServerOnly = false;
+                    NewLevel.LevelName = AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName;
+                    UE_LOG(LogNeon, Log, "Additional Level: %s", NewLevel.LevelName.ToString().ToString().c_str());
+                    TArray<FAdditionalLevelStreamed>& Levels = GameState->GetAdditionalPlaylistLevelsStreamed();
+                    Levels.Add(NewLevel, StaticClassImpl("AdditionalLevelStreamed")->GetSize());
+                }
+            }
+
+            if (AdditionalLevelsServerOffset != -1)
+            {
+                auto AdditionalServerLevels = *reinterpret_cast<TArray<TSoftObjectPtr<UWorld>>*>(__int64(Playlist) + AdditionalLevelsServerOffset);
+                for (size_t i = 0; i < AdditionalServerLevels.Num(); i++)
+                {
+                    FVector Loc{};
+                    FRotator Rot{};
+                    bool Success = false;
+                    ((ULevelStreamingDynamic*)ULevelStreamingDynamic::StaticClass()->GetClassDefaultObject())->CallFunc<void>("LevelStreamingDynamic", "LoadLevelInstanceBySoftObjectPtr", UWorld::GetWorld(), AdditionalServerLevels[i], Loc, Rot, &Success, FString());
+                    FAdditionalLevelStreamed NewLevel{};
+                    NewLevel.bIsServerOnly = true;
+                    NewLevel.LevelName = AdditionalServerLevels[i].SoftObjectPtr.ObjectID.AssetPathName;
+                    UE_LOG(LogNeon, Log, "Additional Server Level: %s", NewLevel.LevelName.ToString().ToString().c_str());
+                    TArray<FAdditionalLevelStreamed>& Levels = GameState->GetAdditionalPlaylistLevelsStreamed();
+                    Levels.Add(NewLevel, StaticClassImpl("AdditionalLevelStreamed")->GetSize());
+                }
+
+                GameState->CallFunc<void>("FortGameState", "OnRep_AdditionalPlaylistLevelsStreamed");
+                GameState->CallFunc<void>("FortGameState", "OnFinishedStreamingAdditionalPlaylistLevel");
+            }
+            
             if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
             {
                 GameMode->SetServerBotManager((UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode));
                 GameMode->GetServerBotManager()->SetCachedGameMode(GameMode);
                 GameMode->GetServerBotManager()->SetCachedGameState(GameState);
 
-                BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
-                BotMutator->SetCachedGameMode(GameMode);
-                BotMutator->SetCachedGameState(GameState);
+              //  BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
+             //   BotMutator->SetCachedGameMode(GameMode);
+           //     BotMutator->SetCachedGameState(GameState);
 
-                AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
-                GameMode->SetAIDirector(AIDirector);
-                AIDirector->CallFunc<void>("FortAIDirector", "Activate");
+        //        AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
+          //      GameMode->SetAIDirector(AIDirector);
+            //    AIDirector->CallFunc<void>("FortAIDirector", "Activate");
 
-                AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
-                GameMode->SetAIGoalManager(AIGoalManager);
+              //  AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
+              //  GameMode->SetAIGoalManager(AIGoalManager);
             }
         } else
         {

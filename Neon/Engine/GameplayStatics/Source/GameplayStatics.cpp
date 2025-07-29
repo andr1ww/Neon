@@ -168,16 +168,15 @@ UObject* UGameplayStatics::SpawnObject(TSubclassOf<class UObject> ObjectClass, c
         Func = Info.Func;
     if (!Func)
         return nullptr;
-
-    struct GameplayStatics_SpawnObject final
+    
+    struct
     {
-    public:
-        TSubclassOf<class UObject>                    ObjectClass;                                       // 0x0000(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-        class UObject*                                Param_Outer;                                       // 0x0008(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-        class UObject*                                ReturnValue;                                       // 0x0010(0x0008)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    } GameplayStatics_SpawnObject_Params{ ObjectClass, Param_Outer };
+        UClass* ObjectClass;                                              // (Parm, ZeroConstructor, IsPlainOldData, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        UObject* Outer;                                                    // (Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        UObject* ReturnValue;                                              // (Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    } UGameplayStatics_SpawnObject_Params{ObjectClass, Param_Outer};
     
-    SDK::StaticClassImpl("GameplayStatics")->GetClassDefaultObject()->ProcessEvent(Func, &GameplayStatics_SpawnObject_Params);
+    SDK::StaticClassImpl("GameplayStatics")->GetClassDefaultObject()->ProcessEvent(Func, &UGameplayStatics_SpawnObject_Params);
     
-    return GameplayStatics_SpawnObject_Params.ReturnValue;
+    return UGameplayStatics_SpawnObject_Params.ReturnValue;
 }

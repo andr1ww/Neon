@@ -98,6 +98,8 @@ public:
     uint64 GetInterfaceAddress();
 
     uint64 OnDamageServer();
+
+    uint64 SpawnBot();
 };
 
 inline UFinder* Finder = new UFinder();

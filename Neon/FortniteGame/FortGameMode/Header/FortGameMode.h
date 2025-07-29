@@ -6,6 +6,7 @@
 #include "FortniteGame/FortGameState/Header/FortGameState.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "FortniteGame/FortServerBotManager/Header/FortServerBotManager.h"
+#include "Engine/ObjectPtr/Header/ObjectPtr.h"
 
 class AFortGameStateAthena;
 class UFortItemDefinition;
@@ -37,6 +38,74 @@ public:
 };
 
 static inline AFortAthenaMutator_Bots* BotMutator = nullptr;
+
+struct FAdditionalLevelStreamed final
+{
+public:
+    class FName                                   LevelName;                                         // 0x0000(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    bool                                          bIsServerOnly;                                     // 0x0008(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    uint8                                         Pad_1B33[0x3];                                     // 0x0009(0x0003)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
+template<class TObjectID>
+struct TPersistentObjectPtr
+{
+public:
+    /** Once the object has been noticed to be loaded, this is set to the object weak pointer **/
+    mutable FWeakObjectPtr	WeakPtr;
+    /** Compared to CurrentAnnotationTag and if they are not equal, a guid search will be performed **/
+    mutable int			TagAtLastTest;
+    /** Guid for the object this pointer points to or will point to. **/
+    TObjectID				ObjectID;
+};
+
+struct FSoftObjectPath
+{
+public:
+    /** Asset path, patch to a top level object in a package. This is /package/path.assetname */
+    SDK::FName AssetPathName;
+
+    /** Optional FString for subobject within an asset. This is the sub path after the : */
+    SDK::FString SubPathString;
+};
+
+struct FSoftObjectPtr : public TPersistentObjectPtr<FSoftObjectPath>
+{
+public:
+};
+
+template<class T = SDK::UObject>
+struct TSoftObjectPtr
+{
+public:
+    FSoftObjectPtr SoftObjectPtr;
+
+    bool IsValid()
+    {
+        return SoftObjectPtr.ObjectID.AssetPathName.GetComparisonIndex();
+    }
+
+    T* Get(SDK::UClass* ClassToLoad = nullptr, bool bTryToLoad = false)
+    {
+        if (SoftObjectPtr.ObjectID.AssetPathName.GetComparisonIndex() <= 0)
+            return nullptr;
+
+        if (bTryToLoad)
+        {
+            return Runtime::StaticLoadObject<T>(SoftObjectPtr.ObjectID.AssetPathName.ToString(), ClassToLoad);
+        }
+
+        return Runtime::StaticFindObject<T>(SoftObjectPtr.ObjectID.AssetPathName.ToString());
+    }
+};
+
+class ULevelStreamingDynamic final : public UObject
+{
+public:
+    uint8                                         bInitiallyLoaded : 1;                              // 0x0148(0x0001)(BitIndex: 0x00, PropSize: 0x0001 (Edit, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic))
+    uint8                                         bInitiallyVisible : 1;                             // 0x0148(0x0001)(BitIndex: 0x01, PropSize: 0x0001 (Edit, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic))
+    uint8                                         Pad_6BF[0x7];                                      // 0x0149(0x0007)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
 
 class AFortGameModeAthena : public AFortGameMode
 {

@@ -5,7 +5,13 @@
 #include "FortniteGame/FortAthenaMapInfo/Header/FortAthenaMapInfo.h"
 #include "FortniteGame/FortPlaylistAthena/Header/FortPlaylistAthena.h"
 
-class AFortGameStateAthena : public SDK::UObject
+class AFortGameState : public UObject
+{
+public:
+    DEFINE_MEMBER(TArray<struct FAdditionalLevelStreamed>, AFortGameState, AdditionalPlaylistLevelsStreamed);
+};
+
+class AFortGameStateAthena : public AFortGameState
 {
 public:
     DEFINE_PTR(FPlaylistPropertyArray, AFortGameStateAthena, CurrentPlaylistInfo)
