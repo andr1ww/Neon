@@ -103,6 +103,7 @@ void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFort
         if (ItemInstancesOffsetPtr[i] && ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemGuid() == Entry.GetItemGuid())
         {
             entry = ItemInstancesOffsetPtr[i];
+            UE_Log(LogSkidder, Log, "FoundInstance[%d]", i);
             break;
         }
     }
@@ -115,17 +116,14 @@ void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFort
         {
             if (ReplicatedEntriesOffsetPtr[i].GetItemGuid() == Entry.GetItemGuid())
             {
+                UE_Log(LogSkidder, Log, "FoundEntry[%d]", i);
                 ReplicatedEntriesOffsetPtr[i] = Entry;
                 break;
             }
         }
     }
     
-    WorldInventory->SetbRequiresLocalUpdate(true);
-    WorldInventory->HandleInventoryLocalUpdate();
-    WorldInventory->CallFunc<void>("Actor", "ForceNetUpdate");
-    Inventory.MarkItemDirty(Entry);
-    Inventory.MarkArrayDirty();
+    Update(PlayerController, &Entry);
 }
 
 FFortItemEntry AFortInventory::MakeItemEntry(UFortItemDefinition* ItemDefinition, int32 Count, int32 Level) {
