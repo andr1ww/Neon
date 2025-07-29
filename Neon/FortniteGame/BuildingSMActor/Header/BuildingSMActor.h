@@ -16,12 +16,6 @@ public:
 	DEFINE_PTR(UFortWeaponItemDefinition, AFortWeapon, WeaponData)
 };
 
-struct FGameplayTag
-{
-public:
-	class FName                                   TagName;                                           // 0x0000(0x0004)(Edit, ZeroConstructor, EditConst, SaveGame, IsPlainOldData, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
-};
-
 struct FHitResult final
 {
 public:

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "../Header/FortGameMode.h"
 
+#include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "Engine/UEngine/Header/UEngine.h"
@@ -44,6 +45,17 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             GameState->CallFunc<void>("FortGameStateAthena","OnRep_AdditionalPlaylistLevelsStreamed");
             
             GameMode->SetWarmupRequiredPlayerCount(1);
+
+            if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
+            {
+                GameMode->SetServerBotManager((UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode));
+                GameMode->GetServerBotManager()->SetCachedGameMode(GameMode);
+                GameMode->GetServerBotManager()->SetCachedGameState(GameState);
+
+                BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
+                BotMutator->SetCachedGameMode(GameMode);
+                BotMutator->SetCachedGameState(GameState);
+            }
         } else
         {
             GameState->Set("FortGameStateAthena", "CurrentPlaylistData", Playlist);

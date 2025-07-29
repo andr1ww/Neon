@@ -19,6 +19,7 @@ public:
 	static float GetTimeSeconds(UWorld* World);
 	static AActor* FinishSpawningActor(AActor* Actor, const FTransform& SpawnTransform);
 	static AActor* BeginDeferredActorSpawnFromClass(const UObject* WorldContextObject, UClass* ActorClass, const FTransform& SpawnTransform, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::Undefined, AActor* Owner = nullptr);
+	static UObject* SpawnObject(TSubclassOf<class UObject> ObjectClass, class UObject* Param_Outer);
 
 	static AActor* SpawnActor(UClass* Class, FTransform& Transform, AActor* Owner = nullptr);
 	static AActor* SpawnActor(UClass* Class, FVector& Loc, FRotator& Rot, AActor* Owner = nullptr);

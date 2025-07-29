@@ -158,3 +158,26 @@ AActor* UGameplayStatics::SpawnActor(UClass* Class, FVector& Loc, FRotator& Rot,
     FTransform Transform(Loc, FRotToQuat(Rot));
     return FinishSpawningActor(BeginDeferredActorSpawnFromClass(UWorld::GetWorld(), Class, Transform, ESpawnActorCollisionHandlingMethod::AlwaysSpawn, Owner), Transform);
 }
+
+UObject* UGameplayStatics::SpawnObject(TSubclassOf<class UObject> ObjectClass, class UObject* Param_Outer)
+{
+    static SDK::UFunction* Func = nullptr;
+    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("GameplayStatics", "SpawnObject");
+
+    if (Func == nullptr)
+        Func = Info.Func;
+    if (!Func)
+        return nullptr;
+
+    struct GameplayStatics_SpawnObject final
+    {
+    public:
+        TSubclassOf<class UObject>                    ObjectClass;                                       // 0x0000(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        class UObject*                                Param_Outer;                                       // 0x0008(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        class UObject*                                ReturnValue;                                       // 0x0010(0x0008)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    } GameplayStatics_SpawnObject_Params{ ObjectClass, Param_Outer };
+    
+    SDK::StaticClassImpl("GameplayStatics")->GetClassDefaultObject()->ProcessEvent(Func, &GameplayStatics_SpawnObject_Params);
+    
+    return GameplayStatics_SpawnObject_Params.ReturnValue;
+}

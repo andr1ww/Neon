@@ -5,6 +5,7 @@
 #include "Engine/Transform/Header/Transform.h"
 #include "FortniteGame/FortGameState/Header/FortGameState.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
+#include "FortniteGame/FortServerBotManager/Header/FortServerBotManager.h"
 
 struct FItemAndCount final 
 {
@@ -27,6 +28,8 @@ public:
     DEFINE_BOOL(AFortGameMode, bWorldIsReady);
 };
 
+static inline AFortAthenaMutator_Bots* BotMutator = nullptr;
+
 class AFortGameModeAthena : public AFortGameMode
 {
 public:
@@ -34,7 +37,7 @@ public:
     DEFINE_MEMBER(int32, AFortGameModeAthena, NumPlayers);
     DEFINE_MEMBER(TArray<FItemAndCount>, AFortGameModeAthena, StartingItems);
     DEFINE_MEMBER(TArray<AFortPlayerControllerAthena*>, AFortGameModeAthena, AlivePlayers);
-    
+    DEFINE_PTR(UFortServerBotManagerAthena, AFortGameModeAthena, ServerBotManager);
 public:
     DECLARE_DEFAULT_OBJECT(AFortGameModeAthena);
     DECLARE_STATIC_CLASS(AFortGameModeAthena);

@@ -14,6 +14,11 @@ enum class EFortResourceType : uint8
     EFortResourceType_MAX                    = 7,
 };
 
+struct FGameplayTag
+{
+public:
+    class FName                                   TagName;                                           // 0x0000(0x0004)(Edit, ZeroConstructor, EditConst, SaveGame, IsPlainOldData, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
+};
 
 class UFortItemDefinition : public UObject
 {
