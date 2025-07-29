@@ -39,6 +39,7 @@ public:
     DEFINE_MEMBER(TArray<AFortPlayerControllerAthena*>, AFortGameModeAthena, AlivePlayers);
     DEFINE_PTR(UFortServerBotManagerAthena, AFortGameModeAthena, ServerBotManager);
     DEFINE_PTR(AFortAIDirector, AFortGameModeAthena, AIDirector);
+    DEFINE_PTR(AFortAIGoalManager, AFortGameModeAthena, AIGoalManager);
 public:
     DECLARE_DEFAULT_OBJECT(AFortGameModeAthena);
     DECLARE_STATIC_CLASS(AFortGameModeAthena);
