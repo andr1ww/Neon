@@ -1,5 +1,8 @@
 ﻿#pragma once
 #include "pch.h"
+#include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
+
+struct FFortAthenaLoadout;
 
 class ACharacter : public APawn
 {
@@ -21,7 +24,8 @@ public:
 
 class AFortPlayerPawn : public AFortPawn
 {
-
+public:
+    DEFINE_MEMBER(FFortAthenaLoadout*, AFortPlayerPawn, CosmeticLoadout);
 };
 
 class ADefaultPawn : public APawn

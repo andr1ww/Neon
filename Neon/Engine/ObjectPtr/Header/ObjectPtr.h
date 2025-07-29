@@ -1,6 +1,8 @@
 #pragma once
 #include "pch.h"
 
+#include "Neon/Runtime/Runtime.h"
+
 class FWeakObjectPtr
 {
 public:
@@ -45,5 +47,57 @@ public:
     UEType* operator->() const
     {
         return static_cast<UEType*>(FWeakObjectPtr::Get());
+    }
+};
+
+template<class TObjectID>
+struct TPersistentObjectPtr
+{
+public:
+    /** Once the object has been noticed to be loaded, this is set to the object weak pointer **/
+    mutable FWeakObjectPtr	WeakPtr;
+    /** Compared to CurrentAnnotationTag and if they are not equal, a guid search will be performed **/
+    mutable int			TagAtLastTest;
+    /** Guid for the object this pointer points to or will point to. **/
+    TObjectID				ObjectID;
+};
+
+struct FSoftObjectPath
+{
+public:
+    /** Asset path, patch to a top level object in a package. This is /package/path.assetname */
+    SDK::FName AssetPathName;
+
+    /** Optional FString for subobject within an asset. This is the sub path after the : */
+    SDK::FString SubPathString;
+};
+
+struct FSoftObjectPtr : public TPersistentObjectPtr<FSoftObjectPath>
+{
+public:
+};
+
+template<class T = SDK::UObject>
+struct TSoftObjectPtr
+{
+public:
+    FSoftObjectPtr SoftObjectPtr;
+
+    bool IsValid()
+    {
+        return SoftObjectPtr.ObjectID.AssetPathName.GetComparisonIndex();
+    }
+
+    T* Get(SDK::UClass* ClassToLoad = nullptr, bool bTryToLoad = false)
+    {
+        if (SoftObjectPtr.ObjectID.AssetPathName.GetComparisonIndex() <= 0)
+            return nullptr;
+
+        if (bTryToLoad)
+        {
+            return Runtime::StaticLoadObject<T>(SoftObjectPtr.ObjectID.AssetPathName.ToString(), ClassToLoad);
+        }
+
+        return Runtime::StaticFindObject<T>(SoftObjectPtr.ObjectID.AssetPathName.ToString());
     }
 };

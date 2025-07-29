@@ -112,11 +112,11 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
 
                 UE_LOG(LogNeon, Log, "Server Bot Manager Spawned: %s", GameMode->GetServerBotManager()->GetFName().ToString().ToString().c_str());
                 
-                BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
-                GameMode->GetServerBotManager()->SetCachedBotMutator(BotMutator);
+                FBotMutator::Set(UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({}));
+                GameMode->GetServerBotManager()->SetCachedBotMutator(FBotMutator::Get());
                 GameMode->SetServerBotManagerClass(UFortServerBotManagerAthena::StaticClass());
-                BotMutator->Set("FortAthenaMutator", "CachedGameMode", GameMode);
-                BotMutator->Set("FortAthenaMutator", "CachedGameState", GameState);
+                FBotMutator::Get()->Set("FortAthenaMutator", "CachedGameMode", GameMode);
+                FBotMutator::Get()->Set("FortAthenaMutator", "CachedGameState", GameState);
 
                 AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
                 GameMode->SetAIDirector(AIDirector);

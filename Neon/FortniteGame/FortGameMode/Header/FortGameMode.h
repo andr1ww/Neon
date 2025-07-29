@@ -38,7 +38,20 @@ public:
     DEFINE_BOOL(AFortGameMode, bWorldIsReady);
 };
 
-static inline AFortAthenaMutator_Bots* BotMutator = nullptr;
+struct FBotMutator
+{
+    static inline AFortAthenaMutator_Bots* Instance = nullptr;
+
+    static AFortAthenaMutator_Bots* Get()
+    {
+        return Instance;
+    }
+
+    static void Set(AFortAthenaMutator_Bots* NewInstance)
+    {
+        Instance = NewInstance;
+    }
+};
 
 struct FAdditionalLevelStreamed final
 {
@@ -46,58 +59,6 @@ public:
     class FName                                   LevelName;                                         // 0x0000(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
     bool                                          bIsServerOnly;                                     // 0x0008(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
     uint8                                         Pad_1B33[0x3];                                     // 0x0009(0x0003)(Fixing Struct Size After Last Property [ Dumper-7 ])
-};
-
-template<class TObjectID>
-struct TPersistentObjectPtr
-{
-public:
-    /** Once the object has been noticed to be loaded, this is set to the object weak pointer **/
-    mutable FWeakObjectPtr	WeakPtr;
-    /** Compared to CurrentAnnotationTag and if they are not equal, a guid search will be performed **/
-    mutable int			TagAtLastTest;
-    /** Guid for the object this pointer points to or will point to. **/
-    TObjectID				ObjectID;
-};
-
-struct FSoftObjectPath
-{
-public:
-    /** Asset path, patch to a top level object in a package. This is /package/path.assetname */
-    SDK::FName AssetPathName;
-
-    /** Optional FString for subobject within an asset. This is the sub path after the : */
-    SDK::FString SubPathString;
-};
-
-struct FSoftObjectPtr : public TPersistentObjectPtr<FSoftObjectPath>
-{
-public:
-};
-
-template<class T = SDK::UObject>
-struct TSoftObjectPtr
-{
-public:
-    FSoftObjectPtr SoftObjectPtr;
-
-    bool IsValid()
-    {
-        return SoftObjectPtr.ObjectID.AssetPathName.GetComparisonIndex();
-    }
-
-    T* Get(SDK::UClass* ClassToLoad = nullptr, bool bTryToLoad = false)
-    {
-        if (SoftObjectPtr.ObjectID.AssetPathName.GetComparisonIndex() <= 0)
-            return nullptr;
-
-        if (bTryToLoad)
-        {
-            return Runtime::StaticLoadObject<T>(SoftObjectPtr.ObjectID.AssetPathName.ToString(), ClassToLoad);
-        }
-
-        return Runtime::StaticFindObject<T>(SoftObjectPtr.ObjectID.AssetPathName.ToString());
-    }
 };
 
 class ULevelStreamingDynamic : public UObject
@@ -139,9 +100,7 @@ public:
         Parms.OptionalLevelNameOverride = OptionalLevelNameOverride;
     
          SDK::StaticClassImpl("LevelStreamingDynamic")->GetClassDefaultObject()->ProcessEvent(Func, &Parms);
-
-         UE_LOG(LogNeon, Log, "I mean we called?");
-    
+        
          if (bOutSuccess != nullptr)
              *bOutSuccess = Parms.bOutSuccess;
          
