@@ -229,5 +229,31 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
     }
 }
 
+void AFortPlayerControllerAthena::ServerBeginEditingBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+    ABuildingSMActor* BuildingSMActor;
+    Stack.StepCompiledIn(&BuildingSMActor);
+    Stack.IncrementCode();
 
- 
+    if (!PlayerController || !PlayerController->GetMyFortPawn() || !BuildingSMActor || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex"))
+        return;
+
+    FFortItemEntry* ItemEntry = nullptr;
+    AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+    FFortItemList& Inventory = WorldInventory->GetInventory();
+    TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
+
+    for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); ++i)
+    {
+        if (ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemDefinition()->IsA<UFortEditToolItemDefinition>())
+        {
+            ItemEntry = &ItemInstancesOffsetPtr[i]->GetItemEntry();
+            break;
+        }
+    }
+
+    if (!ItemEntry)
+        return;
+
+    PlayerController->CallFunc<void>("FortPlayerController", "ServerExecuteInventoryItem", ItemEntry->GetItemGuid());
+}
