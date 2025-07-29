@@ -279,8 +279,7 @@ void AFortPlayerControllerAthena::ServerEditBuildingActor(AFortPlayerControllerA
     Stack.StepCompiledIn(&RotationIterations);
     Stack.StepCompiledIn(&bMirrored);
 
-    if (!PlayerController || !BuildingSMActor || !BuildingSMActor || !BuildingSMActor->IsA<ABuildingSMActor>() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex"))
-        return;
+    if (!PlayerController || !BuildingSMActor || !BuildingSMActor || !BuildingSMActor->IsA<ABuildingSMActor>() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
 
     BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", nullptr);
     BuildingSMActor->CallFunc<void>("BuildingSMActor", "OnRep_EditingPlayer");
@@ -290,4 +289,42 @@ void AFortPlayerControllerAthena::ServerEditBuildingActor(AFortPlayerControllerA
     ABuildingSMActor* NewBuild = ReplaceBuildingActor(BuildingSMActor, 1, NewClass, BuildingSMActor->Get<int32>("BuildingActor", "CurrentBuildingLevel"), RotationIterations, bMirrored, PlayerController);
 
     if (NewBuild) NewBuild->SetbPlayerPlaced(true);
+}
+
+void AFortPlayerControllerAthena::ServerEndEditingBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+    ABuildingSMActor* BuildingSMActor;
+    Stack.StepCompiledIn(&BuildingSMActor);
+    Stack.IncrementCode();
+
+    if (!PlayerController || !BuildingSMActor || !BuildingSMActor || !BuildingSMActor->IsA<ABuildingSMActor>() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
+
+    FFortItemEntry* ItemEntry = nullptr;
+    AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+    FFortItemList& Inventory = WorldInventory->GetInventory();
+    TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
+
+    for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); ++i)
+    {
+        if (ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemDefinition()->IsA<UFortEditToolItemDefinition>())
+        {
+            ItemEntry = &ItemInstancesOffsetPtr[i]->GetItemEntry();
+            break;
+        }
+    }
+
+    if (!ItemEntry)
+        return;
+
+    AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->GetMyFortPawn()->Get<AFortWeapon*>("FortPawn", "CurrentWeapon"));
+    PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "EquipWeaponDefinition", ItemEntry->GetItemDefinition(), ItemEntry->GetItemGuid());
+    
+    if (EditingTool)
+    {
+        EditingTool->Set("FortWeap_EditingTool", "EditActor", nullptr);
+        EditingTool->Set("FortWeap_EditingTool", "bEditConfirmed", true);
+        EditingTool->CallFunc<void>("FortWeap_EditingTool", "OnRep_EditActor");
+    }
+
+    // TODO: BuildingsEdited++ i cba rn
 }
