@@ -96,41 +96,52 @@ void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFort
     TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
     TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
 
-    UFortWorldItem* entry = nullptr;
+    UFortWorldItem* EToDelete = nullptr;
+    int32 RIndex = -1;
+    int32 EIndex = -1;
 
     for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); i++)
     {
         if (ItemInstancesOffsetPtr[i] && ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemGuid() == Entry.GetItemGuid())
         {
-            entry = ItemInstancesOffsetPtr[i];
-            UE_LOG(LogNeon, Log, "FoundInstance[%d]", i);
+            EToDelete = ItemInstancesOffsetPtr[i];
+            EIndex = i;
             break;
         }
     }
 
-    if (entry)
+    for (int32 i = 0; i < ReplicatedEntriesOffsetPtr.Num(); i++)
     {
-        entry->SetItemEntry(Entry);
-
-        for (int32 i = 0; i < ReplicatedEntriesOffsetPtr.Num(); i++)
+        static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
+        auto ReplicatedEntry = (FFortItemEntry*) ((uint8*) ReplicatedEntriesOffsetPtr.GetData() + (i * StructSize));
+    
+        if (ReplicatedEntry->GetItemGuid() == Entry.GetItemGuid())
         {
-            static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
-            auto ReplicatedEntry = (FFortItemEntry*) ((uint8*) ReplicatedEntriesOffsetPtr.GetData() + (i * StructSize));
-        
-            if (ReplicatedEntry->GetItemGuid() == Entry.GetItemGuid())
-            {
-                UE_LOG(LogNeon, Log, "FoundEntry[%d]", i);
-                *ReplicatedEntry = Entry;
-                break;
-            }
+            RIndex = i;
+            break;
         }
     }
 
-    if (!PlayerController) return;
-    WorldInventory->SetbRequiresLocalUpdate(true);
-    WorldInventory->HandleInventoryLocalUpdate();
+    if (EToDelete && EIndex != -1)
+    {
+        ItemInstancesOffsetPtr.Remove(EIndex);
+    }
 
-    Entry.ReplicationKey ? WorldInventory->GetInventory().MarkItemDirty(Entry) : WorldInventory->GetInventory().MarkArrayDirty();
+    if (RIndex != -1)
+    {
+        ReplicatedEntriesOffsetPtr.Remove(RIndex);
+    }
+
+    if (Entry.GetItemDefinition())
+    {
+        WorldInventory->GiveItem(
+            Cast<AFortPlayerControllerAthena>(PlayerController),
+            Entry.GetItemDefinition(),
+            Entry.GetCount(),
+            Entry.GetLoadedAmmo(),
+            Entry.GetLevel()
+        );
+    }
 }
 
 FFortItemEntry AFortInventory::MakeItemEntry(UFortItemDefinition* ItemDefinition, int32 Count, int32 Level) {
