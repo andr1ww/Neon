@@ -28,7 +28,7 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
 
 UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level)
 {
-    if (!PlayerController || !Def)
+    if (!PlayerController || !Def || Count == 0)
     {
         UE_LOG(LogNeon, Fatal, "Invalid parameters for GiveItem: PlayerController: %p, Def: %p, Count: %d, Level: %d", PlayerController, Def, Count, Level);
         return nullptr;
@@ -55,11 +55,8 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
     ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry(), StructSize);
     ItemInstancesOffsetPtr.Add(BP);
-
-    if (WorldInventory)
-    {
-        WorldInventory->Update(PlayerController, &ItemEntry);
-    }
+    
+    WorldInventory->Update(PlayerController, &ItemEntry);
     
     return BP;
 }
@@ -118,7 +115,7 @@ void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFort
         static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
         auto ReplicatedEntry = (FFortItemEntry*) ((uint8*) ReplicatedEntriesOffsetPtr.GetData() + (i * StructSize));
     
-        if (ReplicatedEntry->GetItemGuid() == Entry.GetItemGuid())
+        if (ReplicatedEntry->GetItemGuid() == EToDelete->GetItemEntry().GetItemGuid())
         {
             RIndex = i;
             break;
