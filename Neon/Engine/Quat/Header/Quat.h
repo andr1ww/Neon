@@ -81,6 +81,4 @@ struct FQuat {
             ScaleA * A.W + ScaleB * BCopy.W
         );
     }
-
-    static FQuat FromRotator(const FRotator& R);
 };

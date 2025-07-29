@@ -181,6 +181,32 @@ UObject* UGameplayStatics::SpawnObject(TSubclassOf<class UObject> ObjectClass, c
     return UGameplayStatics_SpawnObject_Params.ReturnValue;
 }
 
+inline FQuat FRotToQuat2(FRotator Rot)
+{
+    const float DEG_TO_RAD = 3.1415926535897932f / 180.0f;
+    const float DIVIDE_BY_2 = DEG_TO_RAD / 2.0f;
+    
+    float HalfPitch = Rot.Pitch * DIVIDE_BY_2;
+    float HalfYaw = Rot.Yaw * DIVIDE_BY_2;
+    float HalfRoll = Rot.Roll * DIVIDE_BY_2;
+    
+    float SP, SY, SR;
+    float CP, CY, CR;
+
+    sinCos(&SP, &CP, HalfPitch);
+    sinCos(&SY, &CY, HalfYaw);
+    sinCos(&SR, &CR, HalfRoll);
+
+    FQuat RotationQuat;
+    RotationQuat.X = CR * SP * SY - SR * CP * CY;
+    RotationQuat.Y = -CR * SP * CY - SR * CP * SY;
+    RotationQuat.Z = CR * CP * SY - SR * SP * CY;
+    RotationQuat.W = CR * CP * CY + SR * SP * SY;
+
+    return RotationQuat;
+}
+
+
 AActor* UGameplayStatics::SpawnActorOG(UClass* Class, FVector Loc, FRotator Rot, AActor* Owner)
 {
     UWorld* World = UWorld::GetWorld();
@@ -193,7 +219,14 @@ AActor* UGameplayStatics::SpawnActorOG(UClass* Class, FVector Loc, FRotator Rot,
     addr.bDeferConstruction = false;
     addr.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
     
-    FTransform Transform(Loc, FRotToQuat(Rot));
+    FTransform Transform(Loc, FRotToQuat2(Rot), FVector(1.0f, 1.0f, 1.0f));
     
-    return ((AActor * (*)(UWorld*, UClass*, FTransform const*, FActorSpawnParameters*))(Finder->SpawnActor()))(UWorld::GetWorld(), Class, &Transform, &addr);
+    AActor* SpawnedActor = ((AActor * (*)(UWorld*, UClass*, FTransform const*, FActorSpawnParameters*))(Finder->SpawnActor()))(UWorld::GetWorld(), Class, &Transform, &addr);
+    
+    if (SpawnedActor)
+    {
+        SpawnedActor->CallFunc<void>("Actor", "K2_SetActorRotation", Rot, false);
+    }
+
+    return SpawnedActor;
 }

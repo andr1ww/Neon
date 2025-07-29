@@ -42,10 +42,9 @@ public:
 	static UObject* SpawnObject(TSubclassOf<class UObject> ObjectClass, class UObject* Param_Outer);
 
 	static AActor* SpawnActorOG(UClass* Class, FVector Loc, FRotator Rot = FRotator(0,0,0), AActor* Owner = nullptr);
-	static AActor* SpawnActorOG(UClass* Class, FTransform Transform, AActor* Owner = nullptr);
     
 	template <typename T>
-	static T* SpawnActorOG(UClass* Class, FVector Loc, FRotator Rot =  FRotator(0,0,0), AActor* Owner = nullptr)
+	static T* SpawnActorOG(UClass* Class, FVector Loc, FRotator Rot = FRotator(0,0,0), AActor* Owner = nullptr)
 	{
 		return static_cast<T*>(SpawnActorOG(Class, Loc, Rot, Owner));
 	}
