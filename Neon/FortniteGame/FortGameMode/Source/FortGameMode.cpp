@@ -55,6 +55,10 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
                 BotMutator->SetCachedGameMode(GameMode);
                 BotMutator->SetCachedGameState(GameState);
+
+                AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
+                GameMode->SetAIDirector(AIDirector);
+                AIDirector->CallFunc<void>("FortAIDirector", "Activate");
             }
         } else
         {

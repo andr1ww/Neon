@@ -8,6 +8,11 @@
 
 class AFortGameModeAthena;
 
+class AFortAIDirector : public AActor
+{
+    
+};
+
 class AFortAthenaMutator : public AActor
 {
 public:
