@@ -914,23 +914,3 @@ uint64 UFinder::OnPossessedPawnDied()
     
     return CachedResult = 0;
 }
-
-uint64 UFinder::SpawnActorTransform()
-{
-    static uint64 CachedResult = 0;
-    if (CachedResult != 0)
-        return CachedResult;
-    
-    if (Engine_Version >= 427)
-    {
-        auto stat = Memcury::Scanner::FindStringRef(L"STAT_SpawnActorTime");
-        return CachedResult = FindBytes(stat, { 0x48, 0x8B, 0xC4 }, 3000, 0, true);
-    }
-
-    auto Addr = Memcury::Scanner::FindStringRef(L"SpawnActor failed because no class was specified");
-
-    if (Engine_Version >= 416 && Fortnite_Version <= 3.3)
-        return CachedResult = FindBytes(Addr, { 0x40, 0x55 }, 3000, 0, true);
-
-    return CachedResult = FindBytes(Addr, { 0x4C, 0x8B, 0xDC }, 3000, 0, true);
-}
