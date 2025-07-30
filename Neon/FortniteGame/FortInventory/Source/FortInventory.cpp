@@ -81,17 +81,24 @@ UObject* AFortInventory::GiveItem(AFortAthenaAIBotController* Controller, UFortI
     ItemEntry.SetLoadedAmmo(LoadedAmmo);
     ItemEntry.SetLevel(Level);
     ItemEntry.SetItemDefinition(Def);
+    
+    AFortInventory* PCInventory = Controller->GetInventory();
+    if (PCInventory)
+    {
+        FFortItemList& Inventory = PCInventory->GetInventory();
+        if (&Inventory)
+        {
+            TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
+            TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
 
-    FFortItemList& Inventory = Controller->GetInventory()->GetInventory();
-    TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
-    TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
+            static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
 
-    static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
-
-    ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry(), StructSize);
-    ItemInstancesOffsetPtr.Add(BP);
-    Controller->GetInventory()->Update((AFortPlayerControllerAthena*)Controller, &ItemEntry);
-
+            ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry(), StructSize);
+            ItemInstancesOffsetPtr.Add(BP);
+            PCInventory->Update((AFortPlayerControllerAthena*)Controller, &ItemEntry);
+        }
+    }
+    
     return BP;
 }
 
