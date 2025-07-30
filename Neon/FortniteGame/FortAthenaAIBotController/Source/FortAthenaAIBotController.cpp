@@ -6,8 +6,8 @@
 #include "Engine/NetDriver/Header/NetDriver.h"
 
 void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
-	static TArray<UAthenaCharacterItemDefinition*> Characters = TArray<UAthenaCharacterItemDefinition*>();
-	static TArray<UAthenaPickaxeItemDefinition*> Pickaxes = TArray<UAthenaPickaxeItemDefinition*>();
+	static std::vector<UAthenaCharacterItemDefinition*> Characters = std::vector<UAthenaCharacterItemDefinition*>();
+	static std::vector<UAthenaPickaxeItemDefinition*> Pickaxes = std::vector<UAthenaPickaxeItemDefinition*>();
 
 	if (Characters.Num() == 0)
 	{
@@ -70,4 +70,31 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 			}
 		}
 	}
+}
+
+void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController* Controller, AActor* DamagedActor, float Damage, AFortPlayerControllerAthena* InstigatedBy, AActor* DamageCauser, FVector HitLocation, UPrimitiveComponent* HitComp, FName Bone, FVector Momentum)
+{
+	if (Controller->GetPawn())
+	{
+		AFortInventory* PCInventory = Controller->GetInventory();
+		FFortItemList& Inventory = PCInventory->GetInventory();
+		if (&Inventory != nullptr)
+		{
+			TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
+			for (int32 i = 0; i < ReplicatedEntriesOffsetPtr.Num(); ++i)
+			{
+				AFortInventory::SpawnPickup(
+					Controller->GetActorLocation(), 
+					ReplicatedEntriesOffsetPtr[i].GetItemDefinition(), 
+					ReplicatedEntriesOffsetPtr[i].GetCount(), 
+					0,
+					EFortPickupSourceTypeFlag::Tossed, 
+					EFortPickupSpawnSource::Unset,
+					InstigatedBy->GetMyFortPawn()
+				);
+			}
+		}
+	}
+
+	return OnPossessedPawnDiedOG(Controller, DamagedActor, Damage, InstigatedBy, DamageCauser, HitLocation, HitComp, Bone, Momentum);
 }

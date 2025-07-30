@@ -402,9 +402,9 @@ T* StaticLoadObjectOnly(std::string name) {
 	}
 
 	template<typename T>
-TArray<T*> GetObjectsOfClass(UClass* Class = T::StaticClass())
+std::vector<T*> GetObjectsOfClass(UClass* Class = T::StaticClass())
 	{
-		TArray<T*> ArrayOfObjects;
+		std::vector<T*> ArrayOfObjects;
 		for (int i = 0; i < GUObjectArray.GetObjectArrayNum(); i++)
 		{
 			SDK::FUObjectItem *IndexedObject =
@@ -419,7 +419,7 @@ TArray<T*> GetObjectsOfClass(UClass* Class = T::StaticClass())
 			{
 				if (Class == Object->GetClass())
 				{
-					ArrayOfObjects.Add(Cast<T>((UObject*)Object));
+					ArrayOfObjects.push_back(Cast<T>((UObject*)Object));
 				}
 			}
 		}

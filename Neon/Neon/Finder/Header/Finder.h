@@ -110,6 +110,8 @@ public:
     uint64 BotManagerSetup();
 
     uint64 SpawnBotRet();
+
+    uint64 OnPossessedPawnDied();
 };
 
 inline UFinder* Finder = new UFinder();

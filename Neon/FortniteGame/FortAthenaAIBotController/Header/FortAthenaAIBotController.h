@@ -12,6 +12,11 @@ class AAIController : public AController
 
 };
 
+class UPrimitiveComponent : public UObject
+{
+    
+};
+
 class AFortAthenaAIBotController : public AAIController
 {
 public:
@@ -19,6 +24,7 @@ public:
     DEFINE_PTR(UFortAthenaAIBotInventoryItems, AFortAthenaAIBotController, StartupInventory);
 
 public:
+    DefHookOg(void, OnPossessedPawnDied, AFortAthenaAIBotController*, AActor*, float, AFortPlayerControllerAthena*, AActor*, FVector, UPrimitiveComponent*, FName, FVector);
     // Stuff that doesent exist in the fortnite sdk
     static void SpawnPlayerBot(int Count);
 };

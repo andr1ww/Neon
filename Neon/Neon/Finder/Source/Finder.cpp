@@ -898,3 +898,19 @@ uint64 UFinder::SpawnBotRet()
 
     return 0;
 }
+
+uint64 UFinder::OnPossessedPawnDied()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+
+    auto Addr = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 56 48 83 EC ? 49 8B F1 0F 29 74 24").Get(); 
+
+    if (Addr)
+    {
+        return CachedResult = Addr;
+    }
+    
+    return CachedResult = 0;
+}

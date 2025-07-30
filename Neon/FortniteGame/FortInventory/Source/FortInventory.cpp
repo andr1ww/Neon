@@ -30,7 +30,6 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
 {
     if (!PlayerController || !Def || Count == 0)
     {
-        UE_LOG(LogNeon, Fatal, "Invalid parameters for GiveItem: PlayerController: %p, Def: %p, Count: %d, Level: %d", PlayerController, Def, Count, Level);
         return nullptr;
     }
 
@@ -65,7 +64,6 @@ UObject* AFortInventory::GiveItem(AFortAthenaAIBotController* Controller, UFortI
 {
     if (!Controller || !Def || Count == 0)
     {
-        UE_LOG(LogNeon, Fatal, "Invalid parameters for GiveItem: PlayerController: %p, Def: %p, Count: %d, Level: %d", Controller, Def, Count, Level);
         return nullptr;
     }
 

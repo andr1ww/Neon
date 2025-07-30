@@ -15,23 +15,6 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
         return SpawnBotOG(BotManager, SpawnLoc, SpawnRot, BotData, RuntimeBotData);
     }
     
-    static TArray<UAthenaCharacterItemDefinition*> Characters = TArray<UAthenaCharacterItemDefinition*>();
-    static TArray<UAthenaPickaxeItemDefinition*> Pickaxes = TArray<UAthenaPickaxeItemDefinition*>();
-    UAthenaCharacterItemDefinition* RandomCharacter = nullptr;
-    UAthenaPickaxeItemDefinition* RandomPickaxe = nullptr;
-    if (Characters.Num() == 0)
-    {
-        Characters = Runtime::GetObjectsOfClass<UAthenaCharacterItemDefinition>();
-        Pickaxes = Runtime::GetObjectsOfClass<UAthenaPickaxeItemDefinition>();
-    }
-    if (Characters.Num() > 0 && Pickaxes.Num() > 0)
-    {
-        int32 RandomCharacterIndex = rand() % Characters.Num() - 1;
-        RandomCharacter = Characters[RandomCharacterIndex];
-        int32 RandomPickaxeIndex = rand() % Pickaxes.Num() - 1;
-        RandomPickaxe = Pickaxes[RandomPickaxeIndex];
-    }
-
     static void (*BotManagerSetup)(__int64 BotManaager, __int64 Pawn, __int64 BehaviorTree, __int64 a4, DWORD* SkillLevel, __int64 idk, __int64 StartupInventory, __int64 BotNameSettings, __int64 idk_1, BYTE* CanRespawnOnDeath, unsigned __int8 BitFieldDataThing, BYTE* CustomSquadId, FFortAthenaAIBotRunTimeCustomizationData InRuntimeBotData) = decltype(BotManagerSetup)(Finder->BotManagerSetup());
    
     AActor *SpawnLocator = UGameplayStatics::SpawnActor<ADefaultPawn>(SpawnLoc, SpawnRot);
@@ -60,14 +43,6 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                     }
                 } else
                 {
-                        
-                        if (RandomCharacter) {
-                  //          BotData->GetCharacterCustomization()->GetCustomizationLoadout().SetCharacter(RandomCharacter);
-                        }
-                        
-                        if (RandomPickaxe) {
-                            BotData->GetCharacterCustomization()->GetCustomizationLoadout().SetPickaxe(RandomPickaxe);
-                        }
                     
                     if (!Controller->GetInventory()) {
                         Controller->SetInventory(UGameplayStatics::SpawnActor<AFortInventory>({}, {}, Ret));
