@@ -23,6 +23,6 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 
 	for (int i = 0; i < Count; i++) {
 		AActor* BotSpawn = PlayerStarts[rand() % (PlayerStarts.Num() - 1)];
-		 GameMode->GetServerBotManager()->GetCachedBotMutator()->SpawnBot(BotBP, BotSpawn, BotSpawn->GetActorLocation(), {}, false);
+		GameMode->GetServerBotManager()->GetCachedBotMutator()->SpawnBot(BotBP, BotSpawn, BotSpawn->GetActorLocation(), {}, false);
 	}
 }

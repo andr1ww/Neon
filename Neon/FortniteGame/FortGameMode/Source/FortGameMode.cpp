@@ -228,6 +228,6 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 0, 1); 
     } 
     
-    AFortAthenaAIBotController::SpawnPlayerBot(10);
+    AFortAthenaAIBotController::SpawnPlayerBot(90);
     return Pawn;
 }
