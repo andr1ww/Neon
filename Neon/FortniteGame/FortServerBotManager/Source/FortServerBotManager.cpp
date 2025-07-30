@@ -51,22 +51,6 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
 
                 if (BotData->GetCharacterCustomization()->GetCustomizationLoadout().GetCharacter()->GetFName().ToString().ToString() == "CID_556_Athena_Commando_F_RebirthDefaultA")
                 {
-                    if (!Controller->GetInventory()) {
-                        Controller->SetInventory(UGameplayStatics::SpawnActor<AFortInventory>({}, {}, Ret));
-                    }
-
-                    if (BotData->GetStartupInventory())
-                    {
-                        for (int32 i = 0; i < BotData->GetStartupInventory()->GetItems().Num(); i++) {
-                            UFortItemDefinition* ItemDef = BotData->GetStartupInventory()->GetItems()[i];
-                            if (!ItemDef) continue;
-                            UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(Controller, ItemDef, 1, 30, 0);
-                            if (ItemDef->IsA(UFortWeaponItemDefinition::StaticClass())) {
-                                Ret->CallFunc<void>("FortPawn", "EquipWeaponDefinition", Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry(), false);
-                            }
-                        }
-                    }
-                    
                     std::string Tag = RuntimeBotData.PredefinedCosmeticSetTag.TagName.ToString().ToString();
                     if (Tag == "Athena.Faction.Alter") {
                         BotData->GetCharacterCustomization()->GetCustomizationLoadout().SetCharacter(Runtime::StaticLoadObject<UAthenaCharacterItemDefinition>("/Game/Athena/Items/Cosmetics/Characters/CID_NPC_Athena_Commando_M_HenchmanBad.CID_NPC_Athena_Commando_M_HenchmanBad"));
@@ -131,6 +115,22 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
 
         if (BotData->GetFName().ToString().ToString().contains("MANG"))
         {
+            if (!Controller->GetInventory()) {
+                Controller->SetInventory(UGameplayStatics::SpawnActor<AFortInventory>({}, {}, Ret));
+            }
+
+            if (BotData->GetStartupInventory())
+            {
+                for (int32 i = 0; i < BotData->GetStartupInventory()->GetItems().Num(); i++) {
+                    UFortItemDefinition* ItemDef = BotData->GetStartupInventory()->GetItems()[i];
+                    if (!ItemDef) continue;
+                    UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(Controller, ItemDef, 1, 30, 0);
+                    if (ItemDef->IsA(UFortWeaponItemDefinition::StaticClass())) {
+                        Ret->CallFunc<void>("FortPawn", "EquipWeaponDefinition", Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry(), false);
+                    }
+                }
+            }
+            
             DWORD CustomSquadId = RuntimeBotData.CustomSquadId;
             BYTE TrueByte = 1;
             BYTE FalseByte = 0;
