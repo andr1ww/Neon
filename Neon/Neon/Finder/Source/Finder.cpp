@@ -852,3 +852,15 @@ uint64 UFinder::ReplaceBuildingActor()
 
     return CachedResult = FindBytes(StringRef, BytesToFind, 1000, 0, true);
 }
+
+
+uint64 UFinder::BotManagerSetup()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+
+    auto StringRef = Memcury::Scanner::FindStringRef("Can't configure player bots if no GameMode set");
+
+    return CachedResult = StringRef.Get() ? FindBytes(StringRef, { 0x40, 0x55 }, 1000, 0, true) : 0;
+}

@@ -106,6 +106,8 @@ public:
     uint64 CantBuild();
 
     uint64 ReplaceBuildingActor();
+
+    uint64 BotManagerSetup();
 };
 
 inline UFinder* Finder = new UFinder();
