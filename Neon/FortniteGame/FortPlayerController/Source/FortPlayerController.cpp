@@ -334,3 +334,20 @@ void AFortPlayerControllerAthena::ServerRepairBuildingActor(AFortPlayerControlle
     }
 }
 
+void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerController, FFortPlayerDeathReport& DeathReport)
+{
+    auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
+    auto GameState = UWorld::GetWorld()->GetGameState();
+    auto PlayerState = PlayerController->GetPlayerState();
+
+    if (!PlayerController)
+        return ClientOnPawnDiedOG(PlayerController, DeathReport);
+
+    auto KillerPlayerState = DeathReport.GetKillerPlayerState();
+    auto KillerPawn = DeathReport.GetKillerPawn();
+    auto VictimPawn = PlayerController->GetMyFortPawn();
+
+    FVector DeathLocation = VictimPawn ? VictimPawn->GetActorLocation() : FVector{0,0,0};
+
+    
+}
