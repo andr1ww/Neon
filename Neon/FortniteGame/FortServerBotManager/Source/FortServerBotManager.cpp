@@ -90,6 +90,10 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
 
         if (BotData->GetFName().ToString().ToString().contains("MANG"))
         {
+            DWORD CustomSquadId = RuntimeBotData.CustomSquadId;
+            BYTE TrueByte = 1;
+            BYTE FalseByte = 0;
+            BotManagerSetup(__int64(BotManager), __int64(Ret), __int64(BotData->GetBehaviorTree()), 0, &CustomSquadId, 0, __int64(BotData->GetStartupInventory()), __int64(BotData->GetBotNameSettings()), 0, &FalseByte, 0, &TrueByte, RuntimeBotData);
             if (!Controller->GetInventory()) {
                 Controller->SetInventory(UGameplayStatics::SpawnActor<AFortInventory>({}, {}, Ret));
             }
@@ -105,11 +109,6 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                     }
                 }
             }
-            
-            DWORD CustomSquadId = RuntimeBotData.CustomSquadId;
-            BYTE TrueByte = 1;
-            BYTE FalseByte = 0;
-            BotManagerSetup(__int64(BotManager), __int64(Ret), __int64(BotData->GetBehaviorTree()), 0, &CustomSquadId, 0, __int64(BotData->GetStartupInventory()), __int64(BotData->GetBotNameSettings()), 0, &FalseByte, 0, &TrueByte, RuntimeBotData);
         }
         
         return Ret;

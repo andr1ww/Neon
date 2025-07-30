@@ -77,9 +77,9 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
 	if (Controller->GetPawn())
 	{
 		AFortInventory* PCInventory = Controller->GetInventory();
-		FFortItemList& Inventory = PCInventory->GetInventory();
-		if (&Inventory != nullptr)
+		if (PCInventory != nullptr)
 		{
+			FFortItemList& Inventory = PCInventory->GetInventory();
 			TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
 			for (int32 i = 0; i < ReplicatedEntriesOffsetPtr.Num(); ++i)
 			{
