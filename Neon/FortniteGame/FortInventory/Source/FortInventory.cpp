@@ -84,15 +84,15 @@ UObject* AFortInventory::GiveItem(AFortAthenaAIBotController* Controller, UFortI
     if (PCInventory)
     {
         FFortItemList& Inventory = PCInventory->GetInventory();
-        TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
-        TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
-
-        if (ReplicatedEntriesOffsetPtr.Num() > 0 && ItemInstancesOffsetPtr.Num() > 0)
+        if (&Inventory)
         {
+            TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
+            TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
+
             static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
 
-            if (BP) ReplicatedEntriesOffsetPtr.Add(ItemEntry, StructSize);
-            if (BP) ItemInstancesOffsetPtr.Add(BP);
+            ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry(), StructSize);
+            ItemInstancesOffsetPtr.Add(BP);
             PCInventory->Update((AFortPlayerControllerAthena*)Controller, &ItemEntry);
         }
     }
