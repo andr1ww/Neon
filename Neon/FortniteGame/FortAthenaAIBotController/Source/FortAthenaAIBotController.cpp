@@ -9,9 +9,8 @@
 #include "Neon/Finder/Header/Finder.h"
 
 void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
-	static UBehaviorTree* PhoebeBehaviorTree = Runtime::StaticLoadObject<UBehaviorTree>("/Game/Athena/AI/Phoebe/BehaviorTrees/BT_Phoebe.BT_Phoebe");
-	static UClass* PhoebePawnClass = Runtime::StaticLoadObject<UClass>("/Game/Athena/AI/Phoebe/BP_PlayerPawn_Athena_Phoebe.BP_PlayerPawn_Athena_Phoebe_C");
-	if (!PhoebeBehaviorTree || !PhoebePawnClass) {
+	static auto BotBP = Runtime::StaticLoadObject<UClass>("/Game/Athena/AI/Phoebe/BP_PlayerPawn_Athena_Phoebe.BP_PlayerPawn_Athena_Phoebe_C");
+	if (!BotBP) {
 		UE_LOG(LogNeon, Warning, "AFortAthenaAIBotController::SpawnPlayerBot: Unable to spawn bot because BehaviorTree or PawnClass was not found!");
 		return;
 	}
@@ -26,15 +25,7 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 	AFortGameStateAthena* GameState = (AFortGameStateAthena*)UWorld::GetWorld()->GetGameState();
 
 	for (int i = 0; i < Count; i++) {
-		UFortAthenaAIBotCustomizationData* BotCustomizationData = (UFortAthenaAIBotCustomizationData*)UGameplayStatics::SpawnObject(UFortAthenaAIBotCustomizationData::StaticClass(), GameMode);
-		BotCustomizationData->SetBehaviorTree(PhoebeBehaviorTree);
-		BotCustomizationData->SetPawnClass(PhoebePawnClass);
-		BotCustomizationData->SetStartupInventory((UFortAthenaAIBotInventoryItems*)UGameplayStatics::SpawnObject(UFortAthenaAIBotInventoryItems::StaticClass(), GameMode));
-		BotCustomizationData->SetCharacterCustomization((UFortAthenaAIBotCharacterCustomization*)UGameplayStatics::SpawnObject(UFortAthenaAIBotCharacterCustomization::StaticClass(), GameMode));
-
-		FFortAthenaAIBotRunTimeCustomizationData BotRunTimeCustomizationData;
-
 		AActor* BotSpawn = PlayerStarts[rand() % (PlayerStarts.Num() - 1)];
-		GameMode->GetServerBotManager()->SpawnBot(GameMode->GetServerBotManager(), BotSpawn->GetActorLocation(), {}, BotCustomizationData, BotRunTimeCustomizationData);
+		FBotMutator::Get()->SpawnBot(BotBP, BotSpawn, BotSpawn->GetActorLocation(), {}, false);
 	}
 }

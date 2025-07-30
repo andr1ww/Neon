@@ -178,8 +178,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
 
             GameState->OnRep_CurrentPlaylistId();
             GameState->OnRep_CurrentPlaylistInfo();
-
-            AFortAthenaAIBotController::SpawnPlayerBot(10);
         }
     }
     
@@ -231,5 +229,6 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 0, 1); 
     } 
     
+    AFortAthenaAIBotController::SpawnPlayerBot(10);
     return Pawn;
 }
