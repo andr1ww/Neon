@@ -34,7 +34,9 @@ public:
 
 class AFortPickupAthena : public AFortPickup
 {
-    
+public:
+    DECLARE_STATIC_CLASS(AFortPickupAthena)
+    DECLARE_DEFAULT_OBJECT(AFortPickupAthena)
 };
 
 class UFortItem : public UObject

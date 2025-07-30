@@ -14,7 +14,9 @@ class AAIController : public AController
 
 class UPrimitiveComponent : public UObject
 {
-    
+public:
+    DECLARE_STATIC_CLASS(UPrimitiveComponent)
+    DECLARE_DEFAULT_OBJECT(UPrimitiveComponent)
 };
 
 class AFortAthenaAIBotController : public AAIController

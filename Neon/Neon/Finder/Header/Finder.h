@@ -102,6 +102,8 @@ public:
     uint64 SpawnBot();
 
     uint64 SpawnActor();
+
+    uint64 SetupPickup();
     
     uint64 CantBuild();
 

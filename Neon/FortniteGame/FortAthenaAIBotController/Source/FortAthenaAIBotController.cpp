@@ -74,6 +74,8 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 
 void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController* Controller, AActor* DamagedActor, float Damage, AFortPlayerControllerAthena* InstigatedBy, AActor* DamageCauser, FVector HitLocation, UPrimitiveComponent* HitComp, FName Bone, FVector Momentum)
 {
+	OnPossessedPawnDiedOG(Controller, DamagedActor, Damage, InstigatedBy, DamageCauser, HitLocation, HitComp, Bone, Momentum);
+	
     if (Controller->GetPawn())
     {
         AFortInventory* PCInventory = Controller->GetInventory();
@@ -97,11 +99,9 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
         }
         else
         {
-            auto it = BotStartupInventoryMap.find(Controller);
-            if (it != BotStartupInventoryMap.end() && it->second != nullptr)
+        	UFortAthenaAIBotInventoryItems* StartupInventory = FBotInventory::GetInventory(Controller);
+        	if (StartupInventory != nullptr)
             {
-                UFortAthenaAIBotInventoryItems* StartupInventory = it->second;
-                
                 for (int32 i = 0; i < StartupInventory->GetItems().Num(); i++) 
                 {
                     UFortItemDefinition* ItemDef = StartupInventory->GetItems()[i];
@@ -122,11 +122,5 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
         }
     }
 
-	auto it = BotStartupInventoryMap.find(Controller);
-	if (it != BotStartupInventoryMap.end())
-	{
-		BotStartupInventoryMap.erase(it);
-	}
-
-    return OnPossessedPawnDiedOG(Controller, DamagedActor, Damage, InstigatedBy, DamageCauser, HitLocation, HitComp, Bone, Momentum);
+	FBotInventory::RemoveInventory(Controller);
 }

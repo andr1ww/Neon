@@ -319,7 +319,7 @@ public:
         return *reinterpret_cast<int32*>(__int64(this) + RepFrameOffset);
     }
     // Replication
-    static inline float GetMaxTickRate() { return 60.f; }
+    static inline float GetMaxTickRate() { return 30.f; }
     static int32 ServerReplicateActors(UNetDriver* NetDriver, float DeltaSeconds);
     static int32 ServerReplicateActors_PrepConnections(UNetDriver*, float DeltaSeconds);
     static void ServerReplicateActors_BuildConsiderList(UNetDriver* Driver, TArray<AActor*>& OutConsiderList, const float ServerTickTime);

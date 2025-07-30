@@ -104,9 +104,14 @@ AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry& Entr
 {
     if (OverrideCount != -1)
         printf("Count: %d\n", OverrideCount);
-    AFortPickupAthena* NewPickup = UGameplayStatics::SpawnActor<AFortPickupAthena>(Loc, {});
+    AFortPickupAthena* NewPickup = UGameplayStatics::SpawnActorOG<AFortPickupAthena>(AFortPickupAthena::StaticClass(), Loc);
     if (NewPickup != nullptr && Entry.GetItemDefinition() != nullptr)
     {
+        if (Finder->SetupPickup())
+        {
+            UE_LOG(LogNeon, Log, "Ok");
+            ((FVector * (*)(AFortPickup*, FFortItemEntry*, TArray<FFortItemEntry>, bool))(Finder->SetupPickup()))(NewPickup, &Entry, TArray<FFortItemEntry>(), false);
+        }
         NewPickup->SetbRandomRotation(RandomRotation);
         NewPickup->GetPrimaryPickupItemEntry().SetItemDefinition(Entry.GetItemDefinition());
         NewPickup->GetPrimaryPickupItemEntry().SetCount(OverrideCount != -1 ? OverrideCount : Entry.GetCount());

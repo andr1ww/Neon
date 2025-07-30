@@ -25,7 +25,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
 
         if (BotData->GetStartupInventory())
         {
-            BotStartupInventoryMap[Controller] = BotData->GetStartupInventory();
+            FBotInventory::SetInventory(Controller, BotData->GetStartupInventory());
         }
 
         if (BotData->GetCharacterCustomization()) {

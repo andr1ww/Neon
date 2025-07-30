@@ -99,7 +99,36 @@ public:
     DEFINE_PTR(UFortBotNameSettings, UFortAthenaAIBotCustomizationData, BotNameSettings);   
 };
 
-static std::map<AFortAthenaAIBotController*, UFortAthenaAIBotInventoryItems*> BotStartupInventoryMap;
+struct FBotInventory {
+    static std::map<AFortAthenaAIBotController*, UFortAthenaAIBotInventoryItems*>& GetMap()
+    {
+        static std::map<AFortAthenaAIBotController*, UFortAthenaAIBotInventoryItems*> Map;
+        return Map;
+    }
+    
+    static void SetInventory(AFortAthenaAIBotController* Controller, UFortAthenaAIBotInventoryItems* Inventory)
+    {
+        GetMap()[Controller] = Inventory;
+    }
+    
+    static UFortAthenaAIBotInventoryItems* GetInventory(AFortAthenaAIBotController* Controller)
+    {
+        auto& map = GetMap();
+        auto it = map.find(Controller);
+        return it != map.end() ? it->second : nullptr;
+    }
+    
+    static void RemoveInventory(AFortAthenaAIBotController* Controller)
+    {
+        auto& map = GetMap();
+        auto it = map.find(Controller);
+        if (it != map.end())
+        {
+            map.erase(it);
+        }
+    }
+};
+
 
 class UFortServerBotManagerAthena : public UObject
 {

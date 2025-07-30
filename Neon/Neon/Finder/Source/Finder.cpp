@@ -914,3 +914,35 @@ uint64 UFinder::OnPossessedPawnDied()
     
     return CachedResult = 0;
 }
+
+uint64 UFinder::SetupPickup()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+    
+    if (Engine_Version == 419)
+        return CachedResult = Memcury::Scanner::FindPattern("48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC 20 80 B9 ? ? ? ? ? 41 0F B6 E9").Get(); // 1.11
+    if (Engine_Version == 420)
+    {
+        if (Fortnite_Version <= 3.3)
+            return CachedResult = Memcury::Scanner::FindPattern("48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC 20 80 B9 ? ? ? ? ? 41 0F B6 E9 49 8B F8 48 8B F1 0F 85 ? ? ? ? 48 83 7A").Get(); // 3.3
+
+        return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 41 56 48 83 EC 20 80 B9 ? ? ? ? ? 45 0F B6 F1 49 8B E8").Get(); // 4.1
+    }
+    if (Engine_Version == 421)
+    {
+        auto addr = Memcury::Scanner::FindPattern("48 89 5C 24 ? 55 57 41 57 48 83 EC 30 80 B9 ? ? ? ? ? 41 0F B6", false).Get(); // 6.21
+
+        if (!addr)
+            addr = Memcury::Scanner::FindPattern("48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC 20 80 B9 ? ? ? ? ? 41 0F B6 E9").Get(); // 5.41
+
+        return CachedResult = addr;
+    }
+    if (Engine_Version == 422)
+        return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 57 41 56 41 57 48 83 EC 30 80 B9 ? ? ? ? ? 45 0F B6 F1").Get(); // 7.30
+    if (Engine_Version == 423)
+        return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 57 41 56 41 57 48 83 EC 30 80 B9 ? ? ? ? ? 45 0F B6 F1 4D").Get(); // 8.51 & 10.40
+
+    return CachedResult = 0;
+}
