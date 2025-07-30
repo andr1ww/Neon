@@ -180,7 +180,18 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         }
     }
     
-    return *Result = GameMode->GetAlivePlayers().Num() >= GameMode->GetWarmupRequiredPlayerCount();
+    if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
+    {
+        auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
+        auto WarmupDuration = 60.f;
+
+        GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
+        GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
+        GameMode->Set("FortGameModeAthena", "WarmupCountdownDuration", WarmupDuration);
+        GameMode->Set("FortGameModeAthena", "WarmupEarlyCountdownDuration", WarmupDuration);
+    }
+    
+    return *Result = GameMode->GetAlivePlayers().Num() >= GameMode->GetWarmupRequiredPlayerCount();;
 }
 
 APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer, AActor* StartSpot)

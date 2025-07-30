@@ -356,6 +356,18 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
         {
             ServerReplicateActors(NetDriver, DeltaSeconds);
         }
+
+        static bool bStartedBus = false;
+        if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && !bStartedBus)
+        {
+            AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
+            auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
+            if (GameState->Get<float>("FortGameStateAthena", "WarmupCountdownEndTime") <= Time)
+            {
+                ExecuteConsoleCommand(UWorld::GetWorld(), L"startaircraft", nullptr);
+                bStartedBus = true;
+            }
+        }
     }
     
 	return TickFlushOriginal(NetDriver, DeltaSeconds);
