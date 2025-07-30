@@ -56,7 +56,7 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		if (PickDef) {
 			UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(PC, PickDef, 1, 1, 0);
 			if (Item) {
-				Pawn->CallFunc<void>("FortPawn", "EquipWeaponDefinition", Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry().GetItemGuid(), Item->GetItemEntry().GetTrackerGuid(), false);
+				Pawn->CallFunc<void>("FortPawn", "EquipWeaponDefinition", Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry().GetItemGuid(), false);
 			}
 		}
 	}
