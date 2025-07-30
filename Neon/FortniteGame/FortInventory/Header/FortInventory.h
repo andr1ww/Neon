@@ -28,8 +28,27 @@ struct FFortItemEntry : public FFastArraySerializerItem
 class AFortPickup : public AActor
 {
 public:
+    void OnRep_PrimaryPickupItemEntry()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPickup", "OnRep_PrimaryPickupItemEntry");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        if (!this) 
+            return;
+
+        this->ProcessEvent(Func, nullptr);
+    }
+public:
     DEFINE_MEMBER(bool, AFortPickup, bRandomRotation);
-    DEFINE_MEMBER(FFortItemEntry, AFortPickup, PrimaryPickupItemEntry);
+    DEFINE_PTR(FFortItemEntry, AFortPickup, PrimaryPickupItemEntry);
+public:
+    DECLARE_STATIC_CLASS(AFortPickup)
+    DECLARE_DEFAULT_OBJECT(AFortPickup)
 };
 
 class AFortPickupAthena : public AFortPickup
@@ -103,9 +122,9 @@ public:
     static UObject* GiveItem(AFortAthenaAIBotController* Controller, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level);
     static void ReplaceEntry(AFortPlayerController*, FFortItemEntry&);
     static void Remove(AFortPlayerController* PlayerController, FGuid Guid, int AmountToRemove = -1);
-    static AFortPickupAthena* SpawnPickup(FVector, FFortItemEntry&, EFortPickupSourceTypeFlag SourceTypeFlag = EFortPickupSourceTypeFlag::Tossed, EFortPickupSpawnSource SpawnSource = EFortPickupSpawnSource::Unset, AFortPlayerPawn* Pawn = nullptr, int OverrideCount = -1, bool Toss = true, bool RandomRotation = true, bool bCombine = true);
+    static AFortPickupAthena* SpawnPickup(FVector, FFortItemEntry*, EFortPickupSourceTypeFlag SourceTypeFlag = EFortPickupSourceTypeFlag::Tossed, EFortPickupSpawnSource SpawnSource = EFortPickupSpawnSource::Unset, AFortPlayerPawn* Pawn = nullptr, int OverrideCount = -1, bool Toss = true, bool RandomRotation = true, bool bCombine = true);
     static AFortPickupAthena* SpawnPickup(FVector, UFortItemDefinition*, int, int, EFortPickupSourceTypeFlag SourceTypeFlag = EFortPickupSourceTypeFlag::Tossed, EFortPickupSpawnSource SpawnSource = EFortPickupSpawnSource::Unset, AFortPlayerPawn* Pawn = nullptr, bool Toss = true);
-    static FFortItemEntry MakeItemEntry(UFortItemDefinition*, int32, int32);
+    static FFortItemEntry* MakeItemEntry(UFortItemDefinition*, int32, int32);
 public:
     DECLARE_STATIC_CLASS(AFortInventory)
     DECLARE_DEFAULT_OBJECT(AFortInventory)

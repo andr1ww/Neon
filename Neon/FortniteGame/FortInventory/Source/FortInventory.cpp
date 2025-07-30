@@ -100,24 +100,32 @@ UObject* AFortInventory::GiveItem(AFortAthenaAIBotController* Controller, UFortI
     return BP;
 }
 
-AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry& Entry, EFortPickupSourceTypeFlag SourceTypeFlag, EFortPickupSpawnSource SpawnSource, AFortPlayerPawn* Pawn, int OverrideCount, bool Toss, bool RandomRotation, bool bCombine)
+AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry* Entry, EFortPickupSourceTypeFlag SourceTypeFlag, EFortPickupSpawnSource SpawnSource, AFortPlayerPawn* Pawn, int OverrideCount, bool Toss, bool RandomRotation, bool bCombine)
 {
     AFortPickupAthena* NewPickup = UGameplayStatics::SpawnActorOG<AFortPickupAthena>(AFortPickupAthena::StaticClass(), Loc);
-    if (NewPickup != nullptr && Entry.GetItemDefinition() != nullptr)
+    if (NewPickup != nullptr && Entry->GetItemDefinition() != nullptr)
     {
         if (Finder->SetupPickup())
         {
             UE_LOG(LogNeon, Log, "Ok");
-            ((FVector * (*)(AFortPickup*, FFortItemEntry*, TArray<FFortItemEntry>, bool))(Finder->SetupPickup()))(NewPickup, &Entry, TArray<FFortItemEntry>(), false);
+            ((FVector * (*)(AFortPickup*, FFortItemEntry*, TArray<FFortItemEntry>, bool))(Finder->SetupPickup()))(NewPickup, Entry, TArray<FFortItemEntry>(), false);
         }
-        NewPickup->SetbRandomRotation(RandomRotation);
-        NewPickup->GetPrimaryPickupItemEntry().SetItemDefinition(Entry.GetItemDefinition());
-        NewPickup->GetPrimaryPickupItemEntry().SetCount(OverrideCount != -1 ? OverrideCount : Entry.GetCount());
-        NewPickup->CallFunc<void>("FortPickup", "OnRep_PrimaryPickupItemEntry");
         
-        NewPickup->CallFunc<void>("FortPickup", "TossPickup", Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
-        NewPickup->Set("FortPickup", "bTossedFromContainer", SpawnSource == EFortPickupSpawnSource::Chest || SpawnSource == EFortPickupSpawnSource::AmmoBox);
-        if (NewPickup->Get<bool>("FortPickup", "bTossedFromContainer")) NewPickup->CallFunc<void>("FortPickup", "OnRep_TossedFromContainer");
+        if (NewPickup)
+        {
+            NewPickup->SetbRandomRotation(RandomRotation);
+            static int PrimaryPickupItemEntryOffset = Runtime::GetOffset(NewPickup, "PrimaryPickupItemEntry");
+            
+            FFortItemEntry* ItemEntry = reinterpret_cast<FFortItemEntry*>(__int64(NewPickup) + PrimaryPickupItemEntryOffset);
+   
+            ItemEntry->SetItemDefinition(Entry->GetItemDefinition());
+            ItemEntry->SetCount(OverrideCount != -1 ? OverrideCount : Entry->GetCount());
+            NewPickup->OnRep_PrimaryPickupItemEntry();
+            
+            NewPickup->CallFunc<void>("FortPickup", "TossPickup", Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
+            NewPickup->Set("FortPickup", "bTossedFromContainer", SpawnSource == EFortPickupSpawnSource::Chest || SpawnSource == EFortPickupSpawnSource::AmmoBox);
+            if (NewPickup->Get<bool>("FortPickup", "bTossedFromContainer")) NewPickup->CallFunc<void>("FortPickup", "OnRep_TossedFromContainer");
+        }
     }
 
     return NewPickup;
@@ -125,7 +133,7 @@ AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry& Entr
 
 AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, UFortItemDefinition* ItemDefinition, int Count, int LoadedAmmo, EFortPickupSourceTypeFlag SourceTypeFlag, EFortPickupSpawnSource SpawnSource, AFortPlayerPawn* Pawn, bool Toss)
 {
-    FFortItemEntry ItemEntry = MakeItemEntry(ItemDefinition, Count, 0);
+    FFortItemEntry* ItemEntry = MakeItemEntry(ItemDefinition, Count, 0);
     return SpawnPickup(Loc, ItemEntry, SourceTypeFlag, SpawnSource, Pawn, -1, Toss, true, true);
 }
 
@@ -186,19 +194,20 @@ void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFort
     }
 }
 
-FFortItemEntry AFortInventory::MakeItemEntry(UFortItemDefinition* ItemDefinition, int32 Count, int32 Level) {
-    FFortItemEntry IE{};
+FFortItemEntry* AFortInventory::MakeItemEntry(UFortItemDefinition* ItemDefinition, int32 Count, int32 Level) {
+    int32 FortItemEntrySize = StaticClassImpl("FortItemEntry")->GetSize();
+    FFortItemEntry* IE = (FFortItemEntry*)VirtualAlloc(0, FortItemEntrySize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    
+    IE->MostRecentArrayReplicationKey = -1;
+    IE->ReplicationID = -1;
+    IE->ReplicationKey = -1;
 
-    IE.MostRecentArrayReplicationKey = -1;
-    IE.ReplicationID = -1;
-    IE.ReplicationKey = -1;
-
-    IE.SetItemDefinition(ItemDefinition);
-    IE.SetCount(Count);
-    IE.SetLoadedAmmo(/*ItemDefinition->IsA<UFortWeaponItemDefinition>() ? GetStats((UFortWeaponItemDefinition*)ItemDefinition)->ClipSize : */0);
-    IE.SetDurability(1.f);
-    IE.SetGameplayAbilitySpecHandle(FGameplayAbilitySpecHandle(-1));
-    IE.SetLevel(Level);
+    IE->SetItemDefinition(ItemDefinition);
+    IE->SetCount(Count);
+    IE->SetLoadedAmmo(/*ItemDefinition->IsA<UFortWeaponItemDefinition>() ? GetStats((UFortWeaponItemDefinition*)ItemDefinition)->ClipSize : */0);
+    IE->SetDurability(1.f);
+    IE->SetGameplayAbilitySpecHandle(FGameplayAbilitySpecHandle(-1));
+    IE->SetLevel(Level);
 
     return IE;
 }

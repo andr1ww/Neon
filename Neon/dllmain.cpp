@@ -145,7 +145,7 @@ void Main()
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerEditBuildingActor", AFortPlayerControllerAthena::ServerEditBuildingActor);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerEndEditingBuildingActor", AFortPlayerControllerAthena::ServerEndEditingBuildingActor);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerRepairBuildingActor", AFortPlayerControllerAthena::ServerRepairBuildingActor);
-	//if (Finder->OnPossessedPawnDied()) Runtime::Hook(Finder->OnPossessedPawnDied(), AFortAthenaAIBotController::OnPossessedPawnDied, (void**)&AFortAthenaAIBotController::OnPossessedPawnDiedOG); 
+	if (Finder->OnPossessedPawnDied()) Runtime::Hook(Finder->OnPossessedPawnDied(), AFortAthenaAIBotController::OnPossessedPawnDied, (void**)&AFortAthenaAIBotController::OnPossessedPawnDiedOG); 
 	int InternalServerTryActivateAbilityIndex = 0;
 
 	if (Engine_Version > 4.20)

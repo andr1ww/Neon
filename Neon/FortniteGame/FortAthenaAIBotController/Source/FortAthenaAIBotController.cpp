@@ -74,8 +74,6 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 
 void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController* Controller, AActor* DamagedActor, float Damage, AFortPlayerControllerAthena* InstigatedBy, AActor* DamageCauser, FVector HitLocation, UPrimitiveComponent* HitComp, FName Bone, FVector Momentum)
 {
-	OnPossessedPawnDiedOG(Controller, DamagedActor, Damage, InstigatedBy, DamageCauser, HitLocation, HitComp, Bone, Momentum);
-	
     if (Controller->GetPawn())
     {
         AFortInventory* PCInventory = Controller->GetInventory();
@@ -123,4 +121,6 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
     }
 
 	FBotInventory::RemoveInventory(Controller);
+
+	return OnPossessedPawnDiedOG(Controller, DamagedActor, Damage, InstigatedBy, DamageCauser, HitLocation, HitComp, Bone, Momentum);
 }
