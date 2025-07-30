@@ -26,7 +26,6 @@ public:
     static float EvaluateCurveTableRow(UCurveTable* CurveTable, FName RowName, float InXY,
         const FString& ContextString = FString(), EEvaluateCurveTableResult* OutResult = nullptr)
     {
-        UE_LOG(LogNeon, Log, "EvaluateCurveTableRow");
         static SDK::UFunction* Func = nullptr;
         SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("DataTableFunctionLibrary", "EvaluateCurveTableRow");
 

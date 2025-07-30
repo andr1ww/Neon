@@ -206,7 +206,6 @@ inline FQuat FRotToQuat2(FRotator Rot)
     return RotationQuat;
 }
 
-
 AActor* UGameplayStatics::SpawnActorOG(UClass* Class, FVector Loc, FRotator Rot, AActor* Owner)
 {
     UWorld* World = UWorld::GetWorld();
