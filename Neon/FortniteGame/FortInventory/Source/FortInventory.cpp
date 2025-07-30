@@ -102,15 +102,13 @@ UObject* AFortInventory::GiveItem(AFortAthenaAIBotController* Controller, UFortI
 
 AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry& Entry, EFortPickupSourceTypeFlag SourceTypeFlag, EFortPickupSpawnSource SpawnSource, AFortPlayerPawn* Pawn, int OverrideCount, bool Toss, bool RandomRotation, bool bCombine)
 {
-    if (OverrideCount != -1)
-        printf("Count: %d\n", OverrideCount);
     AFortPickupAthena* NewPickup = UGameplayStatics::SpawnActorOG<AFortPickupAthena>(AFortPickupAthena::StaticClass(), Loc);
     if (NewPickup != nullptr && Entry.GetItemDefinition() != nullptr)
     {
         if (Finder->SetupPickup())
         {
             UE_LOG(LogNeon, Log, "Ok");
-           // ((FVector * (*)(AFortPickup*, FFortItemEntry*, TArray<FFortItemEntry>, bool))(Finder->SetupPickup()))(NewPickup, &Entry, TArray<FFortItemEntry>(), false);
+            ((FVector * (*)(AFortPickup*, FFortItemEntry*, TArray<FFortItemEntry>, bool))(Finder->SetupPickup()))(NewPickup, &Entry, TArray<FFortItemEntry>(), false);
         }
         NewPickup->SetbRandomRotation(RandomRotation);
         NewPickup->GetPrimaryPickupItemEntry().SetItemDefinition(Entry.GetItemDefinition());
