@@ -64,11 +64,6 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                     else if (Tag == "Athena.Faction.Ego") {
                         BotData->GetCharacterCustomization()->GetCustomizationLoadout().SetCharacter(Runtime::StaticLoadObject<UAthenaCharacterItemDefinition>("/Game/Athena/Items/Cosmetics/Characters/CID_NPC_Athena_Commando_M_HenchmanGood.CID_NPC_Athena_Commando_M_HenchmanGood"));
                     }
-
-                    DWORD CustomSquadId = RuntimeBotData.CustomSquadId;
-                    BYTE TrueByte = 1;
-                    BYTE FalseByte = 0;
-                    BotManagerSetup(__int64(BotManager), __int64(Ret), __int64(BotData->GetBehaviorTree()), 0, &CustomSquadId, 0, __int64(BotData->GetStartupInventory()), __int64(BotData->GetBotNameSettings()), 0, &FalseByte, 0, &TrueByte, RuntimeBotData);
                 } else
                 {
                         
@@ -124,6 +119,14 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             }
         }
 
+        if (BotData->GetFName().ToString().ToString().contains("MANG"))
+        {
+            DWORD CustomSquadId = RuntimeBotData.CustomSquadId;
+            BYTE TrueByte = 1;
+            BYTE FalseByte = 0;
+            BotManagerSetup(__int64(BotManager), __int64(Ret), __int64(BotData->GetBehaviorTree()), 0, &CustomSquadId, 0, __int64(BotData->GetStartupInventory()), __int64(BotData->GetBotNameSettings()), 0, &FalseByte, 0, &TrueByte, RuntimeBotData);
+        }
+        
         return Ret;
     }
 }
