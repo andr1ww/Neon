@@ -110,15 +110,14 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 GameMode->SetServerBotManager((UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode));
                 GameMode->GetServerBotManager()->SetCachedGameMode(GameMode);
                 GameMode->GetServerBotManager()->SetCachedGameState(GameState);
-
-                UE_LOG(LogNeon, Log, "Server Bot Manager Spawned: %s", GameMode->GetServerBotManager()->GetFName().ToString().ToString().c_str());
                 
-                FBotMutator::Set(UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({}));
-                GameMode->GetServerBotManager()->SetCachedBotMutator(FBotMutator::Get());
+                auto BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
+                GameMode->GetServerBotManager()->SetCachedBotMutator(BotMutator);
+                BotMutator->Set("FortAthenaMutator", "CachedGameMode", GameMode);
+                BotMutator->Set("FortAthenaMutator", "CachedGameState", GameState);
+                FBotMutator::Set(BotMutator);
                 GameMode->SetServerBotManagerClass(UFortServerBotManagerAthena::StaticClass());
-                FBotMutator::Get()->Set("FortAthenaMutator", "CachedGameMode", GameMode);
-                FBotMutator::Get()->Set("FortAthenaMutator", "CachedGameState", GameState);
-
+                
                 AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
                 GameMode->SetAIDirector(AIDirector);
                 AIDirector->CallFunc<void>("FortAIDirector", "Activate");

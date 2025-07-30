@@ -40,7 +40,7 @@ class AFortAthenaMutator_SpawningPolicyEQS : public AFortAthenaMutator_SpawningP
 class AFortAthenaMutator_Bots : public AFortAthenaMutator_SpawningPolicyEQS
 {
 public:
-    static AFortPlayerPawn* SpawnBot(TSubclassOf<class AFortPlayerPawn> BotPawnClass, const class AActor* InSpawnLocator, const struct FVector& InSpawnLocation, const struct FRotator& InSpawnRotation, const bool bSnapToGround)
+    AFortPlayerPawn* SpawnBot(TSubclassOf<class AFortPlayerPawn> BotPawnClass, const class AActor* InSpawnLocator, const struct FVector& InSpawnLocation, const struct FRotator& InSpawnRotation, const bool bSnapToGround)
     {
         static SDK::UFunction* Func = nullptr;
         SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortAthenaMutator_Bots", "SpawnBot");
@@ -61,7 +61,7 @@ public:
             class AFortPlayerPawn*                  ReturnValue;                                       // 0x0030(0x0008)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
         } FortAthenaMutator_Bots_SpawnBot_Params{ BotPawnClass, InSpawnLocator, InSpawnLocation, InSpawnRotation, bSnapToGround };
     
-        SDK::StaticClassImpl("FortAthenaMutator_Bots")->GetClassDefaultObject()->ProcessEvent(Func, &FortAthenaMutator_Bots_SpawnBot_Params);
+        this->ProcessEvent(Func, &FortAthenaMutator_Bots_SpawnBot_Params);
     
         return FortAthenaMutator_Bots_SpawnBot_Params.ReturnValue;
     }
