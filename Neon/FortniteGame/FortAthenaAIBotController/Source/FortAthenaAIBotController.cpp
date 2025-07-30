@@ -47,7 +47,9 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 					for (int32 i = 0; i < Spec->GetCharacterParts().Num(); i++)
 					{
 						UCustomCharacterPart* Part = Runtime::StaticLoadObject<UCustomCharacterPart>(UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary", "Conv_NameToString", Spec->GetCharacterParts()[i].SoftObjectPtr.ObjectID.AssetPathName).ToString());
-						Pawn->CallFunc<void>("FortPlayerPawn", "ServerChoosePart", Part->GetCharacterPartType(), Part);
+						if (Part) {
+							Pawn->CallFunc<void>("FortPlayerPawn", "ServerChoosePart", Part->GetCharacterPartType(), Part);
+						}
 					}
 				}
 			}
