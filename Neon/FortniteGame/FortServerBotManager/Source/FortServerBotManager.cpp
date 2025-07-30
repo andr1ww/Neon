@@ -95,17 +95,20 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             BYTE FalseByte = 0;
             BotManagerSetup(__int64(BotManager), __int64(Ret), __int64(BotData->GetBehaviorTree()), 0, &CustomSquadId, 0, __int64(BotData->GetStartupInventory()), __int64(BotData->GetBotNameSettings()), 0, &FalseByte, 0, &TrueByte, RuntimeBotData);
             if (!Controller->GetInventory()) {
-                Controller->SetInventory(UGameplayStatics::SpawnActor<AFortInventory>({}, {}, Ret));
+                Controller->SetInventory(UGameplayStatics::SpawnActorTransformOG<AFortInventory>({}, Ret));
             }
 
-            if (BotData->GetStartupInventory())
+            if (Controller->GetInventory())
             {
-                for (int32 i = 0; i < BotData->GetStartupInventory()->GetItems().Num(); i++) {
-                    UFortItemDefinition* ItemDef = BotData->GetStartupInventory()->GetItems()[i];
-                    if (!ItemDef) continue;
-                    UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(Controller, ItemDef, 1, 30, 0);
-                    if (ItemDef->IsA(UFortWeaponItemDefinition::StaticClass())) {
-                        Ret->CallFunc<void>("FortPawn", "EquipWeaponDefinition", Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry(), false);
+                if (BotData->GetStartupInventory())
+                {
+                    for (int32 i = 0; i < BotData->GetStartupInventory()->GetItems().Num(); i++) {
+                        UFortItemDefinition* ItemDef = BotData->GetStartupInventory()->GetItems()[i];
+                        if (!ItemDef) continue;
+                        UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(Controller, ItemDef, 1, 30, 0);
+                        if (ItemDef->IsA(UFortWeaponItemDefinition::StaticClass())) {
+                            Ret->CallFunc<void>("FortPawn", "EquipWeaponDefinition", Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry(), false);
+                        }
                     }
                 }
             }

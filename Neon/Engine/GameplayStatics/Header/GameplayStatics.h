@@ -75,6 +75,23 @@ public:
 	{
 		return (T*)SpawnActor(T::StaticClass(), Transform, Owner);
 	}
+
+	static AActor* SpawnActorTransformOG(UClass* Class, const FTransform& Transform, AActor* Owner)
+	{
+		FActorSpawnParameters addr{};
+		addr.Owner = Owner;
+		addr.bDeferConstruction = false;
+		addr.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		return ((AActor * (*)(UWorld*, UClass*, FTransform const*, FActorSpawnParameters*))(Finder->SpawnActorTransform()))(UWorld::GetWorld(), Class, &Transform, &addr);
+	}
+
+	template <typename T>
+	static T* SpawnActorTransformOG(const FTransform& Transform, AActor* Owner = nullptr)
+	{
+		return (T*)SpawnActorTransformOG(T::StaticClass(), Transform, Owner);
+	}
+
 public:
 	DECLARE_STATIC_CLASS(UGameplayStatics);
 	DECLARE_DEFAULT_OBJECT(UGameplayStatics);
