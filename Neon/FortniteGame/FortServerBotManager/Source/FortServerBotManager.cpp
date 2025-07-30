@@ -51,7 +51,12 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
         }
 
         for (int32 i = 0; i < BotData->GetStartupInventory()->GetItems().Num(); i++) {
-            
+            UFortItemDefinition* ItemDef = BotData->GetStartupInventory()->GetItems()[i];
+			if (!ItemDef) continue;
+            UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(Controller, ItemDef, 1, 30, 0);
+            if (ItemDef->IsA(UFortWeaponItemDefinition::StaticClass())) {
+                Ret->CallFunc<void>("FortPawn", "EquipWeaponDefinition", Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry(), Item->GetItemEntry().GetTrackerGuid(), false);
+            }
         }
 
         return Ret;
