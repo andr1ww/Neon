@@ -61,8 +61,11 @@ class APlayerStart : public ANavigationObjectBase {
 
 };
 
-class AFortPlayerStartWarmup final : public APlayerStart {
-
+class AFortPlayerStartWarmup : public APlayerStart
+{
+public:
+    DECLARE_STATIC_CLASS(AFortPlayerStartWarmup)
+    DECLARE_DEFAULT_OBJECT(AFortPlayerStartWarmup)
 };
 
 struct FAdditionalLevelStreamed final

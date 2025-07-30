@@ -226,8 +226,13 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         auto Pickaxe = NewPlayer->GetCosmeticLoadoutPC().GetPickaxe();
         auto WeaponDef = Pickaxe->GetWeaponDefinition();
         AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 0, 1); 
-    } 
-    
-    AFortAthenaAIBotController::SpawnPlayerBot(90);
+    }
+
+    static bool bSpawnedAI = false;
+    if (!bSpawnedAI)
+    {
+        bSpawnedAI = true;
+        AFortAthenaAIBotController::SpawnPlayerBot(90);
+    }
     return Pawn;
 }
