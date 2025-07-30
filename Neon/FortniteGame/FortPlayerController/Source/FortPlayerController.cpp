@@ -172,8 +172,8 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
     TArray<AActor*> ExistingBuildings;
     char PlacementResultFlag;
     static auto CantBuild = (__int64 (*)(UWorld*, UObject*, FVector, FRotator, bool, TArray<AActor*>*, char*))(Finder->CantBuild());
-    bool bCanBuild = !CantBuild(UWorld::GetWorld(), BuildingClass, CreateBuildingData.GetBuildLoc(), 
-                 CreateBuildingData.GetBuildRot(), CreateBuildingData.bMirrored, 
+    bool bCanBuild = !CantBuild(UWorld::GetWorld(), BuildingClass, CreateBuildingData.BuildLoc, 
+                 CreateBuildingData.BuildRot, CreateBuildingData.bMirrored, 
                  &ExistingBuildings, &PlacementResultFlag);
         
     if (!bCanBuild)
@@ -213,9 +213,9 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
     for (auto* Building : ExistingBuildings) {
         if (Building) Building->CallFunc<void>("Actor", "K2_DestroyActor");
     }
-
-    auto BuildingActor = UGameplayStatics::SpawnActorOG<ABuildingSMActor>(BuildingClass, CreateBuildingData.GetBuildLoc(), 
-                                             CreateBuildingData.GetBuildRot(), PlayerController);
+    
+    auto BuildingActor = UGameplayStatics::SpawnActorOG<ABuildingSMActor>(BuildingClass, CreateBuildingData.BuildLoc, 
+                                             CreateBuildingData.BuildRot, PlayerController);
    
     if (ABuildingSMActor* BuildingSMActor = BuildingActor) {
         BuildingSMActor->SetbPlayerPlaced(true);

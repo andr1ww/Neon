@@ -807,18 +807,12 @@ uint64 UFinder::SpawnActor()
     if (CachedResult != 0)
         return CachedResult;
 
-    if (Engine_Version >= 427)
+    if (Fortnite_Version >= 6.21 && Fortnite_Version <= 15.30)
     {
-        auto stat = Memcury::Scanner::FindStringRef(L"STAT_SpawnActorTime");
-        return CachedResult = FindBytes(stat, { 0x48, 0x8B, 0xC4 }, 3000, 0, true);
-    }
-
-    auto Addr = Memcury::Scanner::FindStringRef(L"SpawnActor failed because no class was specified");
-
-    if (Engine_Version >= 416 && Fortnite_Version <= 3.3)
-        return CachedResult = FindBytes(Addr, { 0x40, 0x55 }, 3000, 0, true);
-
-    return CachedResult = FindBytes(Addr, { 0x4C, 0x8B, 0xDC }, 3000, 0, true);
+        return CachedResult = Memcury::Scanner::FindPattern("40 53 56 57 48 83 EC ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 44 24 ? 0F 28 1D ? ? ? ? 0F 57 D2 48 8B B4 24").Get();
+    } 
+    
+    return CachedResult = 0;
 }
 
 uint64 UFinder::CantBuild()

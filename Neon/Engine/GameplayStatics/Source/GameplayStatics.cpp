@@ -218,14 +218,5 @@ AActor* UGameplayStatics::SpawnActorOG(UClass* Class, FVector Loc, FRotator Rot,
     addr.bDeferConstruction = false;
     addr.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
     
-    FTransform Transform(Loc, FRotToQuat2(Rot), FVector(1.0f, 1.0f, 1.0f));
-    
-    AActor* SpawnedActor = ((AActor * (*)(UWorld*, UClass*, FTransform const*, FActorSpawnParameters*))(Finder->SpawnActor()))(UWorld::GetWorld(), Class, &Transform, &addr);
-    
-    if (SpawnedActor)
-    {
-        SpawnedActor->CallFunc<void>("Actor", "K2_SetActorRotation", Rot, false);
-    }
-
-    return SpawnedActor;
+    return ((AActor * (*)(UWorld*, UClass*, FVector const*, FRotator const*, FActorSpawnParameters*))(Finder->SpawnActor()))(UWorld::GetWorld(), Class, &Loc, &Rot, &addr);
 }
