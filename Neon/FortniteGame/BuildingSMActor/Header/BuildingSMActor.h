@@ -5,6 +5,7 @@
 #include "Engine/DataTable/Header/DataTable.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
+#include "FortniteGame/Common/Header/Tags.h"
 
 class UFortWeaponItemDefinition;
 class AFortPlayerControllerAthena;
@@ -31,13 +32,6 @@ struct FHitResult final
 {
 public:
 	uint8_t Padding[0x88]; // 0xe8 on LWC builds
-};
-
-struct FGameplayTagContainer final
-{
-public:
-    TArray<struct FGameplayTag>                   GameplayTags;                                      // 0x0000(0x0010)(Edit, BlueprintVisible, ZeroConstructor, EditConst, SaveGame, Protected, NativeAccessSpecifierProtected)
-    TArray<struct FGameplayTag>                   ParentTags;                                        // 0x0010(0x0010)(ZeroConstructor, Transient, Protected, NativeAccessSpecifierProtected)
 };
 
 class ABuildingActor : public AActor

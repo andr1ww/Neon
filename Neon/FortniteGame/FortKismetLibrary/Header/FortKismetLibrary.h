@@ -2,6 +2,7 @@
 #include "pch.h"
 
 #include "FortniteGame/BuildingSMActor/Header/BuildingSMActor.h"
+#include "FortniteGame/FortInventory/Header/FortInventory.h"
 
 class UFortResourceItemDefinition : public UFortWorldItemDefinition
 {

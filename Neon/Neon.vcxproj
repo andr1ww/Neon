@@ -163,6 +163,7 @@
     <ClInclude Include="FortniteGame\AbilitySystemComponent\Header\AbilitySystemComponent.h" />
     <ClInclude Include="FortniteGame\BuildingSMActor\Header\BuildingSMActor.h" />
     <ClInclude Include="FortniteGame\Common\Header\ItemDefinition.h" />
+    <ClInclude Include="FortniteGame\Common\Header\Tags.h" />
     <ClInclude Include="FortniteGame\FortAthenaAIBotController\Header\FortAthenaAIBotController.h" />
     <ClInclude Include="FortniteGame\FortAthenaMapInfo\Header\FortAthenaMapInfo.h" />
     <ClInclude Include="FortniteGame\FortGameMode\Header\FortGameMode.h" />

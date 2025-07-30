@@ -55,12 +55,6 @@ public:
     DEFINE_MEMBER(FFortItemEntry, UFortWorldItem, ItemEntry);
 };
 
-class UFortWorldItemDefinition : public UFortItemDefinition
-{
-public:
-    DEFINE_MEMBER(FScalableFloat, UFortWorldItemDefinition, MaxStackSize)
-};
-
 class UFortWeaponItemDefinition : public UFortWorldItemDefinition
 {
     

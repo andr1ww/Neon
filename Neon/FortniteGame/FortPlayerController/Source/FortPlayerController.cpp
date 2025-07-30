@@ -349,5 +349,15 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 
     FVector DeathLocation = VictimPawn ? VictimPawn->GetActorLocation() : FVector{0,0,0};
 
-    
+    if (!KillerPlayerState && VictimPawn)
+        KillerPlayerState = ((AFortPlayerControllerAthena*)VictimPawn->GetController())->GetPlayerState();
+
+    PlayerState->Set("FortPlayerState", "PawnDeathLocation", DeathLocation);
+    PlayerState->GetDeathInfo().SetbDBNO(false);
+    PlayerState->GetDeathInfo().SetDeathLocation(DeathLocation);
+    PlayerState->GetDeathInfo().SetDeathTags(DeathReport.Tags);
+    PlayerState->GetDeathInfo().SetDeathCause(PlayerState->CallFunc<EDeathCause>("FortPlayerStateAthena", "ToDeathCause", DeathReport.Tags, false));
+    PlayerState->GetDeathInfo().SetDowner((AActor*)KillerPlayerState);
+    PlayerState->GetDeathInfo().SetFinisherOrDowner((AActor*)KillerPlayerState);
+    EDeathCause CachedDeathCause = PlayerState->GetDeathInfo().GetDeathCause();
 }

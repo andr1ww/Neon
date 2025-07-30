@@ -49,3 +49,9 @@ public:
         return Parms.ReturnValue;
     }
 };
+
+class UFortWorldItemDefinition : public UFortItemDefinition
+{
+public:
+    DEFINE_MEMBER(FScalableFloat, UFortWorldItemDefinition, MaxStackSize)
+};
