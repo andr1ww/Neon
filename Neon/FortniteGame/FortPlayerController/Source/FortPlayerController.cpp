@@ -280,6 +280,7 @@ void AFortPlayerControllerAthena::ServerEditBuildingActor(AFortPlayerControllerA
     Stack.StepCompiledIn(&NewClass);
     Stack.StepCompiledIn(&RotationIterations);
     Stack.StepCompiledIn(&bMirrored);
+    Stack.IncrementCode();
 
     if (!PlayerController || !BuildingSMActor || !BuildingSMActor || !BuildingSMActor->IsA<ABuildingSMActor>() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
 
@@ -328,7 +329,8 @@ void AFortPlayerControllerAthena::ServerEndEditingBuildingActor(AFortPlayerContr
         EditingTool->CallFunc<void>("FortWeap_EditingTool", "OnRep_EditActor");
     }
 
-    // TODO: BuildingsEdited++ i cba rn
+    PlayerController->Set("FortPlayerControllerAthena", "BuildingsEdited", 
+    PlayerController->Get<int32>("FortPlayerControllerAthena", "BuildingsEdited") + 1);
 }
 
 void AFortPlayerControllerAthena::ServerRepairBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)

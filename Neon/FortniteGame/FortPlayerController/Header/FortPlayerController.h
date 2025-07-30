@@ -117,6 +117,9 @@ enum class EFortTeam : uint8
 
 class UFortEditToolItemDefinition : public UObject
 {
+public:
+    DECLARE_STATIC_CLASS(UFortEditToolItemDefinition)
+    DECLARE_DEFAULT_OBJECT(UFortEditToolItemDefinition)
 };
 
 class AFortWeap_EditingTool : public UObject
