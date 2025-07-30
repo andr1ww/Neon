@@ -9,7 +9,7 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 	static std::vector<UAthenaCharacterItemDefinition*> Characters = std::vector<UAthenaCharacterItemDefinition*>();
 	static std::vector<UAthenaPickaxeItemDefinition*> Pickaxes = std::vector<UAthenaPickaxeItemDefinition*>();
 
-	if (Characters.Num() == 0)
+	if (Characters.size() == 0)
 	{
 		Characters = Runtime::GetObjectsOfClass<UAthenaCharacterItemDefinition>();
 		Pickaxes = Runtime::GetObjectsOfClass<UAthenaPickaxeItemDefinition>();
@@ -37,9 +37,9 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		AFortPlayerPawn* Pawn = GameMode->GetServerBotManager()->GetCachedBotMutator()->SpawnBot(BotBP, BotSpawn, BotSpawn->GetActorLocation(), {}, false);
 		AFortAthenaAIBotController* PC = (AFortAthenaAIBotController*)Pawn->GetController();
 
-		if (Characters.Num() != 0)
+		if (Characters.size() != 0)
 		{
-			UAthenaCharacterItemDefinition* CID = Characters[rand() % (Characters.Num() - 1)];
+			UAthenaCharacterItemDefinition* CID = Characters[rand() % (Characters.size() - 1)];
 			/*	if (CID) {
 			UFortHeroSpecialization* Spec = Runtime::StaticLoadObject<UFortHeroSpecialization>(UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary", "Conv_NameToString", CID->GetHeroDefinition()->GetSpecializations()[i].SoftObjectPtr.ObjectID.AssetPathName).ToString());
 				if (Spec)
@@ -60,7 +60,7 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		}
 
 		static UFortWeaponMeleeItemDefinition* PickDef = Runtime::StaticLoadObject<UFortWeaponMeleeItemDefinition>("/Game/Athena/Items/Weapons/WID_Harvest_Pickaxe_Athena_C_T01.WID_Harvest_Pickaxe_Athena_C_T01");
-		if (Pickaxes.Num() != 0) {
+		if (Pickaxes.size() != 0) {
 	//		PickDef = (UFortWeaponMeleeItemDefinition*)Pickaxes[rand() % (Pickaxes.Num() - 1)];
 		}
 		if (PickDef) {
