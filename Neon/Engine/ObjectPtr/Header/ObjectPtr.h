@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 
+#include "Engine/Kismet/Header/Kismet.h"
 #include "Neon/Runtime/Runtime.h"
 
 class FWeakObjectPtr
@@ -95,9 +96,9 @@ public:
 
         if (bTryToLoad)
         {
-            return Runtime::StaticLoadObject<T>(SoftObjectPtr.ObjectID.AssetPathName.ToString(), ClassToLoad);
+            return Runtime::StaticLoadObjectOnly<T>(UKismetStringLibrary::Conv_NameToString(SoftObjectPtr.ObjectID.AssetPathName).ToString());
         }
 
-        return Runtime::StaticFindObject<T>(SoftObjectPtr.ObjectID.AssetPathName.ToString());
+        return Runtime::StaticFindObject<T>(SoftObjectPtr.ObjectID.AssetPathName.ToString().ToString());
     }
 };

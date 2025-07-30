@@ -271,10 +271,21 @@ namespace Runtime
 inline T* StaticFindObject(std::string ObjectPath, UClass* Class = UObject::StaticClass()) {
 		return (T*)Funcs::StaticFindObject(Class, nullptr, std::wstring(ObjectPath.begin(), ObjectPath.end()).c_str(), false);
 	}
-
+	
 	template<typename T>
 T* StaticLoadObject(std::string name) {
 		T* Object = StaticFindObject<T>(name);
+		if (!Object) {
+			auto Name = std::wstring(name.begin(), name.end()).c_str();
+			UObject* BaseObject = Funcs::StaticLoadObject(T::StaticClass(), nullptr, Name, nullptr, 0, nullptr, false);
+			Object = static_cast<T*>(BaseObject);
+		}
+		return Object;
+	}
+
+	template<typename T>
+T* StaticLoadObjectOnly(std::string name) {
+		T* Object = nullptr;
 		if (!Object) {
 			auto Name = std::wstring(name.begin(), name.end()).c_str();
 			UObject* BaseObject = Funcs::StaticLoadObject(T::StaticClass(), nullptr, Name, nullptr, 0, nullptr, false);

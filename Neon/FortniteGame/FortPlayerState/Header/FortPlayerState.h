@@ -28,12 +28,18 @@ class UFortHeroSpecialization : public UObject
 {
 public:
     DEFINE_MEMBER(TArray<TSoftObjectPtr<UCustomCharacterPart>>, UFortHeroSpecialization, CharacterParts);
+public:
+	DECLARE_STATIC_CLASS(UFortHeroSpecialization)
+	DECLARE_DEFAULT_OBJECT(UFortHeroSpecialization)
 };
 
 class UFortHeroType : public UObject
 {
 public:
     DEFINE_MEMBER(TArray<TSoftObjectPtr<UFortHeroSpecialization>>, UFortHeroType, Specializations);
+public:
+	DECLARE_STATIC_CLASS(UFortHeroType)
+	DECLARE_DEFAULT_OBJECT(UFortHeroType)
 };
 
 class AFortPlayerStateZone : public UObject
