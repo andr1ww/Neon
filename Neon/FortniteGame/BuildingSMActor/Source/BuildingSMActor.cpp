@@ -15,7 +15,6 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
                                       AActor* DamageCauser,
                                       FGameplayEffectContextHandle Context)
 {
-    UE_LOG(LogNeon, Log, "Called");
     AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
     
     if (!BuildingActor || !Controller || !GameState)
@@ -59,7 +58,6 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     UCurveTable* ResourceCurveTable = nullptr;
     
     if (BuildingActor->GetBuildingResourceAmountOverride().RowName.GetComparisonIndex() > 0) {
-        UE_LOG(LogNeon, Log, "GetBuildingResourceAmountOverride");
         if (BuildingActor->GetBuildingResourceAmountOverride().CurveTable) {
             ResourceCurveTable = BuildingActor->GetBuildingResourceAmountOverride().CurveTable;
         } else {
@@ -77,9 +75,7 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
 
         ResourceAmount = round(RC);
     }
-
-    UE_LOG(LogNeon, Log, "ResourceAmount: %d", ResourceAmount);
-
+    
     if (ResourceAmount <= 0)
     {
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
@@ -114,7 +110,6 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     if (InventoryEntry != nullptr) {
         int32 NewCount = InventoryEntry->GetCount() + ResourceAmount;
         InventoryEntry->SetCount(NewCount);
-        UE_LOG(LogNeon, Log, "NewCount: %d", NewCount);
     
         if (NewCount > MaxStackSize) {
             int32 OverflowAmount = NewCount - MaxStackSize;
@@ -148,7 +143,6 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
             ResourceAmount = MaxStackSize;
         }
 
-        UE_LOG(LogNeon, Log, "Giving");
         AFortInventory::GiveItem(Controller, ResourceDefinition, ResourceAmount, 0, 0);
     }
         
