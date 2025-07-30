@@ -328,6 +328,9 @@ template <typename InElementType> class TArray {
         friend class FString;
 
       public:
+        /**
+         * Constructor, initializes element number counters.
+         */
         FORCEINLINE TArray() : Data( nullptr ), ArrayNum( 0 ), ArrayMax( 0 ) {}
 
       protected:
@@ -344,6 +347,12 @@ template <typename InElementType> class TArray {
 
         FORCEINLINE ElementType &GetFirstData() { return Data[0]; }
 
+        /**
+         * Helper function for returning a typed pointer to the first array
+         * entry.
+         *
+         * @returns Pointer to first array entry or nullptr if ArrayMax == 0.
+         */
         FORCEINLINE const ElementType &GetFirstData() const {
                 return (const ElementType &)Data[0];
         }
@@ -354,31 +363,88 @@ template <typename InElementType> class TArray {
                 return (const ElementType &)Data[Index];
         }
 
+        /**
+         * Helper function returning the size of the inner type.
+         *
+         * @returns Size in bytes of array type.
+         */
         FORCEINLINE uint32 GetTypeSize() const { return sizeof( ElementType ); }
 
+        /**
+         * Returns the amount of slack in this array in elements.
+         *
+         * @see Num, Shrink
+         */
         FORCEINLINE int32 GetSlack() const { return ArrayMax - ArrayNum; }
 
+        /**
+         * Tests if index is valid, i.e. greater than or equal to zero, and less
+         * than the number of elements in the array.
+         *
+         * @param Index Index to test.
+         * @returns True if index is valid. False otherwise.
+         */
         FORCEINLINE bool IsValidIndex( int32 Index ) const {
                 return Index >= 0 && Index < ArrayNum;
         }
 
+        /**
+         * Returns number of elements in array.
+         *
+         * @returns Number of elements in array.
+         * @see GetSlack
+         */
         FORCEINLINE int32 Num() const { return ArrayNum; }
 
+        /**
+         * Returns maximum number of elements in array.
+         *
+         * @returns Maximum number of elements in array.
+         * @see GetSlack
+         */
         FORCEINLINE int32 Max() const { return ArrayMax; }
 
+        /**
+         * Array bracket operator. Returns reference to element at give index.
+         *
+         * @returns Reference to indexed element.
+         */
         FORCEINLINE ElementType &operator[]( int32 Index ) {
                 return GetData( Index );
         }
 
+        /**
+         * Array bracket operator. Returns reference to element at give index.
+         *
+         * Const version of the above.
+         *
+         * @returns Reference to indexed element.
+         */
         FORCEINLINE const ElementType &operator[]( int32 Index ) const {
                 return GetData( Index );
         }
+
+        /**
+         * Finds element within the array.
+         *
+         * @param Item Item to look for.
+         * @param Index Will contain the found index.
+         * @returns True if found. False otherwise.
+         * @see FindLast, FindLastByPredicate
+         */
 
         FORCEINLINE bool Find( const ElementType &Item, int32 Index ) const {
                 Index = this->Find( Item );
                 return Index != -1;
         }
 
+        /**
+         * Finds element within the array.
+         *
+         * @param Item Item to look for.
+         * @returns Index of the found element. INDEX_NONE otherwise.
+         * @see FindLast, FindLastByPredicate
+         */
         int32 Find( const ElementType &Item ) const {
                 for ( int i = 0; i < ArrayNum; i++ ) {
                         if ( Data[i] == Item ) {
@@ -416,85 +482,68 @@ template <typename InElementType> class TArray {
         }
 
         FORCEINLINE void ResizeGrow(int32 ElementSize = sizeof(ElementType)) {
-            int32 newCapacity;
-            if (ArrayMax == 0) {
-                newCapacity = 4;
-            } else {
-                newCapacity = ArrayMax + ArrayMax / 2 + 8;
-            }
-            
-            Data = (ElementType*)FMemory::Realloc(Data, newCapacity * ElementSize, 0);
-            if (Data) {
-                ArrayMax = newCapacity;
-            }
+            Data = (ElementType*)FMemory::Realloc(Data, (ArrayMax = 1 + ArrayNum) * ElementSize, 0);
         }
 
-        FORCEINLINE int32 AddUninitialized(int32 Count = 1, int32 ElementSize = sizeof(ElementType)) {
-            if (Count <= 0) {
-                return ArrayNum;
-            }
-            
-            if ((ArrayNum + Count) > ArrayMax) {
-                int32 MinCapacity = ArrayNum + Count;
-                while (ArrayMax < MinCapacity) {
+        FORCEINLINE int32 AddUnitalized(int32 Count = 1, int32 ElementSize = sizeof(ElementType)) {
+            if (Count >= 0) {
+                if ((ArrayNum + Count) > ArrayMax) {
                     ResizeGrow(ElementSize);
                 }
+
+                return ArrayNum;
             }
-            
-            int32 OldNum = ArrayNum;
-            ArrayNum += Count;
-            return OldNum;
         }
 
-        FORCEINLINE int32 Emplace(const InElementType& Item, int32 ElementSize = sizeof(ElementType)) {
-            const int32 Index = AddUninitialized(1, ElementSize);
-            
-            if constexpr (std::is_trivially_copyable_v<ElementType>) {
-                memcpy_s(
-                    (void*)((uintptr_t)Data + (Index * ElementSize)),
-                    ElementSize, 
-                    (const void*)&Item, 
-                    ElementSize
-                );
-            } else {
-                new((void*)((uintptr_t)Data + (Index * ElementSize))) ElementType(Item);
-            }
-            
-            return Index;
+        FORCEINLINE int32 Emplace(InElementType& Item,
+            int32 ElementSize = sizeof(ElementType)) {
+            const int32 Index = AddUnitalized(1, ElementSize);
+            memcpy_s((InElementType*)(__int64(Data) +
+                (ArrayNum * ElementSize)),
+                ElementSize, (void*)&Item, ElementSize);
+            ArrayNum++;
+
+            return ArrayNum -1;
         }
 
-        FORCEINLINE int32 Emplace(InElementType&& Item, int32 ElementSize = sizeof(ElementType)) {
-            const int32 Index = AddUninitialized(1, ElementSize);
-            
-            if constexpr (std::is_trivially_copyable_v<ElementType>) {
-                memcpy_s(
-                    (void*)((uintptr_t)Data + (Index * ElementSize)),
-                    ElementSize, 
-                    (const void*)&Item, 
-                    ElementSize
-                );
-            } else {
-                new((void*)((uintptr_t)Data + (Index * ElementSize))) ElementType(std::move(Item));
-            }
-            
-            return Index;
+        FORCEINLINE int32 Emplace(const InElementType& Item,
+            int32 ElementSize = sizeof(ElementType)) {
+            const int32 Index = AddUnitalized(1, ElementSize);
+            memcpy_s((InElementType*)(__int64(Data) +
+                (ArrayNum * ElementSize)),
+                ElementSize, (void*)&Item, ElementSize);
+            ArrayNum++;
+
+            return ArrayNum - 1;
         }
 
-        FORCEINLINE ElementType& Emplace_GetRef(const InElementType& Item, int32 ElementSize = sizeof(ElementType)) {
-            const int32 Index = Emplace(Item, ElementSize);
-            return Data[Index];
+        FORCEINLINE ElementType&
+            Emplace_GetRef(InElementType& Item,
+                int32 ElementSize = sizeof(ElementType)) {
+            const int32 Index = AddUnitalized(1, ElementSize);
+            memcpy_s((InElementType*)(__int64(Data) +
+                (ArrayNum * ElementSize)),
+                ElementSize, (void*)&Item, ElementSize);
+            return Data[ArrayNum - 1];
         }
 
-        FORCEINLINE int32 Add(const ElementType& Item, int32 ElementSize = sizeof(ElementType)) {
-            return Emplace(Item, ElementSize);
+        FORCEINLINE int32 Add( InElementType &Item,
+                               int32 ElementSize = sizeof( ElementType ) ) {
+                if ( &Item )
+                        return Emplace( Item, ElementSize );
         }
 
-        FORCEINLINE int32 Add(InElementType& Item, int32 ElementSize = sizeof(ElementType)) {
-            return Emplace(Item, ElementSize);
+        FORCEINLINE int32 Add( const ElementType &Item, int32 ElementSize = sizeof(ElementType) ) {
+                if ( &Item )
+                        return Emplace( Item,ElementSize );
         }
 
-        FORCEINLINE ElementType& Add_GetRef(const ElementType& Item, int32 ElementSize = sizeof(ElementType)) {
-            return Emplace_GetRef(Item, ElementSize);
+        FORCEINLINE ElementType &
+        Add_GetRef( ElementType &Item,
+                    int32 ElementSize = sizeof( ElementType ) ) {
+                if ( &Item ) {
+                        return Emplace_GetRef( Item,ElementSize );
+                }
         }
 
         inline bool Remove( int32 Index ) {
@@ -538,8 +587,18 @@ template <typename InElementType> class TArray {
                                           SizeType>
             TConstIterator;
 
+        /**
+         * Creates an iterator for the contents of this array
+         *
+         * @returns The iterator.
+         */
         TIterator CreateIterator() { return TIterator( *this ); }
 
+        /**
+         * Creates a const iterator for the contents of this array
+         *
+         * @returns The const iterator.
+         */
         TConstIterator CreateConstIterator() const {
                 return TConstIterator( *this );
         }

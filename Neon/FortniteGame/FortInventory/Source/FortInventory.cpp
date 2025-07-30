@@ -90,7 +90,7 @@ UObject* AFortInventory::GiveItem(AFortAthenaAIBotController* Controller, UFortI
         if (ReplicatedEntriesOffsetPtr.Num() > 0 && ItemInstancesOffsetPtr.Num() > 0)
         {
             static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
-            
+
             if (BP) ReplicatedEntriesOffsetPtr.Add(ItemEntry, StructSize);
             if (BP) ItemInstancesOffsetPtr.Add(BP);
             PCInventory->Update((AFortPlayerControllerAthena*)Controller, &ItemEntry);

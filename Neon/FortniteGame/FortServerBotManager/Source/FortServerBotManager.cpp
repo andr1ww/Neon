@@ -95,7 +95,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             BYTE FalseByte = 0;
             BotManagerSetup(__int64(BotManager), __int64(Ret), __int64(BotData->GetBehaviorTree()), 0, &CustomSquadId, 0, __int64(BotData->GetStartupInventory()), __int64(BotData->GetBotNameSettings()), 0, &FalseByte, 0, &TrueByte, RuntimeBotData);
             if (!Controller->GetInventory()) {
-                Controller->SetInventory(UGameplayStatics::SpawnActor<AFortInventory>({}, {}, Ret));
+                Controller->SetInventory(UGameplayStatics::SpawnActorTransformOG<AFortInventory>({}, Ret));
             }
 
             if (Controller->GetInventory())
@@ -107,7 +107,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                         if (!ItemDef) continue;
                         UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(Controller, ItemDef, 1, 30, 0);
                         if (ItemDef->IsA(UFortWeaponItemDefinition::StaticClass()) && Item) {
-                           Ret->CallFunc<void>("FortPawn", "EquipWeaponDefinition", Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry(), false);
+//                            Ret->CallFunc<void>("FortPawn", "EquipWeaponDefinition", Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry(), false);
                         }
                     }
                 }
