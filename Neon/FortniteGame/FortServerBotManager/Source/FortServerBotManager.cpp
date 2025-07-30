@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "../Header/FortServerBotManager.h"
-
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "Engine/Kismet/Header/Kismet.h"
 
@@ -18,10 +17,16 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
     static void (*BotManagerSetup)(__int64 BotManaager, __int64 Pawn, __int64 BehaviorTree, __int64 a4, DWORD* SkillLevel, __int64 idk, __int64 StartupInventory, __int64 BotNameSettings, __int64 idk_1, BYTE* CanRespawnOnDeath, unsigned __int8 BitFieldDataThing, BYTE* CustomSquadId, FFortAthenaAIBotRunTimeCustomizationData InRuntimeBotData) = decltype(BotManagerSetup)(Finder->BotManagerSetup());
    
     AActor *SpawnLocator = UGameplayStatics::SpawnActor<ADefaultPawn>(SpawnLoc, SpawnRot);
-    AFortPlayerPawn* Ret = BotManager->GetCachedBotMutator()->SpawnBot(BotData->GetPawnClass(), SpawnLocator, SpawnLoc, SpawnRot, true); /*SpawnBotOG(BotManager, SpawnLoc, SpawnRot, BotData, RuntimeBotData) */;
+    AFortPlayerPawn* Ret = BotManager->GetCachedBotMutator()->SpawnBot(BotData->GetPawnClass(), SpawnLocator, SpawnLoc, SpawnRot, true);
+    
     if (Ret)
     {
         AFortAthenaAIBotController* Controller = (AFortAthenaAIBotController*)Ret->GetController();
+
+        if (BotData->GetStartupInventory())
+        {
+            BotStartupInventoryMap[Controller] = BotData->GetStartupInventory();
+        }
 
         if (BotData->GetCharacterCustomization()) {
             if (&BotData->GetCharacterCustomization()->GetCustomizationLoadout()) {
@@ -43,7 +48,6 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                     }
                 } else
                 {
-                    
                     if (!Controller->GetInventory()) {
                         Controller->SetInventory(UGameplayStatics::SpawnActor<AFortInventory>({}, {}, Ret));
                     }
@@ -61,8 +65,6 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
     
                         AFortInventory::GiveItem(Controller, Item->GetItem(), Item->GetCount(), 1, 1);
                     }
-
-             //       AFortInventory::GiveItem(Controller, RandomPickaxe->GetWeaponDefinition(), 1, 0, 1); 
                 }
 
                 Controller->Set("FortAthenaAIBotController", "CosmeticLoadoutBC", BotData->GetCharacterCustomization()->GetCustomizationLoadout());

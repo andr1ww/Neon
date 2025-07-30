@@ -74,27 +74,59 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 
 void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController* Controller, AActor* DamagedActor, float Damage, AFortPlayerControllerAthena* InstigatedBy, AActor* DamageCauser, FVector HitLocation, UPrimitiveComponent* HitComp, FName Bone, FVector Momentum)
 {
-	if (Controller->GetPawn())
+    if (Controller->GetPawn())
+    {
+        AFortInventory* PCInventory = Controller->GetInventory();
+        
+        if (PCInventory != nullptr)
+        {
+            FFortItemList& Inventory = PCInventory->GetInventory();
+            TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
+            for (int32 i = 0; i < ReplicatedEntriesOffsetPtr.Num(); ++i)
+            {
+                AFortInventory::SpawnPickup(
+                    Controller->GetActorLocation(), 
+                    ReplicatedEntriesOffsetPtr[i].GetItemDefinition(), 
+                    ReplicatedEntriesOffsetPtr[i].GetCount(), 
+                    0,
+                    EFortPickupSourceTypeFlag::Tossed, 
+                    EFortPickupSpawnSource::Unset,
+                    InstigatedBy->GetMyFortPawn()
+                );
+            }
+        }
+        else
+        {
+            auto it = BotStartupInventoryMap.find(Controller);
+            if (it != BotStartupInventoryMap.end() && it->second != nullptr)
+            {
+                UFortAthenaAIBotInventoryItems* StartupInventory = it->second;
+                
+                for (int32 i = 0; i < StartupInventory->GetItems().Num(); i++) 
+                {
+                    UFortItemDefinition* ItemDef = StartupInventory->GetItems()[i];
+                    if (ItemDef)
+                    {
+                        AFortInventory::SpawnPickup(
+                            Controller->GetActorLocation(), 
+                            ItemDef, 
+                            1, 
+                            30, 
+                            EFortPickupSourceTypeFlag::Tossed, 
+                            EFortPickupSpawnSource::Unset,
+                            InstigatedBy->GetMyFortPawn()
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+	auto it = BotStartupInventoryMap.find(Controller);
+	if (it != BotStartupInventoryMap.end())
 	{
-		AFortInventory* PCInventory = Controller->GetInventory();
-		if (PCInventory != nullptr)
-		{
-			FFortItemList& Inventory = PCInventory->GetInventory();
-			TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
-			for (int32 i = 0; i < ReplicatedEntriesOffsetPtr.Num(); ++i)
-			{
-				AFortInventory::SpawnPickup(
-					Controller->GetActorLocation(), 
-					ReplicatedEntriesOffsetPtr[i].GetItemDefinition(), 
-					ReplicatedEntriesOffsetPtr[i].GetCount(), 
-					0,
-					EFortPickupSourceTypeFlag::Tossed, 
-					EFortPickupSpawnSource::Unset,
-					InstigatedBy->GetMyFortPawn()
-				);
-			}
-		}
+		BotStartupInventoryMap.erase(it);
 	}
 
-	return OnPossessedPawnDiedOG(Controller, DamagedActor, Damage, InstigatedBy, DamageCauser, HitLocation, HitComp, Bone, Momentum);
+    return OnPossessedPawnDiedOG(Controller, DamagedActor, Damage, InstigatedBy, DamageCauser, HitLocation, HitComp, Bone, Momentum);
 }

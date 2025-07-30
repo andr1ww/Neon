@@ -99,6 +99,8 @@ public:
     DEFINE_PTR(UFortBotNameSettings, UFortAthenaAIBotCustomizationData, BotNameSettings);   
 };
 
+static std::map<AFortAthenaAIBotController*, UFortAthenaAIBotInventoryItems*> BotStartupInventoryMap;
+
 class UFortServerBotManagerAthena : public UObject
 {
 public:
