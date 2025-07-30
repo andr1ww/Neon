@@ -874,3 +874,27 @@ uint64 UFinder::BotManagerSetup()
 
     return CachedResult = StringRef.Get() ? FindBytes(StringRef, { 0x40, 0x55 }, 1000, 0, true) : 0;
 }
+
+uint64 UFinder::SpawnBotRet()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+
+    if (Fortnite_Version == 12.61)
+    {
+        return CachedResult = IMAGEBASE + 0x1aaa8df;
+    }
+    
+    auto strRef = Memcury::Scanner::FindStringRef(L"Unable to create UFortAthenaAIBotCustomizationData object. BotClass = %s", true, 0, Fortnite_Version >= 19.00).Get();
+
+    for (int i = 0; i < 1000; i++)
+    {
+        if ((uint8_t)(strRef + i) == 0x48 && (uint8_t)(strRef + i + 1) == 0x8b && (uint8_t)(strRef + i + 2) == 0xd8)
+        {
+            return CachedResult = strRef + i;
+        }
+    }
+
+    return 0;
+}

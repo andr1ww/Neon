@@ -108,6 +108,8 @@ public:
     uint64 ReplaceBuildingActor();
 
     uint64 BotManagerSetup();
+
+    uint64 SpawnBotRet();
 };
 
 inline UFinder* Finder = new UFinder();

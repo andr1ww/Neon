@@ -6,6 +6,15 @@
 
 AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthena* BotManager, FVector SpawnLoc, FRotator SpawnRot, UFortAthenaAIBotCustomizationData* BotData, FFortAthenaAIBotRunTimeCustomizationData& RuntimeBotData)
 {
+    if (Fortnite_Version == 13.40 || Fortnite_Version == 12.41)
+    {
+        if (__int64(_ReturnAddress()) == Finder->SpawnBotRet())
+            return SpawnBotOG(BotManager, SpawnLoc, SpawnRot, BotData, RuntimeBotData);
+    } else if (__int64(_ReturnAddress()) - IMAGEBASE == 0x1aaa8df)
+    {
+        return SpawnBotOG(BotManager, SpawnLoc, SpawnRot, BotData, RuntimeBotData);
+    }
+    
     static TArray<UAthenaCharacterItemDefinition*> Characters = TArray<UAthenaCharacterItemDefinition*>();
     static TArray<UAthenaPickaxeItemDefinition*> Pickaxes = TArray<UAthenaPickaxeItemDefinition*>();
     UAthenaCharacterItemDefinition* RandomCharacter = nullptr;
@@ -24,8 +33,9 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
     }
 
     static void (*BotManagerSetup)(__int64 BotManaager, __int64 Pawn, __int64 BehaviorTree, __int64 a4, DWORD* SkillLevel, __int64 idk, __int64 StartupInventory, __int64 BotNameSettings, __int64 idk_1, BYTE* CanRespawnOnDeath, unsigned __int8 BitFieldDataThing, BYTE* CustomSquadId, FFortAthenaAIBotRunTimeCustomizationData InRuntimeBotData) = decltype(BotManagerSetup)(Finder->BotManagerSetup());
-    
-    AFortPlayerPawn* Ret = SpawnBotOG(BotManager, SpawnLoc, SpawnRot, BotData, RuntimeBotData);
+   
+    AActor *SpawnLocator = UGameplayStatics::SpawnActor<ADefaultPawn>(SpawnLoc, SpawnRot);
+    AFortPlayerPawn* Ret = BotManager->GetCachedBotMutator()->SpawnBot(BotData->GetPawnClass(), SpawnLocator, SpawnLoc, SpawnRot, true); /*SpawnBotOG(BotManager, SpawnLoc, SpawnRot, BotData, RuntimeBotData) */;
     if (Ret)
     {
         AFortAthenaAIBotController* Controller = (AFortAthenaAIBotController*)Ret->GetController();
