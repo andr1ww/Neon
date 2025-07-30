@@ -394,16 +394,22 @@ T* StaticLoadObject(std::string name) {
 TArray<T*> GetObjectsOfClass(UClass* Class = T::StaticClass())
 	{
 		TArray<T*> ArrayOfObjects;
-		for (int i = 0; i < SDK::GUObjectArray.GetAllocatedSize(); i++)
+		for (int i = 0; i < GUObjectArray.GetObjectArrayNum(); i++)
 		{
-			FUObjectItem* Object = SDK::GUObjectArray.IndexToObject(i);
-
-			if (!Object)
+			SDK::FUObjectItem *IndexedObject =
+							 SDK::GUObjectArray.IndexToObject( i );
+			if ( !IndexedObject )
+				continue;
+			UObject *Object = static_cast<UObject*>(IndexedObject->Object);
+			if ( !Object )
 				continue;
 
-			if (Object->Object->GetClass()->IsA(Class))
+			if (Object)
 			{
-				ArrayOfObjects.Add(Cast<T>((UObject*)Object->Object));
+				if (Class == Object->GetClass())
+				{
+					ArrayOfObjects.Add(Cast<T>((UObject*)Object));
+				}
 			}
 		}
 
