@@ -389,4 +389,24 @@ T* StaticLoadObject(std::string name) {
 		Vt[Ind] = Detour;
 		VirtualProtect(Vt + Ind, sizeof(void*), Vo, &Vo);
 	}
+
+	template<typename T>
+TArray<T*> GetObjectsOfClass(UClass* Class = T::StaticClass())
+	{
+		TArray<T*> ArrayOfObjects;
+		for (int i = 0; i < SDK::GUObjectArray.GetAllocatedSize(); i++)
+		{
+			FUObjectItem* Object = SDK::GUObjectArray.IndexToObject(i);
+
+			if (!Object)
+				continue;
+
+			if (Object->Object->GetClass()->IsA(Class))
+			{
+				ArrayOfObjects.Add(Cast<T>((UObject*)Object->Object));
+			}
+		}
+
+		return ArrayOfObjects;
+	}
 }

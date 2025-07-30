@@ -234,5 +234,6 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         bSpawnedAI = true;
         AFortAthenaAIBotController::SpawnPlayerBot(90);
     }
+    
     return Pawn;
 }

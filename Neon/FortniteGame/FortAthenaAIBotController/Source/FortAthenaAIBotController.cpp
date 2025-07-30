@@ -2,11 +2,7 @@
 #include "../Header/FortAthenaAIBotController.h"
 
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
-#include "Engine/Guid/Header/Guid.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
-#include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
-#include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
-#include "Neon/Finder/Header/Finder.h"
 
 void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 	static auto BotBP = Runtime::StaticLoadObject<UClass>("/Game/Athena/AI/Phoebe/BP_PlayerPawn_Athena_Phoebe.BP_PlayerPawn_Athena_Phoebe_C");
@@ -21,8 +17,13 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 
 	auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
 
+	TArray<AActor*> Spawns = PlayerStarts;
+	
 	for (int i = 0; i < Count; i++) {
-		AActor* BotSpawn = PlayerStarts[rand() % (PlayerStarts.Num() - 1)];
+		int RandomIndex = rand() % Spawns.Num();
+		AActor* BotSpawn = Spawns[RandomIndex];
+		Spawns.Remove(RandomIndex);
+		
 		GameMode->GetServerBotManager()->GetCachedBotMutator()->SpawnBot(BotBP, BotSpawn, BotSpawn->GetActorLocation(), {}, false);
 	}
 }
