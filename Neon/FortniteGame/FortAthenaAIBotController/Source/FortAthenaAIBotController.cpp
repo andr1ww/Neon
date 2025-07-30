@@ -41,7 +41,7 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		{
 			UAthenaCharacterItemDefinition* CID = Characters[rand() % (Characters.Num() - 1)];
 			if (CID) {
-				UFortHeroSpecialization* Spec = Runtime::StaticLoadObject<UFortHeroSpecialization>(UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary", "Conv_NameToString", CID->GetHeroDefinition()->GetSpecializations()[i].SoftObjectPtr.ObjectID.AssetPathName).ToString());
+	/*			UFortHeroSpecialization* Spec = Runtime::StaticLoadObject<UFortHeroSpecialization>(UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary", "Conv_NameToString", CID->GetHeroDefinition()->GetSpecializations()[i].SoftObjectPtr.ObjectID.AssetPathName).ToString());
 				if (Spec)
 				{
 					for (int32 i = 0; i < Spec->GetCharacterParts().Num(); i++)
@@ -52,7 +52,7 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 						}
 					}
 				}
-			}
+			} */
 		}
 
 		if (!PC->GetInventory()) {
