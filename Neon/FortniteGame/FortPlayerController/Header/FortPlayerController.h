@@ -14,6 +14,10 @@ class UAthenaCharacterItemDefinition : public UObject
 {
 public:
     DEFINE_PTR(UFortHeroType, UAthenaCharacterItemDefinition, HeroDefinition);
+
+public:
+    DECLARE_STATIC_CLASS(UAthenaCharacterItemDefinition)
+    DECLARE_DEFAULT_OBJECT(UAthenaCharacterItemDefinition)
 };
 
 
@@ -26,6 +30,9 @@ class UAthenaPickaxeItemDefinition : public UObject
 {
 public:
     DEFINE_PTR(UFortWeaponMeleeItemDefinition, UAthenaPickaxeItemDefinition, WeaponDefinition);
+public:
+    DECLARE_STATIC_CLASS(UAthenaPickaxeItemDefinition)
+    DECLARE_DEFAULT_OBJECT(UAthenaPickaxeItemDefinition)
 };
 
 struct FFortAthenaLoadout final 

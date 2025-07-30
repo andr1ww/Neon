@@ -2,6 +2,7 @@
 #include "../Header/FortAthenaAIBotController.h"
 
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
+#include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 
 void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
@@ -24,6 +25,36 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		AActor* BotSpawn = Spawns[RandomIndex];
 		Spawns.Remove(RandomIndex);
 		
-		GameMode->GetServerBotManager()->GetCachedBotMutator()->SpawnBot(BotBP, BotSpawn, BotSpawn->GetActorLocation(), {}, false);
+		AFortPlayerPawn* Pawn = GameMode->GetServerBotManager()->GetCachedBotMutator()->SpawnBot(BotBP, BotSpawn, BotSpawn->GetActorLocation(), {}, false);
+		AFortAthenaAIBotController* PC = (AFortAthenaAIBotController*)Pawn->GetController();
+
+		if (Characters.Num() != 0)
+		{
+			UAthenaCharacterItemDefinition* CID = Characters[rand() % (Characters.Num() - 1)];
+			UFortHeroSpecialization* Spec = Runtime::StaticLoadObject<UFortHeroSpecialization>(UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary", "Conv_NameToString", CID->GetHeroDefinition()->GetSpecializations()[i].SoftObjectPtr.ObjectID.AssetPathName).ToString());
+			if (Spec)
+			{
+				for (int32 i = 0; i < Spec->GetCharacterParts().Num(); i++)
+				{
+					UCustomCharacterPart* Part = Runtime::StaticLoadObject<UCustomCharacterPart>(UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary", "Conv_NameToString", Spec->GetCharacterParts()[i].SoftObjectPtr.ObjectID.AssetPathName).ToString());
+					Pawn->CallFunc<void>("FortPlayerPawn", "ServerChoosePart", Part->GetCharacterPartType(), Part);
+				}
+			}
+		}
+
+		if (!PC->GetInventory()) {
+			PC->SetInventory(UGameplayStatics::SpawnActor<AFortInventory>({}, {}, Pawn));
+		}
+
+		static UFortWeaponMeleeItemDefinition* PickDef = Runtime::StaticLoadObject<UFortWeaponMeleeItemDefinition>("/Game/Athena/Items/Weapons/WID_Harvest_Pickaxe_Athena_C_T01.WID_Harvest_Pickaxe_Athena_C_T01");
+		if (Pickaxes.Num() != 0) {
+			PickDef = (UFortWeaponMeleeItemDefinition*)Pickaxes[rand() % (Pickaxes.Num() - 1)];
+		}
+		if (PickDef) {
+			UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(PC, PickDef, 1, 1, 0);
+			if (Item) {
+				Pawn->CallFunc<void>("FortPawn", "EquipWeaponDefinition", Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry().GetItemGuid(), Item->GetItemEntry().GetTrackerGuid(), false);
+			}
+		}
 	}
 }

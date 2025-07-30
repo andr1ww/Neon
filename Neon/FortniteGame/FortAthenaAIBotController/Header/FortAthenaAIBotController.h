@@ -7,6 +7,9 @@
 #include "FortniteGame/FortPlayerState/Header/FortPlayerState.h"
 #include "FortniteGame/Common/Header/ItemDefinition.h"
 
+static TArray<UAthenaCharacterItemDefinition*> Characters = Runtime::GetObjectsOfClass<UAthenaCharacterItemDefinition>();
+static TArray<UAthenaPickaxeItemDefinition*> Pickaxes = Runtime::GetObjectsOfClass<UAthenaPickaxeItemDefinition>();
+
 class AAIController : public AController
 {
 
