@@ -22,6 +22,8 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
         int32 RandomPickaxeIndex = rand() % Pickaxes.Num() - 1;
         RandomPickaxe = Pickaxes[RandomPickaxeIndex];
     }
+
+    static void (*BotManagerSetup)(__int64 BotManaager, __int64 Pawn, __int64 BehaviorTree, __int64 a4, DWORD* SkillLevel, __int64 idk, __int64 StartupInventory, __int64 BotNameSettings, __int64 idk_1, BYTE* CanRespawnOnDeath, unsigned __int8 BitFieldDataThing, BYTE* CustomSquadId, FFortAthenaAIBotRunTimeCustomizationData InRuntimeBotData) = decltype(BotManagerSetup)(Finder->BotManagerSetup());
     
     AFortPlayerPawn* Ret = SpawnBotOG(BotManager, SpawnLoc, SpawnRot, BotData, RuntimeBotData);
     if (Ret)
@@ -62,6 +64,11 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                     else if (Tag == "Athena.Faction.Ego") {
                         BotData->GetCharacterCustomization()->GetCustomizationLoadout().SetCharacter(Runtime::StaticLoadObject<UAthenaCharacterItemDefinition>("/Game/Athena/Items/Cosmetics/Characters/CID_NPC_Athena_Commando_M_HenchmanGood.CID_NPC_Athena_Commando_M_HenchmanGood"));
                     }
+
+                    DWORD CustomSquadId = RuntimeBotData.CustomSquadId;
+                    BYTE TrueByte = 1;
+                    BYTE FalseByte = 0;
+                    BotManagerSetup(__int64(BotManager), __int64(Ret), __int64(BotData->GetBehaviorTree()), 0, &CustomSquadId, 0, __int64(BotData->GetStartupInventory()), __int64(BotData->GetBotNameSettings()), 0, &FalseByte, 0, &TrueByte, RuntimeBotData);
                 } else
                 {
                         

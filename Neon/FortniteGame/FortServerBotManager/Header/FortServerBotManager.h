@@ -14,7 +14,7 @@ class AFortAIGoalManager : public AActor
     
 };
 
-class UBehaviorTree final : public UObject {
+class UBehaviorTree : public UObject {
 
 };
 
@@ -84,6 +84,11 @@ public:
     DEFINE_MEMBER(FFortAthenaLoadout, UFortAthenaAIBotCharacterCustomization, CustomizationLoadout);
 };
 
+class UFortBotNameSettings : public UObject
+{
+    
+};
+
 class UFortAthenaAIBotCustomizationData final : public UObject
 {
 public:
@@ -91,6 +96,7 @@ public:
     DEFINE_PTR(UBehaviorTree, UFortAthenaAIBotCustomizationData, BehaviorTree);
     DEFINE_PTR(UFortAthenaAIBotCharacterCustomization, UFortAthenaAIBotCustomizationData, CharacterCustomization);
 	DEFINE_PTR(UFortAthenaAIBotInventoryItems, UFortAthenaAIBotCustomizationData, StartupInventory);
+    DEFINE_PTR(UFortBotNameSettings, UFortAthenaAIBotCustomizationData, BotNameSettings);   
 };
 
 class UFortServerBotManagerAthena : public UObject
