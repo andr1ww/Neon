@@ -860,6 +860,16 @@ uint64 UFinder::BotManagerSetup()
     if (CachedResult != 0)
         return CachedResult;
 
+    if (Fortnite_Version >= 12.50 && Fortnite_Version <= 13.40)
+    {
+        return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 7C 24 ? 55 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ? 45 33 E4").Get();
+    }
+    
+    if (Fortnite_Version <= 12.41 && Fortnite_Version >= 12.00)
+    {
+        return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 55 57 41 54 41 55 41 57 48 8B EC 48 83 EC ? 45 33 E4").Get();
+    }
+
     auto StringRef = Memcury::Scanner::FindStringRef("Can't configure player bots if no GameMode set");
 
     return CachedResult = StringRef.Get() ? FindBytes(StringRef, { 0x40, 0x55 }, 1000, 0, true) : 0;
