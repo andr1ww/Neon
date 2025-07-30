@@ -6,9 +6,15 @@
 #include "Engine/NetDriver/Header/NetDriver.h"
 
 void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
-	static TArray<UAthenaCharacterItemDefinition*> Characters = Runtime::GetObjectsOfClass<UAthenaCharacterItemDefinition>();
-	static TArray<UAthenaPickaxeItemDefinition*> Pickaxes = Runtime::GetObjectsOfClass<UAthenaPickaxeItemDefinition>();
+	static TArray<UAthenaCharacterItemDefinition*> Characters = TArray<UAthenaCharacterItemDefinition*>();
+	static TArray<UAthenaPickaxeItemDefinition*> Pickaxes = TArray<UAthenaPickaxeItemDefinition*>();
 
+	if (Characters.Num() == 0)
+	{
+		Characters = Runtime::GetObjectsOfClass<UAthenaCharacterItemDefinition>();
+		Pickaxes = Runtime::GetObjectsOfClass<UAthenaPickaxeItemDefinition>();
+	}
+	
 	static auto BotBP = Runtime::StaticLoadObject<UClass>("/Game/Athena/AI/Phoebe/BP_PlayerPawn_Athena_Phoebe.BP_PlayerPawn_Athena_Phoebe_C");
 	if (!BotBP) {
 		return;
