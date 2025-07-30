@@ -163,6 +163,7 @@
     <ClInclude Include="FortniteGame\AbilitySystemComponent\Header\AbilitySystemComponent.h" />
     <ClInclude Include="FortniteGame\BuildingSMActor\Header\BuildingSMActor.h" />
     <ClInclude Include="FortniteGame\Common\Header\ItemDefinition.h" />
+    <ClInclude Include="FortniteGame\FortAthenaAIBotController\Header\FortAthenaAIBotController.h" />
     <ClInclude Include="FortniteGame\FortAthenaMapInfo\Header\FortAthenaMapInfo.h" />
     <ClInclude Include="FortniteGame\FortGameMode\Header\FortGameMode.h" />
     <ClInclude Include="FortniteGame\FortGameState\Header\FortGameState.h" />
@@ -196,6 +197,7 @@
     <ClCompile Include="Engine\UEngine\Source\UEngine.cpp" />
     <ClCompile Include="FortniteGame\AbilitySystemComponent\Source\AbilitySystemComponent.cpp" />
     <ClCompile Include="FortniteGame\BuildingSMActor\Source\BuildingSMActor.cpp" />
+    <ClCompile Include="FortniteGame\FortAthenaAIBotController\Source\FortAthenaAIBotController.cpp" />
     <ClCompile Include="FortniteGame\FortGameMode\Source\FortGameMode.cpp" />
     <ClCompile Include="FortniteGame\FortGameState\Source\FortGameState.cpp" />
     <ClCompile Include="FortniteGame\FortInventory\Source\FortInventory.cpp" />

@@ -140,15 +140,3 @@ public:
     static void ServerEndEditingBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerRepairBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
 };
-
-class AAIController : public AController
-{
-    
-};
-
-class AFortAthenaAIBotController : public AAIController
-{
-public:
-    DEFINE_PTR(AFortInventory, AFortAthenaAIBotController, Inventory);
-    DEFINE_PTR(UFortAthenaAIBotInventoryItems, AFortAthenaAIBotController, StartupInventory);
-};

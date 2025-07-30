@@ -5,12 +5,17 @@
 #include "Engine/Vector/Header/Vector.h"
 #include "FortniteGame/FortGameMode/Header/FortGameMode.h"
 #include "FortniteGame/FortPlayerPawn/Header/FortPlayerPawn.h"
+#include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
 
 class AFortGameModeAthena;
 
 class AFortAIGoalManager : public AActor
 {
     
+};
+
+class UBehaviorTree final : public UObject {
+
 };
 
 class AFortAIDirector : public AActor
@@ -83,6 +88,7 @@ class UFortAthenaAIBotCustomizationData final : public UObject
 {
 public:
     DEFINE_MEMBER(TSubclassOf<class AFortPlayerPawn>, UFortAthenaAIBotCustomizationData, PawnClass);
+    DEFINE_PTR(UBehaviorTree, UFortAthenaAIBotCustomizationData, BehaviorTree);
     DEFINE_PTR(UFortAthenaAIBotCharacterCustomization, UFortAthenaAIBotCustomizationData, CharacterCustomization);
 	DEFINE_PTR(UFortAthenaAIBotInventoryItems, UFortAthenaAIBotCustomizationData, StartupInventory);
 };

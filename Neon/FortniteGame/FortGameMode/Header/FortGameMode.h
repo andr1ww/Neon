@@ -53,6 +53,18 @@ struct FBotMutator
     }
 };
 
+class ANavigationObjectBase : public AActor {
+
+};
+
+class APlayerStart : public ANavigationObjectBase {
+
+};
+
+class AFortPlayerStartWarmup final : public APlayerStart {
+
+};
+
 struct FAdditionalLevelStreamed final
 {
 public:

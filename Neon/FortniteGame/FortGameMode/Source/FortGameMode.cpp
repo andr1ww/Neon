@@ -7,6 +7,7 @@
 #include "Engine/UEngine/Header/UEngine.h"
 #include "FortniteGame/FortInventory/Header/FortInventory.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
+#include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
 #include "Neon/Finder/Header/Finder.h"
 #include "Neon/Runtime/Runtime.h"
 
@@ -177,6 +178,8 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
 
             GameState->OnRep_CurrentPlaylistId();
             GameState->OnRep_CurrentPlaylistInfo();
+
+            AFortAthenaAIBotController::SpawnPlayerBot(10);
         }
     }
     
