@@ -9,7 +9,34 @@
 
 class AAIController : public AController
 {
+private:
+    struct AIController_RunBehaviorTree final
+    {
+    public:
+        UBehaviorTree* BTAsset;
+        bool ReturnValue;
+    };
+public:
+    bool RunBehaviorTree(UBehaviorTree* BTAsset) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("AIController", "RunBehaviorTree");
 
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return false;
+
+        struct AIController_RunBehaviorTree final
+        {
+        public:
+            UBehaviorTree* BTAsset;
+            bool ReturnValue;
+        } AIController_RunBehaviorTree{ BTAsset };
+
+        SDK::StaticClassImpl("AIController")->GetClassDefaultObject()->ProcessEvent(Func, &AIController_RunBehaviorTree);
+
+        return AIController_RunBehaviorTree.ReturnValue;
+    }
 };
 
 class UPrimitiveComponent : public UObject

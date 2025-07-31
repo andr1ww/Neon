@@ -196,10 +196,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
 
 APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer, AActor* StartSpot)
 {
-    if (NewPlayer->GetPawn()) {
-        UE_LOG(LogNeon, Warning, "Early return!");
-		return 0;
-    }
     static const UClass* PlayerPawnClass = (UClass*)GUObjectArray.FindObject("PlayerPawn_Athena_C");
 
     if (!PlayerPawnClass)
