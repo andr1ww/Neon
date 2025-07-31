@@ -351,7 +351,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
         return ClientOnPawnDiedOG(PlayerController, DeathReport);
 
     auto KillerPlayerState = DeathReport.GetKillerPlayerState();
-    auto KillerPawn = DeathReport.GetKillerPawn();
+    auto KillerPawn = DeathReport.GetKillerPawn().Get();
     auto VictimPawn = PlayerController->GetMyFortPawn();
 
     FVector DeathLocation = VictimPawn ? VictimPawn->GetActorLocation() : FVector{0,0,0};
@@ -367,4 +367,15 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
     PlayerState->GetDeathInfo().SetDowner((AActor*)KillerPlayerState);
     PlayerState->GetDeathInfo().SetFinisherOrDowner((AActor*)KillerPlayerState);
     EDeathCause CachedDeathCause = PlayerState->GetDeathInfo().GetDeathCause();
+
+    if (VictimPawn) {
+        PlayerState->GetDeathInfo().GetDistance() = (CachedDeathCause != EDeathCause::FallDamage) 
+            ? (KillerPawn && KillerPawn->GetClass()->GetFunction("GetDistanceTo") ? KillerPawn->CallFunc<float>("Actor", "GetDistanceTo", VictimPawn) : 0.0f)
+            : VictimPawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
+    }
+
+    PlayerState->GetDeathInfo().SetbInitialized(true);
+    PlayerState->CallFunc<void>("FortPlayerStateAthena", "OnRep_DeathInfo");
+
+    
 }
