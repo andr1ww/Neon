@@ -45,7 +45,7 @@ public:
     }
 public:
     DEFINE_MEMBER(bool, AFortPickup, bRandomRotation);
-    DEFINE_PTR(FFortItemEntry, AFortPickup, PrimaryPickupItemEntry);
+    DEFINE_MEMBER(FFortItemEntry, AFortPickup, PrimaryPickupItemEntry);
 public:
     DECLARE_STATIC_CLASS(AFortPickup)
     DECLARE_DEFAULT_OBJECT(AFortPickup)

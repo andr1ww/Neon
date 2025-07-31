@@ -107,27 +107,20 @@ AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry* Entr
     {
         if (Finder->SetupPickup())
         {
-            UE_LOG(LogNeon, Log, "Ok");
             ((FVector * (*)(AFortPickup*, FFortItemEntry*, TArray<FFortItemEntry>, bool))(Finder->SetupPickup()))(NewPickup, Entry, TArray<FFortItemEntry>(), false);
         }
         
-        if (NewPickup)
-        {
-            NewPickup->SetbRandomRotation(RandomRotation);
-            static int PrimaryPickupItemEntryOffset = Runtime::GetOffset(NewPickup, "PrimaryPickupItemEntry");
+        NewPickup->SetbRandomRotation(RandomRotation);
+        NewPickup->GetPrimaryPickupItemEntry().SetItemDefinition(Entry->GetItemDefinition());
+        NewPickup->GetPrimaryPickupItemEntry().SetLoadedAmmo(Entry->GetLoadedAmmo());
+        NewPickup->GetPrimaryPickupItemEntry().SetCount(OverrideCount != -1 ? OverrideCount : Entry->GetCount());
+        NewPickup->OnRep_PrimaryPickupItemEntry();
             
-            FFortItemEntry* ItemEntry = reinterpret_cast<FFortItemEntry*>(__int64(NewPickup) + PrimaryPickupItemEntryOffset);
-   
-            ItemEntry->SetItemDefinition(Entry->GetItemDefinition());
-            ItemEntry->SetCount(OverrideCount != -1 ? OverrideCount : Entry->GetCount());
-            NewPickup->OnRep_PrimaryPickupItemEntry();
-            
-            NewPickup->CallFunc<void>("FortPickup", "TossPickup", Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
-            NewPickup->Set("FortPickup", "bTossedFromContainer", SpawnSource == EFortPickupSpawnSource::Chest || SpawnSource == EFortPickupSpawnSource::AmmoBox);
-            if (NewPickup->Get<bool>("FortPickup", "bTossedFromContainer")) NewPickup->CallFunc<void>("FortPickup", "OnRep_TossedFromContainer");
-        }
+        NewPickup->CallFunc<void>("FortPickup", "TossPickup", Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
+        NewPickup->Set("FortPickup", "bTossedFromContainer", SpawnSource == EFortPickupSpawnSource::Chest || SpawnSource == EFortPickupSpawnSource::AmmoBox);
+        if (NewPickup->Get<bool>("FortPickup", "bTossedFromContainer")) NewPickup->CallFunc<void>("FortPickup", "OnRep_TossedFromContainer");
     }
-
+    
     return NewPickup;
 }
 
