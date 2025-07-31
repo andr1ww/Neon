@@ -84,15 +84,18 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
             TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
             for (int32 i = 0; i < ReplicatedEntriesOffsetPtr.Num(); ++i)
             {
-                AFortInventory::SpawnPickup(
-                    Controller->GetActorLocation(), 
-                    ReplicatedEntriesOffsetPtr[i].GetItemDefinition(), 
-                    ReplicatedEntriesOffsetPtr[i].GetCount(), 
-                    0,
-                    EFortPickupSourceTypeFlag::Tossed, 
-                    EFortPickupSpawnSource::Unset,
-                    InstigatedBy->GetMyFortPawn()
-                );
+				UFortWorldItemDefinition* WorldItem = (UFortWorldItemDefinition*)ReplicatedEntriesOffsetPtr[i].GetItemDefinition();
+				if (WorldItem && !WorldItem->GetbCanBeDropped()) {
+					AFortInventory::SpawnPickup(
+						Controller->GetActorLocation(),
+						ReplicatedEntriesOffsetPtr[i].GetItemDefinition(),
+						ReplicatedEntriesOffsetPtr[i].GetCount(),
+						0,
+						EFortPickupSourceTypeFlag::Tossed,
+						EFortPickupSpawnSource::Unset,
+						InstigatedBy->GetMyFortPawn()
+					);
+				}
             }
         }
         else
