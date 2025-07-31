@@ -474,7 +474,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			MatchReport->SetEndOfMatchResults(*RewardResult);
 			PlayerController->CallFunc<void>("FortPlayerControllerAthena", "ClientSendEndBattleRoyaleMatchForPlayer", true, MatchReport->GetEndOfMatchResults());
 
-			int32 PlayerPlace = GameMode->GetNumPlayers() + GameMode->GetNumBots() + 1;
+			int32 PlayerPlace = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num() + 1;
 			PlayerState->SetPlace(PlayerPlace);
 			PlayerState->CallFunc<void>("FortGameStateAthena", "OnRep_Place");
 
@@ -534,7 +534,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 					WinnerMatchReport->SetMatchStats(*MatchStats);
 					LastAliveController->CallFunc<void>("FortPlayerControllerAthena", "ClientSendMatchStatsForPlayer", *MatchStats);
 
-					int32 TotalPlayers = GameMode->GetNumPlayers() + GameMode->GetNumBots() + 1;
+					int32 TotalPlayers = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num() + 1;
 					TeamStats->SetPlace(1);
 					TeamStats->SetTotalPlayers(TotalPlayers);
 					WinnerMatchReport->SetTeamStats(*TeamStats);
