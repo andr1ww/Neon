@@ -57,8 +57,9 @@ void UAbilitySystemComponent::GiveAbility(UAbilitySystemComponent* AbilitySystem
     if (!Ability || !Ability->GetClassDefaultObject()) return;
     
     int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
-    FGameplayAbilitySpec* Spec = (FGameplayAbilitySpec*)VirtualAlloc(0, GameplayAbilitySpecSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-    
+    FGameplayAbilitySpec* Spec = (FGameplayAbilitySpec*)malloc(GameplayAbilitySpecSize);
+    memset(Spec, 0, GameplayAbilitySpecSize);
+        
     if (!Spec) return;
     
     new(Spec) FGameplayAbilitySpec();

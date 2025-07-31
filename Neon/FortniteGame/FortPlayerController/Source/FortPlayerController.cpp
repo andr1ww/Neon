@@ -360,11 +360,15 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	static const int32 FAthenaMatchStatsSize = StaticClassImpl("AthenaMatchStats")->GetSize();
 	static const int32 FAthenaMatchTeamStatsSize = StaticClassImpl("AthenaMatchTeamStats")->GetSize();
 	
-	FDeathInfo* DeathInfo = (FDeathInfo*)VirtualAlloc(0, FDeathInfoSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-	FAthenaRewardResult* RewardResult = (FAthenaRewardResult*)VirtualAlloc(0, FAthenaRewardResultSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-	FAthenaMatchStats* MatchStats = (FAthenaMatchStats*)VirtualAlloc(0, FAthenaMatchStatsSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-	FAthenaMatchTeamStats* TeamStats = (FAthenaMatchTeamStats*)VirtualAlloc(0, FAthenaMatchTeamStatsSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-   
+	FDeathInfo* DeathInfo = (FDeathInfo*)malloc(FDeathInfoSize);
+	memset(DeathInfo, 0, FDeathInfoSize);
+	FAthenaRewardResult* RewardResult = (FAthenaRewardResult*)malloc(FAthenaRewardResultSize);
+	memset(RewardResult, 0, FAthenaRewardResultSize);
+	FAthenaMatchStats* MatchStats = (FAthenaMatchStats*)malloc(FAthenaMatchStatsSize);
+	memset(MatchStats, 0, FAthenaMatchStatsSize);
+	FAthenaMatchTeamStats* TeamStats = (FAthenaMatchTeamStats*)malloc(FAthenaMatchTeamStatsSize);
+	memset(TeamStats, 0, FAthenaMatchTeamStatsSize);
+	
 	auto DeathTags = DeathReport.GetTags();
 	EDeathCause CachedDeathCause = PlayerState->CallFunc<EDeathCause>("FortPlayerStateAthena", "ToDeathCause", DeathTags, false);
 	
@@ -528,12 +532,13 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 				WinnerPlayerState->SetPlace(1);
 				WinnerPlayerState->CallFunc<void>("FortGameStateAthena", "OnRep_Place");
 
-				auto WinnerWeapon = DeathReport.GetDamageCauser() ? Cast<AFortWeapon>(DeathReport.GetDamageCauser())->GetWeaponData() : nullptr;
-           
-				LastAliveController->CallFunc<void>("FortPlayerControllerAthena", "PlayWinEffects", WinnerPawn, WinnerWeapon, CachedDeathCause, false);
-				LastAliveController->CallFunc<void>("FortPlayerControllerAthena", "ClientNotifyWon", WinnerPawn, WinnerWeapon, CachedDeathCause);
-				LastAliveController->CallFunc<void>("FortPlayerControllerAthena", "ClientNotifyTeamWon", WinnerPawn, WinnerWeapon, CachedDeathCause);
-
+				if (ItemDef)
+				{
+			//		LastAliveController->CallFunc<void>("FortPlayerControllerAthena", "PlayWinEffects", WinnerPawn, ItemDef, CachedDeathCause, false);
+			//		LastAliveController->CallFunc<void>("FortPlayerControllerAthena", "ClientNotifyWon", WinnerPawn, ItemDef, CachedDeathCause);
+			//		LastAliveController->CallFunc<void>("FortPlayerControllerAthena", "ClientNotifyTeamWon", WinnerPawn, ItemDef, CachedDeathCause);
+				}
+				
 				auto WinnerMatchReport = LastAliveController->GetMatchReport();
 				if (WinnerMatchReport) {
 					int32 WinnerXP = LastAliveController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "TotalXpEarned");
