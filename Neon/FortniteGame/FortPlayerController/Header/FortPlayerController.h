@@ -88,6 +88,56 @@ public:
     DECLARE_STATIC_CLASS(UGAB_Emote_Generic_C);
 };
 
+struct FAthenaRewardResult final
+{
+public:
+    int32                                         LevelsGained;                                      // 0x0000(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    int32                                         BookLevelsGained;                                  // 0x0004(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    int32                                         TotalSeasonXpGained;                               // 0x0008(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    int32                                         TotalBookXpGained;                                 // 0x000C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    int32                                         PrePenaltySeasonXpGained;                          // 0x0010(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    uint8                                         Pad_14[0x4];                                       // 0x0014(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
+    TArray<struct FAthenaMatchXpMultiplierGroup>  XpMultipliers;                                     // 0x0018(0x0010)(ZeroConstructor, NativeAccessSpecifierPublic)
+    TArray<struct FAthenaAwardGroup>              Rewards;                                           // 0x0028(0x0010)(ZeroConstructor, NativeAccessSpecifierPublic)
+    float                                         AntiAddictionMultiplier;                           // 0x0038(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    uint8                                         Pad_3C[0x4];                                       // 0x003C(0x0004)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
+struct FAthenaMatchStats final
+{
+public:
+	class FString                                 StatBucket;                                        // 0x0000(0x0010)(ZeroConstructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+	class FString                                 MatchID;                                           // 0x0010(0x0010)(ZeroConstructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+	class FString                                 MatchEndTime;                                      // 0x0020(0x0010)(ZeroConstructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+	class FString                                 MatchPlatform;                                     // 0x0030(0x0010)(ZeroConstructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+	int32                                         Stats[0x14];                                       // 0x0040(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+	TArray<struct FAthenaWeaponStats>             WeaponStats;                                       // 0x0090(0x0010)(ZeroConstructor, NativeAccessSpecifierPrivate)
+	TArray<struct FAthenaXPStats>                 XPStats;                                           // 0x00A0(0x0010)(ZeroConstructor, NativeAccessSpecifierPrivate)
+	bool                                          bIsValid;                                          // 0x00D4(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+	uint8                                         Pad_D5[0x3];                                       // 0x00D5(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	class FString                                 FactionTag;                                        // 0x00D8(0x0010)(ZeroConstructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+};
+
+struct FAthenaMatchTeamStats final
+{
+public:
+    int32                                         Place;                                             // 0x0000(0x0004)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    int32                                         TotalPlayers;                                      // 0x0004(0x0004)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
+
+class UAthenaPlayerMatchReport : public UObject
+{
+public:
+    DECLARE_STATIC_CLASS(UAthenaPlayerMatchReport);
+    DECLARE_DEFAULT_OBJECT(UAthenaPlayerMatchReport);
+};
+
+class AFortTeamInfo : public UObject
+{
+public:
+    DEFINE_MEMBER(TArray<AFortPlayerControllerAthena*>, AFortTeamInfo, TeamMembers); // 0x0280(0x0010)(ZeroConstructor, Protected, UObjectWrapper, NativeAccessSpecifierProtected)
+};
+
 class UGAB_Spray_Generic_C : public UGAB_Emote_Generic_C
 {
 public:
@@ -161,6 +211,7 @@ public:
 class AFortPlayerControllerAthena : public AFortPlayerController 
 {
 public:
+    DEFINE_PTR(UAthenaPlayerMatchReport, AFortPlayerControllerAthena, MatchReport);
     DEFINE_PTR(AFortPlayerStateAthena, AFortPlayerControllerAthena, PlayerState);
     DEFINE_BOOL(AFortPlayerControllerAthena, bHasServerFinishedLoading);
 public:

@@ -124,6 +124,9 @@ public:
 class AFortPlayerStateAthena : public AFortPlayerStateZone
 {
 public:
+	DEFINE_MEMBER(int32, AFortPlayerStateAthena, Place);
+	DEFINE_MEMBER(int32, AFortPlayerStateAthena, KillScore);
+	DEFINE_MEMBER(int32, AFortPlayerStateAthena, TeamKillScore);
     DEFINE_MEMBER(FDeathInfo, AFortPlayerStateAthena, DeathInfo);
     DEFINE_PTR(UFortHeroType, AFortPlayerStateAthena, HeroType);
     DEFINE_PTR(UAbilitySystemComponent, AFortPlayerStateAthena, AbilitySystemComponent);
