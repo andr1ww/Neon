@@ -63,7 +63,7 @@ void AFortPlayerPawn::ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack)
     FFortPickupLocationData* FortPickupLocationData = (FFortPickupLocationData*)VirtualAlloc(0, FortPickupLocationDataSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     
     FortPickupLocationData->SetbPlayPickupSound(bPlayPickupSound);
-    FortPickupLocationData->SetFlyTime(InFlyTime);
+    FortPickupLocationData->SetFlyTime(0.3f);
     FortPickupLocationData->SetItemOwner(Pawn);
     FortPickupLocationData->SetPickupGuid(Pickup->GetPrimaryPickupItemEntry().GetItemGuid());
     FortPickupLocationData->SetPickupTarget(Pawn);

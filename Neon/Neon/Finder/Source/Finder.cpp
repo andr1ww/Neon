@@ -979,6 +979,9 @@ uint64 UFinder::CompletePickupAnimation() {
         {
             return CachedResult == Memcury::Scanner::FindPattern("40 53 56 48 83 EC ? 4C 89 6C 24 ? 48 8B F1 4C 8B A9").Get();    
         }
+        else {
+            return CachedResult;
+        }
     }
     
     if (Fortnite_Version >= 17.0 && Fortnite_Version < 19.0) {

@@ -239,12 +239,12 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 0, 1); 
     }
 
-    static bool bSpawnedAI = false;
+    /*static bool bSpawnedAI = false;
     if (!bSpawnedAI)
     {
         bSpawnedAI = true;
         AFortAthenaAIBotController::SpawnPlayerBot(90);
-    }
+    }*/
     
     return Pawn;
 }

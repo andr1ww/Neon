@@ -6,6 +6,18 @@
 #include "FortniteGame/FortAthenaMapInfo/Header/FortAthenaMapInfo.h"
 #include "FortniteGame/FortPlaylistAthena/Header/FortPlaylistAthena.h"
 
+enum class EAthenaGamePhase : uint8
+{
+    None = 0,
+    Setup = 1,
+    Warmup = 2,
+    Aircraft = 3,
+    SafeZones = 4,
+    EndGame = 5,
+    Count = 6,
+    EAthenaGamePhase_MAX = 7,
+};
+
 class AFortGameState : public UObject
 {
 public:
@@ -26,6 +38,8 @@ public:
     void OnRep_CurrentPlaylistInfo();
     DEFINE_MEMBER(int32, AFortGameStateAthena, CurrentPlaylistId);
     DEFINE_PTR(AFortAthenaMapInfo, AFortGameStateAthena, MapInfo);
+
+    DEFINE_MEMBER(EAthenaGamePhase, AFortGameStateAthena, GamePhase);
 public:
     DECLARE_STATIC_CLASS(AFortGameStateAthena);
 };

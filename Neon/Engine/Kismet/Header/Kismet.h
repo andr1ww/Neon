@@ -1,6 +1,40 @@
 #pragma once
 #include "pch.h"
 
+class UKismetMathLibrary final : public UObject {
+private:
+    struct KismetMathLibrary_RandomBoolWithWeight {
+    public:
+        float Weight;
+        bool ReturnValue;
+    };
+public:
+    static bool RandomBoolWithWeight(float Weight) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetMathLibrary", "RandomBoolWithWeight");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return false;
+
+        struct KismetMathLibrary_RandomBoolWithWeight final
+        {
+        public:
+            float Weight;
+            bool ReturnValue;
+        } KismetMathLibrary_RandomBoolWithWeight{ Weight };
+
+        SDK::StaticClassImpl("KismetStringLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &KismetMathLibrary_RandomBoolWithWeight);
+
+        return KismetMathLibrary_RandomBoolWithWeight.Weight;
+    }
+
+public:
+    DECLARE_STATIC_CLASS(UKismetMathLibrary);
+    DECLARE_DEFAULT_OBJECT(UKismetMathLibrary);
+};
+
 class UKismetStringLibrary : public UObject
 {
 private:

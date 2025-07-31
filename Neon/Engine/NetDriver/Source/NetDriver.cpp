@@ -6,6 +6,7 @@
 #include "Engine/Level/Header/Level.h"
 #include "Engine/UEngine/Header/UEngine.h"
 #include "Neon/Finder/Header/Finder.h"
+#include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
 
 UWorld* UWorld::GetWorld()
 {
@@ -348,6 +349,9 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             bStartedEvent = true;
         }
     }
+
+    AFortGameModeAthena* GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
+    AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
     
     if (NetDriver->GetClientConnections().Num() > 0)
     {
@@ -361,13 +365,23 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 
         if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && !bStartedBus)
         {
-            AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
             auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
             if (GameState->Get<float>("FortGameStateAthena", "WarmupCountdownEndTime") <= Time)
             {
                 ExecuteConsoleCommand(UWorld::GetWorld(), L"startaircraft", nullptr);
                 bStartedBus = true;
             }
+        }
+    }
+
+    if (GameState->GetGamePhase() == EAthenaGamePhase::Warmup &&
+        GameMode->GetAlivePlayers().Num() > 0
+        && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) < 100
+        && GameMode->GetAliveBots().Num() < 100)
+    {
+        if (UKismetMathLibrary::RandomBoolWithWeight(0.05f))
+        {
+            AFortAthenaAIBotController::SpawnPlayerBot(1);
         }
     }
     

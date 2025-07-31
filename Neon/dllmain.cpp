@@ -151,6 +151,7 @@ void Main()
 	{
 		Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.ServerHandlePickup", AFortPlayerPawn::ServerHandlePickup);
 		Runtime::Hook(Finder->CompletePickupAnimation(), AFortPlayerPawn::CompletePickupAnimation, (void**)&AFortPlayerPawn::CompletePickupAnimationOG);
+		UE_LOG(LogNeon, Log, "CompletePickupAnimation: 0x%x", Finder->CompletePickupAnimation());
 	} else
 	{
 		Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.ServerHandlePickup", AFortPlayerPawn::ServerHandlePickup);
