@@ -204,6 +204,7 @@
     <ClCompile Include="FortniteGame\FortInventory\Source\FortInventory.cpp" />
     <ClCompile Include="FortniteGame\FortKismetLibrary\Source\FortKismetLibrary.cpp" />
     <ClCompile Include="FortniteGame\FortPlayerController\Source\FortPlayerController.cpp" />
+    <ClCompile Include="FortniteGame\FortPlayerPawn\Source\FortPlayerPawn.cpp" />
     <ClCompile Include="FortniteGame\FortServerBotManager\Source\FortServerBotManager.cpp" />
     <ClCompile Include="Neon\Finder\Source\Finder.cpp" />
     <ClCompile Include="pch.cpp">

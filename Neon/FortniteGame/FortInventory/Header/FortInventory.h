@@ -8,10 +8,13 @@
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "FortniteGame/FortPlayerPawn/Header/FortPlayerPawn.h"
+#include "Engine/ObjectPtr/Header/ObjectPtr.h"
 
 class AFortPlayerControllerAthena;
 class AFortAthenaAIBotController;
 class AFortPlayerController;
+class AFortPawn;
+class AFortPlayerPawn;
 
 struct FFortItemEntry : public FFastArraySerializerItem
 {
@@ -24,6 +27,17 @@ struct FFortItemEntry : public FFastArraySerializerItem
     DEFINE_MEMBER(float, FFortItemEntry, Durability);
     DEFINE_MEMBER(FGameplayAbilitySpecHandle, FFortItemEntry, GameplayAbilitySpecHandle);
 };
+
+struct FFortPickupLocationData final
+{
+public:
+    DEFINE_BOOL(FFortPickupLocationData, bPlayPickupSound);
+    DEFINE_MEMBER(float, FFortPickupLocationData, FlyTime);
+    DEFINE_MEMBER(TWeakObjectPtr<AFortPawn>, FFortPickupLocationData, ItemOwner);
+    DEFINE_MEMBER(TWeakObjectPtr<AFortPawn>, FFortPickupLocationData, PickupTarget);
+    DEFINE_MEMBER(FGuid, FFortPickupLocationData, PickupGuid);
+};
+
 
 class AFortPickup : public AActor
 {
@@ -44,7 +58,9 @@ public:
         this->ProcessEvent(Func, nullptr);
     }
 public:
-    DEFINE_MEMBER(bool, AFortPickup, bRandomRotation);
+    DEFINE_BOOL(AFortPickup, bPickedUp);
+    DEFINE_BOOL(AFortPickup, bRandomRotation);
+    DEFINE_MEMBER(FFortPickupLocationData, AFortPickup, PickupLocationData);
     DEFINE_MEMBER(FFortItemEntry, AFortPickup, PrimaryPickupItemEntry);
 public:
     DECLARE_STATIC_CLASS(AFortPickup)
