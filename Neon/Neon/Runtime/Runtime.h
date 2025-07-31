@@ -48,6 +48,22 @@ public:
 	uint8_t _Padding1[0x6];
 };
 
+class Finder {
+public:
+	static uintptr_t GetCompiledInPattern() {
+		static uintptr_t pattern = uintptr_t();
+		if (!pattern) pattern = Memcury::Scanner::FindPattern("48 8B 41 20 4C 8B D2 48 8B D1 44 0F B6 08 48 FF").Get();
+		return pattern;
+	}
+   
+	static uintptr_t GetExplicitPropPattern() {
+		static uintptr_t pattern = uintptr_t();
+		if (!pattern) pattern = Memcury::Scanner::FindPattern("41 8B 40 ? 4D 8B C8").Get();
+		return pattern;
+	}
+};
+
+
 class FFrame : public FOutputDevice
 {
 public:
@@ -64,38 +80,33 @@ public:
 public:
 	void StepCompiledIn(void* const Result, bool ForceExplicitProp = false)
 	{
-		static auto CompiledInPattern = Memcury::Scanner::FindPattern("48 8B 41 20 4C 8B D2 48 8B D1 44 0F B6 08 48 FF").Get();
-		static auto ExplicitPropPattern = Memcury::Scanner::FindPattern("41 8B 40 ? 4D 8B C8").Get();
 
 		if (Code && !ForceExplicitProp)
 		{
-			((void (*)(FFrame*, UObject*, void* const))(CompiledInPattern))(this, Object, Result); 
+			((void (*)(FFrame*, UObject*, void* const))(Finder::GetCompiledInPattern()))(this, Object, Result); 
 		}
 		else
 		{
 			FField* _Prop = PropertyChainForCompiledIn;
 			PropertyChainForCompiledIn = _Prop->Next;
-			((void (*)(FFrame*, void* const, FField*))(ExplicitPropPattern))(this, Result, _Prop); 
+			((void (*)(FFrame*, void* const, FField*))(Finder::GetExplicitPropPattern()))(this, Result, _Prop); 
 		}
 	}
 	
 	template <typename T>
 	T& StepCompiledInRef() {
-		static auto CompiledInPattern = Memcury::Scanner::FindPattern("48 8B 41 20 4C 8B D2 48 8B D1 44 0F B6 08 48 FF").Get();
-		static auto ExplicitPropPattern = Memcury::Scanner::FindPattern("41 8B 40 ? 4D 8B C8").Get();
-
 		T TempVal{};
 		MostRecentPropertyAddress = nullptr;
 
 		if (Code)
 		{
-			((void (*)(FFrame*, UObject*, void* const))(CompiledInPattern))(this, Object, &TempVal); 
+			((void (*)(FFrame*, UObject*, void* const))(Finder::GetCompiledInPattern()))(this, Object, &TempVal); 
 		}
 		else
 		{
 			FField* _Prop = PropertyChainForCompiledIn;
 			PropertyChainForCompiledIn = _Prop->Next;
-			((void (*)(FFrame*, void* const, FField*))(ExplicitPropPattern))(this, &TempVal, _Prop); 
+			((void (*)(FFrame*, void* const, FField*))(Finder::GetExplicitPropPattern()))(this, &TempVal, _Prop); 
 		}
 
 		return MostRecentPropertyAddress ? *(T*)MostRecentPropertyAddress : TempVal;

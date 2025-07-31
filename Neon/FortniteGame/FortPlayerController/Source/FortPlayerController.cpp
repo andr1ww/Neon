@@ -350,7 +350,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	auto GameState = UWorld::GetWorld()->GetGameState();
 	auto PlayerState = PlayerController->GetPlayerState();
 	auto KillerPlayerState = DeathReport.GetKillerPlayerState();
-	auto KillerPawn = DeathReport.GetKillerPawn().Get();
+	auto KillerPawn = DeathReport.GetKillerPawn();
 	auto VictimPawn = PlayerController->GetMyFortPawn();
 
 	FVector DeathLocation = VictimPawn ? VictimPawn->GetActorLocation() : FVector(0,0,0);
@@ -438,8 +438,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		KillerPlayerState->CallFunc<void>("FortPlayerStateAthena", "OnRep_TeamKillScore");
 		KillerPlayerState->CallFunc<void>("FortPlayerStateAthena", "ClientReportTeamKill", TeamScore);
    	
-		auto TeamInfo = ((AFortPlayerStateAthena*)KillerPlayerState)->Get<TWeakObjectPtr<AFortTeamInfo>>("FortPlayerState", "PlayerTeam");
-		for (const auto& Member : TeamInfo->GetTeamMembers()) {
+		for (const auto& Member : KillerPlayerState->GetPlayerTeam()->GetTeamMembers()) {
 			auto MemberPlayerState = Member->GetPlayerState();
 			if (MemberPlayerState != KillerPlayerState) {
 				int32 MemberTeamScore = MemberPlayerState->GetTeamKillScore() + 1;
@@ -462,7 +461,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	if (!bIsDBNO) {
 		((void (*)(AFortGameModeAthena*, AFortPlayerController*, AFortPlayerStateAthena*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char))(Finder->RemoveFromAlivePlayers()))
 			(GameMode, PlayerController, KillerPlayerState, KillerPawn, 
-			 DeathReport.GetDamageCauser().Get() ? Cast<AFortWeapon>(DeathReport.GetDamageCauser().Get())->GetWeaponData() : nullptr, 
+			 DeathReport.GetDamageCauser() ? Cast<AFortWeapon>(DeathReport.GetDamageCauser())->GetWeaponData() : nullptr, 
 			 CachedDeathCause, 0);
 
 		auto MatchReport = PlayerController->GetMatchReport();
@@ -512,7 +511,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 				WinnerPlayerState->SetPlace(1);
 				WinnerPlayerState->CallFunc<void>("FortGameStateAthena", "OnRep_Place");
 
-				auto WinnerWeapon = DeathReport.GetDamageCauser().ObjectIndex ? Cast<AFortWeapon>(DeathReport.GetDamageCauser().Get())->GetWeaponData() : nullptr;
+				auto WinnerWeapon = DeathReport.GetDamageCauser() ? Cast<AFortWeapon>(DeathReport.GetDamageCauser())->GetWeaponData() : nullptr;
            
 				LastAliveController->CallFunc<void>("FortPlayerControllerAthena", "PlayWinEffects", WinnerPawn, WinnerWeapon, CachedDeathCause, false);
 				LastAliveController->CallFunc<void>("FortPlayerControllerAthena", "ClientNotifyWon", WinnerPawn, WinnerWeapon, CachedDeathCause);

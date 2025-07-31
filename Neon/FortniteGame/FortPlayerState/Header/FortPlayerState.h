@@ -5,6 +5,7 @@
 #include "Engine/ObjectPtr/Header/ObjectPtr.h"
 #include "FortniteGame/BuildingSMActor/Header/BuildingSMActor.h"
 #include "FortniteGame/Common/Header/Tags.h"
+#include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 
 enum class EFortCustomPartType : uint8
 {
@@ -42,7 +43,19 @@ public:
 	DECLARE_DEFAULT_OBJECT(UFortHeroType)
 };
 
-class AFortPlayerStateZone : public UObject
+class AFortTeamInfo : public UObject
+{
+public:
+	DEFINE_MEMBER(TArray<AFortPlayerControllerAthena*>, AFortTeamInfo, TeamMembers); // 0x0280(0x0010)(ZeroConstructor, Protected, UObjectWrapper, NativeAccessSpecifierProtected)
+};
+
+class AFortPlayerState : public UObject
+{
+public:
+	DEFINE_PTR(AFortTeamInfo, AFortPlayerState, PlayerTeam); 
+};
+
+class AFortPlayerStateZone : public AFortPlayerState
 {
     
 };

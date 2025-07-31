@@ -132,12 +132,6 @@ public:
     DECLARE_DEFAULT_OBJECT(UAthenaPlayerMatchReport);
 };
 
-class AFortTeamInfo : public UObject
-{
-public:
-    DEFINE_MEMBER(TArray<AFortPlayerControllerAthena*>, AFortTeamInfo, TeamMembers); // 0x0280(0x0010)(ZeroConstructor, Protected, UObjectWrapper, NativeAccessSpecifierProtected)
-};
-
 class UGAB_Spray_Generic_C : public UGAB_Emote_Generic_C
 {
 public:
@@ -193,13 +187,13 @@ public:
     DEFINE_MEMBER(float, FFortPlayerDeathReport, LethalDamage);
     uint8                                         Pad_C[0x4];
     DEFINE_PTR(AFortPlayerStateAthena, FFortPlayerDeathReport, KillerPlayerState);
-    DEFINE_MEMBER(TWeakObjectPtr<AFortPlayerPawn>, FFortPlayerDeathReport, KillerPawn);
+    DEFINE_PTR(AFortPlayerPawn, FFortPlayerDeathReport, KillerPawn);
     DEFINE_MEMBER(float, FFortPlayerDeathReport, KillerHealthPercent);
     DEFINE_MEMBER(float, FFortPlayerDeathReport, KillerShieldPercent);
     DEFINE_MEMBER(float, FFortPlayerDeathReport, KillerOvershieldPercent);
     uint8                                         Pad_2C[0x4];
     DEFINE_PTR(UFortWeaponItemDefinition, FFortPlayerDeathReport, KillerWeapon);
-    DEFINE_MEMBER(TWeakObjectPtr<AActor>, FFortPlayerDeathReport, DamageCauser);
+    DEFINE_PTR(AActor, FFortPlayerDeathReport, DamageCauser);
     uint8                                         bDroppedBackpack : 1;
     uint8                                         bNotifyUI : 1;
     uint8                                         Pad_41[0x7];
