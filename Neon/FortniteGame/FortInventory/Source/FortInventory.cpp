@@ -102,6 +102,7 @@ UObject* AFortInventory::GiveItem(AFortAthenaAIBotController* Controller, UFortI
 
 AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry* Entry, EFortPickupSourceTypeFlag SourceTypeFlag, EFortPickupSpawnSource SpawnSource, AFortPlayerPawn* Pawn, int OverrideCount, bool Toss, bool RandomRotation, bool bCombine)
 {
+    UE_LOG(LogNeon, Log, "FVector: X: %f, Y: %f, Z: %f", Loc.X, Loc.Y, Loc.Z);
     AFortPickupAthena* NewPickup = UGameplayStatics::SpawnActorOG<AFortPickupAthena>(AFortPickupAthena::StaticClass(), Loc);
     if (NewPickup != nullptr && Entry->GetItemDefinition() != nullptr)
     {
@@ -117,8 +118,6 @@ AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry* Entr
         NewPickup->OnRep_PrimaryPickupItemEntry();
             
         NewPickup->CallFunc<void>("FortPickup", "TossPickup", Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
-        NewPickup->Set("FortPickup", "bTossedFromContainer", SpawnSource == EFortPickupSpawnSource::Chest || SpawnSource == EFortPickupSpawnSource::AmmoBox);
-        if (NewPickup->Get<bool>("FortPickup", "bTossedFromContainer")) NewPickup->CallFunc<void>("FortPickup", "OnRep_TossedFromContainer");
     }
     
     return NewPickup;

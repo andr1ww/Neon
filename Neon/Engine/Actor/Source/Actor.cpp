@@ -3,5 +3,5 @@
 
 FVector AActor::GetActorLocation()
 {
-    return GetDefaultObj()->CallFunc<FVector>("Actor","K2_GetActorLocation");
+    return this->CallFunc<FVector>("Actor","K2_GetActorLocation");
 }

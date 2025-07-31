@@ -306,7 +306,9 @@ int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSecond
 
 void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 {
+    static bool bStartedBus = false;
     if (GetAsyncKeyState(VK_F5) & 0x1) {
+        bStartedBus = true;
         ExecuteConsoleCommand(UWorld::GetWorld(), L"startaircraft", nullptr);
         Sleep(400);
     }
@@ -357,7 +359,6 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             ServerReplicateActors(NetDriver, DeltaSeconds);
         }
 
-        static bool bStartedBus = false;
         if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && !bStartedBus)
         {
             AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
