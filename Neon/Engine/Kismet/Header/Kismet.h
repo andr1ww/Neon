@@ -25,9 +25,9 @@ public:
             bool ReturnValue;
         } KismetMathLibrary_RandomBoolWithWeight{ Weight };
 
-        SDK::StaticClassImpl("KismetStringLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &KismetMathLibrary_RandomBoolWithWeight);
+        SDK::StaticClassImpl("KismetMathLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &KismetMathLibrary_RandomBoolWithWeight);
 
-        return KismetMathLibrary_RandomBoolWithWeight.Weight;
+        return KismetMathLibrary_RandomBoolWithWeight.ReturnValue;
     }
 
 public:
