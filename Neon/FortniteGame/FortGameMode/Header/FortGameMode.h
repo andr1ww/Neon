@@ -169,7 +169,9 @@ class AFortGameModeAthena : public AFortGameMode
 public:
     DEFINE_MEMBER(int32, AFortGameModeAthena, WarmupRequiredPlayerCount);
     DEFINE_MEMBER(int32, AFortGameModeAthena, NumPlayers);
+    DEFINE_MEMBER(int32, AFortGameModeAthena, NumBots);
     DEFINE_MEMBER(TArray<FItemAndCount>, AFortGameModeAthena, StartingItems);
+    DEFINE_MEMBER(TArray<AFortAthenaAIBotController*>, AFortGameModeAthena, AliveBots);
     DEFINE_MEMBER(TArray<AFortPlayerControllerAthena*>, AFortGameModeAthena, AlivePlayers);
     DEFINE_PTR(UFortServerBotManagerAthena, AFortGameModeAthena, ServerBotManager);
     DEFINE_MEMBER(TSubclassOf<class UFortServerBotManagerAthena>, AFortGameModeAthena, ServerBotManagerClass);
