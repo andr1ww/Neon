@@ -13,7 +13,9 @@ using FGameplayEventData = PadB0;
 
 class UGameplayAbility : public UObject
 {
-    
+public:
+    DECLARE_STATIC_CLASS(UGameplayAbility)
+    DECLARE_DEFAULT_OBJECT(UGameplayAbility)
 };
 
 struct FPredictionKey final
