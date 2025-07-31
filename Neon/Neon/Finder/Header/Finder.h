@@ -98,6 +98,8 @@ public:
     uint64 GetInterfaceAddress();
 
     uint64 OnDamageServer();
+    
+    uint64 ClientOnPawnDied();
 
     uint64 SpawnBot();
 
@@ -116,6 +118,8 @@ public:
     uint64 OnPossessedPawnDied();
 
     uint64 CompletePickupAnimation();
+
+    uint64 RemoveFromAlivePlayers();
 };
 
 inline UFinder* Finder = new UFinder();

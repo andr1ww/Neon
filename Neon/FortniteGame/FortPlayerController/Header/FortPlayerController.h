@@ -91,38 +91,34 @@ public:
 struct FAthenaRewardResult final
 {
 public:
-    int32                                         LevelsGained;                                      // 0x0000(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    int32                                         BookLevelsGained;                                  // 0x0004(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    int32                                         TotalSeasonXpGained;                               // 0x0008(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    int32                                         TotalBookXpGained;                                 // 0x000C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    int32                                         PrePenaltySeasonXpGained;                          // 0x0010(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    uint8                                         Pad_14[0x4];                                       // 0x0014(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
-    TArray<struct FAthenaMatchXpMultiplierGroup>  XpMultipliers;                                     // 0x0018(0x0010)(ZeroConstructor, NativeAccessSpecifierPublic)
-    TArray<struct FAthenaAwardGroup>              Rewards;                                           // 0x0028(0x0010)(ZeroConstructor, NativeAccessSpecifierPublic)
-    float                                         AntiAddictionMultiplier;                           // 0x0038(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    uint8                                         Pad_3C[0x4];                                       // 0x003C(0x0004)(Fixing Struct Size After Last Property [ Dumper-7 ])
+    DEFINE_MEMBER(int32, FAthenaRewardResult, LevelsGained);
+    DEFINE_MEMBER(int32, FAthenaRewardResult, BookLevelsGained);
+    DEFINE_MEMBER(int32, FAthenaRewardResult, TotalSeasonXpGained);
+    DEFINE_MEMBER(int32, FAthenaRewardResult, TotalBookXpGained);
+    DEFINE_MEMBER(int32, FAthenaRewardResult, PrePenaltySeasonXpGained);
+    uint8                                         Pad_14[0x4];
+    DEFINE_MEMBER(float, FAthenaRewardResult, AntiAddictionMultiplier);
+    uint8                                         Pad_3C[0x4];
 };
 
 struct FAthenaMatchStats final
 {
 public:
-	class FString                                 StatBucket;                                        // 0x0000(0x0010)(ZeroConstructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
-	class FString                                 MatchID;                                           // 0x0010(0x0010)(ZeroConstructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
-	class FString                                 MatchEndTime;                                      // 0x0020(0x0010)(ZeroConstructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
-	class FString                                 MatchPlatform;                                     // 0x0030(0x0010)(ZeroConstructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
-	int32                                         Stats[0x14];                                       // 0x0040(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
-	TArray<struct FAthenaWeaponStats>             WeaponStats;                                       // 0x0090(0x0010)(ZeroConstructor, NativeAccessSpecifierPrivate)
-	TArray<struct FAthenaXPStats>                 XPStats;                                           // 0x00A0(0x0010)(ZeroConstructor, NativeAccessSpecifierPrivate)
-	bool                                          bIsValid;                                          // 0x00D4(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
-	uint8                                         Pad_D5[0x3];                                       // 0x00D5(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
-	class FString                                 FactionTag;                                        // 0x00D8(0x0010)(ZeroConstructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+    DEFINE_MEMBER(FString, FAthenaMatchStats, StatBucket);
+    DEFINE_MEMBER(FString, FAthenaMatchStats, MatchID);
+    DEFINE_MEMBER(FString, FAthenaMatchStats, MatchEndTime);
+    DEFINE_MEMBER(FString, FAthenaMatchStats, MatchPlatform);
+    int32                                         Stats[0x14];
+    DEFINE_BOOL(FAthenaMatchStats, bIsValid);
+    uint8                                         Pad_D5[0x3];
+    DEFINE_MEMBER(FString, FAthenaMatchStats, FactionTag);
 };
 
 struct FAthenaMatchTeamStats final
 {
 public:
-    int32                                         Place;                                             // 0x0000(0x0004)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    int32                                         TotalPlayers;                                      // 0x0004(0x0004)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    DEFINE_MEMBER(int32, FAthenaMatchTeamStats, Place);
+    DEFINE_MEMBER(int32, FAthenaMatchTeamStats, TotalPlayers);
 };
 
 class UAthenaPlayerMatchReport : public UObject
@@ -192,24 +188,24 @@ class AFortWeap_EditingTool : public UObject
 struct FFortPlayerDeathReport final
 {
 public:
-	float                                         ServerTimeForRespawn;                              // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, Transient, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	float                                         ServerTimeForResurrect;                            // 0x0004(0x0004)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, Transient, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	float                                         LethalDamage;                                      // 0x0008(0x0004)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, Transient, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	uint8                                         Pad_C[0x4];                                        // 0x000C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
-    DEFINE_PTR(AFortPlayerStateAthena, FFortPlayerDeathReport, KillerPlayerState); // 0x0010(0x0008)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, Transient, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    DEFINE_MEMBER(TWeakObjectPtr<AFortPlayerPawn>, FFortPlayerDeathReport, KillerPawn); // 0x0018(0x0008)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, Transient, IsPlainOldData, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	float                                         KillerHealthPercent;                               // 0x0020(0x0004)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, Transient, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	float                                         KillerShieldPercent;                               // 0x0024(0x0004)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, Transient, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	float                                         KillerOvershieldPercent;                           // 0x0028(0x0004)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, Transient, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	uint8                                         Pad_2C[0x4];                                       // 0x002C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
-	class UFortWeaponItemDefinition*              KillerWeapon;                                      // 0x0030(0x0008)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, Transient, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	TWeakObjectPtr<class AActor>                  DamageCauser;                                      // 0x0038(0x0008)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, Transient, IsPlainOldData, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	uint8                                         bDroppedBackpack : 1;                              // 0x0040(0x0001)(BitIndex: 0x00, PropSize: 0x0001 (BlueprintVisible, BlueprintReadOnly, Transient, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic))
-	uint8                                         bNotifyUI : 1;                                     // 0x0040(0x0001)(BitIndex: 0x01, PropSize: 0x0001 (BlueprintVisible, BlueprintReadOnly, Transient, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic))
-	uint8                                         Pad_41[0x7];                                       // 0x0041(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
-    FGameplayTagContainer                  Tags;                                              // 0x0048(0x0020)(BlueprintVisible, BlueprintReadOnly, Transient, NativeAccessSpecifierPublic)
-	struct FVector                                ViewLocationAtTimeOfDeath;                         // 0x0068(0x0018)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, Transient, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	struct FRotator                               ViewRotationAtTimeOfDeath;                         // 0x0080(0x0018)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, Transient, IsPlainOldData, NoDestructor, NativeAccessSpecifierPublic)
+    DEFINE_MEMBER(float, FFortPlayerDeathReport, ServerTimeForRespawn);
+    DEFINE_MEMBER(float, FFortPlayerDeathReport, ServerTimeForResurrect);
+    DEFINE_MEMBER(float, FFortPlayerDeathReport, LethalDamage);
+    uint8                                         Pad_C[0x4];
+    DEFINE_PTR(AFortPlayerStateAthena, FFortPlayerDeathReport, KillerPlayerState);
+    DEFINE_MEMBER(TWeakObjectPtr<AFortPlayerPawn>, FFortPlayerDeathReport, KillerPawn);
+    DEFINE_MEMBER(float, FFortPlayerDeathReport, KillerHealthPercent);
+    DEFINE_MEMBER(float, FFortPlayerDeathReport, KillerShieldPercent);
+    DEFINE_MEMBER(float, FFortPlayerDeathReport, KillerOvershieldPercent);
+    uint8                                         Pad_2C[0x4];
+    DEFINE_PTR(UFortWeaponItemDefinition, FFortPlayerDeathReport, KillerWeapon);
+    DEFINE_MEMBER(TWeakObjectPtr<AActor>, FFortPlayerDeathReport, DamageCauser);
+    uint8                                         bDroppedBackpack : 1;
+    uint8                                         bNotifyUI : 1;
+    uint8                                         Pad_41[0x7];
+    DEFINE_MEMBER(FGameplayTagContainer, FFortPlayerDeathReport, Tags);
+    DEFINE_MEMBER(FVector, FFortPlayerDeathReport, ViewLocationAtTimeOfDeath);
+    DEFINE_MEMBER(FRotator, FFortPlayerDeathReport, ViewRotationAtTimeOfDeath);
 };
 
 class UFortPlayerControllerAthenaXPComponent : public UObject
