@@ -104,6 +104,13 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 JerkyFoundation->CallFunc<void>("BuildingFoundation", "OnRep_DynamicFoundationRepData");
                 JerkyFoundation->CallFunc<void>("BuildingFoundation", "SetDynamicFoundationEnabled", true);
             }
+
+            static const UClass* PlayerPawnClass = (UClass*)GUObjectArray.FindObject("PlayerPawn_Athena_C");
+
+            if (GameMode)
+            {
+                GameMode->Set("GameModeBase", "DefaultPawnClass", PlayerPawnClass);
+            }
             
             if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
             {
@@ -200,24 +207,7 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         UE_LOG(LogNeon, Warning, "Early return!");
 		return 0;
     }
-    static const UClass* PlayerPawnClass = (UClass*)GUObjectArray.FindObject("PlayerPawn_Athena_C");
-
-    if (!PlayerPawnClass)
-    {
-        UE_LOG(LogNeon, Fatal, "PlayerPawn_Athena_C not found!");
-        return nullptr;
-    }
-
-    if (GameMode)
-    {
-        GameMode->Set("GameModeBase", "DefaultPawnClass", PlayerPawnClass);
-    }
-    else
-    {
-        UE_LOG(LogNeon, Fatal, "GameMode is null in SpawnDefaultPawnFor!");
-        return nullptr;
-    }
-
+    
     auto Pawn = GameMode->CallFunc<APawn*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer,  StartSpot->CallFunc<FTransform>("Actor", "GetTransform"));;
 
     auto& StartingItemsArray = GameMode->GetStartingItems();
@@ -247,10 +237,7 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
     {
         NewPlayer->SetMatchReport((UAthenaPlayerMatchReport*)UGameplayStatics::SpawnObject(UAthenaPlayerMatchReport::StaticClass(), NewPlayer));
     }
-
-    static UFortAbilitySet* AbilitySet = nullptr;
-    if (!AbilitySet) AbilitySet = (UFortAbilitySet*)GUObjectArray.FindObject("GAS_AthenaPlayer");
-    UAbilitySystemComponent::GiveAbilitySet(NewPlayer->GetPlayerState()->GetAbilitySystemComponent(), AbilitySet);
+    
   /* TScriptInterface<IAbilitySystemInterface> AbilitySystemInterface{};
 
     static void* (*GetInterfaceAddress)(UObject* Object, UClass* Class) = decltype(GetInterfaceAddress)(Finder->GetInterfaceAddress());

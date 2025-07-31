@@ -27,6 +27,15 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
     }
 }
 
+void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+	Stack.IncrementCode();
+	static UFortAbilitySet* AbilitySet = nullptr;
+	if (!AbilitySet) AbilitySet = (UFortAbilitySet*)GUObjectArray.FindObject("GAS_AthenaPlayer");
+	UAbilitySystemComponent::GiveAbilitySet(PlayerController->GetPlayerState()->GetAbilitySystemComponent(), AbilitySet);
+}
+
+
 void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) {
     FGuid ItemGuid;
     Stack.StepCompiledIn(&ItemGuid);

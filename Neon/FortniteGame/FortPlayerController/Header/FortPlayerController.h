@@ -226,6 +226,7 @@ public:
     DEFINE_BOOL(AFortPlayerControllerAthena, bHasServerFinishedLoading);
 public:
     static void ServerAttemptAircraftJump(UActorComponent* Comp, FFrame& Stack);
+    static void ServerLoadingScreenDropped(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerPlayEmoteItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
