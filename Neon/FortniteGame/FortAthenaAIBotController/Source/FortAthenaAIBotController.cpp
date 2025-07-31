@@ -85,7 +85,7 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
             for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); ++i)
             {
 				UFortWorldItemDefinition* WorldItem = (UFortWorldItemDefinition*)ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemDefinition();
-				if (WorldItem) {
+				if (WorldItem && WorldItem->GetbCanBeDropped()) {
 					AFortInventory::SpawnPickupDirect(
 						Controller->GetActorLocation(),
 						WorldItem,
