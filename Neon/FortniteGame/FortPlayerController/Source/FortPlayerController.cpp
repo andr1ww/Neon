@@ -456,7 +456,11 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
    
 	bool bIsDBNO = VictimPawn && VictimPawn->CallFunc<bool>("FortPawn", "IsDBNO");
 	if (!bIsDBNO) {
-		static auto DamageCauserOffset = Runtime::GetOffsetStruct("FortPlayerDeathReport", "DamageCauser");
+		static int DamageCauserOffset = 0;
+		if (!DamageCauserOffset)
+		{
+			DamageCauserOffset = Runtime::GetOffsetStruct("FortPlayerDeathReport", "DamageCauser");
+		}
 		AActor* DamageCauser = *(AActor**)((char*)&DeathReport + DamageCauserOffset);
 		UFortWeaponItemDefinition* ItemDef = nullptr;
 		
@@ -468,9 +472,9 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 				ItemDef = Owner->IsValidLowLevel() ? Owner->GetWeaponData() : nullptr; 
 			}
 
-			if (auto Weapon = Cast<AFortWeapon>(DamageCauser))
+			if (auto WeaponDef = Cast<AFortWeapon>(DamageCauser))
 			{
-				ItemDef = Weapon->GetWeaponData();
+				ItemDef = WeaponDef->GetWeaponData();
 			}
 		}
 		
