@@ -128,6 +128,10 @@ public:
 class UAthenaPlayerMatchReport : public UObject
 {
 public:
+    DEFINE_MEMBER(FAthenaRewardResult, UAthenaPlayerMatchReport, EndOfMatchResults); // 0x0000(0x0038)(BlueprintVisible, BlueprintReadOnly, Transient, NativeAccessSpecifierPublic)
+    DEFINE_MEMBER(FAthenaMatchTeamStats, UAthenaPlayerMatchReport, TeamStats); // 0x0000(0x0028)(BlueprintVisible, BlueprintReadOnly, Transient, NativeAccessSpecifierPublic)
+    DEFINE_MEMBER(FAthenaMatchStats, UAthenaPlayerMatchReport, MatchStats); // 0x0028(0x00A0)(BlueprintVisible, BlueprintReadOnly, Transient, NativeAccessSpecifierPublic)
+public:
     DECLARE_STATIC_CLASS(UAthenaPlayerMatchReport);
     DECLARE_DEFAULT_OBJECT(UAthenaPlayerMatchReport);
 };
@@ -208,9 +212,16 @@ public:
 	struct FRotator                               ViewRotationAtTimeOfDeath;                         // 0x0080(0x0018)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, Transient, IsPlainOldData, NoDestructor, NativeAccessSpecifierPublic)
 };
 
+class UFortPlayerControllerAthenaXPComponent : public UObject
+{
+public:
+    
+};
+
 class AFortPlayerControllerAthena : public AFortPlayerController 
 {
 public:
+    DEFINE_PTR(UFortPlayerControllerAthenaXPComponent, AFortPlayerControllerAthena, XPComponent);
     DEFINE_PTR(UAthenaPlayerMatchReport, AFortPlayerControllerAthena, MatchReport);
     DEFINE_PTR(AFortPlayerStateAthena, AFortPlayerControllerAthena, PlayerState);
     DEFINE_BOOL(AFortPlayerControllerAthena, bHasServerFinishedLoading);

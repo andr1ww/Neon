@@ -124,6 +124,7 @@ public:
 class AFortPlayerStateAthena : public AFortPlayerStateZone
 {
 public:
+	DEFINE_MEMBER(int32, AFortPlayerStateAthena, SquadId);
 	DEFINE_MEMBER(int32, AFortPlayerStateAthena, Place);
 	DEFINE_MEMBER(int32, AFortPlayerStateAthena, KillScore);
 	DEFINE_MEMBER(int32, AFortPlayerStateAthena, TeamKillScore);
