@@ -313,7 +313,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
         Sleep(400);
     }
     
-    if (GetAsyncKeyState(VK_F6) & 0x1)
+    if (GetAsyncKeyState(VK_F10) & 0x1)
     {
         static std::string Loader = std::string();
         static std::string StartEventPath = std::string();

@@ -128,7 +128,7 @@ AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry* Entr
 AFortPickupAthena* AFortInventory::SpawnPickupDirect(FVector Loc, UFortItemDefinition* ItemDefinition, int Count, int LoadedAmmo, EFortPickupSourceTypeFlag SourceTypeFlag, EFortPickupSpawnSource SpawnSource, AFortPlayerPawn* Pawn, bool Toss)
 {
     if (!ItemDefinition || !Pawn) return nullptr;
-    if (ItemDefinition->GetFName().ToString().ToString().find("Pickaxe") != std::string::npos) return nullptr;
+ //   if (ItemDefinition->GetFName().ToString().ToString().find("Pickaxe") != std::string::npos) return nullptr;
 
     AFortPickupAthena* NewPickup = UGameplayStatics::SpawnActorOG<AFortPickupAthena>(AFortPickupAthena::StaticClass(), Loc);
     if (NewPickup != nullptr && ItemDefinition != nullptr)

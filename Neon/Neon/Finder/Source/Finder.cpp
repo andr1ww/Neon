@@ -974,7 +974,11 @@ uint64 UFinder::CompletePickupAnimation() {
     
     if (Fortnite_Version >= 8.0 && Fortnite_Version < 17.0)
     {
-        return CachedResult = Memcury::Scanner::FindPattern("40 53 56 48 83 EC 38 4C 89 6C 24 ? 48 8B F1 4C 8B A9 ? ? ? ? 4D 85 ED").Get();
+        CachedResult = Memcury::Scanner::FindPattern("40 53 56 48 83 EC 38 4C 89 6C 24 ? 48 8B F1 4C 8B A9 ? ? ? ? 4D 85 ED").Get();
+        if (CachedResult == 0)
+        {
+            return CachedResult == Memcury::Scanner::FindPattern("").Get();    
+        }
     }
     
     if (Fortnite_Version >= 17.0 && Fortnite_Version < 19.0) {
