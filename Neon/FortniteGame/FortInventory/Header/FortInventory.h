@@ -169,6 +169,7 @@ public:
     static void ReplaceEntry(AFortPlayerController*, FFortItemEntry&);
     static void Remove(AFortPlayerController* PlayerController, FGuid Guid, int AmountToRemove = -1);
     static AFortPickupAthena* SpawnPickup(FVector, FFortItemEntry*, EFortPickupSourceTypeFlag SourceTypeFlag = EFortPickupSourceTypeFlag::Tossed, EFortPickupSpawnSource SpawnSource = EFortPickupSpawnSource::Unset, AFortPlayerPawn* Pawn = nullptr, int OverrideCount = -1, bool Toss = true, bool RandomRotation = true, bool bCombine = true);
+    static AFortPickupAthena* SpawnPickupDirect(FVector, UFortItemDefinition*, int, int, EFortPickupSourceTypeFlag SourceTypeFlag = EFortPickupSourceTypeFlag::Tossed, EFortPickupSpawnSource SpawnSource = EFortPickupSpawnSource::Unset, AFortPlayerPawn* Pawn = nullptr, bool Toss = true);
     static AFortPickupAthena* SpawnPickup(FVector, UFortItemDefinition*, int, int, EFortPickupSourceTypeFlag SourceTypeFlag = EFortPickupSourceTypeFlag::Tossed, EFortPickupSpawnSource SpawnSource = EFortPickupSpawnSource::Unset, AFortPlayerPawn* Pawn = nullptr, bool Toss = true);
     static FFortItemEntry* MakeItemEntry(UFortItemDefinition*, int32, int32);
 public:

@@ -53,6 +53,6 @@ public:
 class UFortWorldItemDefinition : public UFortItemDefinition
 {
 public:
-    DEFINE_BOOL(UFortWorldItemDefinition, bCanBeDropped)
+    DEFINE_MEMBER(uint8, UFortWorldItemDefinition, bCanBeDropped)
     DEFINE_MEMBER(FScalableFloat, UFortWorldItemDefinition, MaxStackSize)
 };

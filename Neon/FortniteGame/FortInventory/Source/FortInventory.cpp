@@ -102,7 +102,6 @@ UObject* AFortInventory::GiveItem(AFortAthenaAIBotController* Controller, UFortI
 
 AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry* Entry, EFortPickupSourceTypeFlag SourceTypeFlag, EFortPickupSpawnSource SpawnSource, AFortPlayerPawn* Pawn, int OverrideCount, bool Toss, bool RandomRotation, bool bCombine)
 {
-    UE_LOG(LogNeon, Log, "[AFortInventory::SpawnPickup] FVector: X: %f, Y: %f, Z: %f", Loc.X, Loc.Y, Loc.Z);
     if (!Entry || !Pawn) return nullptr;
     if (Entry->GetItemDefinition()->GetFName().ToString().ToString().find("Pickaxe") != std::string::npos) return nullptr;
 
@@ -118,6 +117,26 @@ AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry* Entr
         NewPickup->GetPrimaryPickupItemEntry().SetItemDefinition(Entry->GetItemDefinition());
         NewPickup->GetPrimaryPickupItemEntry().SetLoadedAmmo(Entry->GetLoadedAmmo());
         NewPickup->GetPrimaryPickupItemEntry().SetCount(OverrideCount != -1 ? OverrideCount : Entry->GetCount());
+        NewPickup->OnRep_PrimaryPickupItemEntry();
+            
+        NewPickup->CallFunc<void>("FortPickup", "TossPickup", Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
+    }
+    
+    return NewPickup;
+}
+
+AFortPickupAthena* AFortInventory::SpawnPickupDirect(FVector Loc, UFortItemDefinition* ItemDefinition, int Count, int LoadedAmmo, EFortPickupSourceTypeFlag SourceTypeFlag, EFortPickupSpawnSource SpawnSource, AFortPlayerPawn* Pawn, bool Toss)
+{
+    if (!ItemDefinition || !Pawn) return nullptr;
+    if (ItemDefinition->GetFName().ToString().ToString().find("Pickaxe") != std::string::npos) return nullptr;
+
+    AFortPickupAthena* NewPickup = UGameplayStatics::SpawnActorOG<AFortPickupAthena>(AFortPickupAthena::StaticClass(), Loc);
+    if (NewPickup != nullptr && ItemDefinition != nullptr)
+    {
+        NewPickup->SetbRandomRotation(true);
+        NewPickup->GetPrimaryPickupItemEntry().SetItemDefinition(ItemDefinition);
+        NewPickup->GetPrimaryPickupItemEntry().SetLoadedAmmo(LoadedAmmo);
+        NewPickup->GetPrimaryPickupItemEntry().SetCount(Count);
         NewPickup->OnRep_PrimaryPickupItemEntry();
             
         NewPickup->CallFunc<void>("FortPickup", "TossPickup", Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
