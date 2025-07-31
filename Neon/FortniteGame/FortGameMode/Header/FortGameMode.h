@@ -175,7 +175,6 @@ public:
     DEFINE_MEMBER(TSubclassOf<class UFortServerBotManagerAthena>, AFortGameModeAthena, ServerBotManagerClass);
     DEFINE_PTR(AFortAIDirector, AFortGameModeAthena, AIDirector);
     DEFINE_PTR(AFortAIGoalManager, AFortGameModeAthena, AIGoalManager);
-
     DEFINE_MEMBER(TArray<AFortPlayerControllerAthena*>, AFortGameModeAthena, AlivePlayers);
     DEFINE_MEMBER(TArray<AFortAthenaAIBotController*>, AFortGameModeAthena, AliveBots);
 public:
