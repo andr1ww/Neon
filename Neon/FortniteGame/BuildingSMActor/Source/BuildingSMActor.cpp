@@ -29,7 +29,7 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     }
     
     if (!DamageCauser || 
-    !DamageCauser->IsA<AFortWeapon>() || 
+    DamageCauser && !DamageCauser->IsA<AFortWeapon>() || 
     !static_cast<AFortWeapon*>(DamageCauser)->GetWeaponData()->IsA<UFortWeaponMeleeItemDefinition>()) {
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }

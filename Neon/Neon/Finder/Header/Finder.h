@@ -114,6 +114,8 @@ public:
     uint64 SpawnBotRet();
 
     uint64 OnPossessedPawnDied();
+
+    uint64 CompletePickupAnimation();
 };
 
 inline UFinder* Finder = new UFinder();

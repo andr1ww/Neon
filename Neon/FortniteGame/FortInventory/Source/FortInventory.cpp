@@ -102,7 +102,9 @@ UObject* AFortInventory::GiveItem(AFortAthenaAIBotController* Controller, UFortI
 
 AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry* Entry, EFortPickupSourceTypeFlag SourceTypeFlag, EFortPickupSpawnSource SpawnSource, AFortPlayerPawn* Pawn, int OverrideCount, bool Toss, bool RandomRotation, bool bCombine)
 {
-    if (Entry->GetItemDefinition()->IsA<UAthenaPickaxeItemDefinition>() || Entry->GetItemDefinition()->GetFName().ToString().ToString().find("Pickaxe") != std::string::npos) return nullptr;
+    UE_LOG(LogNeon, Log, "[AFortInventory::SpawnPickup] FVector: X: %f, Y: %f, Z: %f", Loc.X, Loc.Y, Loc.Z);
+    if (Entry->GetItemDefinition()->GetFName().ToString().ToString().find("Pickaxe") != std::string::npos) return nullptr;
+
     AFortPickupAthena* NewPickup = UGameplayStatics::SpawnActorOG<AFortPickupAthena>(AFortPickupAthena::StaticClass(), Loc);
     if (NewPickup != nullptr && Entry->GetItemDefinition() != nullptr)
     {

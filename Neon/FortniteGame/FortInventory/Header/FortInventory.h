@@ -36,6 +36,7 @@ public:
     DEFINE_MEMBER(TWeakObjectPtr<AFortPawn>, FFortPickupLocationData, ItemOwner);
     DEFINE_MEMBER(TWeakObjectPtr<AFortPawn>, FFortPickupLocationData, PickupTarget);
     DEFINE_MEMBER(FGuid, FFortPickupLocationData, PickupGuid);
+    DEFINE_MEMBER(FVector_NetQuantizeNormal, FFortPickupLocationData, StartDirection);
 };
 
 
@@ -56,6 +57,27 @@ public:
             return;
 
         this->ProcessEvent(Func, nullptr);
+    }
+
+    void OnRep_PickupLocationData()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPickup", "OnRep_PickupLocationData");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        if (!this) 
+            return;
+
+        auto Flgs = Func->FunctionFlags();
+        Func->FunctionFlags() |= 0x400;
+    
+        this->ProcessEvent(Func, nullptr);
+
+        Func->FunctionFlags() = Flgs;
     }
 public:
     DEFINE_BOOL(AFortPickup, bPickedUp);
@@ -96,6 +118,14 @@ class UFortWeaponItemDefinition : public UFortWorldItemDefinition
 {
     
 };
+
+class UFortGadgetItemDefinition : public UFortWorldItemDefinition
+{
+public:
+    DECLARE_STATIC_CLASS(UFortGadgetItemDefinition)
+    DECLARE_DEFAULT_OBJECT(UFortGadgetItemDefinition)
+};
+
 
 enum class EFortPickupSpawnSource : uint8
 {

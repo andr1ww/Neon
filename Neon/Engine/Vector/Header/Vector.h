@@ -11,3 +11,7 @@ struct FVector {
 struct FVector_NetQuantize10 final : public FVector
 {
 };
+
+struct FVector_NetQuantizeNormal final : public FVector
+{
+};

@@ -20,7 +20,10 @@ public:
     }
 	
 public:
-    class UObject* Get() const;
+    class UObject* Get() const
+    {
+        return (UObject*)GUObjectArray.IndexToObject(ObjectIndex);
+    }
     class UObject* operator->() const;
     bool operator==(const FWeakObjectPtr& Other) const;
     bool operator!=(const FWeakObjectPtr& Other) const;
