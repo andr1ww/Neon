@@ -6,7 +6,30 @@
 
 class UFortResourceItemDefinition : public UFortWorldItemDefinition
 {
-    
+public:
+    DECLARE_STATIC_CLASS(UFortResourceItemDefinition);
+    DECLARE_DEFAULT_OBJECT(UFortResourceItemDefinition);
+};
+
+class UFortAmmoItemDefinition : public UFortWorldItemDefinition
+{
+public:
+    DECLARE_STATIC_CLASS(UFortAmmoItemDefinition);
+    DECLARE_DEFAULT_OBJECT(UFortAmmoItemDefinition);
+};
+
+class UFortConsumableItemDefinition : public UFortWorldItemDefinition
+{
+public:
+    DECLARE_STATIC_CLASS(UFortConsumableItemDefinition);
+    DECLARE_DEFAULT_OBJECT(UFortConsumableItemDefinition);
+};
+
+class UFortWeaponRangedItemDefinition : public UFortWorldItemDefinition
+{
+public:
+    DECLARE_STATIC_CLASS(UFortWeaponRangedItemDefinition);
+    DECLARE_DEFAULT_OBJECT(UFortWeaponRangedItemDefinition);
 };
 
 class UFortKismetLibrary : public UObject

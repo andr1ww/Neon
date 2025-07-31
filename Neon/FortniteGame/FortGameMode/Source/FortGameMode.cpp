@@ -245,6 +245,11 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         bSpawnedAI = true;
         AFortAthenaAIBotController::SpawnPlayerBot(90);
     }*/
+
+    if (!NewPlayer->GetMatchReport())
+    {
+        NewPlayer->SetMatchReport((UAthenaPlayerMatchReport*)UGameplayStatics::SpawnObject(UAthenaPlayerMatchReport::StaticClass(), NewPlayer));
+    }
     
     return Pawn;
 }

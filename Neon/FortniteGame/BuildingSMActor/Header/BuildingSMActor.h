@@ -26,6 +26,9 @@ class AFortWeapon : public AActor
 {
 public:
 	DEFINE_PTR(UFortWeaponItemDefinition, AFortWeapon, WeaponData)
+public:
+    DECLARE_STATIC_CLASS(AFortWeapon)
+    DECLARE_DEFAULT_OBJECT(AFortWeapon)
 };
 
 struct FHitResult final

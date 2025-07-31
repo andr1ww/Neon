@@ -116,8 +116,7 @@ public:
 	DEFINE_MEMBER(float, FDeathInfo, Distance);
 	float                                         Distance;                                          // 0x0014(0x0004)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 	DEFINE_MEMBER(FVector, FDeathInfo, DeathLocation); // 0x0018(0x000C)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	DEFINE_MEMBER(bool, FDeathInfo, bInitialized); // 0x0024(0x0001)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	bool                                          bInitialized;                                      // 0x0024(0x0001)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	DEFINE_BOOL(FDeathInfo, bInitialized)
 	uint8                                         Pad_1B1A[0x3];                                     // 0x0025(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
 	uint8                                         Pad_1B1B[0x8];                                     // 0x0048(0x0008)(Fixing Struct Size After Last Property [ Dumper-7 ])
 };
@@ -125,6 +124,10 @@ public:
 class AFortPlayerStateAthena : public AFortPlayerStateZone
 {
 public:
+	DEFINE_MEMBER(int32, AFortPlayerStateAthena, SquadId);
+	DEFINE_MEMBER(int32, AFortPlayerStateAthena, Place);
+	DEFINE_MEMBER(int32, AFortPlayerStateAthena, KillScore);
+	DEFINE_MEMBER(int32, AFortPlayerStateAthena, TeamKillScore);
     DEFINE_MEMBER(FDeathInfo, AFortPlayerStateAthena, DeathInfo);
     DEFINE_PTR(UFortHeroType, AFortPlayerStateAthena, HeroType);
     DEFINE_PTR(UAbilitySystemComponent, AFortPlayerStateAthena, AbilitySystemComponent);

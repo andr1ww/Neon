@@ -106,7 +106,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                     UFortItemDefinition* ItemDef = BotData->GetStartupInventory()->GetItems()[i];
                     if (!ItemDef) continue;
                     UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(Controller, ItemDef, 1, 30, 0);
-                    if (ItemDef->IsA(UFortWeaponItemDefinition::StaticClass())) {
+                    if (ItemDef->IsA(UFortWeaponItemDefinition::StaticClass()) && ((UFortWorldItemDefinition*)ItemDef)->GetbCanBeDropped()) {
                         Ret->CallFunc<void>("FortPawn", "EquipWeaponDefinition", Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry(), false);
                     }
                 }

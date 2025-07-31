@@ -763,6 +763,13 @@ uint64 UFinder::OnDamageServer()
     return Addr;
 }
 
+uint64 UFinder::ClientOnPawnDied()
+{
+    auto Addr = Memcury::FindFunction(L"ClientOnPawnDied", std::vector<uint8_t>{ 0x48, 0x89, 0x5C });
+    return Addr;
+}
+
+
 uint64 UFinder::StaticLoadObject()
 {
     static uint64 CachedResult = 0;
@@ -1004,5 +1011,48 @@ uint64 UFinder::CompletePickupAnimation() {
         return CachedResult = addr;
     }
     
+    return CachedResult = 0;
+}
+
+uint64 UFinder::RemoveFromAlivePlayers()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+    
+    auto Addrr = Memcury::Scanner::FindStringRef(L"FortGameModeAthena: Player [%s] removed from alive players list (Team [%d]).  Player count is now [%d].  Team count is now [%d].", false).Get();
+
+    if (!Addrr)
+        CachedResult = Addrr = Memcury::Scanner::FindStringRef(L"FortGameModeAthena: Player [%s] removed from alive players list (Team [%d]).  Player count is now [%d]. PlayerBots count is now [%d]. Team count is now [%d].", false).Get();
+
+    if (!Addrr)
+        CachedResult = Addrr = Memcury::Scanner::FindStringRef(L"FortGameModeAthena::RemoveFromAlivePlayers: Player [%s] PC [%s] removed from alive players list (Team [%d]).  Player count is now [%d]. PlayerBots count is now [%d]. Team count is now [%d].", true, 0, Fortnite_Version >= 16 && Fortnite_Version < 24).Get(); // checked on 16.40
+
+    for (int i = 0; i < 2000; i++)
+    {
+        if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x4C && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(Addrr - i + 2) == 0x4C) // most common
+        {
+            return CachedResult = Addrr - i;
+        }
+
+        if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(Addrr - i + 2) == 0x54) // idk what verisont bh
+        {
+            for (int z = 3; z < 50; z++)
+            {
+                if (*(uint8_t*)(uint8_t*)(Addrr - i - z) == 0x4C && *(uint8_t*)(uint8_t*)(Addrr - i - z + 1) == 0x89 && *(uint8_t*)(uint8_t*)(Addrr - i - z + 2) == 0x4C)
+                {
+                    return CachedResult = Addrr - i - z;
+                }
+            }
+
+            return CachedResult = Addrr - i;
+        }
+
+        if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x8B && *(uint8_t*)(uint8_t*)(Addrr - i + 2) == 0xC4) // i forgot what version
+        {
+            return CachedResult = Addrr - i;
+        }
+    }
+
     return CachedResult = 0;
 }

@@ -29,4 +29,7 @@ public:
     DefHookOg(void, OnPossessedPawnDied, AFortAthenaAIBotController*, AActor*, float, AFortPlayerControllerAthena*, AActor*, FVector, UPrimitiveComponent*, FName, FVector);
     // Stuff that doesent exist in the fortnite sdk
     static void SpawnPlayerBot(int Count);
+public:
+    DECLARE_STATIC_CLASS(AFortAthenaAIBotController)
+    DECLARE_DEFAULT_OBJECT(AFortAthenaAIBotController)
 };
