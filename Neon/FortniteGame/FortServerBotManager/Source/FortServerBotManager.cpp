@@ -97,7 +97,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             BYTE FalseByte = 0;
             BotManagerSetup(__int64(BotManager), __int64(Ret), __int64(BotData->GetBehaviorTree()), 0, &CustomSquadId, 0, __int64(BotData->GetStartupInventory()), __int64(BotData->GetBotNameSettings()), 0, &FalseByte, 0, &TrueByte, RuntimeBotData);
             if (!Controller->GetInventory()) {
-                Controller->SetInventory(UGameplayStatics::SpawnActor<AFortInventory>({}, {}, Ret));
+                Controller->SetInventory(UGameplayStatics::SpawnActorOG<AFortInventory>(AFortInventory::StaticClass(), {}, {}, Ret));
             }
 
             if (BotData->GetStartupInventory())
