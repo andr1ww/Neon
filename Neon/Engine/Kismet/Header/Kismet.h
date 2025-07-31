@@ -103,4 +103,6 @@ template<class InterfaceType>
 class TScriptInterface : public FScriptInterface
 {
 public:
+    DECLARE_STATIC_CLASS(TScriptInterface)
+    DECLARE_DEFAULT_OBJECT(TScriptInterface)
 };

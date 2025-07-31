@@ -57,7 +57,9 @@ public:
 
 class AFortPlayerStateZone : public AFortPlayerState
 {
-    
+public:
+	DECLARE_STATIC_CLASS(AFortPlayerStateZone)
+	DECLARE_DEFAULT_OBJECT(AFortPlayerStateZone)
 };
 
 enum class EDeathCause : uint8
@@ -144,4 +146,7 @@ public:
     DEFINE_MEMBER(FDeathInfo, AFortPlayerStateAthena, DeathInfo);
     DEFINE_PTR(UFortHeroType, AFortPlayerStateAthena, HeroType);
     DEFINE_PTR(UAbilitySystemComponent, AFortPlayerStateAthena, AbilitySystemComponent);
+public:
+	DECLARE_STATIC_CLASS(AFortPlayerStateAthena)
+	DECLARE_DEFAULT_OBJECT(AFortPlayerStateAthena)
 };

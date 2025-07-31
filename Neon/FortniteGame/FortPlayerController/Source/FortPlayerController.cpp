@@ -25,9 +25,6 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
     {
         UFortKismetLibrary::GetDefaultObj()->CallFunc<void>("FortKismetLibrary", "UpdatePlayerCustomCharacterPartsVisualization", PlayerController->GetPlayerState());    
     }
-    
-    static UFortAbilitySet* AbilitySet = (UFortAbilitySet*)GUObjectArray.FindObject("GAS_AthenaPlayer");
-    UAbilitySystemComponent::GiveAbilitySet(PlayerController->GetPlayerState()->GetAbilitySystemComponent(), AbilitySet);
 }
 
 void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) {
@@ -139,7 +136,7 @@ void AFortPlayerControllerAthena::ServerAttemptAircraftJump(UActorComponent* Com
     Stack.StepCompiledIn(&Rotation);
     Stack.IncrementCode();
     
-    auto PlayerController = (AFortPlayerControllerAthena*)Comp->GetOwner();
+    auto PlayerController = (AFortPlayerControllerAthena*)Comp->CallFunc<AActor*>("ActorComponent", "GetOwner", Comp);
     auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
 
     if (PlayerController && GameMode)

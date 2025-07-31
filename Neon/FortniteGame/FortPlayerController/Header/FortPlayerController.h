@@ -151,7 +151,7 @@ public:
             Func = Info.Func;
         if (!Func)
             return nullptr;
-        struct { UActorComponent* Comp; AActor* ReturnValue; } GetOwnerParams{ this, nullptr };
+        struct { UActorComponent* Comp; AActor* ReturnValue; } GetOwnerParams{ this };
         
         this->ProcessEvent(Func, &GetOwnerParams);
 

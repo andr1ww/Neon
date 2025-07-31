@@ -239,17 +239,42 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 0, 1); 
     }
 
-    /*static bool bSpawnedAI = false;
-    if (!bSpawnedAI)
-    {
-        bSpawnedAI = true;
-        AFortAthenaAIBotController::SpawnPlayerBot(90);
-    }*/
-
     if (!NewPlayer->GetMatchReport())
     {
         NewPlayer->SetMatchReport((UAthenaPlayerMatchReport*)UGameplayStatics::SpawnObject(UAthenaPlayerMatchReport::StaticClass(), NewPlayer));
     }
+
+    static UFortAbilitySet* AbilitySet = nullptr;
+    if (!AbilitySet) AbilitySet = (UFortAbilitySet*)GUObjectArray.FindObject("GAS_AthenaPlayer");
+    UAbilitySystemComponent::GiveAbilitySet(NewPlayer->GetPlayerState()->GetAbilitySystemComponent(), AbilitySet);
+  /* TScriptInterface<IAbilitySystemInterface> AbilitySystemInterface{};
+
+    static void* (*GetInterfaceAddress)(UObject* Object, UClass* Class) = decltype(GetInterfaceAddress)(Finder->GetInterfaceAddress());
     
+    AbilitySystemInterface.ObjectPointer = Cast<AFortPlayerStateZone>(NewPlayer->GetPlayerState());
+    AbilitySystemInterface.InterfacePointer = GetInterfaceAddress(Cast<AFortPlayerStateZone>(NewPlayer->GetPlayerState()), IAbilitySystemInterface::StaticClass());
+
+    static UFunction* Func = nullptr;
+    FFunctionInfo Info = PropLibrary->GetFunctionByName("FortKismetLibrary", "EquipFortAbilitySet");
+
+    if (Func == nullptr)
+        Func = Info.Func;
+    if (!Func)
+        return Pawn;
+    
+    struct FortKismetLibrary_EquipFortAbilitySet final
+    {
+    public:
+        TScriptInterface<IAbilitySystemInterface> AbilitySystemInterfaceActor; 
+        UFortAbilitySet*                        AbilitySet;                
+        UObject*                                OverrideSourceObject;
+    } Params {
+        .AbilitySystemInterfaceActor = AbilitySystemInterface,
+        .AbilitySet = AbilitySet,
+        .OverrideSourceObject = nullptr
+    };
+    
+    StaticClassImpl("FortKismetLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &Params);
+    */
     return Pawn;
 }
