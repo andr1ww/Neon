@@ -151,9 +151,11 @@ public:
             Func = Info.Func;
         if (!Func)
             return nullptr;
-        AActor* Owner;
+        struct { UActorComponent* Comp; AActor* ReturnValue; } GetOwnerParams{ this, nullptr };
         
-        SDK::StaticClassImpl("ActorComponent")->GetClassDefaultObject()->ProcessEvent(Func, &Owner);
+        this->ProcessEvent(Func, &GetOwnerParams);
+
+        return GetOwnerParams.ReturnValue;
     }
 };
 

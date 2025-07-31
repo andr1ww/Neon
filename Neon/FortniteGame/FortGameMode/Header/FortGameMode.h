@@ -28,6 +28,24 @@ class AGameModeBase : public UObject
 {
 public:
     DEFINE_PTR(AFortGameStateAthena, AGameModeBase, GameState);
+public:
+    void RestartPlayer(AController* Controller)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("GameModeBase", "RestartPlayer");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+    
+        struct { AController* NewPlayer; } RestartPlayerParams{ Controller };
+        
+        this->ProcessEvent(Func, &RestartPlayerParams);
+    }
+public:
+    DECLARE_STATIC_CLASS(AGameModeBase)
+    DECLARE_DEFAULT_OBJECT(AGameModeBase)
 };
 
 class AFortGameMode : public AGameModeBase

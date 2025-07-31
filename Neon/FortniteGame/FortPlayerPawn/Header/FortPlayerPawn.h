@@ -43,6 +43,21 @@ public:
 	DEFINE_MEMBER(TArray<class AFortPickup*>, AFortPlayerPawn, IncomingPickups); 
     DEFINE_PTR(FFortAthenaLoadout, AFortPlayerPawn, CosmeticLoadout);
 public:
+	void BeginSkydiving(bool NewValue)
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerPawn", "BeginSkydiving");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+    
+		struct { bool bStartSkydiving; } BeginSkydivingParams{ NewValue };
+	
+		this->ProcessEvent(Func, &BeginSkydivingParams);
+	}
+public:
     static void ServerHandlePickupInfo(AFortPlayerPawn* Pawn, FFrame& Stack);
 	static void ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack);
 	DefHookOg(void, CompletePickupAnimation, AFortPickup* Pickup);

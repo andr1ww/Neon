@@ -139,15 +139,15 @@ void AFortPlayerControllerAthena::ServerAttemptAircraftJump(UActorComponent* Com
     Stack.StepCompiledIn(&Rotation);
     Stack.IncrementCode();
     
-    auto PlayerController = (AFortPlayerControllerAthena*)Comp->CallFunc<AActor*>("ActorComponent", "GetOwner", Comp);
+    auto PlayerController = (AFortPlayerControllerAthena*)Comp->GetOwner();
     auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
 
     if (PlayerController && GameMode)
     {
-        GameMode->CallFunc<void>("GameModeBase", "RestartPlayer", PlayerController);
+        GameMode->RestartPlayer(PlayerController);
         PlayerController->Set("Controller", "ControlRotation", Rotation);
 
-        PlayerController->GetMyFortPawn()->CallFunc<void>("FortPlayerPawn", "BeginSkydiving", true);
+        PlayerController->GetMyFortPawn()->BeginSkydiving(true);
     }
 }
 

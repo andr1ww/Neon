@@ -50,71 +50,79 @@ public:
 
 class Finder {
 public:
-	static uintptr_t GetCompiledInPattern() {
-		static uintptr_t pattern = uintptr_t();
-		if (!pattern) pattern = Memcury::Scanner::FindPattern("48 8B 41 20 4C 8B D2 48 8B D1 44 0F B6 08 48 FF").Get();
-		return pattern;
-	}
+    static uintptr_t GetCompiledInPattern() {
+        static uintptr_t pattern = []() {
+            return Memcury::Scanner::FindPattern("48 8B 41 20 4C 8B D2 48 8B D1 44 0F B6 08 48 FF").Get();
+        }();
+        return pattern;
+    }
    
-	static uintptr_t GetExplicitPropPattern() {
-		static uintptr_t pattern = uintptr_t();
-		if (!pattern) pattern = Memcury::Scanner::FindPattern("41 8B 40 ? 4D 8B C8").Get();
-		return pattern;
-	}
+    static uintptr_t GetExplicitPropPattern() {
+        static uintptr_t pattern = []() {
+            return Memcury::Scanner::FindPattern("41 8B 40 ? 4D 8B C8").Get();
+        }();
+        return pattern;
+    }
 };
 
-
-class FFrame : public FOutputDevice
-{
+class FFrame : public FOutputDevice {
 public:
-	void** VTable;
-	UFunction* Node;
-	UObject* Object;
-	uint8* Code;
-	uint8* Locals;
-	void* MostRecentProperty;
-	uint8_t* MostRecentPropertyAddress;
-	uint8_t _Padding1[0x40];
-	FField* PropertyChainForCompiledIn;
+    void** VTable;
+    UFunction* Node;
+    UObject* Object;
+    uint8* Code;
+    uint8* Locals;
+    void* MostRecentProperty;
+    uint8_t* MostRecentPropertyAddress;
+    uint8_t _Padding1[0x40];
+    FField* PropertyChainForCompiledIn;
+
+private:
+    using CompiledInFuncType = void(*)(FFrame*, UObject*, void* const);
+    using ExplicitPropFuncType = void(*)(FFrame*, void* const, FField*);
+
+    static CompiledInFuncType GetCompiledInFunc() {
+        static CompiledInFuncType func = reinterpret_cast<CompiledInFuncType>(Finder::GetCompiledInPattern());
+        return func;
+    }
+
+    static ExplicitPropFuncType GetExplicitPropFunc() {
+        static ExplicitPropFuncType func = reinterpret_cast<ExplicitPropFuncType>(Finder::GetExplicitPropPattern());
+        return func;
+    }
 
 public:
-	void StepCompiledIn(void* const Result, bool ForceExplicitProp = false)
-	{
+    void StepCompiledIn(void* const Result, bool ForceExplicitProp = false) {
+        if (Code && !ForceExplicitProp) {
+            GetCompiledInFunc()(this, Object, Result);
+        }
+        else {
+            FField* _Prop = PropertyChainForCompiledIn;
+            PropertyChainForCompiledIn = _Prop->Next;
+            GetExplicitPropFunc()(this, Result, _Prop);
+        }
+    }
+    
+    template <typename T>
+    T& StepCompiledInRef() {
+        T TempVal{};
+        MostRecentPropertyAddress = nullptr;
 
-		if (Code && !ForceExplicitProp)
-		{
-			((void (*)(FFrame*, UObject*, void* const))(Finder::GetCompiledInPattern()))(this, Object, Result); 
-		}
-		else
-		{
-			FField* _Prop = PropertyChainForCompiledIn;
-			PropertyChainForCompiledIn = _Prop->Next;
-			((void (*)(FFrame*, void* const, FField*))(Finder::GetExplicitPropPattern()))(this, Result, _Prop); 
-		}
-	}
-	
-	template <typename T>
-	T& StepCompiledInRef() {
-		T TempVal{};
-		MostRecentPropertyAddress = nullptr;
+        if (Code) {
+            GetCompiledInFunc()(this, Object, &TempVal);
+        }
+        else {
+            FField* _Prop = PropertyChainForCompiledIn;
+            PropertyChainForCompiledIn = _Prop->Next;
+            GetExplicitPropFunc()(this, &TempVal, _Prop);
+        }
 
-		if (Code)
-		{
-			((void (*)(FFrame*, UObject*, void* const))(Finder::GetCompiledInPattern()))(this, Object, &TempVal); 
-		}
-		else
-		{
-			FField* _Prop = PropertyChainForCompiledIn;
-			PropertyChainForCompiledIn = _Prop->Next;
-			((void (*)(FFrame*, void* const, FField*))(Finder::GetExplicitPropPattern()))(this, &TempVal, _Prop); 
-		}
+        return MostRecentPropertyAddress ? *reinterpret_cast<T*>(MostRecentPropertyAddress) : TempVal;
+    }
 
-		return MostRecentPropertyAddress ? *(T*)MostRecentPropertyAddress : TempVal;
-	}
-
-	void IncrementCode() {
-		Code = (uint8_t*)(__int64(Code) + (bool)Code);
-	}
+    void IncrementCode() {
+        Code = reinterpret_cast<uint8_t*>(reinterpret_cast<int64_t>(Code) + static_cast<bool>(Code));
+    }
 };
 
 template<typename ClassType>
