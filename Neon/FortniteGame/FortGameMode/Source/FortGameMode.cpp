@@ -114,6 +114,10 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             
             if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
             {
+                if (Playlist->GetAISettings()) {
+                    GameMode->SetAISettings(Playlist->GetAISettings());
+                }
+
                 GameMode->SetServerBotManager((UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode));
                 GameMode->GetServerBotManager()->SetCachedGameMode(GameMode);
                 GameMode->GetServerBotManager()->SetCachedGameState(GameState);

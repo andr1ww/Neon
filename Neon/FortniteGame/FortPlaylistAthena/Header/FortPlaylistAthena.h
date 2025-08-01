@@ -1,6 +1,8 @@
 #pragma once
 #include "pch.h"
 
+class UAthenaAISettings;
+
 class UFortPlaylist : public UObject
 {
 public:
@@ -10,7 +12,8 @@ public:
 
 class UFortPlaylistAthena : public UFortPlaylist
 {
-
+public:
+    DEFINE_PTR(UAthenaAISettings, UFortPlaylistAthena, AISettings);
 public:
     DECLARE_STATIC_CLASS(UFortPlaylistAthena);
 };

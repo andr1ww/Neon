@@ -6,8 +6,13 @@
 #include "FortniteGame/FortGameMode/Header/FortGameMode.h"
 #include "FortniteGame/FortPlayerPawn/Header/FortPlayerPawn.h"
 #include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
+#include "Engine/DataTable/Header/DataTable.h"
 
 class AFortGameModeAthena;
+
+class UAthenaAISettings final : public UDataAsset {
+
+};
 
 class AFortAIGoalManager : public AActor
 {
