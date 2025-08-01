@@ -533,7 +533,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			RewardResult->SetTotalBookXpGained(TotalXP);
 			RewardResult->SetTotalSeasonXpGained(TotalXP);
 			MatchReport->SetEndOfMatchResults(*RewardResult);
-			PlayerController->CallFunc<void>("FortPlayerControllerAthena", "ClientSendEndBattleRoyaleMatchForPlayer", true, MatchReport->GetEndOfMatchResults());
+			PlayerController->ClientSendEndBattleRoyaleMatchForPlayer(true, MatchReport->GetEndOfMatchResults());
 
 			int32 PlayerPlace = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num() + 1;
 			PlayerState->SetPlace(PlayerPlace);
@@ -546,13 +546,13 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 				MatchStats->Stats[3] = PlayerState->GetKillScore();
 				MatchStats->Stats[8] = PlayerState->GetSquadId();
 				MatchReport->SetMatchStats(*MatchStats);
-				PlayerController->CallFunc<void>("FortPlayerControllerAthena", "ClientSendMatchStatsForPlayer", *MatchStats);
+				PlayerController->ClientSendMatchStatsForPlayer(*MatchStats);
 			}
 
 			TeamStats->SetPlace(PlayerPlace);
 			TeamStats->SetTotalPlayers(PlayerPlace);
 			MatchReport->SetTeamStats(*TeamStats);
-			PlayerController->CallFunc<void>("FortPlayerControllerAthena", "ClientSendTeamStatsForPlayer", *TeamStats);
+			PlayerController->ClientSendTeamStatsForPlayer(*TeamStats);
 		}
    	
 		AFortPlayerControllerAthena* LastAliveController = nullptr;
@@ -584,7 +584,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 					RewardResult->SetTotalBookXpGained(WinnerXP);
 					RewardResult->SetTotalSeasonXpGained(WinnerXP);
 					WinnerMatchReport->SetEndOfMatchResults(*RewardResult);
-					LastAliveController->CallFunc<void>("FortPlayerControllerAthena", "ClientSendEndBattleRoyaleMatchForPlayer", true, WinnerMatchReport->GetEndOfMatchResults());
+					LastAliveController->ClientSendEndBattleRoyaleMatchForPlayer(true, WinnerMatchReport->GetEndOfMatchResults());
 
 					*MatchStats = WinnerMatchReport->GetMatchStats();
 					*TeamStats = WinnerMatchReport->GetTeamStats();
@@ -592,13 +592,13 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 					MatchStats->Stats[3] = WinnerPlayerState->GetKillScore();
 					MatchStats->Stats[8] = WinnerPlayerState->GetSquadId();
 					WinnerMatchReport->SetMatchStats(*MatchStats);
-					LastAliveController->CallFunc<void>("FortPlayerControllerAthena", "ClientSendMatchStatsForPlayer", *MatchStats);
+					LastAliveController->ClientSendMatchStatsForPlayer(*MatchStats);
 
 					int32 TotalPlayers = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num() + 1;
 					TeamStats->SetPlace(1);
 					TeamStats->SetTotalPlayers(TotalPlayers);
 					WinnerMatchReport->SetTeamStats(*TeamStats);
-					LastAliveController->CallFunc<void>("FortPlayerControllerAthena", "ClientSendTeamStatsForPlayer", *TeamStats);
+					LastAliveController->ClientSendTeamStatsForPlayer(*TeamStats);
 				}
 
 				uint8 WinningTeamIndex = WinnerPlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex");

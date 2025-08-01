@@ -236,4 +236,69 @@ public:
     static void ServerEndEditingBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerRepairBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     DefHookOg(void, ClientOnPawnDied, AFortPlayerControllerAthena* PlayerController, FFortPlayerDeathReport& DeathReport);
+public:
+    DECLARE_STATIC_CLASS(AFortPlayerControllerAthena)
+    DECLARE_DEFAULT_OBJECT(AFortPlayerControllerAthena)
+public:
+    void ClientSendEndBattleRoyaleMatchForPlayer(bool bSuccess, const struct FAthenaRewardResult& Result)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerControllerAthena", "ClientSendEndBattleRoyaleMatchForPlayer");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct FortPlayerControllerAthena_ClientSendEndBattleRoyaleMatchForPlayer final
+        {
+        public:
+            bool                                          bSuccess;                                          // 0x0000(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            uint8                                         Pad_2B47[0x7];                                     // 0x0001(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
+            struct FAthenaRewardResult                    Result;                                            // 0x0008(0x0040)(ConstParm, Parm, ReferenceParm, NativeAccessSpecifierPublic)
+        } FortPlayerControllerAthena_ClientSendEndBattleRoyaleMatchForPlayer_Params{ };
+
+        FortPlayerControllerAthena_ClientSendEndBattleRoyaleMatchForPlayer_Params.bSuccess = bSuccess;
+        FortPlayerControllerAthena_ClientSendEndBattleRoyaleMatchForPlayer_Params.Result = Result;
+    
+        this->ProcessEvent(Func, &FortPlayerControllerAthena_ClientSendEndBattleRoyaleMatchForPlayer_Params);
+    }
+
+    void ClientSendMatchStatsForPlayer(const struct FAthenaMatchStats& Result)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerControllerAthena", "ClientSendEndBattleRoyaleMatchForPlayer");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct FortPlayerControllerAthena_ClientSendMatchStatsForPlayer final
+        {
+        public:
+            struct FAthenaMatchStats                  TeamStats;                                         // 0x0000(0x0008)(ConstParm, Parm, ReferenceParm, NoDestructor, NativeAccessSpecifierPublic)
+        } FortPlayerControllerAthena_ClientSendMatchStatsForPlayer_Params{ Result };
+    
+        this->ProcessEvent(Func, &FortPlayerControllerAthena_ClientSendMatchStatsForPlayer_Params);
+    }
+
+    void ClientSendTeamStatsForPlayer(const struct FAthenaMatchTeamStats& Result)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerControllerAthena", "ClientSendTeamStatsForPlayer");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct FortPlayerControllerAthena_ClientSendTeamStatsForPlayer final
+        {
+        public:
+            struct FAthenaMatchTeamStats                  TeamStats;                                         // 0x0000(0x0008)(ConstParm, Parm, ReferenceParm, NoDestructor, NativeAccessSpecifierPublic)
+        } FortPlayerControllerAthena_ClientSendTeamStatsForPlayer_Params{ Result };
+    
+        this->ProcessEvent(Func, &FortPlayerControllerAthena_ClientSendTeamStatsForPlayer_Params);
+    }
 };
