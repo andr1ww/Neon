@@ -33,6 +33,13 @@ private:
         class UBlackboardComponent* BlackboardComponent;
         bool ReturnValue;
     };
+
+    struct AIController_OnUsingBlackBoard final
+    {
+    public:
+        class UBlackboardComponent* BlackboardComp;
+        class UBlackboardData* BlackboardAsset;
+    };
 public:
     bool RunBehaviorTree(UBehaviorTree* BTAsset) {
         static class UFunction* Func = nullptr;
@@ -68,6 +75,22 @@ public:
         this->ProcessEvent(Func, &Params);
 
         return Params.ReturnValue;
+    }
+
+    void OnUsingBlackBoard(class UBlackboardComponent* BlackboardComp, class UBlackboardData* BlackboardAsset) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("AIController", "OnUsingBlackBoard");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        AIController_OnUsingBlackBoard Params;
+		Params.BlackboardComp = BlackboardComp;
+        Params.BlackboardAsset = BlackboardAsset;
+
+        this->ProcessEvent(Func, &Params);
     }
 };
 

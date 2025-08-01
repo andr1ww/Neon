@@ -27,6 +27,9 @@ bool RunBehaviorTree(AFortAthenaAIBotController* PC, UBehaviorTree* BTAsset)
     if (BTAsset->GetBlackboardAsset() && !BlackboardComp)
     {
        bSuccess = PC->UseBlackboard(BTAsset->GetBlackboardAsset(), &BlackboardComp);
+       if (bSuccess) {
+           PC->OnUsingBlackBoard(BlackboardComp, BTAsset->GetBlackboardAsset());
+       }
     }
 
     if (bSuccess)
@@ -154,6 +157,14 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             }
         }
 
+        if (!Controller->GetBrainComponent()) {
+            Controller->SetBrainComponent((UBrainComponent*)UGameplayStatics::SpawnObject(UBrainComponent::StaticClass(), Controller));
+            Controller->GetBrainComponent()->Activate(false);
+            Controller->GetBrainComponent()->SetActive(true, false);
+            Controller->GetBrainComponent()->OnRep_IsActive();
+			UE_LOG(LogNeon, Log, "FUCK ME");
+        }
+
         //UE_LOG(LogNeon, Log, "BehaviorTree: %s Blackboard: %s", BotData->GetBehaviorTree()->GetFName().ToString().ToString().c_str(), BotData->GetBehaviorTree()->GetBlackboardAsset()->GetFName().ToString().ToString().c_str());
         bool bRanBehaviorTree = false;
         if (BotData->GetBehaviorTree()) {
@@ -176,7 +187,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             }
             else {
 				//UE_LOG(LogNeon, Warning, "Bot %s Failed to RunBehaviorTree %s!", Ret->GetFName().ToString().ToString().c_str(), BotData->GetBehaviorTree()->GetFName().ToString().ToString().c_str());
-				//RunBehaviorTree(Controller, BotData->GetBehaviorTree());
+				RunBehaviorTree(Controller, BotData->GetBehaviorTree());
             }
         }
 

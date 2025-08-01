@@ -142,6 +142,19 @@ public:
 class UActorComponent : public UObject
 {
 public:
+    struct ActorComponent_Activate final
+    {
+    public:
+        bool bReset;
+    };
+
+    struct ActorComponent_SetActive final
+    {
+    public:
+        bool bNewActive;
+        bool bReset;
+    };
+public:
     AActor* GetOwner()
     {
         static SDK::UFunction* Func = nullptr;
@@ -156,6 +169,50 @@ public:
         this->ProcessEvent(Func, &GetOwnerParams);
 
         return GetOwnerParams.ReturnValue;
+    }
+
+    void Activate(bool bReset)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("ActorComponent", "Activate");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+        
+        ActorComponent_Activate Params;
+		Params.bReset = bReset;
+
+        this->ProcessEvent(Func, &Params);
+    }
+
+    void SetActive(bool bNewActive, bool bReset)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("ActorComponent", "SetActive");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        ActorComponent_SetActive Params;
+		Params.bNewActive = bNewActive;
+        Params.bReset = bReset;
+
+        this->ProcessEvent(Func, &Params);
+    }
+
+    void OnRep_IsActive() {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("ActorComponent", "OnRep_IsActive");
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+		this->ProcessEvent(Func, nullptr);
     }
 };
 
