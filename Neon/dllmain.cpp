@@ -108,7 +108,7 @@ void InitNullsAndRetTrues() {
 	}
 
 	Runtime::Hook(IMAGEBASE + 0x2E688D0, RetTrue);
-	Runtime::Hook(IMAGEBASE + 0x1BDC660, FortLoot::SpawnLoot);
+	Runtime::Hook(IMAGEBASE + 0x1BDC660, FortLootPackage::SpawnLoot);
 }
 
 void Main()

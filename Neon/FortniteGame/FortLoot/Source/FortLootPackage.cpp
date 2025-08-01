@@ -58,14 +58,6 @@ T* FortLootPackage::PickWeighted(TArray<T*>& Map, float (*RandFunc)(float), bool
     return nullptr;
 }
 
-bool FortLootPackage::IsValidPointer(void* ptr) {
-    return ptr != nullptr && 
-           ptr != (void*)0xFFFFFFFFULL && 
-           ptr != (void*)0xCCCCCCCCULL && 
-           ptr != (void*)0xDDDDDDDDULL &&
-           (uintptr_t)ptr > 0x10000;
-}
-
 void FortLootPackage::SetupLDSForPackage(TArray<FNeonLootImproper>& LootDrops, FName Package, int i, FName TierGroup, int WorldLevel, int RecursionDepth) {
     if (RecursionDepth > 10) {
         return;
@@ -112,10 +104,25 @@ void FortLootPackage::SetupLDSForPackage(TArray<FNeonLootImproper>& LootDrops, F
     }
 
     auto ItemDefinition = (UFortWorldItemDefinition*)LootPackage->GetItemDefinition().Get();
-    if (!IsValidPointer(ItemDefinition))
+    auto WeaponItemDefinition = Cast<UFortWeaponItemDefinition>(ItemDefinition);
+    bool IsWeapon = LootPackage->GetLootPackageID().ToString().ToString().contains(".Weapon.") && WeaponItemDefinition;
+    if (IsWeapon)
     {
-        return;
+        auto AmmoData = WeaponItemDefinition->GetAmmoData().Get();
+        if (AmmoData)
+        {
+            auto AmmoItemDefinition = Cast<UFortWorldItemDefinition>(AmmoData);
+            if (AmmoItemDefinition)
+            {
+                int AmmoCount = AmmoData->GetDropCount();
+                if (AmmoCount > 0)
+                {
+                    LootDrops.Add(FNeonLootImproper(AmmoItemDefinition, AmmoCount));
+                }
+            }
+        }
     }
+
 
     bool found = false;
     for (auto& LootDrop : LootDrops) {
@@ -158,11 +165,16 @@ void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
     static UDataTable* LootTierData = nullptr;
 
     if (!LootPackages || !LootTierData) {
-        LootPackages = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootPackages_Client.AthenaLootPackages_Client");
-        LootTierData = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootTierData_Client.AthenaLootTierData_Client");
+        static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameState, "CurrentPlaylistInfo");
+            
+        FPlaylistPropertyArray& CurrentPlaylistInfoPtr = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
+        
+        LootPackages = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootPackages().Get(true);
+        LootTierData = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootTierData().Get(true);
         
         if (!LootPackages || !LootTierData) {
-            return; 
+            LootPackages = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootPackages_Client.AthenaLootPackages_Client");
+            LootTierData = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootTierData_Client.AthenaLootTierData_Client");
         }
     }
 
@@ -171,7 +183,7 @@ void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
         for (TPair<FName, uint8_t*>& RowPair : LootPackages->GetRowMap())
         {
             FFortLootPackageData* Val = reinterpret_cast<FFortLootPackageData*>(RowPair.Value);
-            if (IsValidPointer(Val)) {
+            if (Val) {
                 LPGroupsAll.Add(Val);
             }
         }
@@ -182,7 +194,7 @@ void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
                 if (PT) {
                     for (const auto& RowPair : PT->GetRowMap()) {
                         FFortLootPackageData* Val = reinterpret_cast<FFortLootPackageData*>(RowPair.Value);
-                        if (IsValidPointer(Val)) {
+                        if (Val) {
                             LPGroupsAll.Add(Val);
                         }
                     }
@@ -197,7 +209,7 @@ void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
                 if (ParentTable) {
                     for (const auto& RowPair : ParentTable->GetRowMap()) {
                         FFortLootTierData* Val = reinterpret_cast<FFortLootTierData*>(RowPair.Value);
-                        if (IsValidPointer(Val)) {
+                        if (Val) {
                             TierDataAllGroups.Add(Val);
                         }
                     }
@@ -206,7 +218,7 @@ void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
         }
         for (const auto& RowPair : LootTierData->GetRowMap()) {
             FFortLootTierData* Val = reinterpret_cast<FFortLootTierData*>(RowPair.Value);
-            if (IsValidPointer(Val)) {
+            if (Val) {
                 TierDataAllGroups.Add(Val);
             }
         }
@@ -322,9 +334,7 @@ TArray<FortLootPackage::FNeonLootImproper> FortLootPackage::PickLootDrops(FName 
             }
         }
     }
-
-    std::map<UFortWorldItemDefinition*, int32> AmmoMap;
-
+    
     return LootDrops;
 }
     
@@ -349,16 +359,17 @@ bool FortLootPackage::SpawnLoot(ABuildingContainer* Container) {
             break;
         }
     }
-
-    FVector BaseLocation = Container->GetActorLocation();
-    FVector OffsetLocation = BaseLocation + 
-                           (Container->GetActorForwardVector() * Container->GetLootSpawnLocation_Athena().X) + 
-                           (Container->GetActorRightVector() * Container->GetLootSpawnLocation_Athena().Y) + 
-                           (Container->GetActorUpVector() * Container->GetLootSpawnLocation_Athena().Z);
+    
     for (FNeonLootImproper& Item : PickLootDrops(LootTierGroupToUse)) {
-        if (!IsValidPointer(Item.ItemDefinition)) {
+        if (!Item.ItemDefinition) {
             continue;
         }
+
+        FVector BaseLocation = Container->GetActorLocation();
+        FVector OffsetLocation = BaseLocation + 
+                               (Container->GetActorForwardVector() * Container->GetLootSpawnLocation_Athena().X) + 
+                               (Container->GetActorRightVector() * Container->GetLootSpawnLocation_Athena().Y) + 
+                               (Container->GetActorUpVector() * Container->GetLootSpawnLocation_Athena().Z);
         
         AFortInventory::SpawnPickupDirect(
             OffsetLocation, 

@@ -92,7 +92,7 @@ public:
         return SoftObjectPtr.ObjectID.AssetPathName.GetComparisonIndex();
     }
 
-    T* Get(SDK::UClass* ClassToLoad = nullptr, bool bTryToLoad = false)
+    T* Get(bool bTryToLoad = false)
     {
         if (SoftObjectPtr.ObjectID.AssetPathName.GetComparisonIndex() <= 0)
             return nullptr;

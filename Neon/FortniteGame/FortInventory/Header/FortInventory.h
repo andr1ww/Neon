@@ -128,6 +128,8 @@ public:
 class UFortWeaponItemDefinition : public UFortWorldItemDefinition
 {
 public:
+    DEFINE_MEMBER(TSoftObjectPtr<UFortWorldItemDefinition>, UFortWeaponItemDefinition, AmmoData);
+public:
     DECLARE_STATIC_CLASS(UFortWeaponItemDefinition)
     DECLARE_DEFAULT_OBJECT(UFortWeaponItemDefinition)
 };

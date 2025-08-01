@@ -139,18 +139,7 @@ AFortPickupAthena* AFortInventory::SpawnPickupDirect(FVector Loc, UFortItemDefin
         NewPickup->GetPrimaryPickupItemEntry().SetCount(Count);
         NewPickup->OnRep_PrimaryPickupItemEntry();
         
-        int Dist = float(sqrtf(powf(Loc.X - Loc.X, 2.0) + powf(Loc.Y - Loc.Y, 2.0) + powf(Loc.Z - Loc.Z, 2.0))) / 100.f;
-        
-        NewPickup->GetPickupLocationData().SetFlyTime(1.f / Dist);
-        NewPickup->GetPickupLocationData().SetLootFinalPosition(Loc);
-        NewPickup->GetPickupLocationData().SetLootInitialPosition(Loc);
-        NewPickup->GetPickupLocationData().SetFinalTossRestLocation(Loc);
-        NewPickup->OnRep_PickupLocationData();
-
-        if (Pawn)
-        {
-            NewPickup->CallFunc<void>("FortPickup", "TossPickup", Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
-        }
+        NewPickup->CallFunc<void>("FortPickup", "TossPickup", Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
     }
     
     return NewPickup;
