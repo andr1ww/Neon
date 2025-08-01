@@ -65,6 +65,7 @@ public:
     DEFINE_MEMBER(int32, UFortWorldItemDefinition, MaxLevel);
     DEFINE_MEMBER(int32, UFortWorldItemDefinition, MinLevel);
     DEFINE_BOOL(UFortWorldItemDefinition, bCanBeDropped)
+    DEFINE_BOOL(UFortWorldItemDefinition, bForceIntoOverflow)
     DEFINE_MEMBER(FScalableFloat, UFortWorldItemDefinition, MaxStackSize)
 public:
     DECLARE_STATIC_CLASS(UFortWorldItemDefinition)

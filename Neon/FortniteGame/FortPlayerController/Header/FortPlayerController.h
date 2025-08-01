@@ -24,7 +24,9 @@ public:
 
 class UFortWeaponMeleeItemDefinition : public UFortItemDefinition
 {
-    
+public:
+    DECLARE_STATIC_CLASS(UFortWeaponMeleeItemDefinition)
+    DECLARE_DEFAULT_OBJECT(UFortWeaponMeleeItemDefinition)
 };
 
 class UAthenaPickaxeItemDefinition : public UObject 

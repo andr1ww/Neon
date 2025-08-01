@@ -185,7 +185,8 @@ public:
 class AFortGameModeAthena : public AFortGameMode
 {
 public:
-    DEFINE_MEMBER(TMap<FName, FName>, AFortGameModeAthena, RedirectAthenaLootTierGroups);
+    typedef TMap<FName, FName> Redirect;
+    DEFINE_MEMBER(Redirect, AFortGameModeAthena, RedirectAthenaLootTierGroups);
     DEFINE_MEMBER(int32, AFortGameModeAthena, WarmupRequiredPlayerCount);
     DEFINE_MEMBER(TArray<FItemAndCount>, AFortGameModeAthena, StartingItems);
 

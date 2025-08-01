@@ -192,13 +192,13 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
 
             TArray<AActor*> WarmupActors;
             UClass* WarmupClass = Runtime::StaticLoadObject<UClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_Warmup.Tiered_Athena_FloorLoot_Warmup_C");
-            WarmupActors = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), WarmupClass,);
+            WarmupActors = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), WarmupClass);
 
             for (auto& WarmupActor : WarmupActors)
             {
                 auto Container = (ABuildingContainer*)WarmupActor;
 
-                Container->BP_SpawnLoot(nullptr);
+                Container->CallFunc<void>("BuildingContainer", "BP_SpawnLoot", nullptr);
 
                 Container->K2_DestroyActor();
             }
@@ -211,7 +211,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             {
                 auto Container = (ABuildingContainer*)WarmupActor;
 
-                Container->BP_SpawnLoot(nullptr);
+                Container->CallFunc<void>("BuildingContainer", "BP_SpawnLoot", nullptr);
 
                 Container->K2_DestroyActor();
             }

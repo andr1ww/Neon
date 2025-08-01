@@ -67,6 +67,9 @@ public:
 class UCompositeDataTable : public UDataTable
 {
 public:
+    DEFINE_MEMBER(TArray<UDataTable*>, UCompositeDataTable, ParentTables);
+    DEFINE_MEMBER(TArray<UDataTable*>, UCompositeDataTable, OldParentTables);
+public:
     DECLARE_STATIC_CLASS(UCompositeDataTable);
     DECLARE_DEFAULT_OBJECT(UCompositeDataTable)
 };

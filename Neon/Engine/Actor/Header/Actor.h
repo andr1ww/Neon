@@ -9,6 +9,10 @@ public:
 
 public:
     FVector GetActorLocation();
+    FVector GetActorForwardVector();
+    FVector GetActorUpVector();
+    FVector GetActorRightVector();
+    void K2_DestroyActor();
 public:
     DECLARE_STATIC_CLASS(AActor);
     DECLARE_DEFAULT_OBJECT(AActor);

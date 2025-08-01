@@ -11,6 +11,20 @@ public:
     DECLARE_DEFAULT_OBJECT(UFortResourceItemDefinition);
 };
 
+class UFortTrapItemDefinition : public UFortWorldItemDefinition
+{
+public:
+    DECLARE_STATIC_CLASS(UFortTrapItemDefinition);
+    DECLARE_DEFAULT_OBJECT(UFortTrapItemDefinition);
+};
+
+class UFortBuildingItemDefinition : public UFortWorldItemDefinition
+{
+public:
+    DECLARE_STATIC_CLASS(UFortBuildingItemDefinition);
+    DECLARE_DEFAULT_OBJECT(UFortBuildingItemDefinition);
+};
+
 class UFortAmmoItemDefinition : public UFortWorldItemDefinition
 {
 public:

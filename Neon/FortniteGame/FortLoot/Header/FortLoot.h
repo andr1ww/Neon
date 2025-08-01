@@ -8,6 +8,8 @@
 
 struct FFortLootTierData
 {
+    DEFINE_MEMBER(float, FFortLootPackageData, Weight);
+    DEFINE_MEMBER(FName, FFortLootTierData, LootPackage);
     DEFINE_MEMBER(int32, FFortLootTierData, LootTier);
     DEFINE_MEMBER(FName, FFortLootTierData, TierGroup);
     DEFINE_MEMBER(float, FFortLootTierData, NumLootPackageDrops);
@@ -32,6 +34,7 @@ public:
 
 struct FFortLootPackageData
 {
+    DEFINE_MEMBER(float, FFortLootPackageData, Weight);
     DEFINE_PTR(UFortItemDefinition, FFortLootPackageData, ItemDefinition);
     DEFINE_MEMBER(FName, FFortLootPackageData, LootPackageID);
     DEFINE_MEMBER(int32, FFortLootPackageData, LootPackageCategory);
@@ -44,6 +47,7 @@ struct FFortLootPackageData
 class ABuildingContainer : public AActor
 {
 public:
+    DEFINE_MEMBER(FVector, ABuildingContainer, LootSpawnLocation_Athena);
     DEFINE_BOOL(ABuildingContainer, bAlreadySearched);
     DEFINE_MEMBER(FName, ABuildingContainer, SearchLootTierGroup);
 public:
@@ -65,9 +69,22 @@ public:
     DECLARE_DEFAULT_OBJECT(UFortGameFeatureData)
 };
 
+struct FFortGameFeatureLootTableData final
+{
+public:
+    DEFINE_PTR(UDataTable, FFortGameFeatureLootTableData, LootTierData);
+    DEFINE_PTR(UDataTable, FFortGameFeatureLootTableData, LootPackageData);
+};
+
+
 namespace FortLoot
 {
-        
+    EFortQuickBars GetQuickbar(UFortItemDefinition* ItemDefinition)
+    {
+        if (!ItemDefinition) return EFortQuickBars::Max_None;
+        return ItemDefinition->IsA<UFortWeaponMeleeItemDefinition>() || ItemDefinition->IsA<UFortResourceItemDefinition>() || ItemDefinition->IsA<UFortAmmoItemDefinition>() || ItemDefinition->IsA<UFortTrapItemDefinition>() || ItemDefinition->IsA<UFortBuildingItemDefinition>() || ItemDefinition->IsA<UFortEditToolItemDefinition>() || ((UFortWorldItemDefinition*)ItemDefinition)->GetbForceIntoOverflow() ? EFortQuickBars::Secondary : EFortQuickBars::Primary;
+    }
+    
     inline int GetLevel(const FDataTableCategoryHandle& CategoryHandle)
     {
         auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
@@ -83,7 +100,7 @@ namespace FortLoot
 
         for (auto& LootLevelDataPair : CategoryHandle.DataTable->GetRowMap())
         {
-            FFortLootLevelData* Value = reinterpret_cast<FFortLootLevelData*>(LootLevelDataPair.Value());
+            FFortLootLevelData* Value = reinterpret_cast<FFortLootLevelData*>(LootLevelDataPair.Value);
             if (Value->category.GetComparisonIndex() != CategoryHandle.RowContents.GetComparisonIndex())
                 continue;
 
@@ -127,12 +144,12 @@ namespace FortLoot
     template <typename T>
     static T* PickWeighted(TArray<T*>& Map, float (*RandFunc)(float), bool bCheckZero = true)
     {
-        float TotalWeight = std::accumulate(Map.begin(), Map.end(), 0.0f, [&](float acc, T*& p) { return acc + p->Weight; });
+        float TotalWeight = std::accumulate(Map.begin(), Map.end(), 0.0f, [&](float acc, T*& p) { return acc + p->GetWeight(); });
         float RandomNumber = RandFunc(TotalWeight);
 
         for (auto& Element : Map)
         {
-            float Weight = Element->Weight;
+            float Weight = Element->GetWeight();
             if (bCheckZero && Weight == 0)
                 continue;
 
@@ -196,14 +213,14 @@ namespace FortLoot
                     auto OGCount = LootDrop.GetCount();
                     LootDrop.SetCount(ItemDefinition->GetMaxStackSize().Value);
 
-                    if (AFortInventory::GetQuickbar(LootDrop.GetItemDefinition()) == EFortQuickBars::Secondary) LootDrops.Add(AFortInventory::MakeItemEntry(ItemDefinition, OGCount - ItemDefinition->GetMaxStackSize().Value, std::clamp(GetLevel(ItemDefinition->GetLootLevelData()), ItemDefinition->GetMinLevel(), ItemDefinition->GetMaxLevel())));
+                    if (GetQuickbar(LootDrop.GetItemDefinition()) == EFortQuickBars::Secondary) LootDrops.Add(*AFortInventory::MakeItemEntry(ItemDefinition, OGCount - ItemDefinition->GetMaxStackSize().Value, std::clamp(GetLevel(ItemDefinition->GetLootLevelData()), ItemDefinition->GetMinLevel(), ItemDefinition->GetMaxLevel())));
                 }
-                if (AFortInventory::GetQuickbar(LootDrop.GetItemDefinition()) == EFortQuickBars::Secondary) found = true;
+                if (GetQuickbar(LootDrop.GetItemDefinition()) == EFortQuickBars::Secondary) found = true;
             }
         }
 
         if (!found && LootPackage->GetCount() > 0) {
-            LootDrops.Add(AFortInventory::MakeItemEntry(ItemDefinition, LootPackage->GetCount(), std::clamp(GetLevel(ItemDefinition->GetLootLevelData()), ItemDefinition->GetMinLevel(), ItemDefinition->GetMaxLevel())));
+            LootDrops.Add(*AFortInventory::MakeItemEntry(ItemDefinition, LootPackage->GetCount(), std::clamp(GetLevel(ItemDefinition->GetLootLevelData()), ItemDefinition->GetMinLevel(), ItemDefinition->GetMaxLevel())));
         }
     }
 
@@ -223,8 +240,8 @@ namespace FortLoot
             
             FPlaylistPropertyArray& CurrentPlaylistInfoPtr = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
             
-            LootPackages = CurrentPlaylistInfoPtr.GetBasePlaylist()->LootPackages.NewGet();
-            LootTierData = CurrentPlaylistInfoPtr.GetBasePlaylist()->LootTierData.NewGet();
+            LootPackages = CurrentPlaylistInfoPtr.GetBasePlaylist()->Get<UDataTable*>("FortPlaylist", "LootPackages");
+            LootTierData = CurrentPlaylistInfoPtr.GetBasePlaylist()->Get<UDataTable*>("FortPlaylist", "LootTierData");
 
             if (!LootPackages || !LootTierData)
             {
@@ -235,13 +252,15 @@ namespace FortLoot
 
         if (LootPackages)
         {
-            for (auto& [Key, Val] : (TMap<FName, FFortLootPackageData*>)LootPackages->GetRowMap()) {
+            for (const auto& RowPair : LootPackages->GetRowMap()) {
+                FFortLootPackageData* Val = reinterpret_cast<FFortLootPackageData*>(RowPair.Value);
                 LPGroupsAll.Add(Val);
             }
             UCompositeDataTable* CompTable = Cast<UCompositeDataTable>(LootPackages);
             if (CompTable) {
-                for (auto& PT : CompTable->ParentTables) {
-                    for (auto& [Key, Val] : (TMap<FName, FFortLootPackageData*>) PT->GetRowMap()) {
+                for (auto& PT : CompTable->GetParentTables()) {
+                    for (const auto& RowPair : PT->GetRowMap()) {
+                        FFortLootPackageData* Val = reinterpret_cast<FFortLootPackageData*>(RowPair.Value);
                         LPGroupsAll.Add(Val);
                     }
                 }
@@ -249,14 +268,16 @@ namespace FortLoot
         }
         if (LootTierData) {
             if (auto CompositeTable = Cast<UCompositeDataTable>(LootTierData)) {
-                for (auto& ParentTable : CompositeTable->ParentTables) {
-                    for (auto& [Key, Val] : (TMap<FName, FFortLootTierData*>) ParentTable->GetRowMap()) {
+                for (auto& ParentTable : CompositeTable->GetParentTables()) {
+                    for (const auto& RowPair : ParentTable->GetRowMap()) {
+                        FFortLootTierData* Val = reinterpret_cast<FFortLootTierData*>(RowPair.Value);
                         if (!Val) continue;
                         TierDataAllGroups.Add(Val);
                     }
                 }
             }
-            for (auto& [Key, Val] : (TMap<FName, FFortLootTierData*>) LootTierData->GetRowMap()) {
+            for (const auto& RowPair : LootTierData->GetRowMap()) {
+                FFortLootTierData* Val = reinterpret_cast<FFortLootTierData*>(RowPair.Value);
                 if (!Val) continue;
                 TierDataAllGroups.Add(Val);
             }
@@ -264,32 +285,37 @@ namespace FortLoot
 
         auto GameFeatureDataArray = Runtime::GetObjectsOfClass<UFortGameFeatureData>();
 
-        for (const auto& GameFeatureData : GameFeatureDataArray) {
-            auto LootTableData = GameFeatureData->DefaultLootTableData;
-            if (auto LootPackageData = LootTableData.LootPackageData.NewGet())
+        for (const auto& GameFeatureData : GameFeatureDataArray)
+        {
+            auto LootTableData = GameFeatureData->Get<FFortGameFeatureLootTableData>("FortGameFeatureData", "DefaultLootTableData");
+            if (auto LootPackageData = LootTableData.GetLootPackageData())
             {
-                for (auto& [Key, Val] : (TMap<FName, FFortLootPackageData*>)LootPackageData->GetRowMap()) {
+                for (const auto& RowPair : LootPackageData->GetRowMap()) {
+                    FFortLootPackageData* Val = reinterpret_cast<FFortLootPackageData*>(RowPair.Value);
                     LPGroupsAll.Add(Val);
                 }
                 UCompositeDataTable* CompTable = Cast<UCompositeDataTable>(LootPackageData);
                 if (CompTable) {
-                    for (auto& PT : CompTable->ParentTables) {
-                        for (auto& [Key, Val] : (TMap<FName, FFortLootPackageData*>) PT->GetRowMap()) {
+                    for (auto& PT : CompTable->GetParentTables()) {
+                        for (const auto& RowPair : PT->GetRowMap()) {
+                            FFortLootPackageData* Val = reinterpret_cast<FFortLootPackageData*>(RowPair.Value);
                             LPGroupsAll.Add(Val);
                         }
                     }
                 }
             }
-            if (auto LootTierDataTable = LootTableData.LootTierData.NewGet()) {
+            if (auto LootTierDataTable = LootTableData.GetLootTierData()) {
                 if (auto CompositeTable = Cast<UCompositeDataTable>(LootTierDataTable)) {
-                    for (auto& ParentTable : CompositeTable->ParentTables) {
-                        for (auto& [Key, Val] : (TMap<FName, FFortLootTierData*>) ParentTable->GetRowMap()) {
+                    for (auto& ParentTable : CompositeTable->GetParentTables()) {
+                        for (const auto& RowPair : ParentTable->GetRowMap()) {
+                            FFortLootTierData* Val = reinterpret_cast<FFortLootTierData*>(RowPair.Value);
                             if (!Val) continue;
                             TierDataAllGroups.Add(Val);
                         }
                     }
                 }
-                for (auto& [Key, Val] : (TMap<FName, FFortLootTierData*>) LootTierDataTable->GetRowMap()) {
+                for (const auto& RowPair : LootTierDataTable->GetRowMap()) {
+                    FFortLootTierData* Val = reinterpret_cast<FFortLootTierData*>(RowPair.Value);
                     if (!Val) continue;
                     TierDataAllGroups.Add(Val);
                 }
@@ -356,25 +382,30 @@ namespace FortLoot
 
         for (int i = 0; i < AmountOfLootDrops && i < LootTierData->GetLootPackageCategoryMinArray().Num(); i++)
             for (int j = 0; j < LootTierData->GetLootPackageCategoryMinArray()[i] && LootTierData->GetLootPackageCategoryMinArray()[i] >= 1; j++)
-                SetupLDSForPackage(LootDrops, LootTierData->LootPackage, i, TierGroup, WorldLevel);
+                SetupLDSForPackage(LootDrops, LootTierData->GetLootPackage(), i, TierGroup, WorldLevel);
 
         std::map<UFortWorldItemDefinition*, int32> AmmoMap;
         for (auto& Item : LootDrops)
-            if (Item.GetItemDefinition()->IsA<UFortWeaponRangedItemDefinition>() && !Item.GetItemDefinition()->IsStackable() && ((UFortWorldItemDefinition*)Item.GetItemDefinition())->GetAmmoWorldItemDefinition_BP())
+            if (Item.GetItemDefinition()->IsA<UFortWeaponRangedItemDefinition>() && !Item.GetItemDefinition()->CallFunc<bool>("FortItemDefinition", "IsStackable") && Item.GetItemDefinition()->CallFunc<UFortWorldItemDefinition*>("FortWorldItemDefinition", "GetAmmoWorldItemDefinition_BP"))
             {
-                auto AmmoDefinition = ((UFortWorldItemDefinition*)Item.GetItemDefinition())->GetAmmoWorldItemDefinition_BP();
+                auto AmmoDefinition = Item.GetItemDefinition()->CallFunc<UFortWorldItemDefinition*>("FortWorldItemDefinition", "GetAmmoWorldItemDefinition_BP");
                 int i = 0;
-                auto AmmoEntry = LootDrops.Search([&](FFortItemEntry& Entry)
+                FFortItemEntry* AmmoEntry = nullptr;
+                for (FFortItemEntry& Entry : LootDrops)
+                {
+                    if (AmmoMap[AmmoDefinition] > 0 && i < AmmoMap[AmmoDefinition])
                     {
-                        if (AmmoMap[AmmoDefinition] > 0 && i < AmmoMap[AmmoDefinition])
-                        {
-                            i++;
-                            return false;
-                        }
-                        AmmoMap[AmmoDefinition]++;
-                        return Entry.GetItemDefinition() == AmmoDefinition;
-                    });
-
+                        i++;
+                        continue;
+                    }
+                    AmmoMap[AmmoDefinition]++;
+                    if (Entry.GetItemDefinition() == AmmoDefinition)
+                    {
+                        AmmoEntry = &Entry;
+                        break;
+                    }
+                }
+                
                 if (AmmoEntry)
                     continue;
 
@@ -388,7 +419,7 @@ namespace FortLoot
                     }
 
                 if (Group)
-                    LootDrops.Add(AFortInventory::MakeItemEntry(AmmoDefinition, Group->GetCount(), 0));
+                    LootDrops.Add(*AFortInventory::MakeItemEntry(AmmoDefinition, Group->GetCount(), 0));
             }
 
         return LootDrops;
@@ -402,19 +433,19 @@ namespace FortLoot
 
         FName LootTierGroupToUse = Container->GetSearchLootTierGroup();
 
-        for (auto& [SupportTierGroup, Redirect] : GameMode->RedirectAthenaLootTierGroups) {
-            if (LootTierGroupToUse == SupportTierGroup) {
+        for (auto& [SupportTierGroup, Redirect] : GameMode->GetRedirectAthenaLootTierGroups()) {
+            if (LootTierGroupToUse.GetComparisonIndex() == SupportTierGroup.GetComparisonIndex()) {
                 LootTierGroupToUse = Redirect;
                 break;
             }
         }
 
         FVector BaseLocation = Container->GetActorLocation();
-        FVector OffsetLocation = BaseLocation + (Container->GetActorForwardVector() * Container->LootSpawnLocation_Athena.X) + (Container->GetActorRightVector() * Container->LootSpawnLocation_Athena.Y) + (Container->GetActorUpVector() * Container->LootSpawnLocation_Athena.Z);
+        FVector OffsetLocation = BaseLocation + (Container->GetActorForwardVector() * Container->GetLootSpawnLocation_Athena().X) + (Container->GetActorRightVector() * Container->GetLootSpawnLocation_Athena().Y) + (Container->GetActorUpVector() * Container->GetLootSpawnLocation_Athena().Z);
         for (FFortItemEntry& Entry : PickLootDrops(LootTierGroupToUse)) {
             if (!Entry.GetItemDefinition())
                 continue;
-            AFortInventory::SpawnPickup(OffsetLocation, Entry, EFortPickupSourceTypeFlag::Container, EFortPickupSpawnSource::Unset);
+            AFortInventory::SpawnPickup(OffsetLocation, &Entry, EFortPickupSourceTypeFlag::Container, EFortPickupSpawnSource::Unset);
         }
 
         Container->SetbAlreadySearched(true);
