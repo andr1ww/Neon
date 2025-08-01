@@ -428,7 +428,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	}
 
 	DeathInfo->SetbInitialized(true);
-	PlayerState->CallFunc<void>("FortPlayerStateAthena", "OnRep_DeathInfo");
+	PlayerState->OnRep_DeathInfo();
    
 	auto WorldInventory = PlayerController->GetWorldInventory();
 	if (WorldInventory && VictimPawn) {

@@ -146,6 +146,20 @@ public:
     DEFINE_MEMBER(FDeathInfo, AFortPlayerStateAthena, DeathInfo);
     DEFINE_PTR(UFortHeroType, AFortPlayerStateAthena, HeroType);
     DEFINE_PTR(UAbilitySystemComponent, AFortPlayerStateAthena, AbilitySystemComponent);
+
+public:
+	void OnRep_DeathInfo()
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerStateAthena", "OnRep_DeathInfo");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+		
+		this->ProcessEvent(Func, nullptr);
+	}
 public:
 	DECLARE_STATIC_CLASS(AFortPlayerStateAthena)
 	DECLARE_DEFAULT_OBJECT(AFortPlayerStateAthena)
