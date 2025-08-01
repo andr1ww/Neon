@@ -31,6 +31,9 @@ struct FFortItemEntry : public FFastArraySerializerItem
 struct FFortPickupLocationData final
 {
 public:
+    DEFINE_MEMBER(FVector, FFortPickupLocationData, LootInitialPosition);
+    DEFINE_MEMBER(FVector, FFortPickupLocationData, LootFinalPosition);
+    DEFINE_MEMBER(FVector, FFortPickupLocationData, FinalTossRestLocation);
     DEFINE_BOOL(FFortPickupLocationData, bPlayPickupSound);
     DEFINE_MEMBER(float, FFortPickupLocationData, FlyTime);
     DEFINE_MEMBER(TWeakObjectPtr<AFortPawn>, FFortPickupLocationData, ItemOwner);
@@ -124,7 +127,9 @@ public:
 
 class UFortWeaponItemDefinition : public UFortWorldItemDefinition
 {
-    
+public:
+    DECLARE_STATIC_CLASS(UFortWeaponItemDefinition)
+    DECLARE_DEFAULT_OBJECT(UFortWeaponItemDefinition)
 };
 
 class UFortGadgetItemDefinition : public UFortWorldItemDefinition

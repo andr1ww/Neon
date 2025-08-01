@@ -6,6 +6,7 @@
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
 #include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
+#include "FortniteGame/FortLoot/Header/FortLoot.h"
 #include "Neon/Finder/Header/Finder.h"
 
 void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) 
