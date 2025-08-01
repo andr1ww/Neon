@@ -169,6 +169,7 @@
     <ClInclude Include="FortniteGame\FortGameMode\Header\FortGameMode.h" />
     <ClInclude Include="FortniteGame\FortGameState\Header\FortGameState.h" />
     <ClInclude Include="FortniteGame\FortKismetLibrary\Header\FortKismetLibrary.h" />
+    <ClInclude Include="FortniteGame\FortLoot\Header\FortLoot.h" />
     <ClInclude Include="FortniteGame\FortPlayerController\Header\FortPlayerController.h" />
     <ClInclude Include="FortniteGame\FortPlayerPawn\Header\FortPlayerPawn.h" />
     <ClInclude Include="FortniteGame\FortPlayerState\Header\FortPlayerState.h" />
@@ -219,6 +220,9 @@
     <Content Include="FortniteGame\FortInventory\Header\FortInventory.h" />
     <Content Include="FortniteGame\FortServerBotManager\Header\FortServerBotManager.h" />
     <Content Include="SDK\FortSDK.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="FortniteGame\FortLoot\Source\" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

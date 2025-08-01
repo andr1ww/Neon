@@ -54,3 +54,19 @@ public:
         return Params.OutXY;
     }
 };
+
+class UDataTable : public UObject {
+public:
+    typedef TMap<FName, uint8*> RowMapType;
+    DEFINE_MEMBER(RowMapType, UDataTable, RowMap);
+    
+    DECLARE_STATIC_CLASS(UDataTable)
+    DECLARE_DEFAULT_OBJECT(UDataTable)
+};
+
+class UCompositeDataTable : public UDataTable
+{
+public:
+    DECLARE_STATIC_CLASS(UCompositeDataTable);
+    DECLARE_DEFAULT_OBJECT(UCompositeDataTable)
+};

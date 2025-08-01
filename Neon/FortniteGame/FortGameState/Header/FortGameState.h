@@ -43,6 +43,7 @@ public:
 class AFortGameState : public UObject
 {
 public:
+    DEFINE_MEMBER(int32, AFortGameState, WorldLevel);
     DEFINE_MEMBER(TArray<struct FAdditionalLevelStreamed>, AFortGameState, AdditionalPlaylistLevelsStreamed);
 };
 

@@ -50,9 +50,23 @@ public:
     }
 };
 
+struct FDataTableCategoryHandle final
+{
+public:
+    class UDataTable*                             DataTable;                                         // 0x0000(0x0008)(Edit, BlueprintVisible, ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    class FName                                   ColumnName;                                        // 0x0008(0x0004)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    class FName                                   RowContents;                                       // 0x000C(0x0004)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
+
 class UFortWorldItemDefinition : public UFortItemDefinition
 {
 public:
+    DEFINE_MEMBER(FDataTableCategoryHandle, UFortWorldItemDefinition, LootLevelData);
+    DEFINE_MEMBER(int32, UFortWorldItemDefinition, MaxLevel);
+    DEFINE_MEMBER(int32, UFortWorldItemDefinition, MinLevel);
     DEFINE_BOOL(UFortWorldItemDefinition, bCanBeDropped)
     DEFINE_MEMBER(FScalableFloat, UFortWorldItemDefinition, MaxStackSize)
+public:
+    DECLARE_STATIC_CLASS(UFortWorldItemDefinition)
+    DECLARE_DEFAULT_OBJECT(UFortWorldItemDefinition)
 };

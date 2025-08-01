@@ -150,6 +150,13 @@ public:
 	DECLARE_DEFAULT_OBJECT(UBlackboardComponent);
 };
 
+class UFortAthenaAIBotAttackingDigestedSkillSet : public UObject
+{
+public:
+    DECLARE_STATIC_CLASS(UFortAthenaAIBotAttackingDigestedSkillSet)
+    DECLARE_DEFAULT_OBJECT(UFortAthenaAIBotAttackingDigestedSkillSet)
+};
+
 class UBehaviorTree : public UObject {
 public:
     DEFINE_PTR(UBlackboardData, UBehaviorTree, BlackboardAsset);
