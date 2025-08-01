@@ -161,14 +161,12 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             }
         }
 
-        if (!Controller->GetBrainComponent()) {
-     //       Controller->SetBrainComponent((UBrainComponent*)UGameplayStatics::SpawnObject(UBrainComponent::StaticClass(), Controller));
-   //        Controller->GetBrainComponent()->Activate(false);
-        //    Controller->GetBrainComponent()->SetActive(true, false);
-          //  Controller->GetBrainComponent()->OnRep_IsActive();
-        }
-        
-        UE_LOG(LogNeon, Log, "BehaviorTree: %s Blackboard: %s", BotData->GetBehaviorTree()->GetFName().ToString().ToString().c_str(), BotData->GetBehaviorTree()->GetBlackboardAsset()->GetFName().ToString().ToString().c_str());
+        Controller->GetPathFollowingComponent()->SetMyNavData(UWorld::GetWorld()->GetNavigationSystem()->GetMainNavData());
+        Controller->GetPathFollowingComponent()->CallFunc<void>("PathFollowingComponent", "OnNavDataRegistered", UWorld::GetWorld()->GetNavigationSystem()->GetMainNavData());
+        Controller->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "Activate", true);
+        Controller->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "SetActivate", true, true);
+        Controller->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "OnRep_IsActive");
+
         bool bRanBehaviorTree = false;
         if (BotData->GetBehaviorTree()) {
 			Controller->SetBehaviorTree(BotData->GetBehaviorTree());
@@ -199,7 +197,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             // start manual tickingb
         }
         
-    //    SpawnLocator->CallFunc<void>("Actor", "K2_DestroyActor");
+        SpawnLocator->CallFunc<void>("Actor", "K2_DestroyActor");
         
         return Ret;
     }

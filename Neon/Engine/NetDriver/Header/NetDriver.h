@@ -9,6 +9,7 @@
 #include "Neon/Finder/Header/Finder.h"
 
 class AFortGameModeAthena;
+class UAthenaNavSystem;
 
 struct FURL
 {
@@ -374,6 +375,7 @@ public:
     DEFINE_PTR(ULevel, UWorld, CurrentLevelPendingVisibility);
     DEFINE_PTR(ULevel, UWorld, CurrentLevelPendingInvisibility);
     DEFINE_PTR(AFortGameModeAthena, UWorld, AuthorityGameMode);
+    DEFINE_PTR(UAthenaNavSystem, UWorld, NavigationSystem);
 public:
     DECLARE_STATIC_CLASS(UWorld);
     DECLARE_DEFAULT_OBJECT(UWorld);

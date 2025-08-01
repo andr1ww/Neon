@@ -11,6 +11,7 @@
 
 class AFortGameModeAthena;
 class UActorComponent;
+class ANavigationData;
 
 enum class EExecutionStatus : uint8
 {
@@ -281,12 +282,20 @@ class UNavigationSystemV1 : public UObject
 {
 public:
     DEFINE_BOOL(UNavigationSystemV1, bAutoCreateNavigationData);
+    DEFINE_PTR(ANavigationData, UNavigationSystemV1, MainNavData);
 public:
     DECLARE_DEFAULT_OBJECT(UNavigationSystemV1)
     DECLARE_STATIC_CLASS(UNavigationSystemV1)
 };
 
-class UAthenaNavSystem : public UObject
+class UFortNavSystem : public UNavigationSystemV1
+{
+public:
+    DECLARE_STATIC_CLASS(UFortNavSystem);
+    DECLARE_DEFAULT_OBJECT(UFortNavSystem)
+};
+
+class UAthenaNavSystem : public UFortNavSystem
 {
 public:
     DECLARE_DEFAULT_OBJECT(UAthenaNavSystem);
