@@ -154,8 +154,10 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             }
         }
 
+        //UE_LOG(LogNeon, Log, "BehaviorTree: %s Blackboard: %s", BotData->GetBehaviorTree()->GetFName().ToString().ToString().c_str(), BotData->GetBehaviorTree()->GetBlackboardAsset()->GetFName().ToString().ToString().c_str());
         bool bRanBehaviorTree = false;
         if (BotData->GetBehaviorTree()) {
+			Controller->SetBehaviorTree(BotData->GetBehaviorTree());
             if (Controller->RunBehaviorTree(BotData->GetBehaviorTree())) {
                 Controller->BlueprintOnBehaviorTreeStarted();
 				bRanBehaviorTree = true;

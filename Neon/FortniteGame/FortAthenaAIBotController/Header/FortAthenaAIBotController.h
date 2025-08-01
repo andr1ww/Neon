@@ -84,6 +84,8 @@ public:
     DEFINE_PTR(AFortInventory, AFortAthenaAIBotController, Inventory);
     DEFINE_PTR(UFortAthenaAIBotInventoryItems, AFortAthenaAIBotController, StartupInventory);
 
+    DEFINE_PTR(UBehaviorTree, AFortAthenaAIBotController, BehaviorTree);
+
 public:
     DefHookOg(void, OnPossessedPawnDied, AFortAthenaAIBotController*, AActor*, float, AFortPlayerControllerAthena*, AActor*, FVector, UPrimitiveComponent*, FName, FVector);
 
