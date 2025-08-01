@@ -1248,6 +1248,10 @@ class FString {
         FString( const std::wstring &Str ) : FString( Str.c_str() ) {}
 
       public:
+        DataType GetData()
+        {
+                return Data;
+        }
         std::string ToString() {
                 wchar_t *ProcessedData = Data.GetData();
                 std::wstring WideDataString( ProcessedData );

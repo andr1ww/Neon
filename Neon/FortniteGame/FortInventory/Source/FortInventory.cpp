@@ -127,9 +127,9 @@ AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry* Entr
 
 AFortPickupAthena* AFortInventory::SpawnPickupDirect(FVector Loc, UFortItemDefinition* ItemDefinition, int Count, int LoadedAmmo, EFortPickupSourceTypeFlag SourceTypeFlag, EFortPickupSpawnSource SpawnSource, AFortPlayerPawn* Pawn, bool Toss)
 {
-    if (!ItemDefinition || !Pawn) return nullptr;
+    if (!ItemDefinition) return nullptr;
  //   if (ItemDefinition->GetFName().ToString().ToString().find("Pickaxe") != std::string::npos) return nullptr;
-
+    
     AFortPickupAthena* NewPickup = UGameplayStatics::SpawnActorOG<AFortPickupAthena>(AFortPickupAthena::StaticClass(), Loc);
     if (NewPickup != nullptr && ItemDefinition != nullptr)
     {
@@ -138,8 +138,19 @@ AFortPickupAthena* AFortInventory::SpawnPickupDirect(FVector Loc, UFortItemDefin
         NewPickup->GetPrimaryPickupItemEntry().SetLoadedAmmo(LoadedAmmo);
         NewPickup->GetPrimaryPickupItemEntry().SetCount(Count);
         NewPickup->OnRep_PrimaryPickupItemEntry();
-            
-        NewPickup->CallFunc<void>("FortPickup", "TossPickup", Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
+        
+        int Dist = float(sqrtf(powf(Loc.X - Loc.X, 2.0) + powf(Loc.Y - Loc.Y, 2.0) + powf(Loc.Z - Loc.Z, 2.0))) / 100.f;
+        
+        NewPickup->GetPickupLocationData().SetFlyTime(1.f / Dist);
+        NewPickup->GetPickupLocationData().SetLootFinalPosition(Loc);
+        NewPickup->GetPickupLocationData().SetLootInitialPosition(Loc);
+        NewPickup->GetPickupLocationData().SetFinalTossRestLocation(Loc);
+        NewPickup->OnRep_PickupLocationData();
+
+        if (Pawn)
+        {
+            NewPickup->CallFunc<void>("FortPickup", "TossPickup", Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
+        }
     }
     
     return NewPickup;

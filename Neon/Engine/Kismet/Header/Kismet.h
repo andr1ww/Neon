@@ -80,7 +80,9 @@ public:
         KismetStringLibrary_ConvStringToName Params;
 		Params.InString = InString;
 
-        SDK::StaticClassImpl("KismetStringLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &Params);
+        static UObject* DefaultObject = nullptr;
+        if (!DefaultObject) DefaultObject = SDK::StaticClassImpl("KismetStringLibrary")->GetClassDefaultObject();
+        DefaultObject->ProcessEvent(Func, &Params);
 
         return Params.ReturnValue;
     }

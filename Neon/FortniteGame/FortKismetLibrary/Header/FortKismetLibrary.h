@@ -39,13 +39,6 @@ public:
     DECLARE_DEFAULT_OBJECT(UFortConsumableItemDefinition);
 };
 
-class UFortWeaponRangedItemDefinition : public UFortWorldItemDefinition
-{
-public:
-    DECLARE_STATIC_CLASS(UFortWeaponRangedItemDefinition);
-    DECLARE_DEFAULT_OBJECT(UFortWeaponRangedItemDefinition);
-};
-
 class UFortKismetLibrary : public UObject
 {
 public:

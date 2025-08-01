@@ -254,6 +254,27 @@ namespace Runtime
 		}
 		return Offset;
 	}
+
+	template <typename T>
+inline T* StaticFindObject(std::string ObjectPath, UClass* Class = UObject::StaticClass()) {
+		return (T*)Funcs::StaticFindObject(Class, nullptr, std::wstring(ObjectPath.begin(), ObjectPath.end()).c_str(), false);
+	}
+	
+	
+	inline int GetOffsetStructStatic(const std::string& StructName, const std::string& PropName) {
+		int Offset = -1;
+		for (UStruct* Struct = Runtime::StaticFindObject<UStruct>(StructName); Struct;
+			Struct = Struct->GetSuperStruct()) {
+			auto FuncInfo = SDK::PropLibrary->GetPropertyByName(
+				Struct->GetFName().ToString().ToString(), PropName);
+
+			Offset = FuncInfo.Offset;
+
+			if (Offset != -1)
+				break;
+			}
+		return Offset;
+	}
 	
 	inline void* nullptrForHook = nullptr;
 
@@ -278,11 +299,6 @@ namespace Runtime
 			}
 		}
 		return -1;
-	}
-
-	template <typename T>
-inline T* StaticFindObject(std::string ObjectPath, UClass* Class = UObject::StaticClass()) {
-		return (T*)Funcs::StaticFindObject(Class, nullptr, std::wstring(ObjectPath.begin(), ObjectPath.end()).c_str(), false);
 	}
 	
 	template<typename T>

@@ -1,6 +1,8 @@
 #pragma once
 #include "pch.h"
 
+#include "Neon/Runtime/Runtime.h"
+
 
 class UCurveTable : public UObject
 {
@@ -57,8 +59,20 @@ public:
 
 class UDataTable : public UObject {
 public:
-    typedef TMap<FName, uint8*> RowMapType;
-    DEFINE_MEMBER(RowMapType, UDataTable, RowMap);
+    template <typename RowDataType = uint8_t>
+    TMap<FName, RowDataType*>& GetRowMap()
+    {
+        static TMap<FName, RowDataType*> EmptyMap; 
+        
+    
+        void* TargetAddress = reinterpret_cast<void*>(__int64(this) + 0x30);
+        if (IsBadReadPtr(TargetAddress, sizeof(TMap<FName, RowDataType*>))) {
+            UE_LOG(LogNeon, Error, TEXT("Cannot read DataTable RowMap at address: 0x%p"), TargetAddress);
+            return EmptyMap;
+        }
+    
+        return *(TMap<FName, RowDataType*>*)(__int64(this) + 0x30);
+    }
     
     DECLARE_STATIC_CLASS(UDataTable)
     DECLARE_DEFAULT_OBJECT(UDataTable)
