@@ -166,10 +166,13 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
         Controller->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "Activate", true);
         Controller->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "SetActivate", true, true);
         Controller->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "OnRep_IsActive");
+
         UBlackboardComponent* Blackboard = Controller->GetBlackboard();
         Controller->UseBlackboard(Controller->GetBehaviorTree()->GetBlackboardAsset(), &Blackboard);
         Controller->OnUsingBlackBoard(Blackboard, Controller->GetBehaviorTree()->GetBlackboardAsset());
         
+        Controller->SetSkill(BotData->GetSkillLevel());
+
         bool bRanBehaviorTree = false;
         if (BotData->GetBehaviorTree()) {
 			Controller->SetBehaviorTree(BotData->GetBehaviorTree());

@@ -252,6 +252,8 @@ public:
     DEFINE_PTR(UFortAthenaAIBotCharacterCustomization, UFortAthenaAIBotCustomizationData, CharacterCustomization);
 	DEFINE_PTR(UFortAthenaAIBotInventoryItems, UFortAthenaAIBotCustomizationData, StartupInventory);
     DEFINE_PTR(UFortBotNameSettings, UFortAthenaAIBotCustomizationData, BotNameSettings);   
+
+	DEFINE_MEMBER(float, UFortAthenaAIBotCustomizationData, SkillLevel);
 };
 
 struct FBotInventory {
