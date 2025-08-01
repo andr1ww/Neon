@@ -10,14 +10,27 @@
 
 
 class UBehaviorTree;
+class UBrainComponent;
+class UBlackboardComponent;
 
 class AAIController : public AController
 {
+public:
+    DEFINE_PTR(UBrainComponent, AAIController, BrainComponent);
+    DEFINE_PTR(UBlackboardComponent, AAIController, Blackboard);
 private:
     struct AIController_RunBehaviorTree final
     {
     public:
         UBehaviorTree* BTAsset;
+        bool ReturnValue;
+    };
+
+    struct AIController_UseBlackboard final
+    {
+    public:
+        class UBlackboardData* BlackboardAsset;
+        class UBlackboardComponent* BlackboardComponent;
         bool ReturnValue;
     };
 public:
@@ -30,16 +43,31 @@ public:
         if (!Func)
             return false;
 
-        struct AIController_RunBehaviorTree final
-        {
-        public:
-            UBehaviorTree* BTAsset;
-            bool ReturnValue;
-        } AIController_RunBehaviorTree{ BTAsset };
+        AIController_RunBehaviorTree Params;
+		Params.BTAsset = BTAsset;
 
-        SDK::StaticClassImpl("AIController")->GetClassDefaultObject()->ProcessEvent(Func, &AIController_RunBehaviorTree);
+        this->ProcessEvent(Func, &Params);
 
-        return AIController_RunBehaviorTree.ReturnValue;
+        return Params.ReturnValue;
+    }
+
+    bool UseBlackboard(class UBlackboardData* BlackboardAsset, class UBlackboardComponent** BlackboardComponent) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("AIController", "UseBlackboard");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return false;
+
+        AIController_UseBlackboard Params;
+		Params.BlackboardAsset = BlackboardAsset;
+        if (BlackboardComponent != nullptr)
+            Params.BlackboardComponent = *BlackboardComponent;
+
+        this->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
     }
 };
 
@@ -58,8 +86,22 @@ public:
 
 public:
     DefHookOg(void, OnPossessedPawnDied, AFortAthenaAIBotController*, AActor*, float, AFortPlayerControllerAthena*, AActor*, FVector, UPrimitiveComponent*, FName, FVector);
+
+public:
     // Stuff that doesent exist in the fortnite sdk
     static void SpawnPlayerBot(int Count);
+public:
+    void BlueprintOnBehaviorTreeStarted() {
+        static class SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortAthenaAIBotController", "BlueprintOnBehaviorTreeStarted");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        this->ProcessEvent(Func, nullptr);
+    }
 public:
     DECLARE_STATIC_CLASS(AFortAthenaAIBotController)
     DECLARE_DEFAULT_OBJECT(AFortAthenaAIBotController)

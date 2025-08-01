@@ -1056,3 +1056,17 @@ uint64 UFinder::RemoveFromAlivePlayers()
 
     return CachedResult = 0;
 }
+
+uint64 UFinder::RegisterComponentWithWorld()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+
+    auto Addr = Memcury::Scanner::FindPattern("48 83 EC ? 44 0F B6 05 ? ? ? ? 48 8D 05 ? ? ? ? 48 89 5C 24 ? 48 8B D9 48 89 6C 24", false).Get();
+    if (Addr != 0) {
+        return CachedResult = Addr;
+    }
+
+    return CachedResult = 0;
+}

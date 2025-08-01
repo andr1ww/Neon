@@ -120,6 +120,8 @@ public:
     uint64 CompletePickupAnimation();
 
     uint64 RemoveFromAlivePlayers();
+
+    uint64 RegisterComponentWithWorld();
 };
 
 inline UFinder* Finder = new UFinder();

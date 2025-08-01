@@ -9,6 +9,47 @@
 #include "Engine/DataTable/Header/DataTable.h"
 
 class AFortGameModeAthena;
+class UActorComponent;
+
+enum class EExecutionStatus : uint8
+{
+    ExecutionError = 0,
+    ExecutionDenied = 1,
+    ExecutionSuccess = 2,
+    ExecutionPending = 3,
+    ExecutionAllowed = 4,
+    EExecutionStatus_MAX = 5,
+};
+
+namespace EBTExecutionMode
+{
+    enum Type
+    {
+        SingleRun,
+        Looped,
+    };
+}
+
+namespace EBTActiveNode
+{
+    enum Type
+    {
+        Composite,
+        ActiveTask,
+        AbortingTask,
+        InactiveTask,
+    };
+}
+
+namespace EBTTaskStatus
+{
+    enum Type
+    {
+        Active,
+        Aborting,
+        Inactive,
+    };
+}
 
 class UAthenaAISettings final : public UDataAsset {
 
@@ -19,8 +60,108 @@ class AFortAIGoalManager : public AActor
     
 };
 
-class UBehaviorTree : public UObject {
+class UBrainComponent : public UActorComponent {
+public:
+    void StartLogic() {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BrainComponent", "StartLogic");
 
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        this->ProcessEvent(Func, nullptr);
+    }
+
+    void RestartLogic() {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BrainComponent", "RestartLogic");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        this->ProcessEvent(Func, nullptr);
+    }
+public:
+	DECLARE_STATIC_CLASS(UBrainComponent);
+	DECLARE_DEFAULT_OBJECT(UBrainComponent);
+};
+
+class UBlackboardData final : public UDataAsset {
+public:
+	DECLARE_STATIC_CLASS(UBlackboardData);
+	DECLARE_DEFAULT_OBJECT(UBlackboardData);
+};
+
+class UBlackboardComponent final : public UActorComponent {
+private:
+    struct BlackboardComponent_SetValueAsEnum final
+    {
+    public:
+        FName KeyName;
+        uint8 EnumValue;
+    };
+
+    struct BlackboardComponent_SetValueAsBool final
+    {
+    public:
+        FName KeyName;
+        bool BoolValue;
+    };
+public:
+    void SetValueAsEnum(const class FName& KeyName, uint8 EnumValue) {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BlackboardComponent", "SetValueAsEnum");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+		BlackboardComponent_SetValueAsEnum Params;
+		Params.KeyName = KeyName;
+		Params.EnumValue = EnumValue;
+
+        this->ProcessEvent(Func, &Params);
+    }
+
+    void SetValueAsBool(const class FName& KeyName, bool BoolValue) {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BlackboardComponent", "SetValueAsBool");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        BlackboardComponent_SetValueAsBool Params;
+        Params.KeyName = KeyName;
+        Params.BoolValue = BoolValue;
+
+        this->ProcessEvent(Func, &Params);
+    }
+public:
+	DECLARE_STATIC_CLASS(UBlackboardComponent);
+	DECLARE_DEFAULT_OBJECT(UBlackboardComponent);
+};
+
+class UBehaviorTree : public UObject {
+public:
+    DEFINE_PTR(UBlackboardData, UBehaviorTree, BlackboardAsset);
+public:
+	DECLARE_STATIC_CLASS(UBehaviorTree);
+	DECLARE_DEFAULT_OBJECT(UBehaviorTree);
+};
+
+class UBehaviorTreeComponent : public UBrainComponent {
+public:
+    DEFINE_PTR(UBehaviorTree, UBehaviorTreeComponent, DefaultBehaviorTreeAsset);
+public:
+	DECLARE_STATIC_CLASS(UBehaviorTreeComponent);
+	DECLARE_DEFAULT_OBJECT(UBehaviorTreeComponent);
 };
 
 class AFortAIDirector : public AActor

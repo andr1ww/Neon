@@ -3,6 +3,47 @@
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "Engine/Kismet/Header/Kismet.h"
 
+void StartTree(UBehaviorTreeComponent* BTComp, UBehaviorTree* BTAsset, EBTExecutionMode::Type Mode = EBTExecutionMode::Looped)
+{
+    if (!BTComp || !BTAsset)
+        return;
+
+    BTComp->SetDefaultBehaviorTreeAsset(BTAsset);
+
+    BTComp->StartLogic();
+    return;
+}
+
+bool RunBehaviorTree(AFortAthenaAIBotController* PC, UBehaviorTree* BTAsset)
+{
+    if (!BTAsset || !PC) {
+        UE_LOG(LogNeon, Error, "RunBehaviorTree: BTAsset or PC is null!");
+		return false;
+    }
+
+    bool bSuccess = true;
+
+    UBlackboardComponent* BlackboardComp = PC->GetBlackboard();
+    if (BTAsset->GetBlackboardAsset() && !BlackboardComp)
+    {
+       bSuccess = PC->UseBlackboard(BTAsset->GetBlackboardAsset(), &BlackboardComp);
+    }
+
+    if (bSuccess)
+    {
+        UBehaviorTreeComponent* BTComp = (UBehaviorTreeComponent*)PC->GetBrainComponent();
+        if (!BTComp)
+        {
+            BTComp = (UBehaviorTreeComponent*)UGameplayStatics::SpawnObject(UBehaviorTreeComponent::StaticClass(), PC);
+            ((void (*)(UObject * Component, UObject * World))(Finder->RegisterComponentWithWorld()))(BTComp, UWorld::GetWorld());
+        }
+        PC->SetBrainComponent(BTComp);
+        StartTree(BTComp, BTAsset, EBTExecutionMode::Looped);
+    }
+
+    return bSuccess;
+}
+
 AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthena* BotManager, FVector SpawnLoc, FRotator SpawnRot, UFortAthenaAIBotCustomizationData* BotData, FFortAthenaAIBotRunTimeCustomizationData& RuntimeBotData)
 {
     if (Fortnite_Version == 13.40 || Fortnite_Version == 12.41)
@@ -113,13 +154,32 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             }
         }
 
+        bool bRanBehaviorTree = false;
         if (BotData->GetBehaviorTree()) {
             if (Controller->RunBehaviorTree(BotData->GetBehaviorTree())) {
-                
+                Controller->BlueprintOnBehaviorTreeStarted();
+				bRanBehaviorTree = true;
+
+                Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhaseStep"), 2);
+                Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhase"), (uint8)EAthenaGamePhase::Warmup);
+
+                Controller->GetBlackboard()->SetValueAsBool(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_IsMovementBlocked"), false);
+                Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_AvoidThreat_ExecutionStatus"), (uint8)EExecutionStatus::ExecutionAllowed);
+                Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Leash_ExecutionStatus"), (uint8)EExecutionStatus::ExecutionAllowed);
+                Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Patrolling_ExecutionStatus"), (uint8)EExecutionStatus::ExecutionAllowed);
+                Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_DynamicBlueprint_ExecutionStatus"), (uint8)EExecutionStatus::ExecutionAllowed);
+                Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_CharacterLaunched_ExecutionStatus"), (uint8)EExecutionStatus::ExecutionAllowed);
+
+                Controller->GetBrainComponent()->RestartLogic();
             }
             else {
-				UE_LOG(LogNeon, Warning, "Bot %s Failed to RunBehaviorTree %s!", Ret->GetFName().ToString().ToString().c_str(), BotData->GetBehaviorTree()->GetFName().ToString().ToString().c_str());
+				//UE_LOG(LogNeon, Warning, "Bot %s Failed to RunBehaviorTree %s!", Ret->GetFName().ToString().ToString().c_str(), BotData->GetBehaviorTree()->GetFName().ToString().ToString().c_str());
+				//RunBehaviorTree(Controller, BotData->GetBehaviorTree());
             }
+        }
+
+        if (!bRanBehaviorTree) {
+            // start manual ticking
         }
         
         return Ret;

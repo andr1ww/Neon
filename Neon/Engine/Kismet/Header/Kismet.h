@@ -67,6 +67,23 @@ public:
     
         return KismetStringLibrary_Conv_NameToString_Params.ReturnValue;
     }
+
+    static FName Conv_StringToName(const FString& InString) {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetStringLibrary", "Conv_StringToName");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return FName();
+
+        KismetStringLibrary_ConvStringToName Params;
+		Params.InString = InString;
+
+        SDK::StaticClassImpl("KismetStringLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
 public:
     DECLARE_STATIC_CLASS(UKismetStringLibrary);
     DECLARE_DEFAULT_OBJECT(UKismetStringLibrary);

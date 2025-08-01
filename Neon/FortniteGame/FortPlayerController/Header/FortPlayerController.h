@@ -139,7 +139,7 @@ public:
     DECLARE_STATIC_CLASS(UGAB_Spray_Generic_C);
 };
 
-class UActorComponent final : public UObject
+class UActorComponent : public UObject
 {
 public:
     AActor* GetOwner()
