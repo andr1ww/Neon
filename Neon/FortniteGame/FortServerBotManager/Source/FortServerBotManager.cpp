@@ -194,7 +194,23 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
         }
 
         if (!bRanBehaviorTree) {
-            // start manual tickingb
+            // start manual ticking
+        }
+
+        static TArray<AActor*> PatrolPaths;
+        if (PatrolPaths.Num() == 0) {
+            PatrolPaths = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), AFortAthenaPatrolPath::StaticClass());
+		}
+        for (int i = 0; i < PatrolPaths.Num(); i++) {
+			AFortAthenaPatrolPath* PatrolPath = (AFortAthenaPatrolPath*)PatrolPaths[i];
+            if (PatrolPath->GetPatrolPoints()[0]->K2_GetActorLocation() == SpawnLoc) {
+                if (!Controller->GetCachedPatrollingComponent()) {
+					Controller->SetCachedPatrollingComponent((UFortAthenaNpcPatrollingComponent*)UGameplayStatics::SpawnActorOG(UFortAthenaNpcPatrollingComponent::StaticClass(), {}, {}, Controller));
+                }
+                //UE_LOG(LogNeon, Log, "Found Patrol Path!");
+                Controller->GetCachedPatrollingComponent()->SetPatrolPath(PatrolPath);
+                break;
+            }
         }
         
         SpawnLocator->CallFunc<void>("Actor", "K2_DestroyActor");
