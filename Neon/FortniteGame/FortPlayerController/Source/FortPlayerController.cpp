@@ -33,6 +33,24 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
 	static UFortAbilitySet* AbilitySet = nullptr;
 	if (!AbilitySet) AbilitySet = (UFortAbilitySet*)GUObjectArray.FindObject("GAS_AthenaPlayer");
 	UAbilitySystemComponent::GiveAbilitySet(PlayerController->GetPlayerState()->GetAbilitySystemComponent(), AbilitySet);
+	AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
+	AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState();
+	
+	PlayerState->Set("FortPlayerStateAthena", "SquadId", PlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex") - 3);
+	PlayerState->CallFunc<void>("FortPlayerStateAthena", "OnRep_SquadId");
+
+	static const int32 FGameMemberInfoSize = StaticClassImpl("GameMemberInfo")->GetSize();
+	FGameMemberInfo* Member = (FGameMemberInfo*)malloc(FGameMemberInfoSize);
+	memset(Member, 0, FGameMemberInfoSize);
+	Member->MostRecentArrayReplicationKey = -1;
+	Member->ReplicationID = -1;
+	Member->ReplicationKey = -1;
+	Member->TeamIndex = PlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex");
+	Member->SquadId = PlayerState->Get<uint8>("FortPlayerStateAthena", "SquadId");
+	Member->MemberUniqueId = PlayerState->Get<FUniqueNetIdRepl>("PlayerState", "UniqueId");
+
+	GameState->GetGameMemberInfoArray().GetMembers().Add(*Member);
+	GameState->GetGameMemberInfoArray().MarkItemDirty(*Member);
 }
 
 
@@ -87,6 +105,8 @@ void AFortPlayerControllerAthena::ServerPlayEmoteItem(AFortPlayerControllerAthen
     Stack.StepCompiledIn(&Asset);
     Stack.IncrementCode();
 
+	if (!PlayerController->GetMyFortPawn()) return;
+	
     UAbilitySystemComponent* AbilitySystemComponent = PlayerController->GetPlayerState()->GetAbilitySystemComponent();
     UGameplayAbility* Ability = nullptr;
 
@@ -380,11 +400,23 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	
 	auto DeathTags = DeathReport.GetTags();
 	EDeathCause CachedDeathCause = PlayerState->CallFunc<EDeathCause>("FortPlayerStateAthena", "ToDeathCause", DeathTags, false);
+
+	FGameplayTagContainer CopyTags;
+
+	for (int i = 0; i < DeathTags.GetGameplayTags().Num(); ++i)
+	{
+		CopyTags.GetGameplayTags().Add(DeathTags.GetGameplayTags()[i]);
+	}
+
+	for (int i = 0; i < DeathTags.GetParentTags().Num(); ++i)
+	{
+		CopyTags.GetParentTags().Add(DeathTags.GetParentTags()[i]);
+	}
 	
 	PlayerState->Set("FortPlayerState", "PawnDeathLocation", DeathLocation);
 	DeathInfo->SetbDBNO(false);
 	DeathInfo->SetDeathLocation(DeathLocation);
-	DeathInfo->SetDeathTags(DeathTags);
+	DeathInfo->SetDeathTags(CopyTags);
 	DeathInfo->SetDeathCause(CachedDeathCause);
 	DeathInfo->SetDowner((AActor*)KillerPlayerState);
 	DeathInfo->SetFinisherOrDowner((AActor*)KillerPlayerState);
@@ -523,17 +555,15 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			PlayerController->CallFunc<void>("FortPlayerControllerAthena", "ClientSendTeamStatsForPlayer", *TeamStats);
 		}
    	
-		int AlivePlayersCount = 0;
 		AFortPlayerControllerAthena* LastAliveController = nullptr;
 
 		for (const auto& AlivePC : GameMode->GetAlivePlayers()) {
 			if (AlivePC && AlivePC != PlayerController && AlivePC->GetMyFortPawn() && !AlivePC->GetMyFortPawn()->CallFunc<bool>("FortPawn", "IsDBNO")) {
-				AlivePlayersCount++;
 				LastAliveController = AlivePC;
 			}
 		}
 
-		if (AlivePlayersCount == 1 && LastAliveController) {
+		if (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num() == 1 && LastAliveController) {
 			AFortPlayerStateAthena* WinnerPlayerState = LastAliveController->GetPlayerState();
 			AFortPlayerPawn* WinnerPawn = LastAliveController->GetMyFortPawn();
        

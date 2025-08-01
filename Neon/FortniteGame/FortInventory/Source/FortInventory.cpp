@@ -151,53 +151,47 @@ AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, UFortItemDefinition*
     return SpawnPickup(Loc, ItemEntry, SourceTypeFlag, SpawnSource, Pawn, -1, Toss, true, true);
 }
 
-void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFortItemEntry& Entry)
-{
+void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFortItemEntry& Entry) {
     if (!PlayerController) return;
     
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
-    FFortItemList& Inventory = WorldInventory->GetInventory();
-    TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
-    TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
-
-    UFortWorldItem* EToDelete = nullptr;
-    int32 RIndex = -1;
-    int32 EIndex = -1;
-
-    for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); i++)
-    {
-        if (ItemInstancesOffsetPtr[i] && ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemGuid() == Entry.GetItemGuid())
-        {
-            EToDelete = ItemInstancesOffsetPtr[i];
-            EIndex = i;
-            break;
-        }
-    }
-
-    for (int32 i = 0; i < ReplicatedEntriesOffsetPtr.Num(); i++)
-    {
-        static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
-        auto ReplicatedEntry = (FFortItemEntry*) ((uint8*) ReplicatedEntriesOffsetPtr.GetData() + (i * StructSize));
+    if (!WorldInventory) return;
     
-        if (ReplicatedEntry->GetItemGuid() == EToDelete->GetItemEntry().GetItemGuid())
-        {
-            RIndex = i;
+    FFortItemList& Inventory = WorldInventory->GetInventory();
+    TArray<UFortWorldItem*>& ItemInstances = Inventory.GetItemInstances();
+    TArray<FFortItemEntry>& ReplicatedEntries = Inventory.GetReplicatedEntries();
+    
+    FGuid TargetGuid = Entry.GetItemGuid();
+    
+    int32 ItemIndex = -1;
+    int32 ReplicatedIndex = -1;
+    
+    for (int32 i = 0; i < ItemInstances.Num(); i++) {
+        if (ItemInstances[i] && ItemInstances[i]->GetItemEntry().GetItemGuid() == TargetGuid) {
+            ItemIndex = i;
             break;
         }
     }
-
-    if (EToDelete && EIndex != -1)
-    {
-        ItemInstancesOffsetPtr.Remove(EIndex);
+    
+    for (int32 i = 0; i < ReplicatedEntries.Num(); i++) {
+        static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
+        auto ReplicatedEntry = (FFortItemEntry*)((uint8*)ReplicatedEntries.GetData() + (i * StructSize));
+        
+        if (ReplicatedEntry->GetItemGuid() == TargetGuid) {
+            ReplicatedIndex = i;
+            break;
+        }
     }
-
-    if (RIndex != -1)
-    {
-        ReplicatedEntriesOffsetPtr.Remove(RIndex);
+    
+    if (ReplicatedIndex != -1) {
+        ReplicatedEntries.Remove(ReplicatedIndex);
     }
-
-    if (Entry.GetItemDefinition())
-    {
+    
+    if (ItemIndex != -1) {
+        ItemInstances.Remove(ItemIndex);
+    }
+    
+    if (Entry.GetItemDefinition()) {
         WorldInventory->GiveItem(
             Cast<AFortPlayerControllerAthena>(PlayerController),
             Entry.GetItemDefinition(),

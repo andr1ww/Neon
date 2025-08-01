@@ -6,6 +6,10 @@
 #include "FortniteGame/FortPlayerPawn/Header/FortPlayerPawn.h"
 #include "FortniteGame/FortPlayerState/Header/FortPlayerState.h"
 #include "FortniteGame/Common/Header/ItemDefinition.h"
+#include "FortniteGame/FortServerBotManager/Header/FortServerBotManager.h"
+
+
+class UBehaviorTree;
 
 class AAIController : public AController
 {

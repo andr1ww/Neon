@@ -36,7 +36,7 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
 
     static FName PickaxeTag = UKismetStringLibrary::GetDefaultObj()->CallFunc<FName>("KismetStringLibrary","Conv_StringToName", FString(L"Weapon.Melee.Impact.Pickaxe"));
     FGameplayTag* DamageTagEntry = nullptr;
-    for (FGameplayTag& entry : DamageTags.GameplayTags) {
+    for (FGameplayTag& entry : DamageTags.GetGameplayTags()) {
         if (entry.TagName.GetComparisonIndex() == PickaxeTag.GetComparisonIndex()) {
             DamageTagEntry = &entry;
             break;

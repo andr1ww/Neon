@@ -115,10 +115,10 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
 
         if (BotData->GetBehaviorTree()) {
             if (Controller->RunBehaviorTree(BotData->GetBehaviorTree())) {
-                UE_LOG(LogNeon, Log, "Bot %s RanBehaviorTree %s Successfully!", Ret->GetFName().ToString(), BotData->GetBehaviorTree()->GetFName().ToString());
+                
             }
             else {
-				UE_LOG(LogNeon, Warning, "Bot %s Failed to RunBehaviorTree %s!", Ret->GetFName().ToString(), BotData->GetBehaviorTree()->GetFName().ToString());
+				UE_LOG(LogNeon, Warning, "Bot %s Failed to RunBehaviorTree %s!", Ret->GetFName().ToString().ToString().c_str(), BotData->GetBehaviorTree()->GetFName().ToString().ToString().c_str());
             }
         }
         
