@@ -34,4 +34,26 @@ void AActor::K2_DestroyActor()
     this->ProcessEvent(Func, nullptr);
 }
 
+FVector AActor::K2_GetActorLocation()
+{
+    static SDK::UFunction* Func = nullptr;
+    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Actor", "K2_DestroyActor");
+
+    if (Func == nullptr)
+        Func = Info.Func;
+    if (!Func)
+        return FVector();
+
+    struct Actor_K2_GetActorLocation final
+    {
+    public:
+        FVector ReturnValue;
+    };
+	Actor_K2_GetActorLocation Params;
+
+    this->ProcessEvent(Func, &Params);
+
+	return Params.ReturnValue;
+}
+
 

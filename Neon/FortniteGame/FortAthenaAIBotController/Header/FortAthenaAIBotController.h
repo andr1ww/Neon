@@ -12,6 +12,7 @@
 class UBehaviorTree;
 class UBrainComponent;
 class UBlackboardComponent;
+class UFortAthenaNpcPatrollingComponent;
 
 class ANavigationData : public AActor
 {
@@ -128,6 +129,8 @@ public:
 
     DEFINE_PTR(UBehaviorTree, AFortAthenaAIBotController, BehaviorTree);
     DEFINE_MEMBER(float, AFortAthenaAIBotController, Skill);
+
+    DEFINE_PTR(UFortAthenaNpcPatrollingComponent, AFortAthenaAIBotController, CachedPatrollingComponent);
 
 public:
     DefHookOg(void, OnPossessedPawnDied, AFortAthenaAIBotController*, AActor*, float, AFortPlayerControllerAthena*, AActor*, FVector, UPrimitiveComponent*, FName, FVector);

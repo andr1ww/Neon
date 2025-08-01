@@ -340,6 +340,47 @@ public:
 	DECLARE_DEFAULT_OBJECT(UAthenaNavSystemConfig);
 };
 
+class AFortAthenaPatrolPoint final : public AActor {
+public:
+	DECLARE_STATIC_CLASS(AFortAthenaPatrolPoint);
+    DECLARE_DEFAULT_OBJECT(AFortAthenaPatrolPoint);
+};
+
+class AFortAthenaPatrolPath final : public AActor {
+public:
+    DEFINE_MEMBER(TArray<class AFortAthenaPatrolPoint*>, AFortAthenaPatrolPath, PatrolPoints);
+public:
+	DECLARE_STATIC_CLASS(AFortAthenaPatrolPath);
+    DECLARE_DEFAULT_OBJECT(AFortAthenaPatrolPath);
+};
+
+class UFortAthenaNpcPatrollingComponent final : public UActorComponent {
+public:
+    struct FortAthenaNpcPatrollingComponent_SetPatrolPath final
+    {
+    public:
+        const AFortAthenaPatrolPath* NewPatrolPath;
+    };
+public:
+    void SetPatrolPath(const AFortAthenaPatrolPath* NewPatrolPath) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("AIController", "OnUsingBlackBoard");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        FortAthenaNpcPatrollingComponent_SetPatrolPath Params;
+        Params.NewPatrolPath = NewPatrolPath;
+
+        this->ProcessEvent(Func, &Params);
+    }
+public:
+    DECLARE_STATIC_CLASS(UFortAthenaNpcPatrollingComponent);
+    DECLARE_DEFAULT_OBJECT(UFortAthenaNpcPatrollingComponent);
+};
+
 class UFortServerBotManagerAthena : public UObject
 {
 public:
