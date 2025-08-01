@@ -500,7 +500,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		}
 	}
    
-	bool bIsDBNO = VictimPawn && VictimPawn->CallFunc<bool>("FortPawn", "IsDBNO");
+	bool bIsDBNO = VictimPawn && VictimPawn->IsDBNO();
 	if (!bIsDBNO) {
 		static int DamageCauserOffset = 0;
 		if (!DamageCauserOffset)
@@ -559,7 +559,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		AFortPlayerControllerAthena* LastAliveController = nullptr;
 
 		for (const auto& AlivePC : GameMode->GetAlivePlayers()) {
-			if (AlivePC && AlivePC != PlayerController && AlivePC->GetMyFortPawn() && !AlivePC->GetMyFortPawn()->CallFunc<bool>("FortPawn", "IsDBNO")) {
+			if (AlivePC && AlivePC != PlayerController && AlivePC->GetMyFortPawn() && !AlivePC->GetMyFortPawn()->IsDBNO()) {
 				LastAliveController = AlivePC;
 			}
 		}

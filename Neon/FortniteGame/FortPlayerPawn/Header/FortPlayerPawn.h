@@ -16,10 +16,34 @@ class AFGF_Character : public ACharacter
 class AFortPawn : public AFGF_Character
 {
 public:
+	bool IsDBNO()
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPawn", "IsDBNO");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return false;
+
+		struct FortPawn_IsDBNO final
+		{
+		public:
+			bool                                          ReturnValue;                                       // 0x0000(0x0001)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+		} Params{};
+		
+		this->ProcessEvent(Func, &Params);
+
+		return Params.ReturnValue;
+	}
+public:
     DEFINE_BOOL(AFortPawn, bMovingEmote);
     DEFINE_BOOL(AFortPawn, bMovingEmoteForwardOnly);
     DEFINE_BOOL(AFortPawn, bMovingEmoteFollowingOnly);
     DEFINE_MEMBER(float, AFortPawn, EmoteWalkSpeed);
+public:
+	DECLARE_DEFAULT_OBJECT(AFortPawn);
+	DECLARE_STATIC_CLASS(AFortPawn);
 };
 
 struct FFortPickupRequestInfo final
