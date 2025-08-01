@@ -8,7 +8,7 @@
 #include "FortniteGame/FortInventory/Header/FortInventory.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
-#include "FortniteGame/FortLoot/Header/FortLoot.h"
+#include "FortniteGame/FortLoot/Header/FortLootPackage.h"
 #include "Neon/Finder/Header/Finder.h"
 #include "Neon/Runtime/Runtime.h"
 
