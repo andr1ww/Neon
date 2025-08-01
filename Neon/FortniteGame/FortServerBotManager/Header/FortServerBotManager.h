@@ -7,6 +7,7 @@
 #include "FortniteGame/FortPlayerPawn/Header/FortPlayerPawn.h"
 #include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
 #include "Engine/DataTable/Header/DataTable.h"
+#include "Engine/NetDriver/Header/NetDriver.h"
 
 class AFortGameModeAthena;
 class UActorComponent;
@@ -276,6 +277,22 @@ struct FBotInventory {
 };
 
 
+class UNavigationSystemV1 : public UObject
+{
+public:
+    DEFINE_BOOL(UNavigationSystemV1, bAutoCreateNavigationData);
+public:
+    DECLARE_DEFAULT_OBJECT(UNavigationSystemV1)
+    DECLARE_STATIC_CLASS(UNavigationSystemV1)
+};
+
+class UAthenaNavSystem : public UObject
+{
+public:
+    DECLARE_DEFAULT_OBJECT(UAthenaNavSystem);
+    DECLARE_STATIC_CLASS(UAthenaNavSystem);
+};
+
 class UFortServerBotManagerAthena : public UObject
 {
 public:
@@ -283,6 +300,7 @@ public:
     DEFINE_PTR(AFortGameStateAthena, UFortServerBotManagerAthena, CachedGameState);
     DEFINE_PTR(AFortAthenaMutator_Bots, UFortServerBotManagerAthena, CachedBotMutator);
 public:
+    DefHookOg(void, InitializeForWorld, UNavigationSystemV1*, UWorld, uint8);
     DefHookOg(AFortPlayerPawn*, SpawnBot, UFortServerBotManagerAthena *BotManager, FVector SpawnLoc, FRotator SpawnRot, UFortAthenaAIBotCustomizationData *BotData, FFortAthenaAIBotRunTimeCustomizationData &RuntimeBotData);
 public:
     DECLARE_STATIC_CLASS(UFortServerBotManagerAthena)

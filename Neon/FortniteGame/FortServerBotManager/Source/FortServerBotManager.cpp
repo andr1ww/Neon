@@ -64,6 +64,8 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
    
     AActor *SpawnLocator = UGameplayStatics::SpawnActorOG<ADefaultPawn>(ADefaultPawn::StaticClass(), SpawnLoc, SpawnRot);
     AFortPlayerPawn* Ret = BotManager->GetCachedBotMutator()->SpawnBot(BotData->GetPawnClass(), SpawnLocator, SpawnLoc, SpawnRot, true);
+
+ //   Ret->CallFunc<void>("Actor", "K2_TeleportTo", SpawnLoc, SpawnRot);
     
     if (Ret)
     {
@@ -174,8 +176,9 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                 Controller->BlueprintOnBehaviorTreeStarted();
 				bRanBehaviorTree = true;
 
-                Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhaseStep"), 2);
-                Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhase"), (uint8)EAthenaGamePhase::Warmup);
+                Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhaseStep"), 6);
+                Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhase"), (uint8)EAthenaGamePhase::SafeZones);
+                Controller->GetBlackboard()->SetValueAsBool(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Patrolling_ShouldMove"), true);
 
                 Controller->GetBlackboard()->SetValueAsBool(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_IsMovementBlocked"), false);
                 Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_AvoidThreat_ExecutionStatus"), (uint8)EExecutionStatus::ExecutionAllowed);
@@ -195,10 +198,16 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
         if (!bRanBehaviorTree) {
             // start manual tickingb
         }
-
-        UE_LOG(LogNeon, Log, "SetBehaviorTree: %s SetBlackboard: %s", Controller->GetBehaviorTree()->GetFName().ToString().ToString().c_str(), Controller->GetBehaviorTree()->GetBlackboardAsset()->GetFName().ToString().ToString().c_str());
-
+        
+    //    SpawnLocator->CallFunc<void>("Actor", "K2_DestroyActor");
         
         return Ret;
     }
+}
+
+void UFortServerBotManagerAthena::InitializeForWorld(UNavigationSystemV1* NavSystem, UWorld World, uint8 Mode)
+{
+    UE_LOG(LogNeon, Log, "Fuck");
+    NavSystem->SetbAutoCreateNavigationData(true);
+    return InitializeForWorldOG(NavSystem, World, Mode);
 }

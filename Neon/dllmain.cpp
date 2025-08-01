@@ -105,7 +105,8 @@ void InitNullsAndRetTrues() {
 		if (Func == 0x0) continue;
 		Runtime::Patch(Func, 0x85);
 	}
-	
+
+	Runtime::Hook(IMAGEBASE + 0x2E688D0, RetTrue);
 }
 
 void Main()
@@ -148,6 +149,7 @@ void Main()
 	Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.ServerHandlePickupInfo", AFortPlayerPawn::ServerHandlePickupInfo);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerLoadingScreenDropped", AFortPlayerControllerAthena::ServerLoadingScreenDropped);
 	Runtime::Hook(Finder->ClientOnPawnDied(), AFortPlayerControllerAthena::ClientOnPawnDied, (void**)&AFortPlayerControllerAthena::ClientOnPawnDiedOG);
+	Runtime::VFTHook(UAthenaNavSystem::GetDefaultObj()->GetVTable(), 0x53, UFortServerBotManagerAthena::InitializeForWorld, (void**)&UFortServerBotManagerAthena::InitializeForWorldOG);
 	
 	if (Finder->CompletePickupAnimation())
 	{

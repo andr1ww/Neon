@@ -8,6 +8,8 @@
 #include "FortniteGame/FortGameState/Header/FortGameState.h"
 #include "Neon/Finder/Header/Finder.h"
 
+class AFortGameModeAthena;
+
 struct FURL
 {
 public:
