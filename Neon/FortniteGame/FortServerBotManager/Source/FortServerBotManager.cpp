@@ -197,7 +197,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             // start manual ticking
         }
 
-        static TArray<AActor*> PatrolPaths;
+        /*static TArray<AActor*> PatrolPaths;
         if (PatrolPaths.Num() == 0) {
             PatrolPaths = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), AFortAthenaPatrolPath::StaticClass());
 		}
@@ -211,7 +211,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                 Controller->GetCachedPatrollingComponent()->SetPatrolPath(PatrolPath);
                 break;
             }
-        }
+        }*/
         
         SpawnLocator->CallFunc<void>("Actor", "K2_DestroyActor");
         
