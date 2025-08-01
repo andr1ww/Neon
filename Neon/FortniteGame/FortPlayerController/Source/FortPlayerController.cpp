@@ -296,7 +296,7 @@ void AFortPlayerControllerAthena::ServerBeginEditingBuildingActor(AFortPlayerCon
     if (EditingTool)
     {
         EditingTool->Set("FortWeap_EditingTool", "EditActor", BuildingSMActor);
-        EditingTool->CallFunc<void>("FortWeap_EditingTool", "OnRep_EditActor");
+        EditingTool->OnRep_EditActor();
     }
 }
 
@@ -476,9 +476,9 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		int32 TeamScore = KillerPlayerState->GetTeamKillScore() + 1;
 		
 		KillerPlayerState->SetKillScore(KillerScore);
-		KillerPlayerState->CallFunc<void>("FortPlayerStateAthena", "OnRep_KillScore");
+		KillerPlayerState->OnRep_KillScore();
 		KillerPlayerState->SetTeamKillScore(TeamScore);
-		KillerPlayerState->CallFunc<void>("FortPlayerStateAthena", "OnRep_TeamKillScore");
+		KillerPlayerState->OnRep_TeamKillScore();
 		KillerPlayerState->CallFunc<void>("FortPlayerStateAthena", "ClientReportTeamKill", TeamScore);
    	
 		for (const auto& Member : KillerPlayerState->GetPlayerTeam()->GetTeamMembers()) {
@@ -486,7 +486,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			if (MemberPlayerState != KillerPlayerState) {
 				int32 MemberTeamScore = MemberPlayerState->GetTeamKillScore() + 1;
 				MemberPlayerState->SetTeamKillScore(MemberTeamScore);
-				MemberPlayerState->CallFunc<void>("FortPlayerStateAthena", "OnRep_TeamKillScore");
+				MemberPlayerState->OnRep_TeamKillScore();
 				MemberPlayerState->CallFunc<void>("FortPlayerStateAthena", "ClientReportTeamKill", MemberTeamScore);
 			}
 		}
@@ -538,7 +538,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 
 			int32 PlayerPlace = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num() + 1;
 			PlayerState->SetPlace(PlayerPlace);
-			PlayerState->CallFunc<void>("FortGameStateAthena", "OnRep_Place");
+			PlayerState->OnRep_Place();
 
 			*MatchStats = MatchReport->GetMatchStats();
 			*TeamStats = MatchReport->GetTeamStats();
@@ -570,7 +570,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
        
 			if (WinnerPlayerState && WinnerPawn) {
 				WinnerPlayerState->SetPlace(1);
-				WinnerPlayerState->CallFunc<void>("FortGameStateAthena", "OnRep_Place");
+				WinnerPlayerState->OnRep_Place();
 
 				if (ItemDef)
 				{

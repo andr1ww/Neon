@@ -160,6 +160,45 @@ public:
 		
 		this->ProcessEvent(Func, nullptr);
 	}
+
+	void OnRep_TeamKillScore()
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerStateAthena", "OnRep_TeamKillScore");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+		
+		this->ProcessEvent(Func, nullptr);
+	}
+
+	void OnRep_KillScore()
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerStateAthena", "OnRep_KillScore");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+		
+		this->ProcessEvent(Func, nullptr);
+	}
+
+	void OnRep_Place()
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerStateAthena", "OnRep_Place");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+		
+		this->ProcessEvent(Func, nullptr);
+	}
 public:
 	DECLARE_STATIC_CLASS(AFortPlayerStateAthena)
 	DECLARE_DEFAULT_OBJECT(AFortPlayerStateAthena)
