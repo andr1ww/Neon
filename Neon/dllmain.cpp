@@ -185,6 +185,11 @@ void Main()
 		Runtime::Hook(Finder->SpawnBot(), UFortServerBotManagerAthena::SpawnBot, (void**)&UFortServerBotManagerAthena::SpawnBotOG);
 	}
 
+	if (Finder->CreateAndConfigureNavigationSystem()) {
+		Runtime::Hook(Finder->CreateAndConfigureNavigationSystem(), UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem, (void**)&UFortServerBotManagerAthena::CreateAndConfigureNavigationSystemOG);
+		UE_LOG(LogNeon, Log, "CreateAndConfigureNavigationSystem: 0x%x", Finder->CreateAndConfigureNavigationSystem() - IMAGEBASE);
+	}
+
 	UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
 	FString WorldName;
 	if (Fortnite_Version <= 10.40)

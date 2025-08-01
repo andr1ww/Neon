@@ -302,6 +302,35 @@ public:
     DECLARE_STATIC_CLASS(UAthenaNavSystem);
 };
 
+class UNavigationSystemConfig : public UObject {
+public:
+    DECLARE_STATIC_CLASS(UNavigationSystemConfig);
+    DECLARE_DEFAULT_OBJECT(UNavigationSystemConfig);
+};
+
+class UNavigationSystemModuleConfig : public UNavigationSystemConfig {
+public:
+    DEFINE_BOOL(UNavigationSystemModuleConfig, bAutoSpawnMissingNavData);
+    DEFINE_BOOL(UNavigationSystemModuleConfig, bSpawnNavDataInNavBoundsLevel);
+public:
+	DECLARE_STATIC_CLASS(UNavigationSystemModuleConfig);
+	DECLARE_DEFAULT_OBJECT(UNavigationSystemModuleConfig);
+};
+
+class UFortNavSystemConfig : public UNavigationSystemModuleConfig {
+public:
+	DECLARE_STATIC_CLASS(UFortNavSystemConfig);
+	DECLARE_DEFAULT_OBJECT(UFortNavSystemConfig);
+};
+
+class UAthenaNavSystemConfig final : public UFortNavSystemConfig {
+public:
+    DEFINE_BOOL(UAthenaNavSystemConfig, bPrioritizeNavigationAroundSpawners);
+public:
+	DECLARE_STATIC_CLASS(UAthenaNavSystemConfig);
+	DECLARE_DEFAULT_OBJECT(UAthenaNavSystemConfig);
+};
+
 class UFortServerBotManagerAthena : public UObject
 {
 public:
@@ -309,7 +338,9 @@ public:
     DEFINE_PTR(AFortGameStateAthena, UFortServerBotManagerAthena, CachedGameState);
     DEFINE_PTR(AFortAthenaMutator_Bots, UFortServerBotManagerAthena, CachedBotMutator);
 public:
-    DefHookOg(void, InitializeForWorld, UNavigationSystemV1*, UWorld, uint8);
+    DefHookOg(void, InitializeForWorld, UNavigationSystemV1*, UWorld*, uint8);
+    DefHookOg(void, CreateAndConfigureNavigationSystem, UAthenaNavSystemConfig*, UWorld*);
+
     DefHookOg(AFortPlayerPawn*, SpawnBot, UFortServerBotManagerAthena *BotManager, FVector SpawnLoc, FRotator SpawnRot, UFortAthenaAIBotCustomizationData *BotData, FFortAthenaAIBotRunTimeCustomizationData &RuntimeBotData);
 public:
     DECLARE_STATIC_CLASS(UFortServerBotManagerAthena)

@@ -200,9 +200,18 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
     }
 }
 
-void UFortServerBotManagerAthena::InitializeForWorld(UNavigationSystemV1* NavSystem, UWorld World, uint8 Mode)
+void UFortServerBotManagerAthena::InitializeForWorld(UNavigationSystemV1* NavSystem, UWorld* World, uint8 Mode)
 {
-    UE_LOG(LogNeon, Log, "Fuck");
+    UE_LOG(LogNeon, Log, "InitializeForWorld For World: '%s' For NavigationSystem: '%s'", World->GetFName().ToString().ToString().c_str(), NavSystem->GetFName().ToString().ToString().c_str());
     NavSystem->SetbAutoCreateNavigationData(true);
     return InitializeForWorldOG(NavSystem, World, Mode);
+}
+
+void UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem(UAthenaNavSystemConfig* Config, UWorld* World)
+{
+	UE_LOG(LogNeon, Log, "CreateAndConfigureNavigationSystem For World: '%s' For Config: '%s'", World->GetFName().ToString().ToString().c_str(), Config->GetFName().ToString().ToString().c_str());
+    Config->SetbPrioritizeNavigationAroundSpawners(true);
+	Config->SetbAutoSpawnMissingNavData(true);
+    Config->SetbSpawnNavDataInNavBoundsLevel(true);
+    return CreateAndConfigureNavigationSystemOG(Config, World);
 }

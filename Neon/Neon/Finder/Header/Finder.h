@@ -122,6 +122,8 @@ public:
     uint64 RemoveFromAlivePlayers();
 
     uint64 RegisterComponentWithWorld();
+
+    uint64 CreateAndConfigureNavigationSystem();
 };
 
 inline UFinder* Finder = new UFinder();
