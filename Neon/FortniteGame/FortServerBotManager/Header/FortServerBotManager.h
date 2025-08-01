@@ -90,7 +90,7 @@ public:
 	DECLARE_DEFAULT_OBJECT(UBrainComponent);
 };
 
-class UBlackboardData final : public UDataAsset {
+class UBlackboardData : public UDataAsset {
 public:
 	DECLARE_STATIC_CLASS(UBlackboardData);
 	DECLARE_DEFAULT_OBJECT(UBlackboardData);
