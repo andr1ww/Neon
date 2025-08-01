@@ -20,6 +20,12 @@ enum class EEvaluateCurveTableResult : uint8_t
     EEvaluateCurveTableResult_MAX = 2
 };
 
+class UDataAsset : public UObject {
+public:
+    DECLARE_STATIC_CLASS(UDataAsset);
+    DECLARE_DEFAULT_OBJECT(UDataAsset);
+};
+
 class UDataTableFunctionLibrary : public UObject
 {
 public:

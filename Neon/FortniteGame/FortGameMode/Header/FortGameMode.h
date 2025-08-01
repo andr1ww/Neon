@@ -186,15 +186,20 @@ class AFortGameModeAthena : public AFortGameMode
 {
 public:
     DEFINE_MEMBER(int32, AFortGameModeAthena, WarmupRequiredPlayerCount);
+    DEFINE_MEMBER(TArray<FItemAndCount>, AFortGameModeAthena, StartingItems);
+
     DEFINE_MEMBER(int32, AFortGameModeAthena, NumPlayers);
     DEFINE_MEMBER(int32, AFortGameModeAthena, NumBots);
-    DEFINE_MEMBER(TArray<FItemAndCount>, AFortGameModeAthena, StartingItems);
-    DEFINE_PTR(UFortServerBotManagerAthena, AFortGameModeAthena, ServerBotManager);
-    DEFINE_MEMBER(TSubclassOf<class UFortServerBotManagerAthena>, AFortGameModeAthena, ServerBotManagerClass);
-    DEFINE_PTR(AFortAIDirector, AFortGameModeAthena, AIDirector);
-    DEFINE_PTR(AFortAIGoalManager, AFortGameModeAthena, AIGoalManager);
+
     DEFINE_MEMBER(TArray<AFortPlayerControllerAthena*>, AFortGameModeAthena, AlivePlayers);
     DEFINE_MEMBER(TArray<AFortAthenaAIBotController*>, AFortGameModeAthena, AliveBots);
+
+    DEFINE_PTR(AFortAIDirector, AFortGameModeAthena, AIDirector);
+    DEFINE_PTR(AFortAIGoalManager, AFortGameModeAthena, AIGoalManager);
+    DEFINE_PTR(UAthenaAISettings, AFortGameModeAthena, AISettings);
+
+    DEFINE_MEMBER(TSubclassOf<class UFortServerBotManagerAthena>, AFortGameModeAthena, ServerBotManagerClass);
+    DEFINE_PTR(UFortServerBotManagerAthena, AFortGameModeAthena, ServerBotManager);
 public:
     DECLARE_DEFAULT_OBJECT(AFortGameModeAthena);
     DECLARE_STATIC_CLASS(AFortGameModeAthena);
