@@ -479,7 +479,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		KillerPlayerState->OnRep_KillScore();
 		KillerPlayerState->SetTeamKillScore(TeamScore);
 		KillerPlayerState->OnRep_TeamKillScore();
-		KillerPlayerState->CallFunc<void>("FortPlayerStateAthena", "ClientReportTeamKill", TeamScore);
+		KillerPlayerState->ClientReportTeamKill(TeamScore);
    	
 		for (const auto& Member : KillerPlayerState->GetPlayerTeam()->GetTeamMembers()) {
 			auto MemberPlayerState = Member->GetPlayerState();
@@ -487,11 +487,11 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 				int32 MemberTeamScore = MemberPlayerState->GetTeamKillScore() + 1;
 				MemberPlayerState->SetTeamKillScore(MemberTeamScore);
 				MemberPlayerState->OnRep_TeamKillScore();
-				MemberPlayerState->CallFunc<void>("FortPlayerStateAthena", "ClientReportTeamKill", MemberTeamScore);
+				MemberPlayerState->ClientReportTeamKill(MemberTeamScore);
 			}
 		}
    	
-		KillerPlayerState->CallFunc<void>("FortPlayerStateAthena", "ClientReportKill", KillerPlayerState);
+		KillerPlayerState->ClientReportKill(KillerPlayerState);
 		if (auto CPlayerController = (AFortPlayerControllerAthena*)KillerPawn->GetController()) {
 			if (CPlayerController->GetMyFortPawn()) {
 				MatchStats->Stats[3] = KillerScore;
@@ -604,9 +604,9 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 
 				uint8 WinningTeamIndex = WinnerPlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex");
 				GameState->Set("FortGameStateAthena", "WinningTeam", WinningTeamIndex);
-				GameState->CallFunc<void>("FortGameStateAthena", "OnRep_WinningTeam");
+				GameState->OnRep_WinningTeam();
 				GameState->Set("FortGameStateAthena", "WinningPlayerState", WinnerPlayerState);
-				GameState->CallFunc<void>("FortGameStateAthena", "OnRep_WinningPlayerState");
+				GameState->OnRep_WinningPlayerState();
 			}
 		}
 	}

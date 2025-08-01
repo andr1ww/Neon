@@ -58,6 +58,32 @@ using Map = TMap<TSubclassOf<ABuildingActor>, int32>;
 class AFortGameStateAthena : public AFortGameState
 {
 public:
+    void OnRep_WinningPlayerState()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortGameStateAthena", "OnRep_WinningPlayerState");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+		
+        this->ProcessEvent(Func, nullptr);
+    }
+
+    void OnRep_WinningTeam()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortGameStateAthena", "OnRep_WinningTeam");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+		
+        this->ProcessEvent(Func, nullptr);
+    }
+public:
     DEFINE_MEMBER(Map, AFortGameStateAthena, AllPlayerBuildableClassesIndexLookup);
     DEFINE_MEMBER(TArray<TSubclassOf<ABuildingActor>>, UWorld, BuildingActorClasses);
     DEFINE_PTR(FPlaylistPropertyArray, AFortGameStateAthena, CurrentPlaylistInfo)
@@ -72,6 +98,7 @@ public:
     DEFINE_MEMBER(EAthenaGamePhase, AFortGameStateAthena, GamePhase);
 public:
     DECLARE_STATIC_CLASS(AFortGameStateAthena);
+    DECLARE_DEFAULT_OBJECT(AFortGameStateAthena)
 };
 
 

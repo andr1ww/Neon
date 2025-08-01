@@ -199,6 +199,44 @@ public:
 		
 		this->ProcessEvent(Func, nullptr);
 	}
+
+	void ClientReportKill(const AFortPlayerStateAthena* Player)
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerStateAthena", "ClientReportKill");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+
+		struct FortPlayerStateAthena_ClientReportKill final
+		{
+		public:
+			const class AFortPlayerStateAthena*           Player;                                            // 0x0000(0x0008)(ConstParm, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+		} Params{Player};
+		
+		this->ProcessEvent(Func, &Params);
+	}
+
+	void ClientReportTeamKill(int32 TeamKills)
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerStateAthena", "ClientReportTeamKill");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+
+		struct FortPlayerStateAthena_ClientReportTeamKill final
+		{
+		public:
+			int32                                         TeamKills;                                         // 0x0000(0x0004)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+		} Params{TeamKills};
+		
+		this->ProcessEvent(Func, &Params);
+	}
 public:
 	DECLARE_STATIC_CLASS(AFortPlayerStateAthena)
 	DECLARE_DEFAULT_OBJECT(AFortPlayerStateAthena)
