@@ -403,14 +403,14 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 
 	FGameplayTagContainer CopyTags;
 
-	for (int i = 0; i < DeathTags.GetGameplayTags().Num(); ++i)
+	for (int i = 0; i < DeathTags.GameplayTags.Num(); ++i)
 	{
-		CopyTags.GetGameplayTags().Add(DeathTags.GetGameplayTags()[i]);
+		CopyTags.GameplayTags.Add(DeathTags.GameplayTags[i]);
 	}
 
-	for (int i = 0; i < DeathTags.GetParentTags().Num(); ++i)
+	for (int i = 0; i < DeathTags.ParentTags.Num(); ++i)
 	{
-		CopyTags.GetParentTags().Add(DeathTags.GetParentTags()[i]);
+		CopyTags.ParentTags.Add(DeathTags.ParentTags[i]);
 	}
 	
 	PlayerState->Set("FortPlayerState", "PawnDeathLocation", DeathLocation);
