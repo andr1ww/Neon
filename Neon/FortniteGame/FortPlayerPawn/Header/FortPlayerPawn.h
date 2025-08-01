@@ -89,5 +89,7 @@ public:
 
 class ADefaultPawn : public APawn
 {
-    
+public:
+	DECLARE_DEFAULT_OBJECT(ADefaultPawn)
+	DECLARE_STATIC_CLASS(ADefaultPawn)
 };
