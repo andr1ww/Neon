@@ -177,11 +177,16 @@ void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
     static UDataTable* LootTierData = nullptr;
 
     if (!LootPackages || !LootTierData) {
-        LootPackages = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootPackages_Client.AthenaLootPackages_Client");
-        LootTierData = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootTierData_Client.AthenaLootTierData_Client");
+        static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameState, "CurrentPlaylistInfo");
+            
+        FPlaylistPropertyArray& CurrentPlaylistInfoPtr = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
+        
+      //  LootPackages = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootPackages().Get(true);
+      //  LootTierData = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootTierData().Get(true);
         
         if (!LootPackages || !LootTierData) {
-            return; 
+            LootPackages = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootPackages_Client.AthenaLootPackages_Client");
+            LootTierData = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootTierData_Client.AthenaLootTierData_Client");
         }
     }
 
