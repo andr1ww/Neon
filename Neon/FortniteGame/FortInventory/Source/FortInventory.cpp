@@ -38,33 +38,25 @@ void AFortInventory::Remove(AFortPlayerController* PlayerController, FGuid Guid,
     TArray<UFortWorldItem*>& ItemInstances = Inventory.GetItemInstances();
     TArray<FFortItemEntry>& ReplicatedEntries = Inventory.GetReplicatedEntries();
     
-    int32 ItemIndex = -1;
-    int32 ReplicatedIndex = -1;
-    
-    for (int32 i = 0; i < ItemInstances.Num(); i++) {
+    for (int32 i = ItemInstances.Num() - 1; i >= 0; i--) {
         if (ItemInstances[i] && ItemInstances[i]->GetItemEntry().GetItemGuid() == Guid) {
-            ItemIndex = i;
+            ItemInstances.Remove(i);
             break;
         }
     }
     
-    for (int32 i = 0; i < ReplicatedEntries.Num(); i++) {
-        static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
+    static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
+    for (int32 i = ReplicatedEntries.Num() - 1; i >= 0; i--) {
         auto ReplicatedEntry = (FFortItemEntry*)((uint8*)ReplicatedEntries.GetData() + (i * StructSize));
         
         if (ReplicatedEntry->GetItemGuid() == Guid) {
-            ReplicatedIndex = i;
+            UE_LOG(LogNeon, Log, "Removing replicated entry at index %d", i);
+            ReplicatedEntries.Remove(i);
             break;
         }
     }
-    
-    if (ReplicatedIndex != -1) {
-        ReplicatedEntries.Remove(ReplicatedIndex);
-    }
-    
-    if (ItemIndex != -1) {
-        ItemInstances.Remove(ItemIndex);
-    }
+
+    WorldInventory->Update((AFortPlayerControllerAthena*)PlayerController, nullptr);
 }
 
 FFortRangedWeaponStats* AFortInventory::GetStats(UFortWeaponItemDefinition* Def)

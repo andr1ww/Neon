@@ -89,30 +89,33 @@ void AFortPlayerPawn::ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack)
     }
 
     if (ItemCount == 5 && FortLootPackage::GetQuickbar(Pickup->GetPrimaryPickupItemEntry().GetItemDefinition()) == EFortQuickBars::Primary) {
-        if (MyFortPawn && MyFortPawn->Get<AFortWeapon*>("FortPawn", "CurrentWeapon") &&
-            FortLootPackage::GetQuickbar(MyFortPawn->Get<AFortWeapon*>("FortPawn", "CurrentWeapon")->GetWeaponData()) == EFortQuickBars::Primary) {
+        if (MyFortPawn && MyFortPawn->GetCurrentWeapon() &&
+            FortLootPackage::GetQuickbar(MyFortPawn->GetCurrentWeapon()->GetWeaponData()) == EFortQuickBars::Primary) {
         
-            FGuid CurrentWeaponGuid = MyFortPawn->Get<AFortWeapon*>("FortPawn", "CurrentWeapon")->GetItemEntryGuid();
+            FGuid CurrentWeaponGuid = MyFortPawn->GetCurrentWeapon()->GetItemEntryGuid();
             FFortItemEntry* foundItemEntry = nullptr;
         
             for (int32 i = 0; i < ItemInstances.Num(); i++) {
                 if (ItemInstances[i]->GetItemEntry().GetItemGuid() == CurrentWeaponGuid) {
+                    UE_LOG(LogNeon, Log, "Found");
                     foundItemEntry = &ItemInstances[i]->GetItemEntry();
                     break;
                 }
             }
         
-            if (foundItemEntry) {
-                AFortInventory::SpawnPickupDirect(PlayerController->GetViewTarget()->K2_GetActorLocation(), 
+            if (foundItemEntry)
+            {
+                UE_LOG(LogNeon, Log, "Ok");
+                AFortInventory::SpawnPickupDirect(PlayerController->GetViewTarget()->GetActorLocation(), 
                     foundItemEntry->GetItemDefinition(), foundItemEntry->GetCount(), foundItemEntry->GetLoadedAmmo(), EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, MyFortPawn, true);
-                AFortInventory::Remove(PlayerController, MyFortPawn->Get<AFortWeapon*>("FortPawn", "CurrentWeapon")->GetItemEntryGuid());
+    AFortInventory::Remove(PlayerController, CurrentWeaponGuid, 1);
                 AFortInventory::GiveItem(PlayerController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount, Pickup->GetPrimaryPickupItemEntry().GetLevel());
             } else {
-                AFortInventory::SpawnPickupDirect(PlayerController->GetViewTarget()->K2_GetActorLocation(),
+                AFortInventory::SpawnPickupDirect(PlayerController->GetViewTarget()->GetActorLocation(),
                     Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), Pickup->GetPrimaryPickupItemEntry().GetLoadedAmmo(), EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, MyFortPawn, true);
             }
         } else {
-            AFortInventory::SpawnPickupDirect(PlayerController->GetViewTarget()->K2_GetActorLocation(),
+            AFortInventory::SpawnPickupDirect(PlayerController->GetViewTarget()->GetActorLocation(),
                 Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), Pickup->GetPrimaryPickupItemEntry().GetLoadedAmmo(), EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, MyFortPawn, true);
         }
     } else {

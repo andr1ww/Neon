@@ -194,6 +194,13 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             UClass* WarmupClass = Runtime::StaticLoadObject<UClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_Warmup.Tiered_Athena_FloorLoot_Warmup_C");
             WarmupActors = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), WarmupClass);
 
+            static const UClass* PlayerPawnClass = (UClass*)GUObjectArray.FindObject("PlayerPawn_Athena_C");
+            
+            if (GameMode && PlayerPawnClass)
+            {
+                GameMode->Set("GameModeBase", "DefaultPawnClass", PlayerPawnClass);
+            }
+            
             for (auto& WarmupActor : WarmupActors)
             {
                 auto Container = (ABuildingContainer*)WarmupActor;
@@ -235,24 +242,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
 
 APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer, AActor* StartSpot)
 {
-    static const UClass* PlayerPawnClass = (UClass*)GUObjectArray.FindObject("PlayerPawn_Athena_C");
-
-    if (!PlayerPawnClass)
-    {
-        UE_LOG(LogNeon, Fatal, "PlayerPawn_Athena_C not found!");
-        return nullptr;
-    }
-
-    if (GameMode)
-    {
-        GameMode->Set("GameModeBase", "DefaultPawnClass", PlayerPawnClass);
-    }
-    else
-    {
-        UE_LOG(LogNeon, Fatal, "GameMode is null in SpawnDefaultPawnFor!");
-        return nullptr;
-    }
-
     if (NewPlayer->GetPawn()) {
         UE_LOG(LogNeon, Warning, "Early return!");
 		return 0;

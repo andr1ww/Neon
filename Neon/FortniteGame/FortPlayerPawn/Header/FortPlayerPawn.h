@@ -3,6 +3,7 @@
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 
 struct FFortAthenaLoadout;
+class AFortWeapon;
 
 class ACharacter : public APawn
 {
@@ -37,6 +38,7 @@ public:
 		return Params.ReturnValue;
 	}
 public:
+	DEFINE_PTR(AFortWeapon, AFortPawn, CurrentWeapon);
     DEFINE_BOOL(AFortPawn, bMovingEmote);
     DEFINE_BOOL(AFortPawn, bMovingEmoteForwardOnly);
     DEFINE_BOOL(AFortPawn, bMovingEmoteFollowingOnly);

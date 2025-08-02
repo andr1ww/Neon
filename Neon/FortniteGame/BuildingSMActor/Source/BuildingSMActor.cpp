@@ -125,9 +125,9 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
                 Controller->GetMyFortPawn()
             );
         }
-    
-        AFortInventory::ReplaceEntry(Controller, *InventoryEntry);
+        
         WorldItem->SetItemEntry(*InventoryEntry);
+        AFortInventory::ReplaceEntry(Controller, *InventoryEntry);
     } else if (ResourceAmount > 0) {
         if (ResourceAmount > MaxStackSize) {
             AFortInventory::SpawnPickup(
