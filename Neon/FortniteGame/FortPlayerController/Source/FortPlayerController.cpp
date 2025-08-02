@@ -169,6 +169,16 @@ void AFortPlayerControllerAthena::ServerAttemptAircraftJump(UActorComponent* Com
     auto PlayerController = (AFortPlayerControllerAthena*)Comp->CallFunc<AActor*>("ActorComponent", "GetOwner", Comp);
     auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
 
+	if (PlayerController && PlayerController->GetWorldInventory())
+	{
+		for (int i = PlayerController->GetWorldInventory()->GetInventory().GetItemInstances().Num() - 1; i >= 0; --i) {
+			PlayerController->GetWorldInventory()->GetInventory().GetItemInstances().Remove(i);
+		}
+		for (int i = PlayerController->GetWorldInventory()->GetInventory().GetReplicatedEntries().Num() - 1; i >= 0; --i) {
+			PlayerController->GetWorldInventory()->GetInventory().GetReplicatedEntries().Remove(i);
+		}
+	}
+	
     if (PlayerController && GameMode)
     {
         GameMode->RestartPlayer(PlayerController);
