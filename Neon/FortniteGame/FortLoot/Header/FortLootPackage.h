@@ -101,6 +101,7 @@ namespace FortLootPackage
 
     extern TArray<FFortLootTierData*> TierDataAllGroups;
     extern TArray<FFortLootPackageData*> LPGroupsAll;
+    bool IsValidPointer(void* ptr);
 
     void SetupLDSForPackage(TArray<FNeonLootImproper>& LootDrops, FName Package, int i, FName TierGroup, int WorldLevel, int RecursionDepth = 0);
     void SetupLootGroups(AFortGameStateAthena* GameState);

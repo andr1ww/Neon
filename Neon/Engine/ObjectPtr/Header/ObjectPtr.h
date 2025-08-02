@@ -99,9 +99,41 @@ public:
 
         if (bTryToLoad)
         {
-            return Runtime::StaticLoadObjectOnly<T>(UKismetStringLibrary::Conv_NameToString(SoftObjectPtr.ObjectID.AssetPathName).ToString());
+            return Runtime::StaticLoadObject<T>(UKismetStringLibrary::Conv_NameToString(SoftObjectPtr.ObjectID.AssetPathName).ToString());
         }
 
         return Runtime::StaticFindObject<T>(SoftObjectPtr.ObjectID.AssetPathName.ToString().ToString());
+    }
+
+    T* NewGet()
+    {
+        if (this->SoftObjectPtr.WeakPtr.ObjectIndex != -1)
+        {
+            SDK::FUObjectItem* ObjectItem = GUObjectArray.IndexToObject(this->SoftObjectPtr.WeakPtr.ObjectIndex);
+            if (ObjectItem && ObjectItem->Object)
+            {
+                SDK::UObject* UObj = static_cast<SDK::UObject*>(ObjectItem->Object);
+                return Cast<T>(UObj);
+            }
+        }
+
+        std::string AssetName = UKismetStringLibrary::Conv_NameToString(this->SoftObjectPtr.ObjectID.AssetPathName).ToString();
+    
+        for (int32 i = 0; i < GUObjectArray.GetObjectArrayNum(); ++i)
+        {
+            FUObjectItem* Object = GUObjectArray.IndexToObject(i);
+            if (!Object)
+                continue;
+            
+            if (Object->Object->GetFName().ToString().ToString().contains(AssetName))
+            {
+                SDK::UObject* UObj = static_cast<SDK::UObject*>(Object->Object);
+                T* CastedObject = Cast<T>(UObj);
+                if (CastedObject)
+                    return CastedObject;
+            }
+        }
+
+        return Runtime::StaticLoadObject<T>(UKismetStringLibrary::Conv_NameToString(SoftObjectPtr.ObjectID.AssetPathName).ToString());
     }
 };
