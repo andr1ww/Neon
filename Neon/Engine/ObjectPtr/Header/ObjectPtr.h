@@ -92,11 +92,19 @@ public:
         return SoftObjectPtr.ObjectID.AssetPathName.GetComparisonIndex();
     }
 
-    T* Get(bool bTryToLoad = false)
+    T* Get(UClass* ClassToLoad = nullptr, bool bTryToLoad = false)
     {
         if (SoftObjectPtr.ObjectID.AssetPathName.GetComparisonIndex() <= 0)
             return nullptr;
 
+        if (bTryToLoad && ClassToLoad)
+        {
+            return Runtime::StaticLoadObject<T>(
+                UKismetStringLibrary::Conv_NameToString(SoftObjectPtr.ObjectID.AssetPathName).ToString(), 
+                ClassToLoad
+            );
+        }
+    
         if (bTryToLoad)
         {
             return Runtime::StaticLoadObject<T>(UKismetStringLibrary::Conv_NameToString(SoftObjectPtr.ObjectID.AssetPathName).ToString());
