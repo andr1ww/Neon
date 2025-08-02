@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "pch.h"
 #include "Neon/Runtime/Runtime.h"
+#include "Engine/Float/Header/Float.h"
 
 enum class EFortResourceType : uint8
 {
@@ -55,7 +56,7 @@ public:
 
 struct FFortBaseWeaponStats : public UObject
 {
-    DEFINE_MEMBER(int32, FFortBaseWeaponStats, ClipSize);
+    DEFINE_MEMBER(int, FFortBaseWeaponStats, ClipSize);
 };
 
 struct FIndexedCurve
@@ -138,47 +139,36 @@ public:
         };
         
         FortItemDefinition_CreateTemporaryItemInstanceBP Params;
-
-        auto Flgs = Func->FunctionFlags();
-        Func->FunctionFlags() |= 0x400;
         
         this->ProcessEvent(Func, &Params);
-
-        Func->FunctionFlags() = Flgs;
-
+        
         return Params.ReturnValue;
     }
 
     float GetMaxStackSize()
     {
-        static auto MaxStackSizeOffset = Runtime::GetOffset(this, "MaxStackSize");
-
-        bool bIsScalableFloat = Fortnite_Version >= 12; // idk
+        bool bIsScalableFloat = Fortnite_Version >= 12.00; 
 
         if (!bIsScalableFloat)
-            return *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + MaxStackSizeOffset);
-
-        struct FScalableFloat
         {
-        public:
-            float                                        Value;                                             // 0x0(0x4)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-            uint8                                        Pad_3BF0[0x4];                                     // Fixing Size After Last Property  [ Dumper-7 ]
-            FCurveTableRowHandle                  Curve;                                             // 0x8(0x10)(Edit, BlueprintVisible, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-        };
-
+            static auto MaxStackSize = this->Get<uintptr_t>("FortItemDefinition", "MaxStackSize");
+            return static_cast<float>(MaxStackSize);
+        }
+    
+        static auto MaxStackSize = this->Get<FScalableFloat>("FortItemDefinition", "MaxStackSize");
+    
         static auto AthenaGameData = Runtime::StaticFindObject<UDataTable>("/Game/Athena/Balance/DataTables/AthenaGameData.AthenaGameData");
 
-        auto& ScalableFloat = *reinterpret_cast<FScalableFloat*>(reinterpret_cast<uintptr_t>(this) + MaxStackSizeOffset);
         auto& RowMap = AthenaGameData->GetRowMap();
 
-        if (ScalableFloat.Curve.RowName.GetComparisonIndex() == 0)
-            return ScalableFloat.Value;
+        if (MaxStackSize.Curve.RowName.GetComparisonIndex() == 0)
+            return MaxStackSize.Value;
 
         FSimpleCurve* Curve = nullptr;
 
         for (auto& Pair : RowMap)
         {
-            if (Pair.Key.GetComparisonIndex() == ScalableFloat.Curve.RowName.GetComparisonIndex())
+            if (Pair.Key.GetComparisonIndex() == MaxStackSize.Curve.RowName.GetComparisonIndex())
             {
                 Curve = (FSimpleCurve*)Pair.Value;
                 break;

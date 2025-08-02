@@ -37,7 +37,7 @@ void AActor::K2_DestroyActor()
 FVector AActor::K2_GetActorLocation()
 {
     static SDK::UFunction* Func = nullptr;
-    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Actor", "K2_DestroyActor");
+    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Actor", "K2_GetActorLocation");
 
     if (Func == nullptr)
         Func = Info.Func;
