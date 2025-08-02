@@ -159,3 +159,25 @@ void AFortPlayerPawn::ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack)
     Pickup->CallFunc<void>("FortPickup", "OnRep_bPickedUp");
     Pickup->CallFunc<void>("Actor", "K2_DestroyActor");
 }
+
+void AFortPlayerPawn::GiveItemToInventoryOwner(UObject* Object, FFrame& Stack) {
+    TScriptInterface<class IFortInventoryOwnerInterface> InventoryOwner;
+    UFortWorldItemDefinition* ItemDefinition;
+    int32 NumberToGive;
+    bool bNotifyPlayer;
+    int32 ItemLevel;
+    int32 PickupInstigatorHandle;
+    Stack.StepCompiledIn(&InventoryOwner);
+    Stack.StepCompiledIn(&ItemDefinition);
+    Stack.StepCompiledIn(&NumberToGive);
+    Stack.StepCompiledIn(&bNotifyPlayer);
+    Stack.StepCompiledIn(&ItemLevel);
+    Stack.StepCompiledIn(&PickupInstigatorHandle);
+
+    UE_LOG(LogNeon, Log, "GiveItemToInventoryOwner Called!");
+
+    auto PC = (AFortPlayerControllerAthena*)InventoryOwner.ObjectPointer;
+    AFortInventory::GiveItem(PC, ItemDefinition, 1, 1, 0);
+
+	return GiveItemToInventoryOwnerOG(Object, Stack);
+}

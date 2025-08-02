@@ -101,6 +101,8 @@ public:
     static void ServerHandlePickupInfo(AFortPlayerPawn* Pawn, FFrame& Stack);
 	static void ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack);
 	DefHookOg(void, CompletePickupAnimation, AFortPickup* Pickup);
+
+	DefHookOg(void, GiveItemToInventoryOwner, UObject*, FFrame&);
 };
 
 class ADefaultPawn : public APawn

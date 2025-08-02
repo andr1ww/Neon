@@ -154,6 +154,10 @@ void Main()
 	Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.ServerHandlePickupInfo", AFortPlayerPawn::ServerHandlePickupInfo);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerLoadingScreenDropped", AFortPlayerControllerAthena::ServerLoadingScreenDropped);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerAttemptInventoryDrop", AFortPlayerControllerAthena::ServerAttemptInventoryDrop);
+
+	Runtime::Exec("/Script/FortniteGame.FortKismetLibrary.GiveItemToInventoryOwner", AFortPlayerPawn::GiveItemToInventoryOwner, (void**)&AFortPlayerPawn::GiveItemToInventoryOwnerOG);
+	Runtime::Exec("/Script/FortniteGame.FortKismetLibrary.K2_RemoveItemFromPlayerByGuid", AFortPlayerControllerAthena::K2_RemoveItemFromPlayerByGuid, (void**)&AFortPlayerControllerAthena::K2_RemoveItemFromPlayerByGuidOG);
+
 	Runtime::Hook(Finder->ClientOnPawnDied(), AFortPlayerControllerAthena::ClientOnPawnDied, (void**)&AFortPlayerControllerAthena::ClientOnPawnDiedOG);
 	Runtime::VFTHook(UAthenaNavSystem::GetDefaultObj()->GetVTable(), 0x53, UFortServerBotManagerAthena::InitializeForWorld, (void**)&UFortServerBotManagerAthena::InitializeForWorldOG);
 	
@@ -195,6 +199,8 @@ void Main()
 		Runtime::Hook(Finder->CreateAndConfigureNavigationSystem(), UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem, (void**)&UFortServerBotManagerAthena::CreateAndConfigureNavigationSystemOG);
 		UE_LOG(LogNeon, Log, "CreateAndConfigureNavigationSystem: 0x%x", Finder->CreateAndConfigureNavigationSystem() - IMAGEBASE);
 	}
+
+	Runtime::Hook(IMAGEBASE + 0x1EE9720, AFortPlayerControllerAthena::K2_RemoveItemFromPlayer, (void**)&AFortPlayerControllerAthena::K2_RemoveItemFromPlayerOG);
 
 	UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
 	FString WorldName;

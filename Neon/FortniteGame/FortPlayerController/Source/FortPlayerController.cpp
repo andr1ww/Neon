@@ -657,3 +657,36 @@ void AFortPlayerControllerAthena::ServerAttemptInventoryDrop(AFortPlayerControll
 	else
 		AFortInventory::ReplaceEntry(PlayerController, *Entry);
 }
+
+int32 AFortPlayerControllerAthena::K2_RemoveItemFromPlayerByGuid(UObject* Context, FFrame& Stack)
+{
+    AFortPlayerControllerAthena* PlayerController;
+    FGuid ItemGuid;
+    int32 AmountToRemove;
+    bool bForceRemoval;
+    Stack.StepCompiledIn(&PlayerController);
+    Stack.StepCompiledIn(&ItemGuid);
+    Stack.StepCompiledIn(&AmountToRemove);
+    Stack.StepCompiledIn(&bForceRemoval);
+
+    UE_LOG(LogNeon, Log, "K2_RemoveItemFromPlayerByGuid Called!");
+    AFortInventory::Remove(PlayerController, ItemGuid, 1);
+
+    return K2_RemoveItemFromPlayerByGuidOG(Context, Stack);
+}
+
+int32 AFortPlayerControllerAthena::K2_RemoveItemFromPlayer(AFortPlayerControllerAthena* PC, UFortWorldItemDefinition* ItemDefinition, int32 AmountToRemove, bool bForceRemoval) {
+    if (!PC || !ItemDefinition) {
+		return AmountToRemove;
+    }
+
+    UE_LOG(LogNeon, Log, "K2_RemoveItemFromPlayer Called: %s %s", std::to_string(AmountToRemove), ItemDefinition->GetFName().ToString().ToString().c_str());
+
+    FGuid ItemGuid = AFortInventory::FindGuidByDefinition(PC, ItemDefinition);
+    if (ItemGuid.A != 0) {
+        AFortInventory::Remove(PC, ItemGuid, INT_MAX, true);
+		UE_LOG(LogNeon, Log, "K2_RemoveItemFromPlayer: Removed %s %s", std::to_string(AmountToRemove), ItemDefinition->GetFName().ToString().ToString().c_str());
+    }
+
+    return K2_RemoveItemFromPlayerOG(PC, ItemDefinition, AmountToRemove, bForceRemoval);
+}
