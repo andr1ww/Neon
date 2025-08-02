@@ -410,12 +410,12 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		RewardResult = (FAthenaRewardResult*)malloc(FAthenaRewardResultSize);
 		MatchStats = (FAthenaMatchStats*)malloc(FAthenaMatchStatsSize);
 		TeamStats = (FAthenaMatchTeamStats*)malloc(FAthenaMatchTeamStatsSize);
+
+		memset(DeathInfo, 0, sizeof(FDeathInfo));
+		memset(RewardResult, 0, sizeof(FAthenaRewardResult));
+		memset(MatchStats, 0, sizeof(FAthenaMatchStats));
+		memset(TeamStats, 0, sizeof(FAthenaMatchTeamStats));
 	}
-	
-	memset(DeathInfo, 0, sizeof(FDeathInfo));
-	memset(RewardResult, 0, sizeof(FAthenaRewardResult));
-	memset(MatchStats, 0, sizeof(FAthenaMatchStats));
-	memset(TeamStats, 0, sizeof(FAthenaMatchTeamStats));
 	
 	auto DeathTags = DeathReport.GetTags();
 	EDeathCause DeathCause = PlayerState->CallFunc<EDeathCause>("FortPlayerStateAthena", "ToDeathCause", DeathTags, false);

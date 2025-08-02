@@ -313,6 +313,17 @@ T* StaticLoadObject(std::string name) {
 	}
 
 	template<typename T>
+T* StaticLoadObject(std::string name, UClass* ClassToLoad) {
+		T* Object = StaticFindObject<T>(name);
+		if (!Object) {
+			auto Name = std::wstring(name.begin(), name.end()).c_str();
+			UObject* BaseObject = Funcs::StaticLoadObject(ClassToLoad, nullptr, Name, nullptr, 0, nullptr, false);
+			Object = static_cast<T*>(BaseObject);
+		}
+		return Object;
+	}
+
+	template<typename T>
 T* StaticLoadObjectOnly(std::string name) {
 		T* Object = nullptr;
 		if (!Object) {

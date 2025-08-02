@@ -106,9 +106,12 @@ void InitNullsAndRetTrues() {
 		if (Func == 0x0) continue;
 		Runtime::Patch(Func, 0x85);
 	}
-
-	Runtime::Hook(IMAGEBASE + 0x2E688D0, RetTrue);
-	Runtime::Hook(IMAGEBASE + 0x1BDC660, FortLootPackage::SpawnLoot);
+	if (Fortnite_Version == 12.61)
+	{
+		Runtime::Hook(IMAGEBASE + 0x2E688D0, RetTrue); // server context
+		Runtime::Hook(IMAGEBASE + 0x1BDC660, FortLootPackage::SpawnLoot);
+		Runtime::Hook(IMAGEBASE + 0x3F88350, RetTrue); // IsThereAnywhereToBuildNavigation
+	}
 }
 
 void Main()
@@ -216,7 +219,9 @@ void Main()
 	{
 		WorldName = L"open Asteria_Terrain";
 	}
-    
+	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAthenaBots VeryVerbose", nullptr);
+	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogNavigationDataBuild VeryVerbose", nullptr);
+
 	ExecuteConsoleCommand(UWorld::GetWorld(), WorldName, nullptr);
 	if (Fortnite_Version >= 19.10)
 	{

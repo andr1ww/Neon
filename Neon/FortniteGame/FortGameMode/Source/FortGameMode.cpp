@@ -223,6 +223,9 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 Container->K2_DestroyActor();
             }
             WarmupActors.Free();
+
+            static void (*Build)(UNavigationSystemV1* System) = decltype(Build)(IMAGEBASE + 0x48C50C0);
+            Build(UWorld::GetWorld()->GetNavigationSystem());
         }
     }
     
