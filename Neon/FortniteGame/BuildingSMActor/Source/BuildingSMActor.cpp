@@ -128,6 +128,11 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         
         WorldItem->SetItemEntry(*InventoryEntry);
         AFortInventory::ReplaceEntry(Controller, *InventoryEntry);
+
+        if (InventoryEntry->GetCount() <= 0)
+        {
+            AFortInventory::Remove(Controller, InventoryEntry->GetItemGuid());
+        }
     } else if (ResourceAmount > 0) {
         if (ResourceAmount > MaxStackSize) {
             AFortInventory::SpawnPickup(
