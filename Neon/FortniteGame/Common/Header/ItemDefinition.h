@@ -26,6 +26,38 @@ struct FSimpleCurveKey
     float                                              Value;                                                    // 0x0004(0x0004) (Edit, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 };
 
+enum class EFortItemEntryState : uint8_t 
+{
+    NoneState = 0,
+    NewItemCount = 1,
+    ShouldShowItemToast = 2,
+    DurabilityInitialized = 3,
+    DoNotShowSpawnParticles = 4,
+    FromRecoveredBackpack = 5,
+    FromGift = 6,
+    PendingUpgradeCriteriaProgress = 7,
+    OwnerBuildingHandle = 8,
+    FromDroppedPickup = 9,
+    JustCrafted = 10,
+    CraftAndSlotTarget = 11,
+    GenericAttributeValueSet = 12,
+    PickupInstigatorHandle = 13,
+    CreativeUserPrefabHasContent = 14,
+    EFortItemEntryState_MAX = 15
+};
+
+struct FFortItemEntryStateValue
+{
+public:
+    DEFINE_MEMBER(EFortItemEntryState, FFortItemEntryStateValue, StateType);
+    DEFINE_MEMBER(int, FFortItemEntryStateValue, IntValue); 
+};
+
+struct FFortBaseWeaponStats : public UObject
+{
+    DEFINE_MEMBER(int32, FFortBaseWeaponStats, ClipSize);
+};
+
 struct FIndexedCurve
 {
 

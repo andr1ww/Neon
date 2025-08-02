@@ -9,40 +9,12 @@
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "FortniteGame/FortPlayerPawn/Header/FortPlayerPawn.h"
 #include "Engine/ObjectPtr/Header/ObjectPtr.h"
-#include "FortniteGame/FortLoot/Header/FortLootPackage.h"
 
 class AFortPlayerControllerAthena;
 class AFortAthenaAIBotController;
 class AFortPlayerController;
 class AFortPawn;
 class AFortPlayerPawn;
-
-enum class EFortItemEntryState : uint8_t 
-{
-    NoneState = 0,
-    NewItemCount = 1,
-    ShouldShowItemToast = 2,
-    DurabilityInitialized = 3,
-    DoNotShowSpawnParticles = 4,
-    FromRecoveredBackpack = 5,
-    FromGift = 6,
-    PendingUpgradeCriteriaProgress = 7,
-    OwnerBuildingHandle = 8,
-    FromDroppedPickup = 9,
-    JustCrafted = 10,
-    CraftAndSlotTarget = 11,
-    GenericAttributeValueSet = 12,
-    PickupInstigatorHandle = 13,
-    CreativeUserPrefabHasContent = 14,
-    EFortItemEntryState_MAX = 15
-};
-
-struct FFortItemEntryStateValue
-{
-public:
-    DEFINE_MEMBER(EFortItemEntryState, FFortItemEntryStateValue, StateType);
-    DEFINE_MEMBER(int, FFortItemEntryStateValue, IntValue); 
-};
 
 struct FFortItemEntry : public FFastArraySerializerItem
 {
@@ -180,11 +152,6 @@ enum class EFortPickupSourceTypeFlag : uint8
     FloorLoot                                = 32,
     Fishing                                  = 64,
     EFortPickupSourceTypeFlag_MAX            = 65,
-};
-
-struct FFortBaseWeaponStats : public FTableRowBase
-{
-    DEFINE_MEMBER(int32, FFortBaseWeaponStats, ClipSize);
 };
 
 struct FFortRangedWeaponStats : public FFortBaseWeaponStats
