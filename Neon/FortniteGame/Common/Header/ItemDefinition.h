@@ -54,7 +54,7 @@ public:
     DEFINE_MEMBER(int, FFortItemEntryStateValue, IntValue); 
 };
 
-struct FFortBaseWeaponStats : public UObject
+struct FFortBaseWeaponStats 
 {
     DEFINE_MEMBER(int, FFortBaseWeaponStats, ClipSize);
 };

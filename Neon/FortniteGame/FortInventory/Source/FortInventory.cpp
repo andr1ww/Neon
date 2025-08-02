@@ -69,24 +69,27 @@ void AFortInventory::Remove(AFortPlayerController* PlayerController, FGuid Guid,
 
 FFortRangedWeaponStats* AFortInventory::GetStats(UFortWeaponItemDefinition* Def)
 {
-    if (!Def || !Def->GetWeaponStatHandle().GetDataTable())
+    if (!Def || !Def->GetWeaponStatHandle().DataTable)
         return nullptr;
 
-    if (!Def->IsA<UFortWeaponRangedItemDefinition>()) return nullptr;
+    if (!Def->IsA<UFortWeaponRangedItemDefinition>()) 
+        return nullptr;
 
-    auto RowMap = Def->GetWeaponStatHandle().GetDataTable()->GetRowMap();
-    FFortRangedWeaponStats* Val = nullptr;
-
+    auto& WeaponStatHandle = Def->GetWeaponStatHandle();
+    auto Table = WeaponStatHandle.DataTable;
+    auto& RowMap = Table->GetRowMap();
+    
+    void* Row = nullptr;
     for (auto& Pair : RowMap)
     {
-        if (Def->GetWeaponStatHandle().GetRowName().GetComparisonIndex() == Pair.Key.GetComparisonIndex() && Pair.Value)
+        if (WeaponStatHandle.GetRowName().ToString().ToString() == Pair.Key.ToString().ToString())
         {
-            Val = *(FFortRangedWeaponStats**)Pair.Value;
+            Row = Pair.Value;
             break;
         }
     }
     
-    return Val ? *(FFortRangedWeaponStats**)Val : nullptr;
+    return Row ? (FFortRangedWeaponStats*)Row : nullptr;
 }
 
 UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level)
