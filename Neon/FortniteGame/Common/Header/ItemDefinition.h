@@ -20,6 +20,27 @@ public:
     class FName                                   TagName;                                           // 0x0000(0x0004)(Edit, ZeroConstructor, EditConst, SaveGame, IsPlainOldData, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
 };
 
+struct FSimpleCurveKey
+{
+    float                                              Time;                                                     // 0x0000(0x0004) (Edit, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    float                                              Value;                                                    // 0x0004(0x0004) (Edit, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
+
+struct FIndexedCurve
+{
+
+};
+
+struct FRealCurve : public FIndexedCurve
+{
+};
+
+struct FSimpleCurve : public FRealCurve
+{
+public:
+    DEFINE_MEMBER(TArray<FSimpleCurveKey>, FSimpleCurve, Keys); 
+};
+
 class UFortWorldItemDefinition;
 
 class UFortItemDefinition : public UObject
@@ -96,6 +117,49 @@ public:
         return Params.ReturnValue;
     }
 
+    float GetMaxStackSize()
+    {
+        static auto MaxStackSizeOffset = Runtime::GetOffset(this, "MaxStackSize");
+
+        bool bIsScalableFloat = Fortnite_Version >= 12; // idk
+
+        if (!bIsScalableFloat)
+            return *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + MaxStackSizeOffset);
+
+        struct FScalableFloat
+        {
+        public:
+            float                                        Value;                                             // 0x0(0x4)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            uint8                                        Pad_3BF0[0x4];                                     // Fixing Size After Last Property  [ Dumper-7 ]
+            FCurveTableRowHandle                  Curve;                                             // 0x8(0x10)(Edit, BlueprintVisible, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        };
+
+        static auto AthenaGameData = Runtime::StaticFindObject<UDataTable>("/Game/Athena/Balance/DataTables/AthenaGameData.AthenaGameData");
+
+        auto& ScalableFloat = *reinterpret_cast<FScalableFloat*>(reinterpret_cast<uintptr_t>(this) + MaxStackSizeOffset);
+        auto& RowMap = AthenaGameData->GetRowMap();
+
+        if (ScalableFloat.Curve.RowName.GetComparisonIndex() == 0)
+            return ScalableFloat.Value;
+
+        FSimpleCurve* Curve = nullptr;
+
+        for (auto& Pair : RowMap)
+        {
+            if (Pair.Key.GetComparisonIndex() == ScalableFloat.Curve.RowName.GetComparisonIndex())
+            {
+                Curve = (FSimpleCurve*)Pair.Value;
+                break;
+            }
+        }
+
+        if (!Curve)
+            return 1;
+
+        return Curve->GetKeys()[0].Value;
+    }
+public:
+    DEFINE_BOOL(FFortItemEntry, bAllowMultipleStacks);
 public:
     DECLARE_STATIC_CLASS(UFortItemDefinition)
     DECLARE_DEFAULT_OBJECT(UFortItemDefinition)
@@ -122,4 +186,14 @@ public:
 public:
     DECLARE_STATIC_CLASS(UFortWorldItemDefinition)
     DECLARE_DEFAULT_OBJECT(UFortWorldItemDefinition)
+};
+
+class UFortWeaponItemDefinition : public UFortWorldItemDefinition
+{
+public:
+    DEFINE_MEMBER(FDataTableRowHandle, UFortWeaponItemDefinition, WeaponStatHandle);
+    DEFINE_MEMBER(TSoftObjectPtr<UFortWorldItemDefinition>, UFortWeaponItemDefinition, AmmoData);
+public:
+    DECLARE_STATIC_CLASS(UFortWeaponItemDefinition)
+    DECLARE_DEFAULT_OBJECT(UFortWeaponItemDefinition)
 };

@@ -9,6 +9,7 @@
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "FortniteGame/FortPlayerPawn/Header/FortPlayerPawn.h"
 #include "Engine/ObjectPtr/Header/ObjectPtr.h"
+#include "FortniteGame/FortLoot/Header/FortLootPackage.h"
 
 class AFortPlayerControllerAthena;
 class AFortAthenaAIBotController;
@@ -16,8 +17,36 @@ class AFortPlayerController;
 class AFortPawn;
 class AFortPlayerPawn;
 
+enum class EFortItemEntryState : uint8_t 
+{
+    NoneState = 0,
+    NewItemCount = 1,
+    ShouldShowItemToast = 2,
+    DurabilityInitialized = 3,
+    DoNotShowSpawnParticles = 4,
+    FromRecoveredBackpack = 5,
+    FromGift = 6,
+    PendingUpgradeCriteriaProgress = 7,
+    OwnerBuildingHandle = 8,
+    FromDroppedPickup = 9,
+    JustCrafted = 10,
+    CraftAndSlotTarget = 11,
+    GenericAttributeValueSet = 12,
+    PickupInstigatorHandle = 13,
+    CreativeUserPrefabHasContent = 14,
+    EFortItemEntryState_MAX = 15
+};
+
+struct FFortItemEntryStateValue
+{
+public:
+    DEFINE_MEMBER(EFortItemEntryState, FFortItemEntryStateValue, StateType);
+    DEFINE_MEMBER(int, FFortItemEntryStateValue, IntValue); 
+};
+
 struct FFortItemEntry : public FFastArraySerializerItem
 {
+    DEFINE_MEMBER(TArray<FFortItemEntryStateValue>, FFortItemEntry, StateValues);
     DEFINE_MEMBER(int32, FFortItemEntry, Count);
     DEFINE_MEMBER(int32, FFortItemEntry, LoadedAmmo);
     DEFINE_MEMBER(int32, FFortItemEntry, Level);
@@ -40,15 +69,6 @@ public:
     DEFINE_MEMBER(TWeakObjectPtr<AFortPawn>, FFortPickupLocationData, PickupTarget);
     DEFINE_MEMBER(FGuid, FFortPickupLocationData, PickupGuid);
     DEFINE_MEMBER(FVector_NetQuantizeNormal, FFortPickupLocationData, StartDirection);
-};
-
-enum class EFortQuickBars : uint8
-{
-    Primary                                  = 0,
-    Secondary                                = 1,
-    Creative                                 = 2,
-    Max_None                                 = 3,
-    EFortQuickBars_MAX                       = 4,
 };
 
 class AFortPickup : public AActor
@@ -125,15 +145,6 @@ public:
     DEFINE_MEMBER(FFortItemEntry, UFortWorldItem, ItemEntry);
 };
 
-class UFortWeaponItemDefinition : public UFortWorldItemDefinition
-{
-public:
-    DEFINE_MEMBER(TSoftObjectPtr<UFortWorldItemDefinition>, UFortWeaponItemDefinition, AmmoData);
-public:
-    DECLARE_STATIC_CLASS(UFortWeaponItemDefinition)
-    DECLARE_DEFAULT_OBJECT(UFortWeaponItemDefinition)
-};
-
 class UFortGadgetItemDefinition : public UFortWorldItemDefinition
 {
 public:
@@ -171,6 +182,16 @@ enum class EFortPickupSourceTypeFlag : uint8
     EFortPickupSourceTypeFlag_MAX            = 65,
 };
 
+struct FFortBaseWeaponStats : public FTableRowBase
+{
+    DEFINE_MEMBER(int32, FFortBaseWeaponStats, ClipSize);
+};
+
+struct FFortRangedWeaponStats : public FFortBaseWeaponStats
+{
+    
+};
+    
 class AFortInventory : public AActor
 {
 public:
@@ -187,6 +208,7 @@ public:
     static AFortPickupAthena* SpawnPickupDirect(FVector, UFortItemDefinition*, int, int, EFortPickupSourceTypeFlag SourceTypeFlag = EFortPickupSourceTypeFlag::Tossed, EFortPickupSpawnSource SpawnSource = EFortPickupSpawnSource::Unset, AFortPlayerPawn* Pawn = nullptr, bool Toss = true);
     static AFortPickupAthena* SpawnPickup(FVector, UFortItemDefinition*, int, int, EFortPickupSourceTypeFlag SourceTypeFlag = EFortPickupSourceTypeFlag::Tossed, EFortPickupSpawnSource SpawnSource = EFortPickupSpawnSource::Unset, AFortPlayerPawn* Pawn = nullptr, bool Toss = true);
     static FFortItemEntry* MakeItemEntry(UFortItemDefinition*, int32, int32);
+    static FFortRangedWeaponStats* GetStats(UFortWeaponItemDefinition*);
 public:
     DECLARE_STATIC_CLASS(AFortInventory)
     DECLARE_DEFAULT_OBJECT(AFortInventory)

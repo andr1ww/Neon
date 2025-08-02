@@ -2,6 +2,7 @@
 #include "FortniteGame/FortInventory/Header/FortInventory.h"
 
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
+#include "FortniteGame/FortLoot/Header/FortLootPackage.h"
 
 void AFortInventory::HandleInventoryLocalUpdate()
 {
@@ -24,6 +25,29 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
     this->HandleInventoryLocalUpdate();
 
     Entry ? this->GetInventory().MarkItemDirty(*Entry) : this->GetInventory().MarkArrayDirty();
+}
+
+
+FFortRangedWeaponStats* AFortInventory::GetStats(UFortWeaponItemDefinition* Def)
+{
+    if (!Def || !Def->GetWeaponStatHandle().GetDataTable())
+        return nullptr;
+
+    if (!Def->IsA<UFortWeaponRangedItemDefinition>()) return nullptr;
+
+    auto RowMap = Def->GetWeaponStatHandle().GetDataTable()->GetRowMap();
+    FFortRangedWeaponStats* Val = nullptr;
+
+    for (auto& Pair : RowMap)
+    {
+        if (Def->GetWeaponStatHandle().GetRowName().GetComparisonIndex() == Pair.Key.GetComparisonIndex() && Pair.Value)
+        {
+            Val = *(FFortRangedWeaponStats**)Pair.Value;
+            break;
+        }
+    }
+    
+    return Val ? *(FFortRangedWeaponStats**)Val : nullptr;
 }
 
 UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level)

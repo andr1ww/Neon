@@ -5,6 +5,9 @@
 
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/FortInventory/Header/FortInventory.h"
+#include "FortniteGame/Common/Header/ItemDefinition.h"
+
+class UFortWeaponItemDefinition;
 
 struct FFortLootTierData
 {
@@ -80,6 +83,15 @@ struct FFortGameFeatureLootTableData final
 public:
     DEFINE_PTR(UDataTable, FFortGameFeatureLootTableData, LootTierData);
     DEFINE_PTR(UDataTable, FFortGameFeatureLootTableData, LootPackageData);
+};
+
+enum class EFortQuickBars : uint8
+{
+    Primary                                  = 0,
+    Secondary                                = 1,
+    Creative                                 = 2,
+    Max_None                                 = 3,
+    EFortQuickBars_MAX                       = 4,
 };
 
 namespace FortLootPackage

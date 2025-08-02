@@ -25,6 +25,7 @@ struct FCreateBuildingActorData { uint32_t BuildingClassHandle; FVector BuildLoc
 class AFortWeapon : public AActor
 {
 public:
+    DEFINE_MEMBER(FGuid, AFortWeapon, ItemEntryGuid)
 	DEFINE_PTR(UFortWeaponItemDefinition, AFortWeapon, WeaponData)
 public:
     DECLARE_STATIC_CLASS(AFortWeapon)

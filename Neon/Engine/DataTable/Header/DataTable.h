@@ -9,6 +9,14 @@ class UCurveTable : public UObject
 public:
 };
 
+struct FDataTableRowHandle final
+{
+public:
+    DEFINE_PTR(class UDataTable, FDataTableRowHandle, DataTable); // 0x0000(0x0008)(Edit, BlueprintVisible, ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    DEFINE_MEMBER(FName, FDataTableRowHandle, RowName); // 0x0008(0x0004)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    uint8                                         Pad_C[0x4];                                        // 0x000C(0x0004)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
 struct FCurveTableRowHandle
 {
     UCurveTable* CurveTable;
