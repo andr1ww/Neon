@@ -11,7 +11,6 @@ void AFortPlayerPawn::ServerHandlePickupInfo(AFortPlayerPawn* Pawn, FFrame& Stac
     Stack.StepCompiledIn(&Params);
     Stack.IncrementCode();
 
-    UE_LOG(LogNeon, Log, "ServerHandlePickupInfo");
     if (!Pawn || !Pickup || Pickup->GetbPickedUp())
         return;
 
@@ -30,7 +29,6 @@ void AFortPlayerPawn::ServerHandlePickupInfo(AFortPlayerPawn* Pawn, FFrame& Stac
 
 void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
 {
-    UE_LOG(LogNeon, Log, "CompletePickupAnimation");
     AFortPlayerPawn* Pawn = (AFortPlayerPawn*)Pickup->GetPickupLocationData().GetPickupTarget().Get();
     if (!Pawn) return CompletePickupAnimationOG(Pickup);
 
@@ -53,7 +51,8 @@ void AFortPlayerPawn::ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack)
     Stack.StepCompiledIn(&bPlayPickupSound);
     Stack.IncrementCode();
     
-    UE_LOG(LogNeon, Log, "ServerHandlePickup");
+
+
     if (!Pawn || !Pickup || Pickup->GetbPickedUp())
         return;
 
@@ -97,7 +96,6 @@ void AFortPlayerPawn::ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack)
         
             for (int32 i = 0; i < ItemInstances.Num(); i++) {
                 if (ItemInstances[i]->GetItemEntry().GetItemGuid() == CurrentWeaponGuid) {
-                    UE_LOG(LogNeon, Log, "Found");
                     foundItemEntry = &ItemInstances[i]->GetItemEntry();
                     break;
                 }
@@ -105,7 +103,6 @@ void AFortPlayerPawn::ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack)
         
             if (foundItemEntry)
             {
-                UE_LOG(LogNeon, Log, "Ok");
                 AFortInventory::SpawnPickupDirect(PlayerController->GetViewTarget()->GetActorLocation(), 
                     foundItemEntry->GetItemDefinition(), foundItemEntry->GetCount(), foundItemEntry->GetLoadedAmmo(), EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, MyFortPawn, true);
     AFortInventory::Remove(PlayerController, CurrentWeaponGuid, 1);
