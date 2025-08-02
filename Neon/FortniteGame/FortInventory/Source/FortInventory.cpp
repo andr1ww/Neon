@@ -26,7 +26,7 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
 
     Entry ? this->GetInventory().MarkItemDirty(*Entry) : this->GetInventory().MarkArrayDirty();
 }
-void AFortInventory::Remove(AFortPlayerController* PlayerController, FGuid Guid, int AmountToRemove)
+void AFortInventory::Remove(AFortPlayerController* PlayerController, FGuid Guid, int AmountToRemove, bool bRemoveAll)
 {
     if (!PlayerController) return;
     
@@ -41,11 +41,17 @@ void AFortInventory::Remove(AFortPlayerController* PlayerController, FGuid Guid,
     
     for (int32 i = ItemInstances.Num() - 1; i >= 0; i--) {
         if (ItemInstances[i] && ItemInstances[i]->GetItemEntry().GetItemGuid() == Guid) {
-            UFortWorldItem** DataPtr = ItemInstances.GetData();
-            for (int32 j = i; j < ItemInstances.Num() - 1; j++) {
-                DataPtr[j] = DataPtr[j + 1];
+            if (bRemoveAll) {
+                ItemInstances.Remove(i);
             }
-            *((int32*)((uint8*)&ItemInstances + 8)) -= 1;
+            else {
+                UFortWorldItem** DataPtr = ItemInstances.GetData();
+                for (int32 j = i; j < ItemInstances.Num() - 1; j++) {
+                    DataPtr[j] = DataPtr[j + 1];
+                }
+                *((int32*)((uint8*)&ItemInstances + 8)) -= 1;
+            }
+
             bItemRemoved = true;
             break;
         }
@@ -56,15 +62,21 @@ void AFortInventory::Remove(AFortPlayerController* PlayerController, FGuid Guid,
         auto ReplicatedEntry = (FFortItemEntry*)((uint8*)ReplicatedEntries.GetData() + (i * StructSize));
         
         if (ReplicatedEntry->GetItemGuid() == Guid) {
-            uint8* CurrentPtr = (uint8*)ReplicatedEntry;
-            uint8* NextPtr = CurrentPtr + StructSize;
-            int32 ElementsToMove = ReplicatedEntries.Num() - 1 - i;
-            
-            if (ElementsToMove > 0) {
-                memmove(CurrentPtr, NextPtr, ElementsToMove * StructSize);
+            if (bRemoveAll) {
+                ReplicatedEntries.Remove(i);
             }
-            
-            *((int32*)((uint8*)&ReplicatedEntries + 8)) -= 1;
+            else {
+                uint8* CurrentPtr = (uint8*)ReplicatedEntry;
+                uint8* NextPtr = CurrentPtr + StructSize;
+                int32 ElementsToMove = ReplicatedEntries.Num() - 1 - i;
+
+                if (ElementsToMove > 0) {
+                    memmove(CurrentPtr, NextPtr, ElementsToMove * StructSize);
+                }
+
+                *((int32*)((uint8*)&ReplicatedEntries + 8)) -= 1;
+            }
+
             bItemRemoved = true;
             break;
         }
@@ -85,6 +97,23 @@ void AFortInventory::Remove(AFortPlayerController* PlayerController, FGuid Guid,
         
         WorldInventory->Update((AFortPlayerControllerAthena*)PlayerController, nullptr);
     }
+}
+
+FGuid AFortInventory::FindGuidByDefinition(AFortPlayerControllerAthena* PC, UFortItemDefinition* ItemDef) {
+	if (!PC || !ItemDef) return FGuid();
+
+    AFortInventory* WorldInventory = PC->GetWorldInventory();
+    if (!WorldInventory) return FGuid();
+
+    FFortItemList& Inventory = WorldInventory->GetInventory();
+    TArray<UFortWorldItem*>& ItemInstances = Inventory.GetItemInstances();
+    for (UFortWorldItem* Item : ItemInstances) {
+        if (Item && Item->GetItemEntry().GetItemDefinition() == ItemDef) {
+            return Item->GetItemEntry().GetItemGuid();
+        }
+    }
+
+	return FGuid();
 }
 
 FFortRangedWeaponStats* AFortInventory::GetStats(UFortWeaponItemDefinition* Def)

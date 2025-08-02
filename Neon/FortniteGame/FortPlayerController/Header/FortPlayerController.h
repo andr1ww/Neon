@@ -311,6 +311,9 @@ public:
     static void ServerRepairBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerAttemptInventoryDrop(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     DefHookOg(void, ClientOnPawnDied, AFortPlayerControllerAthena* PlayerController, FFortPlayerDeathReport& DeathReport);
+
+    DefHookOg(int32, K2_RemoveItemFromPlayerByGuid, UObject*, FFrame&);
+    DefHookOg(int32, K2_RemoveItemFromPlayer, AFortPlayerControllerAthena*, UFortWorldItemDefinition*, int32, bool);
 public:
     DECLARE_STATIC_CLASS(AFortPlayerControllerAthena)
     DECLARE_DEFAULT_OBJECT(AFortPlayerControllerAthena)
