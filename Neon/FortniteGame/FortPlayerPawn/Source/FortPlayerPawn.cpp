@@ -51,8 +51,6 @@ void AFortPlayerPawn::ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack)
     Stack.StepCompiledIn(&bPlayPickupSound);
     Stack.IncrementCode();
     
-
-
     if (!Pawn || !Pickup || Pickup->GetbPickedUp())
         return;
 
@@ -105,7 +103,7 @@ void AFortPlayerPawn::ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack)
             {
                 AFortInventory::SpawnPickupDirect(PlayerController->GetViewTarget()->GetActorLocation(), 
                     foundItemEntry->GetItemDefinition(), foundItemEntry->GetCount(), foundItemEntry->GetLoadedAmmo(), EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, MyFortPawn, true);
-    AFortInventory::Remove(PlayerController, CurrentWeaponGuid, 1);
+                AFortInventory::Remove(PlayerController, CurrentWeaponGuid, 1);
                 AFortInventory::GiveItem(PlayerController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount, Pickup->GetPrimaryPickupItemEntry().GetLevel());
             } else {
                 AFortInventory::SpawnPickupDirect(PlayerController->GetViewTarget()->GetActorLocation(),
@@ -115,7 +113,32 @@ void AFortPlayerPawn::ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack)
             AFortInventory::SpawnPickupDirect(PlayerController->GetViewTarget()->GetActorLocation(),
                 Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), Pickup->GetPrimaryPickupItemEntry().GetLoadedAmmo(), EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, MyFortPawn, true);
         }
-    } else {
+    } 
+    else if (FortLootPackage::GetQuickbar(Pickup->GetPrimaryPickupItemEntry().GetItemDefinition()) != EFortQuickBars::Primary) {
+        FFortItemEntry* existingItemEntry = nullptr;
+        FGuid existingItemGuid;
+        
+        for (int32 i = 0; i < ItemInstances.Num(); i++) {
+            if (ItemInstances[i] && ItemInstances[i]->GetItemEntry().GetItemDefinition() && 
+                ItemInstances[i]->GetItemEntry().GetItemDefinition() == Pickup->GetPrimaryPickupItemEntry().GetItemDefinition()) {
+                existingItemEntry = &ItemInstances[i]->GetItemEntry();
+                existingItemGuid = existingItemEntry->GetItemGuid();
+                break;
+            }
+        }
+        
+        if (existingItemEntry && existingItemEntry->GetItemDefinition()) {
+            FFortItemEntry newEntry = *existingItemEntry;
+            newEntry.SetCount(existingItemEntry->GetCount() + Pickup->GetPrimaryPickupItemEntry().GetCount());
+            newEntry.SetItemGuid(existingItemGuid);
+            newEntry.SetItemDefinition(existingItemEntry->GetItemDefinition()); 
+            
+            AFortInventory::ReplaceEntry(PlayerController, newEntry);
+        } else {
+            AFortInventory::GiveItem(PlayerController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount, Pickup->GetPrimaryPickupItemEntry().GetLevel());
+        }
+    }
+    else {
         AFortInventory::GiveItem(PlayerController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount, Pickup->GetPrimaryPickupItemEntry().GetLevel());
     }
     
