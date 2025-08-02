@@ -56,13 +56,24 @@ void UAbilitySystemComponent::GiveAbility(UAbilitySystemComponent* AbilitySystem
 {
     if (!Ability || !Ability->GetClassDefaultObject()) return;
     
-    int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
-    FGameplayAbilitySpec* Spec = (FGameplayAbilitySpec*)malloc(GameplayAbilitySpecSize);
-    memset(Spec, 0, GameplayAbilitySpecSize);
-        
-    if (!Spec) return;
+    static FGameplayAbilitySpec* StaticSpec = nullptr;
+    static bool bInitialized = false;
     
-    new(Spec) FGameplayAbilitySpec();
+    if (!bInitialized)
+    {
+        int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
+        StaticSpec = (FGameplayAbilitySpec*)malloc(GameplayAbilitySpecSize);
+        
+        if (!StaticSpec) return;
+        
+        memset(StaticSpec, 0, GameplayAbilitySpecSize);
+        
+        new(StaticSpec) FGameplayAbilitySpec();
+        
+        bInitialized = true;
+    }
+    
+    if (!StaticSpec) return;
     
     using GiveAbilityFunc = FGameplayAbilitySpecHandle(__fastcall*)(
         UAbilitySystemComponent*,
@@ -70,24 +81,21 @@ void UAbilitySystemComponent::GiveAbility(UAbilitySystemComponent* AbilitySystem
         const FGameplayAbilitySpec&
     );
     
-    Spec->MostRecentArrayReplicationKey = -1;
-    Spec->ReplicationID = -1;
-    Spec->ReplicationKey = -1;
-    Spec->GetHandle().Handle = rand();
-    Spec->SetAbility((UGameplayAbility*)Ability->GetClassDefaultObject());
-    Spec->SetSourceObject(nullptr);
-    Spec->SetInputID(-1);
-    Spec->SetLevel(1);
+    StaticSpec->MostRecentArrayReplicationKey = -1;
+    StaticSpec->ReplicationID = -1;
+    StaticSpec->ReplicationKey = -1;
+    StaticSpec->GetHandle().Handle = rand();
+    StaticSpec->SetAbility((UGameplayAbility*)Ability->GetClassDefaultObject());
+    StaticSpec->SetSourceObject(nullptr);
+    StaticSpec->SetInputID(-1);
+    StaticSpec->SetLevel(1);
     
-    FGameplayAbilitySpecHandle Handle = Spec->GetHandle();
+    FGameplayAbilitySpecHandle Handle = StaticSpec->GetHandle();
     
     if (Finder->GiveAbility())
     {
-        ((GiveAbilityFunc)Finder->GiveAbility())(AbilitySystemComponent, &Handle, *Spec);
+        ((GiveAbilityFunc)Finder->GiveAbility())(AbilitySystemComponent, &Handle, *StaticSpec);
     }
-    
-    Spec->~FGameplayAbilitySpec();
-    VirtualFree(Spec, 0, MEM_RELEASE);
 }
 
 void UAbilitySystemComponent::GiveAbilitySet(UAbilitySystemComponent* AbilitySystemComponent, UFortAbilitySet* Set)
