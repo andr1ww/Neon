@@ -609,3 +609,40 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
    
 	ClientOnPawnDiedOG(PlayerController, DeathReport);
 }
+
+void AFortPlayerControllerAthena::ServerAttemptInventoryDrop(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+	FGuid ItemGuid;
+	int32 Count;
+	Stack.StepCompiledIn(&ItemGuid);
+	Stack.StepCompiledIn(&Count);
+	Stack.IncrementCode();
+
+	if (!PlayerController || !PlayerController->GetPawn())
+		return;
+
+	AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+	FFortItemList& Inventory = WorldInventory->GetInventory();
+	TArray<FFortItemEntry>& ReplicatedEntries = Inventory.GetReplicatedEntries();
+    
+	FFortItemEntry* Entry = nullptr;
+	uint8* Data = (uint8*)ReplicatedEntries.GetData();
+	static int32 FortItemEntrySize = StaticClassImpl("FortItemEntry")->GetSize();
+    
+	for (int32 i = 0; i < Count; ++i) {
+		auto Item = (FFortItemEntry*)(Data + (i * FortItemEntrySize));
+		if (Item->GetItemGuid() == ItemGuid) {
+			Entry = Item;
+			break;
+		}
+	}
+
+	if (!Entry || (Entry->GetCount() - Count) < 0)
+		return;
+	Entry->SetCount(Entry->GetCount() - Count);
+	AFortInventory::SpawnPickup(PlayerController->GetPawn()->GetActorLocation() + PlayerController->GetPawn()->GetActorForwardVector() * 70.f + FVector(0, 0, 50), Entry, EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, PlayerController->GetMyFortPawn(), Count);
+	if (Entry->GetCount() == 0)
+		AFortInventory::Remove(PlayerController, ItemGuid);
+	else
+		AFortInventory::ReplaceEntry(PlayerController, *Entry);
+}

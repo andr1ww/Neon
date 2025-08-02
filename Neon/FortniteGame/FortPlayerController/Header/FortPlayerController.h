@@ -309,6 +309,7 @@ public:
     static void ServerEditBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerEndEditingBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerRepairBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
+    static void ServerAttemptInventoryDrop(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     DefHookOg(void, ClientOnPawnDied, AFortPlayerControllerAthena* PlayerController, FFortPlayerDeathReport& DeathReport);
 public:
     DECLARE_STATIC_CLASS(AFortPlayerControllerAthena)
