@@ -120,8 +120,8 @@ void UAbilitySystemComponent::GiveAbilitySet(UAbilitySystemComponent* AbilitySys
                 if (!EffectInfo.GetGameplayEffect()) {
                     continue;
                 }
-                FGameplayEffectContextHandle EffectContext{}; 
-                AbilitySystemComponent->CallFunc<void>("AbilitySystemComponent", "BP_ApplyGameplayEffectToSelf", EffectInfo.GetGameplayEffect(), EffectInfo.Level, EffectContext);
+                FGameplayEffectContextHandle EffectContext{};
+                AbilitySystemComponent->BP_ApplyGameplayEffectToSelf(EffectInfo.GetGameplayEffect(), EffectInfo.Level, EffectContext);
             }
         }
     }
