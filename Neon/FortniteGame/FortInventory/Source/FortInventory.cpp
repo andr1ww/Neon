@@ -26,7 +26,7 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
 
     Entry ? this->GetInventory().MarkItemDirty(*Entry) : this->GetInventory().MarkArrayDirty();
 }
-void AFortInventory::Remove(AFortPlayerController* PlayerController, FGuid Guid, int AmountToRemove, bool bRemoveAll)
+void AFortInventory::Remove(AFortPlayerController* PlayerController, FGuid Guid, int AmountToRemove)
 {
     if (!PlayerController) return;
     
@@ -41,16 +41,11 @@ void AFortInventory::Remove(AFortPlayerController* PlayerController, FGuid Guid,
     
     for (int32 i = ItemInstances.Num() - 1; i >= 0; i--) {
         if (ItemInstances[i] && ItemInstances[i]->GetItemEntry().GetItemGuid() == Guid) {
-            if (bRemoveAll) {
-                ItemInstances.Remove(i);
+            UFortWorldItem** DataPtr = ItemInstances.GetData();
+            for (int32 j = i; j < ItemInstances.Num() - 1; j++) {
+                DataPtr[j] = DataPtr[j + 1];
             }
-            else {
-                UFortWorldItem** DataPtr = ItemInstances.GetData();
-                for (int32 j = i; j < ItemInstances.Num() - 1; j++) {
-                    DataPtr[j] = DataPtr[j + 1];
-                }
-                *((int32*)((uint8*)&ItemInstances + 8)) -= 1;
-            }
+            *((int32*)((uint8*)&ItemInstances + 8)) -= 1;
 
             bItemRemoved = true;
             break;
@@ -62,20 +57,15 @@ void AFortInventory::Remove(AFortPlayerController* PlayerController, FGuid Guid,
         auto ReplicatedEntry = (FFortItemEntry*)((uint8*)ReplicatedEntries.GetData() + (i * StructSize));
         
         if (ReplicatedEntry->GetItemGuid() == Guid) {
-            if (bRemoveAll) {
-                ReplicatedEntries.Remove(i);
-            }
-            else {
-                uint8* CurrentPtr = (uint8*)ReplicatedEntry;
-                uint8* NextPtr = CurrentPtr + StructSize;
-                int32 ElementsToMove = ReplicatedEntries.Num() - 1 - i;
+            uint8* CurrentPtr = (uint8*)ReplicatedEntry;
+            uint8* NextPtr = CurrentPtr + StructSize;
+            int32 ElementsToMove = ReplicatedEntries.Num() - 1 - i;
 
-                if (ElementsToMove > 0) {
-                    memmove(CurrentPtr, NextPtr, ElementsToMove * StructSize);
-                }
-
-                *((int32*)((uint8*)&ReplicatedEntries + 8)) -= 1;
+            if (ElementsToMove > 0) {
+                memmove(CurrentPtr, NextPtr, ElementsToMove * StructSize);
             }
+
+            *((int32*)((uint8*)&ReplicatedEntries + 8)) -= 1;
 
             bItemRemoved = true;
             break;
