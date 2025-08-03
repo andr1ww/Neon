@@ -8,13 +8,22 @@
 #include "FortniteGame/FortGameMode/Header/FortGameMode.h"
 #include "FortniteGame/FortLoot/Header/FortLootPackage.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
-#include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "Neon/Finder/Header/Finder.h"
 #include "Neon/Runtime/Runtime.h"
 
 static inline std::vector<uint64_t> NullFuncs = {};
 static inline std::vector<uint64_t> RetTrueFuncs = {};
 static inline std::vector<uint64_t> FuncsTo85 = {};
+
+static void* (*ProcessEventOG)(UObject*, UFunction*, void*);
+void* ProcessEvent(UObject* Obj, UFunction* Function, void* Params)
+{
+	if (Function && Config::bLogProcessEvent) {
+		UE_LOG(LogNeon, Log, "ProcessEvent: %s", Function->GetFName().ToString().ToString().c_str());
+	}
+
+	return ProcessEventOG(Obj, Function, Params);
+}
 
 void InitNullsAndRetTrues() {
 	if (Fortnite_Version >= 23)
@@ -203,7 +212,8 @@ void Main()
 	}
 
 	Runtime::Hook(IMAGEBASE + 0x1EE9720, AFortPlayerControllerAthena::K2_RemoveItemFromPlayer, (void**)&AFortPlayerControllerAthena::K2_RemoveItemFromPlayerOG);
-
+	Runtime::Hook(IMAGEBASE + 0x2ebf890, ProcessEvent, (void**)&ProcessEventOG);
+	
 	UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
 	FString WorldName;
 	if (Fortnite_Version <= 10.40)

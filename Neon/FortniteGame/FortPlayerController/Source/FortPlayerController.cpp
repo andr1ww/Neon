@@ -7,7 +7,6 @@
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
 #include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
 #include "FortniteGame/FortLoot/Header/FortLootPackage.h"
-#include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "Neon/Finder/Header/Finder.h"
 
 void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) 
@@ -58,7 +57,7 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
 	GameState->GetGameMemberInfoArray().GetMembers().Add(*Member);
 	GameState->GetGameMemberInfoArray().MarkItemDirty(*Member);
 
-	PlayerController->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1)->CallFunc<void>("FortQuestManager", "InitializeQuestAbilities", PlayerController->GetPawn());
+	//PlayerController->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1)->CallFunc<void>("FortQuestManager", "InitializeQuestAbilities", PlayerController->GetPawn());
 }
 
 

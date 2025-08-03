@@ -313,6 +313,11 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
         ExecuteConsoleCommand(UWorld::GetWorld(), L"startaircraft", nullptr);
         Sleep(400);
     }
+
+    if (GetAsyncKeyState(VK_F9) & 0x1)
+    {
+        Config::bLogProcessEvent = !Config::bLogProcessEvent;
+    }
     
     if (GetAsyncKeyState(VK_F10) & 0x1)
     {
