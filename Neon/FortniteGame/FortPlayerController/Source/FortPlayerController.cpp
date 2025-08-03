@@ -684,9 +684,11 @@ int32 AFortPlayerControllerAthena::K2_RemoveItemFromPlayer(AFortPlayerController
 
     FGuid ItemGuid = AFortInventory::FindGuidByDefinition(PC, ItemDefinition);
     if (ItemGuid.A != 0) {
-        AFortInventory::Remove(PC, ItemGuid, INT_MAX, true);
+        AFortInventory::Remove(PC, ItemGuid, INT_MAX);
+        PC->GetWorldInventory()->Update(PC, nullptr);
 		UE_LOG(LogNeon, Log, "K2_RemoveItemFromPlayer: Removed %s %s", std::to_string(AmountToRemove), ItemDefinition->GetFName().ToString().ToString().c_str());
     }
 
+    return AmountToRemove;
     return K2_RemoveItemFromPlayerOG(PC, ItemDefinition, AmountToRemove, bForceRemoval);
 }
