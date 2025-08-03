@@ -107,12 +107,12 @@ void InitNullsAndRetTrues() {
 		if (Func == 0x0) continue;
 		Runtime::Patch(Func, 0x85);
 	}
-	if (Fortnite_Version == 12.61)
+	if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.50)
 	{
 		Runtime::Hook(IMAGEBASE + 0x2E688D0, RetTrue); // server context
 		Runtime::Hook(IMAGEBASE + 0x1BDC660, FortLootPackage::SpawnLoot);
 		Runtime::Hook(IMAGEBASE + 0x3F88350, RetTrue); // IsThereAnywhereToBuildNavigation
-		Runtime::Hook(IMAGEBASE + 0x243E860, UFortQuestManager::SendComplexCustomStatEvent, (void**)&UFortQuestManager::SendComplexCustomStatEventOG);
+	//	Runtime::Hook(IMAGEBASE + 0x243E860, UFortQuestManager::SendComplexCustomStatEvent, (void**)&UFortQuestManager::SendComplexCustomStatEventOG);
 	}
 }
 

@@ -21,7 +21,11 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 
 	QuestManager->GetSourceAndContextTags(&PSourceTags, &ContextTags);
 
-	ContextTags.AppendTags(UWorld::GetWorld()->GetGameState()->GetCurrentPlaylistInfo()->GetBasePlaylist()->GetGameplayTagContainer());
+	static int CurrentPlaylistInfoOffset = Runtime::GetOffset(UWorld::GetWorld()->GetGameState(), "CurrentPlaylistInfo");
+            
+	FPlaylistPropertyArray& CurrentPlaylistInfoPtr = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(UWorld::GetWorld()->GetGameState()) + CurrentPlaylistInfoOffset);
+	
+	ContextTags.AppendTags(CurrentPlaylistInfoPtr.GetBasePlaylist()->GetGameplayTagContainer());
 	SourceTags.AppendTags(PSourceTags);
 
 	for (auto& CurrentQuest : QuestManager->GetCurrentQuests())
