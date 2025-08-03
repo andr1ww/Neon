@@ -23,7 +23,7 @@ void SendObjectiveStat(AFortPlayerControllerAthena* PlayerController, const FNam
 			UpdatedObjectiveStat.Quest = QuestDefinition;
 			UpdatedObjectiveStat.CurrentStage++;
 			UpdatedObjectiveStat.StatDelta = Count;
-			UpdatedObjectiveStat.StatValue = QuestDefinition->GetObjectiveCompletionCount() + Count;
+			UpdatedObjectiveStat.StatValue = QuestDefinition->GetObjectiveCompletionCount();
 			PlayerController->CallFunc<void>("FortPlayerController","OnRep_UpdatedObjectiveStats" );
 			return;
 		}
@@ -44,7 +44,7 @@ void SendObjectiveStat(AFortPlayerControllerAthena* PlayerController, const FNam
 		NewUpdatedObjectiveStat->Quest = QuestDefinition;
 		NewUpdatedObjectiveStat->CurrentStage++;
 		NewUpdatedObjectiveStat->StatDelta = Count;
-		NewUpdatedObjectiveStat->StatValue = QuestDefinition->GetObjectiveCompletionCount() + Count;
+		NewUpdatedObjectiveStat->StatValue = QuestDefinition->GetObjectiveCompletionCount();
 
 		PlayerController->GetUpdatedObjectiveStats().Add(*NewUpdatedObjectiveStat, FFortUpdatedObjectiveStatSize);
 	}
@@ -57,6 +57,8 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 	auto Count = QuestManager->GetObjectiveCompletionCount(QuestDefinition, Obj->GetBackendName());
 	
 	Count++;
+	
+	QuestDefinition->SetObjectiveCompletionCount(Count); 
 	
 	bool thisObjectiveCompleted = (Count >= Obj->GetCount());
 	
