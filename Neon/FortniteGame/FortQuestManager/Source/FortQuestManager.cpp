@@ -57,8 +57,8 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 			
 			if (QuestManager->HasCompletedObjectiveWithName(QuestDef, Objective.GetBackendName()) ||
 				QuestManager->HasCompletedObjective(QuestDef, Objective.GetObjectiveStatHandle()) ||
-				CurrentQuest->HasCompletedObjectiveWithName(Objective.GetBackendName()) ||
-				CurrentQuest->HasCompletedObjective(Objective.GetObjectiveStatHandle()))
+				/*CurrentQuest->HasCompletedObjectiveWithName(Objective.GetBackendName()) ||
+				CurrentQuest->HasCompletedObjective(Objective.GetObjectiveStatHandle())*/)
 			{
 				continue;
 			}
