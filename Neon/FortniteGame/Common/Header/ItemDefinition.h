@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "Neon/Runtime/Runtime.h"
 #include "Engine/Float/Header/Float.h"
+#include "Engine/ObjectPtr/Header/ObjectPtr.h"
+
 
 enum class EFortResourceType : uint8
 {

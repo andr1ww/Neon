@@ -351,7 +351,14 @@ TArray<FortLootPackage::FNeonLootImproper> FortLootPackage::PickLootDrops(FName 
 
     return LootDrops;
 }
-    
+
+struct FFortSearchBounceData final
+{
+public:
+    struct FVector                                BounceNormal;                                      // 0x0000(0x000C)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    uint32                                        SearchAnimationCount;                              // 0x000C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
+
 bool FortLootPackage::SpawnLoot(ABuildingContainer* Container) {
     auto World = UWorld::GetWorld();
     if (!World) {
@@ -397,5 +404,9 @@ bool FortLootPackage::SpawnLoot(ABuildingContainer* Container) {
     }
 
     Container->SetbAlreadySearched(true);
+    Container->CallFunc<void>("BuildingContainer", "OnRep_bAlreadySearched");
+    Container->Get<FFortSearchBounceData>("BuildingContainer", "SearchBounceData").SearchAnimationCount++;
+    Container->CallFunc<void>("BuildingContainer", "BounceContainer");
+    
     return true;
 }

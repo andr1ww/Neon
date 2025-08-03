@@ -146,6 +146,12 @@ class FName
 
         FString ToString() const;
 
+    	
+    bool IsValid() const
+    {
+        return ComparisonIndex > 0;
+    }
+
     bool operator<(const FName& other) const {
         return ComparisonIndex < other.ComparisonIndex;
     }

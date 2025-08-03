@@ -7,6 +7,7 @@
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
 #include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
 #include "FortniteGame/FortLoot/Header/FortLootPackage.h"
+#include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "Neon/Finder/Header/Finder.h"
 
 void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) 
@@ -40,9 +41,13 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
 	PlayerState->Set("FortPlayerStateAthena", "SquadId", PlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex") - 3);
 	PlayerState->CallFunc<void>("FortPlayerStateAthena", "OnRep_SquadId");
 
-	static const int32 FGameMemberInfoSize = StaticClassImpl("GameMemberInfo")->GetSize();
-	FGameMemberInfo* Member = (FGameMemberInfo*)malloc(FGameMemberInfoSize);
-	memset(Member, 0, FGameMemberInfoSize);
+	static FGameMemberInfo* Member = nullptr;
+	if (!Member) {
+		static const int32 FGameMemberInfoSize = StaticClassImpl("GameMemberInfo")->GetSize();
+		Member = (FGameMemberInfo*)malloc(FGameMemberInfoSize);
+		memset(Member, 0, FGameMemberInfoSize);
+	}
+	
 	Member->MostRecentArrayReplicationKey = -1;
 	Member->ReplicationID = -1;
 	Member->ReplicationKey = -1;
@@ -52,6 +57,8 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
 
 	GameState->GetGameMemberInfoArray().GetMembers().Add(*Member);
 	GameState->GetGameMemberInfoArray().MarkItemDirty(*Member);
+
+	PlayerController->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1)->CallFunc<void>("FortQuestManager", "InitializeQuestAbilities", PlayerController->GetPawn());
 }
 
 
