@@ -219,6 +219,38 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
     }
 }
 
+// Doesent even work cuh!
+void UFortServerBotManagerAthena::OnAlertLevelChanged(UObject* Context, FFrame& Stack)
+{
+    AFortAthenaAIBotController* This;
+    EAlertLevel OldAlertLevel;
+    EAlertLevel NewAlertLevel;
+    Stack.StepCompiledIn(&This);
+    Stack.StepCompiledIn(&OldAlertLevel);
+    Stack.StepCompiledIn(&NewAlertLevel);
+    if (!This)
+    {
+        return;
+    }
+
+    AFortPlayerPawn* Pawn = (AFortPlayerPawn*)This->GetPawn();
+    if (!Pawn)
+    {
+        return;
+    }
+    
+    UE_LOG(LogNeon, Log, "OnAlertLevelChanged: %s", std::to_string((int)NewAlertLevel));
+    if (NewAlertLevel == EAlertLevel::Threatened)
+    {
+        Pawn->PawnStartFire(0);
+    } else
+    {
+        Pawn->PawnStopFire(0);
+    }
+
+    return OnAlertLevelChangedOG(Context, Stack);
+}
+
 void UFortServerBotManagerAthena::InitializeForWorld(UNavigationSystemV1* NavSystem, UWorld* World, uint8 Mode)
 {
     UE_LOG(LogNeon, Log, "InitializeForWorld For World: '%s' For NavigationSystem: '%s'", World->GetFName().ToString().ToString().c_str(), NavSystem->GetFName().ToString().ToString().c_str());

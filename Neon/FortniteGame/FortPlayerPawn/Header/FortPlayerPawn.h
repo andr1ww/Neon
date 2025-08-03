@@ -17,6 +17,18 @@ class AFGF_Character : public ACharacter
 class AFortPawn : public AFGF_Character
 {
 public:
+	struct FortPawn_PawnStartFire final
+	{
+	public:
+		uint8 FireModeNum;
+	};
+
+	struct FortPawn_PawnStopFire final
+	{
+	public:
+		uint8 FireModeNum;
+	};
+public:
 	bool IsDBNO()
 	{
 		static SDK::UFunction* Func = nullptr;
@@ -36,6 +48,38 @@ public:
 		this->ProcessEvent(Func, &Params);
 
 		return Params.ReturnValue;
+	}
+
+	void PawnStartFire(uint8 FireModeNum)
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPawn", "PawnStartFire");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+
+		FortPawn_PawnStartFire Params;
+		Params.FireModeNum = FireModeNum;
+		
+		this->ProcessEvent(Func, &Params);
+	}
+
+	void PawnStopFire(uint8 FireModeNum)
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPawn", "PawnStopFire");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+
+		FortPawn_PawnStopFire Params;
+		Params.FireModeNum = FireModeNum;
+		
+		this->ProcessEvent(Func, &Params);
 	}
 public:
 	DEFINE_PTR(AFortWeapon, AFortPawn, CurrentWeapon);

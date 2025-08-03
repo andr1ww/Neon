@@ -13,6 +13,16 @@ class AFortGameModeAthena;
 class UActorComponent;
 class ANavigationData;
 
+enum class EAlertLevel : uint8
+{
+    Unaware                                  = 0,
+    Alerted                                  = 1,
+    LKP                                      = 2,
+    Threatened                               = 3,
+    Count                                    = 4,
+    EAlertLevel_MAX                          = 5,
+};
+
 enum class EExecutionStatus : uint8
 {
     ExecutionError = 0,
@@ -392,6 +402,7 @@ public:
     DefHookOg(void, CreateAndConfigureNavigationSystem, UAthenaNavSystemConfig*, UWorld*);
 
     DefHookOg(AFortPlayerPawn*, SpawnBot, UFortServerBotManagerAthena *BotManager, FVector SpawnLoc, FRotator SpawnRot, UFortAthenaAIBotCustomizationData *BotData, FFortAthenaAIBotRunTimeCustomizationData &RuntimeBotData);
+    DefHookOg(void, OnAlertLevelChanged, UObject* Context, FFrame& Stack);
 public:
     DECLARE_STATIC_CLASS(UFortServerBotManagerAthena)
     DECLARE_DEFAULT_OBJECT(UFortServerBotManagerAthena)
