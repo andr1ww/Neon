@@ -28,8 +28,14 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 	ContextTags.AppendTags(CurrentPlaylistInfoPtr.GetBasePlaylist()->GetGameplayTagContainer());
 	SourceTags.AppendTags(PSourceTags);
 
-	for (auto& CurrentQuest : QuestManager->GetCurrentQuests())
+	auto& CurrentQuests = QuestManager->GetCurrentQuests();
+	for (int i = 0; i < CurrentQuests.Num(); i++)
 	{
+		if (!CurrentQuests.IsValidIndex(i) || !CurrentQuests[i])
+			continue;
+			
+		auto CurrentQuest = CurrentQuests[i];
+		
 		if (CurrentQuest->HasCompletedQuest())
 			continue;
 
@@ -41,8 +47,14 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 		if (QuestManager->HasCompletedQuest(QuestDef))
 			continue;
 				
-		for (auto& Objective : QuestDef->GetObjectives())
+		auto& Objectives = QuestDef->GetObjectives();
+		for (int j = 0; j < Objectives.Num(); j++)
 		{
+			if (!Objectives.IsValidIndex(j))
+				continue;
+				
+			FFortMcpQuestObjectiveInfo& Objective = Objectives[j];
+			
 			if (QuestManager->HasCompletedObjectiveWithName(QuestDef, Objective.GetBackendName()) ||
 				QuestManager->HasCompletedObjective(QuestDef, Objective.GetObjectiveStatHandle()) ||
 				CurrentQuest->HasCompletedObjectiveWithName(Objective.GetBackendName()) ||
@@ -56,15 +68,27 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 
 			if (!StatTable || !StatRowName.IsValid())
 			{
-				for (auto& ObjectiveStat : Objective.GetInlineObjectiveStats())
+				auto& InlineStats = Objective.GetInlineObjectiveStats();
+				for (int k = 0; k < InlineStats.Num(); k++)
 				{
+					if (!InlineStats.IsValidIndex(k))
+						continue;
+						
+					FFortQuestObjectiveStat& ObjectiveStat = InlineStats[k];
+					
 					if (ObjectiveStat.GetType() != StatEvent)
 						continue;
-					bool bFoundCorrectQuest = true; 
+					bool bFoundQuest = true; 
 
-					for (auto& TagCondition : ObjectiveStat.GetTagConditions())
+					auto& TagConditions = ObjectiveStat.GetTagConditions();
+					for (int l = 0; l < TagConditions.Num(); l++)
 					{
-						if (!TagCondition.GetRequire() || !bFoundCorrectQuest)
+						if (!TagConditions.IsValidIndex(l))
+							continue;
+							
+						FInlineObjectiveStatTagCheckEntry& TagCondition = TagConditions[l];
+						
+						if (!TagCondition.GetRequire() || !bFoundQuest)
 							continue;
 
 						switch (TagCondition.GetType())
@@ -75,8 +99,10 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 									break;
 
 								if (!TargetTags.HasTag(TagCondition.GetTag()))
-									bFoundCorrectQuest = false;
-
+								{
+									bFoundQuest = false;
+								}
+								
 								break;
 							}
 						case EInlineObjectiveStatTagCheckEntryType::Source:
@@ -85,7 +111,9 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 									break;
 
 								if (!SourceTags.HasTag(TagCondition.GetTag()))
-									bFoundCorrectQuest = false;
+								{
+									bFoundQuest = false;
+								}
 
 								break;
 							}
@@ -95,7 +123,9 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 									break;
 
 								if (!ContextTags.HasTag(TagCondition.GetTag()))
-									bFoundCorrectQuest = false;
+								{
+									bFoundQuest = false;
+								}
 
 								break;
 							}
@@ -109,9 +139,11 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 					}
 
 					if (ObjectiveStat.GetType() != StatEvent)
-						bFoundCorrectQuest = false;
+					{
+						bFoundQuest = false;
+					}
 
-					if (bFoundCorrectQuest)
+					if (bFoundQuest)
 					{
 						UE_LOG(LogNeon, Log, "BackendName: %s", Objective.GetBackendName().ToString().ToString().c_str());
 					}
