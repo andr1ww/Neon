@@ -60,6 +60,99 @@
     <ClInclude Include="SDK\include\UnrealContainers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Array\Header\Array.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DataTable\Header\DataTable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GameplayStatics\Header\GameplayStatics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Guid\Header\Guid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\HTTP\Header\HTTP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Kismet\Header\Kismet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Level\Header\Level.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\NetDriver\Header\NetDriver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ObjectPtr\Header\ObjectPtr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Pawn\Header\Pawn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\PlayerController\Header\PlayerController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Quat\Header\Quat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Rotator\Header\Rotator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Transform\Header\Transform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\UEngine\Header\UEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Vector\Header\Vector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FortniteGame\AbilitySystemComponent\Header\AbilitySystemComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FortniteGame\BuildingSMActor\Header\BuildingSMActor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FortniteGame\Common\Header\ItemDefinition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FortniteGame\Common\Header\Tags.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FortniteGame\FortAthenaAIBotController\Header\FortAthenaAIBotController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FortniteGame\FortAthenaMapInfo\Header\FortAthenaMapInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FortniteGame\FortKismetLibrary\Header\FortKismetLibrary.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FortniteGame\FortLoot\Header\FortLootPackage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FortniteGame\FortPlayerController\Header\FortPlayerController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FortniteGame\FortPlayerPawn\Header\FortPlayerPawn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FortniteGame\FortPlayerState\Header\FortPlayerState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FortniteGame\FortPlaylistAthena\Header\FortPlaylistAthena.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Neon\Finder\Header\Finder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Neon\Runtime\Runtime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FortniteGame\FortQuestManager\Header\FortQuestManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -72,6 +165,57 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FortniteGame\FortGameMode\Source\FortGameMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GameplayStatics\Source\GameplayStatics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\HTTP\Source\HTTP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\NetDriver\Source\NetDriver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\PlayerController\Source\PlayerController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\UEngine\Source\UEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FortniteGame\AbilitySystemComponent\Source\AbilitySystemComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FortniteGame\BuildingSMActor\Source\BuildingSMActor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FortniteGame\FortAthenaAIBotController\Source\FortAthenaAIBotController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FortniteGame\FortGameState\Source\FortGameState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FortniteGame\FortInventory\Source\FortInventory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FortniteGame\FortKismetLibrary\Source\FortKismetLibrary.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FortniteGame\FortLoot\Source\FortLootPackage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FortniteGame\FortPlayerController\Source\FortPlayerController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FortniteGame\FortPlayerPawn\Source\FortPlayerPawn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FortniteGame\FortServerBotManager\Source\FortServerBotManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Neon\Finder\Source\Finder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FortniteGame\FortQuestManager\Source\FortQuestManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -8,6 +8,7 @@
 #include "FortniteGame/FortGameMode/Header/FortGameMode.h"
 #include "FortniteGame/FortLoot/Header/FortLootPackage.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
+#include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "Neon/Finder/Header/Finder.h"
 #include "Neon/Runtime/Runtime.h"
 
