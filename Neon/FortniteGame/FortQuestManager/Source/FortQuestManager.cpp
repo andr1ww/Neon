@@ -22,8 +22,8 @@ void SendObjectiveStat(AFortPlayerControllerAthena* PlayerController, const FNam
 		{
 			UpdatedObjectiveStat.Quest = QuestDefinition;
 			UpdatedObjectiveStat.CurrentStage++;
-			UpdatedObjectiveStat.StatDelta = 1;
-			UpdatedObjectiveStat.StatValue = Count;
+			UpdatedObjectiveStat.StatDelta = Count;
+			UpdatedObjectiveStat.StatValue = QuestDefinition->GetObjectiveCompletionCount() + Count;
 			PlayerController->CallFunc<void>("FortPlayerController","OnRep_UpdatedObjectiveStats" );
 			return;
 		}
@@ -43,8 +43,8 @@ void SendObjectiveStat(AFortPlayerControllerAthena* PlayerController, const FNam
 		NewUpdatedObjectiveStat->BackendName = BackendName;
 		NewUpdatedObjectiveStat->Quest = QuestDefinition;
 		NewUpdatedObjectiveStat->CurrentStage++;
-		NewUpdatedObjectiveStat->StatDelta = 1;
-		NewUpdatedObjectiveStat->StatValue = Count;
+		NewUpdatedObjectiveStat->StatDelta = Count;
+		NewUpdatedObjectiveStat->StatValue = QuestDefinition->GetObjectiveCompletionCount() + Count;
 
 		PlayerController->GetUpdatedObjectiveStats().Add(*NewUpdatedObjectiveStat, FFortUpdatedObjectiveStatSize);
 	}
@@ -52,9 +52,13 @@ void SendObjectiveStat(AFortPlayerControllerAthena* PlayerController, const FNam
 	PlayerController->CallFunc<void>("FortPlayerController","OnRep_UpdatedObjectiveStats" );
 }
 
-static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQuestManager* QuestManager, UFortQuestItem* QuestItem, UFortQuestItemDefinition* QuestDefinition, FFortMcpQuestObjectiveInfo* Obj, int32 NewCount)
+static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQuestManager* QuestManager, UFortQuestItem* QuestItem, UFortQuestItemDefinition* QuestDefinition, FFortMcpQuestObjectiveInfo* Obj, int32 PlayerControllerount)
 {
-	bool thisObjectiveCompleted = (NewCount >= Obj->GetCount());
+	auto Count = QuestManager->GetObjectiveCompletionCount(QuestDefinition, Obj->GetBackendName());
+	
+	Count++;
+	
+	bool thisObjectiveCompleted = (Count >= Obj->GetCount());
 	
 	bool allObjsCompleted = false;
 	if (thisObjectiveCompleted)
@@ -71,14 +75,14 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 			int32 CurrentObjCount;
 			if (CurrentObj == Obj)
 			{
-				CurrentObjCount = NewCount;
+				CurrentObjCount = Count;
 			}
 			else
 			{
 				CurrentObjCount = QuestManager->GetObjectiveCompletionCount(QuestDefinition, CurrentObj->GetBackendName());
 			}
 			
-			if (CurrentObjCount < CurrentObj->GetCount())
+			if (CurrentObjCount <= CurrentObj->GetCount())
 			{
 				allObjsCompleted = false;
 				break; 
@@ -95,18 +99,18 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 			if (TeamMemberPlayerController->IsA<AFortAthenaAIBotController>())
 				continue;
 
-			SendObjectiveStat(TeamMemberPlayerController, Obj->GetBackendName(), QuestDefinition, NewCount);
+			SendObjectiveStat(TeamMemberPlayerController, Obj->GetBackendName(), QuestDefinition, Count);
 
 			if (TeamMemberPlayerController == PlayerController)
 			{
-				int32 DeltaChange = NewCount; 
-				QuestManager->CallFunc<void>("FortQuestManager", "SelfCompletedUpdatedQuest", TeamMemberPlayerController, QuestDefinition, Obj->GetBackendName(), NewCount,
+				int32 DeltaChange = Count; 
+				QuestManager->CallFunc<void>("FortQuestManager", "SelfCompletedUpdatedQuest", TeamMemberPlayerController, QuestDefinition, Obj->GetBackendName(), Count,
 					DeltaChange, PlayerState, thisObjectiveCompleted, allObjsCompleted);
 			}
 			else
 			{
-				int32 DeltaChange = NewCount; 
-				QuestManager->CallFunc<void>("FortQuestManager", "AssistedPlayerUpdatedQuest", TeamMemberPlayerController, QuestDefinition, Obj->GetBackendName(), NewCount,
+				int32 DeltaChange = Count; 
+				QuestManager->CallFunc<void>("FortQuestManager", "AssistedPlayerUpdatedQuest", TeamMemberPlayerController, QuestDefinition, Obj->GetBackendName(), Count,
 					DeltaChange, PlayerState, thisObjectiveCompleted, allObjsCompleted);
 			}
 			
@@ -114,7 +118,7 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 				TeamMemberPlayerController, 
 				QuestDefinition, 
 				Obj->GetBackendName(), 
-				NewCount, 
+				Count, 
 				1,
 				TeamMemberPlayerController == PlayerController ? nullptr : PlayerState, 
 				thisObjectiveCompleted, 
@@ -124,7 +128,7 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 	
 	if (allObjsCompleted) 
 	{
-		UE_LOG(LogNeon, Log, "Erm oK");
+		UE_LOG(LogNeon, Log, "All objectives completed! Quest finished.");
 		int32 XPPlayerControllerCount = 0;
 		if (auto RewardsTable = QuestDefinition->GetRewardsTable())
 		{
@@ -145,7 +149,7 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 		
 		if (XPPlayerControllerCount) 
 		{
-			UE_LOG(LogNeon, Log, "Granting");
+			UE_LOG(LogNeon, Log, "Granting XP");
 			static FXPEventEntry* QuestEntry = nullptr;
 			if (!QuestEntry)
 			{
@@ -181,10 +185,7 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 			PlayerController->GetXPComponent()->CallFunc<void>("FortPlayerControllerAthenaXPComponent", "OnProfileUpdated");
 			PlayerController->GetXPComponent()->CallFunc<void>("FortPlayerControllerAthenaXPComponent", "HighPrioXPEvent", QuestEntry);
 		}
-	}
-	
-	if (allObjsCompleted)
-	{
+		
 		QuestManager->CallFunc<void>("FortQuestManager", "ClaimQuestReward", QuestItem);
 	} 
 }
@@ -328,8 +329,7 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 
 					if (bFoundQuest)
 					{
-						auto CurrentCount = QuestManager->GetObjectiveCompletionCount(QuestDef, Objective->GetBackendName());
-						ProgressQuest(Controller, QuestManager, CurrentQuest, QuestDef, Objective, CurrentCount + 1);
+						ProgressQuest(Controller, QuestManager, CurrentQuest, QuestDef, Objective, Objective->GetCount() + 1);
 						UE_LOG(LogNeon, Log, "BackendName: %s", Objective->GetBackendName().ToString().ToString().c_str());
 					}
 				}
@@ -355,9 +355,7 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 
 						if (!ContextTags.HasAll(Row->GetContextTagContainer()))
 							continue;
-						
-						auto CurrentCount = QuestManager->GetObjectiveCompletionCount(QuestDef, Objective->GetBackendName());
-						ProgressQuest(Controller, QuestManager, CurrentQuest, QuestDef, Objective, CurrentCount + 1);
+						ProgressQuest(Controller, QuestManager, CurrentQuest, QuestDef, Objective, Objective->GetCount() + 1);
 						UE_LOG(LogNeon, Log, "BackendName: %s", Objective->GetBackendName().ToString().ToString().c_str());
 					}
 				}
