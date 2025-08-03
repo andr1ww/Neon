@@ -129,8 +129,30 @@ struct FFortQuestObjectiveStat
 	DEFINE_BOOL(FFortQuestObjectiveStat, bHasInclusiveContextTags);
 };
 
+struct FFortQuestRewardTableRow final : public FTableRowBase
+{
+public:
+	DEFINE_MEMBER(int32, FFortQuestRewardTableRow, Quantity);
+	class FString                                 QuestTemplateId;                                   // 0x0008(0x0010)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	class FName                                   TemplateId;                                        // 0x0018(0x0008)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          Hidden;                                            // 0x0024(0x0001)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          Feature;                                           // 0x0025(0x0001)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          Selectable;                                        // 0x0026(0x0001)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	uint8                                         Pad_201E[0x1];                                     // 0x0027(0x0001)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
+struct FXPEventEntry final : public FFastArraySerializerItem
+{
+public:
+	DEFINE_PTR(class UFortQuestItemDefinition, FXPEventEntry, QuestDef);
+	DEFINE_MEMBER(float, FXPEventEntry, Time);
+	DEFINE_MEMBER(int32, FXPEventEntry, EventXpValue);
+	DEFINE_MEMBER(int32, FXPEventEntry, TotalXpEarnedInMatch);
+};
+
 struct FFortMcpQuestObjectiveInfo final
 {
+	DEFINE_MEMBER(int32, FFortMcpQuestObjectiveInfo, Count);
 	DEFINE_MEMBER(TArray<struct FFortQuestObjectiveStat> , FFortMcpQuestObjectiveInfo, InlineObjectiveStats);
 	DEFINE_MEMBER(FName, FFortMcpQuestObjectiveInfo, BackendName);
 	DEFINE_MEMBER(FDataTableRowHandle, FFortMcpQuestObjectiveInfo, ObjectiveStatHandle);
@@ -139,6 +161,8 @@ struct FFortMcpQuestObjectiveInfo final
 class UFortQuestItemDefinition : public UObject
 {
 public:
+	DEFINE_PTR(UDataTable, UFortQuestItemDefinition, RewardsTable);
+	DEFINE_MEMBER(int32, UFortQuestItemDefinition, ObjectiveCompletionCount);
 	DEFINE_MEMBER(TArray<struct FFortMcpQuestObjectiveInfo>,UFortQuestItemDefinition,     Objectives);
 public:
 	DECLARE_DEFAULT_OBJECT(UFortQuestItemDefinition)
@@ -263,6 +287,33 @@ public:
 		public:
 			class AFortPlayerController*                  ReturnValue;                                       // 0x0000(0x0008)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 		} Params{  };
+    
+		this->ProcessEvent(Func, &Params);
+
+		return Params.ReturnValue;
+	}
+
+	inline int32 GetObjectiveCompletionCount(const class UFortQuestItemDefinition* Definition, class FName BackendName)
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortQuestManager", "GetObjectiveCompletionCount");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return 0;
+
+		struct FortQuestManager_GetObjectiveCompletionCount final
+		{
+		public:
+			const class UFortQuestItemDefinition*         Definition;                                        // 0x0000(0x0008)(ConstParm, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+			class FName                                   BackendName;                                       // 0x0008(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+			int32                                         ReturnValue;                                       // 0x0010(0x0004)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+			uint8                                         Pad_3A73[0x4];                                     // 0x0014(0x0004)(Fixing Struct Size After Last Property [ Dumper-7 ])
+		} Params{  };
+
+		Params.Definition = Definition;
+		Params.BackendName = BackendName;
     
 		this->ProcessEvent(Func, &Params);
 

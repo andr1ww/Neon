@@ -24,6 +24,13 @@ public:
     DEFINE_PTR(UFortItemDefinition, FItemAndCount, Item);
 };
 
+class AGameSession : public UObject
+{
+public:
+    DECLARE_STATIC_CLASS(AGameSession)
+    DECLARE_DEFAULT_OBJECT(AGameSession)
+};
+
 class AGameModeBase : public UObject
 {
 public:

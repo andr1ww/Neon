@@ -45,9 +45,21 @@ public:
     DEFINE_PTR(UAthenaPickaxeItemDefinition, FFortAthenaLoadout, Pickaxe);
 };
 
+struct FFortUpdatedObjectiveStat final
+{
+public:
+    class UFortQuestItemDefinition*               Quest;                                             // 0x0000(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    class FName                                   BackendName;                                       // 0x0008(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    int32                                         StatValue;                                         // 0x0010(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    int32                                         ShadowStatValue;                                   // 0x0014(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    int32                                         StatDelta;                                         // 0x0018(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    int32                                         CurrentStage;                                      // 0x001C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
+
 class AFortPlayerController : public APlayerController
 {
 public:
+    DEFINE_MEMBER(TArray<struct FFortUpdatedObjectiveStat> , AFortPlayerController, UpdatedObjectiveStats);
     DEFINE_PTR(AFortInventory, AFortPlayerController, WorldInventory);
     DEFINE_MEMBER(FFortAthenaLoadout, AFortPlayerController, CosmeticLoadoutPC);
     DEFINE_PTR(AFortPlayerPawn, AFortPlayerController, MyFortPawn);

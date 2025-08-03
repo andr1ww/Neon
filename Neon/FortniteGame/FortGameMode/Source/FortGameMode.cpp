@@ -50,6 +50,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             GameState->OnRep_CurrentPlaylistId();
             GameState->OnRep_CurrentPlaylistInfo();
             GameState->CallFunc<void>("FortGameStateAthena","OnRep_AdditionalPlaylistLevelsStreamed");
+            GameMode->Get<AGameSession*>("GameModeBase", "GameSession")->Set("GameSession", "MaxPlayers", Playlist->Get<int32>("FortPlaylist", "MaxPlayers"));
             
             GameMode->SetWarmupRequiredPlayerCount(1);
 
