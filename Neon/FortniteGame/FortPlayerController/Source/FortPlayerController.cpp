@@ -406,48 +406,35 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	if (!KillerPlayerState && VictimPawn)
 		KillerPlayerState = ((AFortPlayerControllerAthena*)VictimPawn->GetController())->GetPlayerState();
 
-	static FDeathInfo* DeathInfo = nullptr;
-	static FAthenaRewardResult* RewardResult = nullptr;
-	static FAthenaMatchStats* MatchStats = nullptr;
-	static FAthenaMatchTeamStats* TeamStats = nullptr;
-	
-	if (!DeathInfo) {
-		static const int32 FDeathInfoSize = StaticClassImpl("DeathInfo")->GetSize();
-		static const int32 FAthenaRewardResultSize = StaticClassImpl("AthenaRewardResult")->GetSize();
-		static const int32 FAthenaMatchStatsSize = StaticClassImpl("AthenaMatchStats")->GetSize();
-		static const int32 FAthenaMatchTeamStatsSize = StaticClassImpl("AthenaMatchTeamStats")->GetSize();
-		
-		DeathInfo = (FDeathInfo*)malloc(FDeathInfoSize);
-		RewardResult = (FAthenaRewardResult*)malloc(FAthenaRewardResultSize);
-		MatchStats = (FAthenaMatchStats*)malloc(FAthenaMatchStatsSize);
-		TeamStats = (FAthenaMatchTeamStats*)malloc(FAthenaMatchTeamStatsSize);
-
-		memset(DeathInfo, 0, sizeof(FDeathInfo));
-		memset(RewardResult, 0, sizeof(FAthenaRewardResult));
-		memset(MatchStats, 0, sizeof(FAthenaMatchStats));
-		memset(TeamStats, 0, sizeof(FAthenaMatchTeamStats));
-	}
+	FDeathInfo* DeathInfo = &PlayerState->GetDeathInfo(); 
+	auto MatchReport = PlayerController->GetMatchReport();
+	FAthenaRewardResult* RewardResult = MatchReport ? &MatchReport->GetEndOfMatchResults() : nullptr;
+	FAthenaMatchStats* MatchStats = MatchReport ? &MatchReport->GetMatchStats() : nullptr;
+	FAthenaMatchTeamStats* TeamStats = MatchReport ? &MatchReport->GetTeamStats() : nullptr;
 	
 	auto DeathTags = DeathReport.GetTags();
 	EDeathCause DeathCause = PlayerState->CallFunc<EDeathCause>("FortPlayerStateAthena", "ToDeathCause", DeathTags, false);
 
 	PlayerState->Set("FortPlayerState", "PawnDeathLocation", DeathLocation);
-	DeathInfo->SetbDBNO(false);
-	DeathInfo->SetDeathLocation(DeathLocation);
-	DeathInfo->SetDeathTags(DeathTags);
-	DeathInfo->SetDeathCause(DeathCause);
-	DeathInfo->SetDowner((AActor*)KillerPlayerState);
-	DeathInfo->SetFinisherOrDowner((AActor*)KillerPlayerState);
+	
+	if (DeathInfo) {
+		DeathInfo->SetbDBNO(false);
+		DeathInfo->SetDeathLocation(DeathLocation);
+		DeathInfo->SetDeathTags(DeathTags);
+		DeathInfo->SetDeathCause(DeathCause);
+		DeathInfo->SetDowner((AActor*)KillerPlayerState);
+		DeathInfo->SetFinisherOrDowner((AActor*)KillerPlayerState);
 
-	if (VictimPawn) {
-		DeathInfo->GetDistance() = (DeathCause != EDeathCause::FallDamage) 
-			? (KillerPawn && KillerPawn->GetClass()->GetFunction("GetDistanceTo") ? KillerPawn->CallFunc<float>("Actor", "GetDistanceTo", VictimPawn) : 0.0f)
-			: VictimPawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
+		if (VictimPawn) {
+			DeathInfo->GetDistance() = (DeathCause != EDeathCause::FallDamage) 
+				? (KillerPawn && KillerPawn->GetClass()->GetFunction("GetDistanceTo") ? KillerPawn->CallFunc<float>("Actor", "GetDistanceTo", VictimPawn) : 0.0f)
+				: VictimPawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
+		}
+
+		DeathInfo->SetbInitialized(true);
+		PlayerState->SetDeathInfo(*DeathInfo);
+		PlayerState->OnRep_DeathInfo();
 	}
-
-	DeathInfo->SetbInitialized(true);
-	PlayerState->SetDeathInfo(*DeathInfo);
-	PlayerState->OnRep_DeathInfo();
    
 	auto WorldInventory = PlayerController->GetWorldInventory();
 	if (WorldInventory && VictimPawn) {
@@ -517,9 +504,9 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
    	
 		KillerPlayerState->ClientReportKill(KillerPlayerState);
 		if (auto CPlayerController = (AFortPlayerControllerAthena*)KillerPawn->GetController()) {
-			if (CPlayerController->GetMyFortPawn()) {
+			if (CPlayerController->GetMyFortPawn() && MatchStats) {
 				MatchStats->Stats[3] = KillerScore;
-				CPlayerController->GetMatchReport()->SetMatchStats(*MatchStats);
+				MatchReport->SetMatchStats(*MatchStats);
 			}
 		}
 	}
@@ -547,34 +534,31 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		((void (*)(AFortGameModeAthena*, AFortPlayerController*, AFortPlayerStateAthena*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char, bool))(Finder->RemoveFromAlivePlayers()))
 		  (GameMode, PlayerController, KillerPlayerState, KillerPawn, ItemDef, DeathCause, 0, false);
 
-		auto MatchReport = PlayerController->GetMatchReport();
-		if (MatchReport) {
-			*RewardResult = MatchReport->GetEndOfMatchResults();
+		if (MatchReport && RewardResult) {
 			int32 TotalXP = PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "TotalXpEarned");
 			RewardResult->SetTotalBookXpGained(TotalXP);
 			RewardResult->SetTotalSeasonXpGained(TotalXP);
 			MatchReport->SetEndOfMatchResults(*RewardResult);
-			PlayerController->ClientSendEndBattleRoyaleMatchForPlayer(true, MatchReport->GetEndOfMatchResults());
+			PlayerController->ClientSendEndBattleRoyaleMatchForPlayer(true, *RewardResult);
 
 			int32 AliveCount = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num();
 			int32 PlayerPlace = AliveCount + 1;
 			PlayerState->SetPlace(PlayerPlace);
 			PlayerState->OnRep_Place();
 
-			*MatchStats = MatchReport->GetMatchStats();
-			*TeamStats = MatchReport->GetTeamStats();
-
-			if (PlayerState->GetKillScore() && PlayerState->GetSquadId()) {
+			if (PlayerState->GetKillScore() && PlayerState->GetSquadId() && MatchStats) {
 				MatchStats->Stats[3] = PlayerState->GetKillScore();
 				MatchStats->Stats[8] = PlayerState->GetSquadId();
 				MatchReport->SetMatchStats(*MatchStats);
 				PlayerController->ClientSendMatchStatsForPlayer(*MatchStats);
 			}
 
-			TeamStats->SetPlace(PlayerPlace);
-			TeamStats->SetTotalPlayers(PlayerPlace);
-			MatchReport->SetTeamStats(*TeamStats);
-			PlayerController->ClientSendTeamStatsForPlayer(*TeamStats);
+			if (TeamStats) {
+				TeamStats->SetPlace(PlayerPlace);
+				TeamStats->SetTotalPlayers(PlayerPlace);
+				MatchReport->SetTeamStats(*TeamStats);
+				PlayerController->ClientSendTeamStatsForPlayer(*TeamStats);
+			}
 		}
    	
 		AFortPlayerControllerAthena* LastAliveController = nullptr;
@@ -597,26 +581,27 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 				WinnerPlayerState->OnRep_Place();
 				
 				auto WinnerMatchReport = LastAliveController->GetMatchReport();
-				if (WinnerMatchReport) {
+				if (WinnerMatchReport && RewardResult) {
 					int32 WinnerXP = LastAliveController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "TotalXpEarned");
-					RewardResult->SetTotalBookXpGained(WinnerXP);
-					RewardResult->SetTotalSeasonXpGained(WinnerXP);
-					WinnerMatchReport->SetEndOfMatchResults(*RewardResult);
-					LastAliveController->ClientSendEndBattleRoyaleMatchForPlayer(true, WinnerMatchReport->GetEndOfMatchResults());
+					auto WinnerRewardResult = &WinnerMatchReport->GetEndOfMatchResults();
+					WinnerRewardResult->SetTotalBookXpGained(WinnerXP);
+					WinnerRewardResult->SetTotalSeasonXpGained(WinnerXP);
+					WinnerMatchReport->SetEndOfMatchResults(*WinnerRewardResult);
+					LastAliveController->ClientSendEndBattleRoyaleMatchForPlayer(true, *WinnerRewardResult);
 
-					*MatchStats = WinnerMatchReport->GetMatchStats();
-					*TeamStats = WinnerMatchReport->GetTeamStats();
+					auto WinnerMatchStats = &WinnerMatchReport->GetMatchStats();
+					auto WinnerTeamStats = &WinnerMatchReport->GetTeamStats();
 
-					MatchStats->Stats[3] = WinnerPlayerState->GetKillScore();
-					MatchStats->Stats[8] = WinnerPlayerState->GetSquadId();
-					WinnerMatchReport->SetMatchStats(*MatchStats);
-					LastAliveController->ClientSendMatchStatsForPlayer(*MatchStats);
+					WinnerMatchStats->Stats[3] = WinnerPlayerState->GetKillScore();
+					WinnerMatchStats->Stats[8] = WinnerPlayerState->GetSquadId();
+					WinnerMatchReport->SetMatchStats(*WinnerMatchStats);
+					LastAliveController->ClientSendMatchStatsForPlayer(*WinnerMatchStats);
 
 					int32 TotalPlayers = TotalAlive + 1;
-					TeamStats->SetPlace(1);
-					TeamStats->SetTotalPlayers(TotalPlayers);
-					WinnerMatchReport->SetTeamStats(*TeamStats);
-					LastAliveController->ClientSendTeamStatsForPlayer(*TeamStats);
+					WinnerTeamStats->SetPlace(1);
+					WinnerTeamStats->SetTotalPlayers(TotalPlayers);
+					WinnerMatchReport->SetTeamStats(*WinnerTeamStats);
+					LastAliveController->ClientSendTeamStatsForPlayer(*WinnerTeamStats);
 				}
 
 				uint8 WinningTeamIndex = WinnerPlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex");

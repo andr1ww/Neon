@@ -74,7 +74,7 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
         
 			if (!Item) {
 				UE_LOG(LogNeon, Fatal, "StartingItem is null in SpawnDefaultPawnFor!");
-				continue;
+				break;
 			}
     
 	//		AFortInventory::GiveItem(PC, Item->GetItem(), Item->GetCount(), 1, 1);
