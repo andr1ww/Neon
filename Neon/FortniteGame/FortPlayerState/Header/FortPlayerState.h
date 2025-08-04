@@ -22,6 +22,9 @@ enum class EFortCustomPartType : uint8
 class UCustomCharacterPart : public UObject
 {
 public:
+	DECLARE_STATIC_CLASS(UCustomCharacterPart)
+	DECLARE_DEFAULT_OBJECT(UCustomCharacterPart)
+public:
     DEFINE_MEMBER(EFortCustomPartType, UCustomCharacterPart, CharacterPartType)
 };
 

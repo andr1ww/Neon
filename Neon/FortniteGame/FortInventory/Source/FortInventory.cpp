@@ -7,15 +7,10 @@
 void AFortInventory::HandleInventoryLocalUpdate()
 {
     static SDK::UFunction* Func = nullptr;
-
-    Func = SDK::PropLibrary->GetFunctionByName("FortInventory", "HandleInventoryLocalUpdate").Func;
-
-    auto Flgs = Func->FunctionFlags();
-    Func->FunctionFlags() |= 0x400;
+    if (!Func) Func = SDK::PropLibrary->GetFunctionByName("FortInventory", "HandleInventoryLocalUpdate").Func;
+    if (!Func) return;
     
     this->ProcessEvent(Func, nullptr);
-
-    Func->FunctionFlags() = Flgs;
 }
 
 void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry* Entry)

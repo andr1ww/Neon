@@ -94,26 +94,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                     else if (Tag == "Athena.Faction.Ego") {
                         BotData->GetCharacterCustomization()->GetCustomizationLoadout().SetCharacter(Runtime::StaticLoadObject<UAthenaCharacterItemDefinition>("/Game/Athena/Items/Cosmetics/Characters/CID_NPC_Athena_Commando_M_HenchmanGood.CID_NPC_Athena_Commando_M_HenchmanGood"));
                     }
-                } else
-                {
-                    if (!Controller->GetInventory()) {
-                        Controller->SetInventory(UGameplayStatics::SpawnActor<AFortInventory>({}, {}, Ret));
-                    }
-
-                    auto& StartingItemsArray = BotManager->GetCachedGameMode()->GetStartingItems();
-                    int32 FItemAndCountSize = StaticClassImpl("ItemAndCount")->GetSize();
-                    for (int i = 0; i < StartingItemsArray.Num(); i++)
-                    {
-                        auto Item = (FItemAndCount*) ((uint8*) StartingItemsArray.GetData() + (i * FItemAndCountSize));
-        
-                        if (!Item) {
-                            UE_LOG(LogNeon, Fatal, "StartingItem is null in SpawnDefaultPawnFor!");
-                            return Ret;
-                        }
-    
-                        AFortInventory::GiveItem(Controller, Item->GetItem(), Item->GetCount(), 1, 1);
-                    }
-                }
+                } 
 
                 Controller->Set("FortAthenaAIBotController", "CosmeticLoadoutBC", BotData->GetCharacterCustomization()->GetCustomizationLoadout());
                 if (BotData->GetCharacterCustomization()->GetCustomizationLoadout().GetCharacter()->GetHeroDefinition())

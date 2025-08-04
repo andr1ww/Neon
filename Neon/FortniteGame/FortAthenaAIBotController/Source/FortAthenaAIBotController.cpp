@@ -4,6 +4,7 @@
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
+#include "FortniteGame/FortLoot/Header/FortLootPackage.h"
 
 void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 	static std::vector<UAthenaCharacterItemDefinition*> Characters = std::vector<UAthenaCharacterItemDefinition*>();
@@ -40,34 +41,59 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		if (Characters.size() != 0)
 		{
 			UAthenaCharacterItemDefinition* CID = Characters[rand() % (Characters.size() - 1)];
-			/*	if (CID) {
-			UFortHeroSpecialization* Spec = Runtime::StaticLoadObject<UFortHeroSpecialization>(UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary", "Conv_NameToString", CID->GetHeroDefinition()->GetSpecializations()[i].SoftObjectPtr.ObjectID.AssetPathName).ToString());
-				if (Spec)
+			if (CID && FortLootPackage::IsValidPointer(CID)) {
+				if (!FortLootPackage::IsValidPointer(CID->GetHeroDefinition())) continue;
+				TArray<TSoftObjectPtr<UFortHeroSpecialization>> Specializations = CID->GetHeroDefinition()->GetSpecializations();
+				if (Specializations.Num() == 0) continue;
+				for (TSoftObjectPtr<UFortHeroSpecialization> Spec : Specializations)
 				{
-					for (int32 i = 0; i < Spec->GetCharacterParts().Num(); i++)
+					if (Spec.IsValid())
 					{
-						UCustomCharacterPart* Part = Runtime::StaticLoadObject<UCustomCharacterPart>(UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary", "Conv_NameToString", Spec->GetCharacterParts()[i].SoftObjectPtr.ObjectID.AssetPathName).ToString());
-						if (Part) {
-							Pawn->CallFunc<void>("FortPlayerPawn", "ServerChoosePart", Part->GetCharacterPartType(), Part);
+						auto SpecDef = Spec.Get(UFortHeroSpecialization::StaticClass(), true);
+						for (int32 j = 0; j < SpecDef->GetCharacterParts().Num(); j++)
+						{
+							UCustomCharacterPart* Part = SpecDef->GetCharacterParts()[j].Get(UCustomCharacterPart::StaticClass(), true); 
+							if (Part) {
+								Pawn->CallFunc<void>("FortPlayerPawn", "ServerChoosePart", Part->GetCharacterPartType(), Part);
+							}
 						}
 					}
 				}
-			} */
+			}
 		}
 
 		if (!PC->GetInventory()) {
-			PC->SetInventory(UGameplayStatics::SpawnActor<AFortInventory>({}, {}, Pawn));
+			PC->SetInventory(UGameplayStatics::SpawnActorOG<AFortInventory>(AFortInventory::StaticClass(), {}, {}, PC));
+		}
+
+		auto& StartingItemsArray = GameMode->GetStartingItems();
+		int32 FItemAndCountSize = StaticClassImpl("ItemAndCount")->GetSize();
+		for (int i = 0; i < StartingItemsArray.Num(); i++)
+		{
+			auto Item = (FItemAndCount*) ((uint8*) StartingItemsArray.GetData() + (i * FItemAndCountSize));
+        
+			if (!Item) {
+				UE_LOG(LogNeon, Fatal, "StartingItem is null in SpawnDefaultPawnFor!");
+				continue;
+			}
+    
+	//		AFortInventory::GiveItem(PC, Item->GetItem(), Item->GetCount(), 1, 1);
 		}
 
 		static UFortWeaponMeleeItemDefinition* PickDef = Runtime::StaticLoadObject<UFortWeaponMeleeItemDefinition>("/Game/Athena/Items/Weapons/WID_Harvest_Pickaxe_Athena_C_T01.WID_Harvest_Pickaxe_Athena_C_T01");
 		if (Pickaxes.size() != 0) {
-	//		PickDef = (UFortWeaponMeleeItemDefinition*)Pickaxes[rand() % (Pickaxes.Num() - 1)];
-		}
-		if (PickDef) {
-			UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(PC, PickDef, 1, 1, 0);
-			if (Item) {
-				Pawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry().GetItemGuid());
+			auto Pickaxe = (UFortWeaponMeleeItemDefinition*)Pickaxes[rand() % (Pickaxes.size() - 1)];
+			if (FortLootPackage::IsValidPointer(Pickaxe))
+			{
+				PickDef = Pickaxe;
 			}
+		}
+		
+		if (PickDef) {
+	//		UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(PC, PickDef, 1, 1, 0);
+	//		if (Item) {
+	//			Pawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry().GetItemGuid());
+	//		}
 		}
 	}
 }
