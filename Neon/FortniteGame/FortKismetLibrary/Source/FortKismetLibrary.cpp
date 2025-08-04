@@ -12,8 +12,10 @@ UFortResourceItemDefinition* UFortKismetLibrary::K2_GetResourceItemDefinition(co
         return nullptr;
 
     struct { EFortResourceType type; UFortResourceItemDefinition* ret; } Params{ResourceType};
-
-    SDK::StaticClassImpl("FortKismetLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &Params);
+    static UObject* Object = nullptr;
+    if (!Object) Object = SDK::StaticClassImpl("FortKismetLibrary")->GetClassDefaultObject();
+    
+    Object->ProcessEvent(Func, &Params);
 
     return Params.ret;
 }
