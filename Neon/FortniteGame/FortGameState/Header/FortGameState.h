@@ -45,6 +45,32 @@ class AFortGameState : public UObject
 public:
     DEFINE_MEMBER(int32, AFortGameState, WorldLevel);
     DEFINE_MEMBER(TArray<struct FAdditionalLevelStreamed>, AFortGameState, AdditionalPlaylistLevelsStreamed);
+public:
+    void OnRep_AdditionalPlaylistLevelsStreamed()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortGameState", "OnRep_AdditionalPlaylistLevelsStreamed");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+		
+        this->ProcessEvent(Func, nullptr);
+    }
+
+    void OnFinishedStreamingAdditionalPlaylistLevel()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortGameState", "OnFinishedStreamingAdditionalPlaylistLevel");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+		
+        this->ProcessEvent(Func, nullptr);
+    }
 };
 
 struct FGameMemberInfoArray final : public FFastArraySerializer
@@ -97,6 +123,9 @@ public:
     DEFINE_MEMBER(FGameMemberInfoArray, AFortGameStateAthena, GameMemberInfoArray);
 
     DEFINE_MEMBER(EAthenaGamePhase, AFortGameStateAthena, GamePhase);
+
+    DEFINE_MEMBER(float, AFortGameStateAthena, WarmupCountdownStartTime);
+    DEFINE_MEMBER(float, AFortGameStateAthena, WarmupCountdownEndTime);
 public:
     DECLARE_STATIC_CLASS(AFortGameStateAthena);
     DECLARE_DEFAULT_OBJECT(AFortGameStateAthena)

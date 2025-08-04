@@ -283,6 +283,8 @@ class UNetDriver : public UObject
 {
 public:
     DEFINE_MEMBER(FName, UNetDriver, NetDriverName);
+    DEFINE_PTR(UWorld, UNetDriver, World);
+    
     DEFINE_PTR(UReplicationDriver, UNetDriver, ReplicationDriver);
     DEFINE_MEMBER(TArray<UNetConnection*>, UNetDriver, ClientConnections);
 public:
