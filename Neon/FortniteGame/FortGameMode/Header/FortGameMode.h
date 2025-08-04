@@ -55,6 +55,32 @@ public:
         
         this->ProcessEvent(Func, &RestartPlayerParams);
     }
+
+    APawn* SpawnDefaultPawnAtTransform(class AController* NewPlayer, const struct FTransform& SpawnTransform)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("GameModeBase", "SpawnDefaultPawnAtTransform");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return nullptr;
+
+        struct GameModeBase_SpawnDefaultPawnAtTransform final
+        {
+        public:
+            class AController* NewPlayer;
+            struct FTransform SpawnTransform;
+            class APawn* ReturnValue;                                       
+        };
+        GameModeBase_SpawnDefaultPawnAtTransform Params{};
+        Params.NewPlayer = NewPlayer;
+        Params.SpawnTransform = std::move(SpawnTransform);
+        
+        this->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
 public:
     DECLARE_STATIC_CLASS(AGameModeBase)
     DECLARE_DEFAULT_OBJECT(AGameModeBase)

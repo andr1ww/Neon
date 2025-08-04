@@ -246,9 +246,15 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         UE_LOG(LogNeon, Warning, "Early return!");
 		return 0;
     }
-    
-    auto Pawn = GameMode->CallFunc<APawn*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer,  StartSpot->CallFunc<FTransform>("Actor", "GetTransform"));;
 
+    auto Pawn = GameMode->CallFunc<APawn*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer,  StartSpot->GetTransform());
+    //APawn* Pawn = GameMode->SpawnDefaultPawnAtTransform(NewPlayer,  StartSpot->GetTransform()); yk why this doesent work???
+    if (!Pawn)
+    {
+        UE_LOG(LogNeon, Warning, "SpawnDefaultPawnFor: Cannot Spawn Pawn!");
+        return 0;
+    }
+    
     auto& StartingItemsArray = GameMode->GetStartingItems();
     int32 FItemAndCountSize = StaticClassImpl("ItemAndCount")->GetSize();
     for (int i = 0; i < StartingItemsArray.Num(); i++)

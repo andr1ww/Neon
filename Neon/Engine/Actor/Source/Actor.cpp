@@ -56,4 +56,26 @@ FVector AActor::K2_GetActorLocation()
 	return Params.ReturnValue;
 }
 
+FTransform AActor::GetTransform()
+{
+    static SDK::UFunction* Func = nullptr;
+    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Actor", "GetTransform");
+
+    if (Func == nullptr)
+        Func = Info.Func;
+    if (!Func)
+        return FTransform();
+
+    struct Actor_GetTransform final
+    {
+    public:
+        FTransform ReturnValue;
+    };
+    Actor_GetTransform Params;
+
+    this->ProcessEvent(Func, &Params);
+
+    return Params.ReturnValue;
+}
+
 
