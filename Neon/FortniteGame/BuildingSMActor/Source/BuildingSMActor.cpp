@@ -55,14 +55,17 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     const float MaxStackSize = ResourceDefinition->GetMaxStackSize().Value;
     int ResourceAmount = 0;
 
-    UCurveTable* ResourceCurveTable = nullptr;
+    static UCurveTable* ResourceCurveTable = nullptr;
     
     if (BuildingActor->GetBuildingResourceAmountOverride().RowName.GetComparisonIndex() > 0) {
-        if (BuildingActor->GetBuildingResourceAmountOverride().CurveTable) {
-            ResourceCurveTable = BuildingActor->GetBuildingResourceAmountOverride().CurveTable;
-        } else {
-            ResourceCurveTable = Runtime::StaticFindObject<UCurveTable>(
-                "/Game/Athena/Balance/DataTables/AthenaResourceRates.AthenaResourceRates");
+        if (!ResourceCurveTable)
+        {
+            if (BuildingActor->GetBuildingResourceAmountOverride().CurveTable) {
+                ResourceCurveTable = BuildingActor->GetBuildingResourceAmountOverride().CurveTable;
+            } else {
+                ResourceCurveTable = Runtime::StaticFindObject<UCurveTable>(
+                    "/Game/Athena/Balance/DataTables/AthenaResourceRates.AthenaResourceRates");
+            }
         }
         
         float Out = UDataTableFunctionLibrary::EvaluateCurveTableRow(
