@@ -185,25 +185,13 @@ public:
 
 class AFortAIDirector : public AActor
 {
-public:
-    float Activate() {
-        static class UFunction* Func = nullptr;
-        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortAIDirector", "Activate");
-
-        if (Func == nullptr)
-            Func = Info.Func;
-        if (!Func)
-            return 0.f;
-
-        this->ProcessEvent(Func, nullptr);
-    }
+    
 };
 
 class AFortAthenaMutator : public AActor
 {
 public:
-    DEFINE_PTR(AFortGameModeAthena, AFortAthenaMutator, CachedGameMode);
-    DEFINE_PTR(AFortGameStateAthena, AFortAthenaMutator, CachedGameState);
+
 };
 
 class AFortAthenaMutator_SpawningPolicyBase : public AFortAthenaMutator

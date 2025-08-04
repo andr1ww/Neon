@@ -27,8 +27,6 @@ public:
 class AGameSession : public UObject
 {
 public:
-    DEFINE_MEMBER(int32, AGameSession, MaxPlayers);
-public:
     DECLARE_STATIC_CLASS(AGameSession)
     DECLARE_DEFAULT_OBJECT(AGameSession)
 };
@@ -36,9 +34,6 @@ public:
 class AGameModeBase : public UObject
 {
 public:
-    DEFINE_MEMBER(TSubclassOf<class APawn>, AGameModeBase, DefaultPawnClass);
-    
-    DEFINE_PTR(AGameSession, AGameModeBase, GameSession);
     DEFINE_PTR(AFortGameStateAthena, AGameModeBase, GameState);
 public:
     void RestartPlayer(AController* Controller)
@@ -192,53 +187,6 @@ public:
     DEFINE_MEMBER(bool, ABuildingFoundation, bServerStreamedInLevel);
     DEFINE_MEMBER(FDynamicBuildingFoundationRepData, ABuildingFoundation, DynamicFoundationRepData);
     DEFINE_MEMBER(EDynamicFoundationEnabledState, ABuildingFoundation, FoundationEnabledState);
-public:
-    void OnRep_ServerStreamedInLevel()
-    {
-        static SDK::UFunction* Func = nullptr;
-        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BuildingFoundation", "OnRep_ServerStreamedInLevel");
-
-        if (Func == nullptr)
-            Func = Info.Func;
-        if (!Func)
-            return;
-		
-        this->ProcessEvent(Func, nullptr);
-    }
-
-    void OnRep_DynamicFoundationRepData()
-    {
-        static SDK::UFunction* Func = nullptr;
-        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BuildingFoundation", "OnRep_DynamicFoundationRepData");
-
-        if (Func == nullptr)
-            Func = Info.Func;
-        if (!Func)
-            return;
-		
-        this->ProcessEvent(Func, nullptr);
-    }
-
-    void SetDynamicFoundationEnabled(bool bEnabled)
-    {
-        static SDK::UFunction* Func = nullptr;
-        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BuildingFoundation", "SetDynamicFoundationEnabled");
-
-        if (Func == nullptr)
-            Func = Info.Func;
-        if (!Func)
-            return;
-
-        struct BuildingFoundation_SetDynamicFoundationEnabled final
-        {
-        public:
-            bool bEnabled;
-        };
-        BuildingFoundation_SetDynamicFoundationEnabled Params;
-        Params.bEnabled = bEnabled;
-		
-        this->ProcessEvent(Func, &Params);
-    }
 };
 
 class AFortGameModeAthena : public AFortGameMode
@@ -261,9 +209,6 @@ public:
 
     DEFINE_MEMBER(TSubclassOf<class UFortServerBotManagerAthena>, AFortGameModeAthena, ServerBotManagerClass);
     DEFINE_PTR(UFortServerBotManagerAthena, AFortGameModeAthena, ServerBotManager);
-
-    DEFINE_MEMBER(float, AFortGameStateAthena, WarmupCountdownDuration);
-    DEFINE_MEMBER(float, AFortGameStateAthena, WarmupEarlyCountdownDuration);
 public:
     DECLARE_DEFAULT_OBJECT(AFortGameModeAthena);
     DECLARE_STATIC_CLASS(AFortGameModeAthena);
