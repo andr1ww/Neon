@@ -133,8 +133,10 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
 
                 AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
                 GameMode->SetAIDirector(AIDirector);
-                //GameMode->GetAIDirector()->Activate();
-                AIDirector->CallFunc<void>("FortAIDirector", "Activate");
+                if (GameMode->GetAIDirector())
+                {
+                    GameMode->GetAIDirector()->CallFunc<void>("FortAIDirector", "Activate");
+                }
 
                 AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
                 GameMode->SetAIGoalManager(AIGoalManager);
