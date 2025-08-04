@@ -82,6 +82,32 @@ public:
 
         return Params.ReturnValue;
     }
+
+    void InitializeKismetSpawnedBuildingActor(class ABuildingActor* BuildingOwner, class AFortPlayerController* SpawningController, bool bUsePlayerBuildAnimations)
+    {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BuildingActor", "InitializeKismetSpawnedBuildingActor");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct BuildingActor_InitializeKismetSpawnedBuildingActor final
+        {
+        public:
+            class ABuildingActor*                         BuildingOwner;                                     // 0x0000(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            class AFortPlayerController*                  SpawningController;                                // 0x0008(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            bool                                          bUsePlayerBuildAnimations;                         // 0x0010(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            uint8                                         Pad_11[0x7];                                       // 0x0011(0x0007)(Fixing Struct Size After Last Property [ Dumper-7 ])
+        } Params {};
+
+        Params.BuildingOwner = BuildingOwner;
+        Params.SpawningController = SpawningController;
+        Params.bUsePlayerBuildAnimations = bUsePlayerBuildAnimations;
+
+        this->ProcessEvent(Func, &Params);
+    }
 public:
     DEFINE_MEMBER(bool, ABuildingActor, bPlayerPlaced);
 };
