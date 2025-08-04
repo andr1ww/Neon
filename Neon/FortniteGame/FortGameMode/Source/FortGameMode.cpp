@@ -223,6 +223,15 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
 
             static void (*Build)(UNavigationSystemV1* System) = decltype(Build)(IMAGEBASE + 0x48C50C0);
             Build(UWorld::GetWorld()->GetNavigationSystem());
+
+            // base time set cause of UNetDriver::TickFlush 
+            auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
+            auto WarmupDuration = 9000.f;
+
+            GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
+            GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
+            GameMode->Set("FortGameModeAthena", "WarmupCountdownDuration", WarmupDuration);
+            GameMode->Set("FortGameModeAthena", "WarmupEarlyCountdownDuration", WarmupDuration);
         }
     }
 
