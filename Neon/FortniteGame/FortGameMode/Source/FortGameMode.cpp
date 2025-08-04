@@ -126,8 +126,8 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 
                 auto BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
                 GameMode->GetServerBotManager()->SetCachedBotMutator(BotMutator);
-                BotMutator->SetCachedGameMode(GameMode);
-                BotMutator->SetCachedGameState(GameState);
+                BotMutator->Set("FortAthenaMutator", "CachedGameMode", GameMode);
+                BotMutator->Set("FortAthenaMutator", "CachedGameState", GameState);
                 FBotMutator::Set(BotMutator);
                 GameMode->SetServerBotManagerClass(UFortServerBotManagerAthena::StaticClass());
                 
