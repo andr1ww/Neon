@@ -1,5 +1,6 @@
 #pragma once
 #include "pch.h"
+#include "Engine/Text/Header/Text.h"
 
 class UKismetMathLibrary final : public UObject {
 private:
@@ -61,6 +62,28 @@ public:
         public:
             class FName                                   InName;                                            // 0x0000(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
             class FString                                 ReturnValue;                                       // 0x0008(0x0010)(Parm, OutParm, ZeroConstructor, ReturnParm, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        } KismetStringLibrary_Conv_NameToString_Params{ InName };
+    
+        SDK::StaticClassImpl("KismetStringLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &KismetStringLibrary_Conv_NameToString_Params);
+    
+        return KismetStringLibrary_Conv_NameToString_Params.ReturnValue;
+    }
+
+    static FText Conv_StringToText(FString InName)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetStringLibrary", "Conv_StringToText");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return FText();
+
+        struct KismetStringLibrary_Conv_StringToText final
+        {
+        public:
+            class FString                                   inString;                                            // 0x0000(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            class FText                                 ReturnValue;                                       // 0x0008(0x0010)(Parm, OutParm, ZeroConstructor, ReturnParm, HasGetValueTypeHash, NativeAccessSpecifierPublic)
         } KismetStringLibrary_Conv_NameToString_Params{ InName };
     
         SDK::StaticClassImpl("KismetStringLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &KismetStringLibrary_Conv_NameToString_Params);

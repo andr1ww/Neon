@@ -157,6 +157,7 @@
     <ClInclude Include="Engine\PlayerController\Header\PlayerController.h" />
     <ClInclude Include="Engine\Quat\Header\Quat.h" />
     <ClInclude Include="Engine\Rotator\Header\Rotator.h" />
+    <ClInclude Include="Engine\Text\Header\Text.h" />
     <ClInclude Include="Engine\Transform\Header\Transform.h" />
     <ClInclude Include="Engine\UEngine\Header\UEngine.h" />
     <ClInclude Include="Engine\Vector\Header\Vector.h" />

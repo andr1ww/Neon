@@ -180,7 +180,7 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 			QuestEntry->SetQuestDef(QuestDefinition);
 			QuestEntry->SetTime(UGameplayStatics::GetTimeSeconds(UWorld::GetWorld()));
 			QuestEntry->SetTotalXpEarnedInMatch(PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "TotalXpEarned") + XPPlayerControllerCount);
-		//	QuestEntry.SetSimulatedXpEvent(UKismetStringLibrary::GetDefaultObj()->CallFunc<FText>("KismetTextLibrary", "Conv_StringToText", FString(L"Objective completed")));
+			QuestEntry->SetSimulatedText(UKismetStringLibrary::Conv_StringToText(FString(L"Objective completed")));
 			
 			int32 CurrentChallengeXp = PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "ChallengeXp");
 			int32 CurrentTotalXp = PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "TotalXpEarned");
@@ -201,7 +201,7 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 			
 			PlayerController->GetXPComponent()->CallFunc<void>("FortPlayerControllerAthenaXPComponent", "OnInMatchProfileUpdate", CurrentProfileVer + 1);
 			PlayerController->GetXPComponent()->CallFunc<void>("FortPlayerControllerAthenaXPComponent", "OnProfileUpdated");
-	//		PlayerController->GetXPComponent()->OnXPEvent(*QuestEntry);
+			PlayerController->GetXPComponent()->OnXPEvent(*QuestEntry);
 		}
 		
 	//	QuestManager->CallFunc<void>("FortQuestManager", "ClaimQuestReward", QuestItem);

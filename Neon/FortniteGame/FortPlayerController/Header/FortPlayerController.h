@@ -322,6 +322,7 @@ public:
 struct FXPEventEntry final : public FFastArraySerializerItem
 {
 public:
+    DEFINE_MEMBER(FText, FXPEventEntry, SimulatedText);
     DEFINE_PTR(class UFortQuestItemDefinition, FXPEventEntry, QuestDef);
     DEFINE_MEMBER(float, FXPEventEntry, Time);
     DEFINE_MEMBER(int32, FXPEventEntry, EventXpValue);
