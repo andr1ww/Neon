@@ -81,19 +81,20 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		}
 
 		static UFortWeaponMeleeItemDefinition* PickDef = Runtime::StaticLoadObject<UFortWeaponMeleeItemDefinition>("/Game/Athena/Items/Weapons/WID_Harvest_Pickaxe_Athena_C_T01.WID_Harvest_Pickaxe_Athena_C_T01");
-		if (Pickaxes.size() != 0) {
+		/*if (Pickaxes.size() != 0) {
 			auto Pickaxe = (UFortWeaponMeleeItemDefinition*)Pickaxes[rand() % (Pickaxes.size() - 1)];
 			if (FortLootPackage::IsValidPointer(Pickaxe))
 			{
 				PickDef = Pickaxe;
 			}
-		}
+		}*/
 		
 		if (PickDef) {
-	//		UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(PC, PickDef, 1, 1, 0);
-	//		if (Item) {
-	//			Pawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry().GetItemGuid());
-	//		}
+			UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(PC, PickDef, 1, 1, 0);
+			if (Item) {
+				Pawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry().GetItemGuid(), Item->GetItemEntry().GetTrackerGuid(), false);
+				//Pawn->CallFunc<void>("FortPawn", "EquipWeaponDefinition", Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry(), false);
+			}
 		}
 	}
 }
