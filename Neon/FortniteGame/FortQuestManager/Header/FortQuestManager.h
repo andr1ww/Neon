@@ -141,15 +141,6 @@ public:
 	uint8                                         Pad_201E[0x1];                                     // 0x0027(0x0001)(Fixing Struct Size After Last Property [ Dumper-7 ])
 };
 
-struct FXPEventEntry final : public FFastArraySerializerItem
-{
-public:
-	DEFINE_PTR(class UFortQuestItemDefinition, FXPEventEntry, QuestDef);
-	DEFINE_MEMBER(float, FXPEventEntry, Time);
-	DEFINE_MEMBER(int32, FXPEventEntry, EventXpValue);
-	DEFINE_MEMBER(int32, FXPEventEntry, TotalXpEarnedInMatch);
-};
-
 struct FFortMcpQuestObjectiveInfo final
 {
 	DEFINE_MEMBER(int32, FFortMcpQuestObjectiveInfo, Count);

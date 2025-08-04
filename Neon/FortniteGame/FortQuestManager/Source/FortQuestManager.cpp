@@ -54,6 +54,7 @@ void SendObjectiveStat(AFortPlayerControllerAthena* PlayerController, const FNam
 
 static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQuestManager* QuestManager, UFortQuestItem* QuestItem, UFortQuestItemDefinition* QuestDefinition, FFortMcpQuestObjectiveInfo* Obj, int32 PlayerControllerount)
 {
+	static std::unordered_map<AFortPlayerControllerAthena*, std::vector<FFortMcpQuestObjectiveInfo>> ObjCompArray;
 	auto Count = QuestManager->GetObjectiveCompletionCount(QuestDefinition, Obj->GetBackendName());
 	
 	Count++;
@@ -61,35 +62,49 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 	QuestDefinition->SetObjectiveCompletionCount(Count); 
 	
 	bool thisObjectiveCompleted = (Count >= Obj->GetCount());
-	
 	bool allObjsCompleted = false;
-	if (thisObjectiveCompleted)
+	if (thisObjectiveCompleted && QuestDefinition->GetObjectives().Num() == 1)
 	{
-		auto& Objectives = QuestDefinition->GetObjectives();
-		static int32 FFortMcpQuestObjectiveInfoSize = StaticClassImpl("FortMcpQuestObjectiveInfo")->GetSize();
-		
-		allObjsCompleted = true; 
-		
-		for (int i = 0; i < Objectives.Num(); i++)
+		allObjsCompleted = true;
+	}
+	
+	if (thisObjectiveCompleted && QuestDefinition->GetObjectives().Num() > 1)
+	{
+		bool alreadyExists = false;
+		for (auto& ObjComp : ObjCompArray[PlayerController])
 		{
-			FFortMcpQuestObjectiveInfo* CurrentObj = (FFortMcpQuestObjectiveInfo*)((uint8*)Objectives.GetData() + (i * FFortMcpQuestObjectiveInfoSize));
-			
-			int32 CurrentObjCount;
-			if (CurrentObj == Obj)
+			if (ObjComp.GetBackendName().GetComparisonIndex() == Obj->GetBackendName().GetComparisonIndex())
 			{
-				CurrentObjCount = Count;
-			}
-			else
-			{
-				CurrentObjCount = QuestManager->GetObjectiveCompletionCount(QuestDefinition, CurrentObj->GetBackendName());
-			}
-			
-			if (CurrentObjCount <= CurrentObj->GetCount())
-			{
-				allObjsCompleted = false;
-				break; 
+				alreadyExists = true;
+				break;
 			}
 		}
+		if (!alreadyExists)
+		{
+			ObjCompArray[PlayerController].push_back(*Obj);
+		}
+		
+		int32 totalObjectives = QuestDefinition->GetObjectives().Num();
+		
+		auto CompletionCount = 0;
+		for (auto& QuestObj : QuestDefinition->GetObjectives())
+		{
+			bool Found = false;
+			for (auto& ObjComp : ObjCompArray[PlayerController])
+			{
+				if (QuestObj.GetBackendName().ToString().ToString() == ObjComp.GetBackendName().ToString().ToString())
+				{
+					Found = true;
+					break;
+				}
+			}
+			if (Found)
+			{
+				CompletionCount++;
+			}
+		}
+		
+		allObjsCompleted = (CompletionCount == totalObjectives);
 	}
 	
 	auto PlayerState = PlayerController->GetPlayerState();
@@ -130,7 +145,8 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 	
 	if (allObjsCompleted) 
 	{
-		UE_LOG(LogNeon, Log, "All objectives completed! Quest finished.");
+		ObjCompArray[PlayerController].clear();
+		
 		int32 XPPlayerControllerCount = 0;
 		if (auto RewardsTable = QuestDefinition->GetRewardsTable())
 		{
@@ -185,10 +201,10 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 			
 			PlayerController->GetXPComponent()->CallFunc<void>("FortPlayerControllerAthenaXPComponent", "OnInMatchProfileUpdate", CurrentProfileVer + 1);
 			PlayerController->GetXPComponent()->CallFunc<void>("FortPlayerControllerAthenaXPComponent", "OnProfileUpdated");
-			PlayerController->GetXPComponent()->CallFunc<void>("FortPlayerControllerAthenaXPComponent", "HighPrioXPEvent", QuestEntry);
+	//		PlayerController->GetXPComponent()->OnXPEvent(*QuestEntry);
 		}
 		
-		QuestManager->CallFunc<void>("FortQuestManager", "ClaimQuestReward", QuestItem);
+	//	QuestManager->CallFunc<void>("FortQuestManager", "ClaimQuestReward", QuestItem);
 	} 
 }
 

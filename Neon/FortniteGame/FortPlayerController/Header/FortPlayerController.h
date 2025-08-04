@@ -290,10 +290,41 @@ public:
     DEFINE_MEMBER(FRotator, FFortPlayerDeathReport, ViewRotationAtTimeOfDeath);
 };
 
+struct FXPEventEntry final : public FFastArraySerializerItem
+{
+public:
+    DEFINE_PTR(class UFortQuestItemDefinition, FXPEventEntry, QuestDef);
+    DEFINE_MEMBER(float, FXPEventEntry, Time);
+    DEFINE_MEMBER(int32, FXPEventEntry, EventXpValue);
+    DEFINE_MEMBER(int32, FXPEventEntry, TotalXpEarnedInMatch);
+};
+
 class UFortPlayerControllerAthenaXPComponent : public UObject
 {
 public:
-    
+    void OnXPEvent(const struct FXPEventEntry& Param_HighPrioXPEvent)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerControllerAthenaXPComponent", "OnXPEvent");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct FortPlayerControllerAthenaXPComponent_HighPrioXPEvent final
+        {
+        public:
+            FXPEventEntry                          XPEvent;                             // 0x0000(0x0050)(Parm, NativeAccessSpecifierPublic)
+        } Params {};
+
+        Params.XPEvent = Param_HighPrioXPEvent;
+        
+        this->ProcessEvent(Func, &Params);
+    }
+public:
+    DECLARE_STATIC_CLASS(UFortPlayerControllerAthenaXPComponent)
+    DECLARE_DEFAULT_OBJECT(UFortPlayerControllerAthenaXPComponent)
 };
 
 class AFortProjectileBase : public UObject
