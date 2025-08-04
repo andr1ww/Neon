@@ -63,6 +63,35 @@ public:
     DEFINE_PTR(AFortInventory, AFortPlayerController, WorldInventory);
     DEFINE_MEMBER(FFortAthenaLoadout, AFortPlayerController, CosmeticLoadoutPC);
     DEFINE_PTR(AFortPlayerPawn, AFortPlayerController, MyFortPawn);
+
+public:
+    void ClientReportDamagedResourceBuilding(class ABuildingSMActor* BuildingSMActor, EFortResourceType PotentialResourceType, int32 PotentialResourceCount, bool bDestroyed, bool bJustHitWeakspot) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerController", "ClientReportDamagedResourceBuilding");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct FortPlayerController_ClientReportDamagedResourceBuilding final
+        {
+        public:
+            class ABuildingSMActor* BuildingSMActor;
+            EFortResourceType PotentialResourceType;
+            int32 PotentialResourceCount;
+            bool bDestroyed;
+            bool bJustHitWeakspot;
+        };
+        FortPlayerController_ClientReportDamagedResourceBuilding Params;
+        Params.BuildingSMActor = BuildingSMActor;
+        Params.PotentialResourceType = PotentialResourceType;
+        Params.PotentialResourceCount = PotentialResourceCount;
+        Params.bDestroyed = bDestroyed;
+        Params.bJustHitWeakspot = bJustHitWeakspot;
+
+        this->ProcessEvent(Func, &Params);
+    }
 };
 
 class UBlueprintGeneratedClass : public UClass

@@ -41,6 +41,48 @@ public:
 class ABuildingActor : public AActor
 {
 public:
+    float GetHealth() {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BuildingActor", "GetHealth");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return 0.f;
+
+        struct BuildingActor_GetHealth final
+        {
+        public:
+            float ReturnValue;
+        };
+        BuildingActor_GetHealth Params;
+
+        this->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+
+    float GetMaxHealth() {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BuildingActor", "GetMaxHealth");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return 0.f;
+
+        struct BuildingActor_GetMaxHealth final
+        {
+        public:
+            float ReturnValue;
+        };
+        BuildingActor_GetMaxHealth Params;
+
+        this->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+public:
     DEFINE_MEMBER(bool, ABuildingActor, bPlayerPlaced);
 };
 

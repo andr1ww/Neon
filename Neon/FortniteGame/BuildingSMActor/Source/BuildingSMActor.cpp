@@ -23,7 +23,7 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
 
-    if (BuildingActor->GetbPlayerPlaced() == true || BuildingActor->CallFunc<float>("BuildingActor", "GetHealth") <= 1.0f)
+    if (BuildingActor->GetbPlayerPlaced() == true || BuildingActor->GetHealth() <= 1.0f)
     {
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
@@ -34,7 +34,7 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
 
-    static FName PickaxeTag = UKismetStringLibrary::GetDefaultObj()->CallFunc<FName>("KismetStringLibrary","Conv_StringToName", FString(L"Weapon.Melee.Impact.Pickaxe"));
+    static FName PickaxeTag = UKismetStringLibrary::Conv_StringToName(L"Weapon.Melee.Impact.Pickaxe");
     FGameplayTag* DamageTagEntry = nullptr;
     for (FGameplayTag& entry : DamageTags.GameplayTags) {
         if (entry.TagName.GetComparisonIndex() == PickaxeTag.GetComparisonIndex()) {
@@ -71,7 +71,7 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
             0.0f
         );
         
-        float RC = Out / (BuildingActor->CallFunc<float>("BuildingActor", "GetMaxHealth") / Damage);
+        float RC = Out / (BuildingActor->GetMaxHealth() / Damage);
 
         ResourceAmount = round(RC);
     }
@@ -81,7 +81,7 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
     
-    const FVector PlayerLocation = Controller->GetPawn()->CallFunc<FVector>("Actor", "K2_GetActorLocation");
+    const FVector PlayerLocation = Controller->GetPawn()->K2_GetActorLocation();
     
     AFortInventory* Inventory = nullptr;
 
@@ -150,14 +150,8 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
 
         AFortInventory::GiveItem(Controller, ResourceDefinition, ResourceAmount, 0, 0);
     }
-        
-    Controller->CallFunc<void>("FortPlayerController", "ClientReportDamagedResourceBuilding",
-        BuildingActor, 
-        BuildingActor->GetResourceType(), 
-        ResourceAmount, 
-        false, 
-        Damage == 100.f
-    );
+
+    Controller->ClientReportDamagedResourceBuilding(BuildingActor, BuildingActor->GetResourceType(), ResourceAmount, false, Damage == 100.f);
 
     return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
 }

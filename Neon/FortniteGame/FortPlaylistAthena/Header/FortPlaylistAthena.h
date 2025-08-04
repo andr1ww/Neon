@@ -16,6 +16,8 @@ public:
   
     DEFINE_MEMBER(FName, UFortPlaylist, PlaylistName);
     DEFINE_MEMBER(int32,UFortPlaylist, PlaylistId);
+
+    DEFINE_MEMBER(int32, UFortPlaylist, MaxPlayers);
 };
 
 class UFortPlaylistAthena : public UFortPlaylist

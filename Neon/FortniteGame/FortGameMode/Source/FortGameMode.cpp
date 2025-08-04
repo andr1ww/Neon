@@ -49,8 +49,8 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         
             GameState->OnRep_CurrentPlaylistId();
             GameState->OnRep_CurrentPlaylistInfo();
-            GameState->CallFunc<void>("FortGameStateAthena","OnRep_AdditionalPlaylistLevelsStreamed");
-            GameMode->Get<AGameSession*>("GameModeBase", "GameSession")->Set("GameSession", "MaxPlayers", Playlist->Get<int32>("FortPlaylist", "MaxPlayers"));
+            GameState->OnRep_AdditionalPlaylistLevelsStreamed();
+            GameMode->GetGameSession()->SetMaxPlayers(Playlist->GetMaxPlayers());
             
             GameMode->SetWarmupRequiredPlayerCount(1);
 
@@ -65,7 +65,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     FVector Loc{};
                     FRotator Rot{};
                     bool Success = false;
-                    ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary","Conv_NameToString",AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName), Loc, Rot, &Success, FString());
+                    ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::Conv_NameToString(AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName), Loc, Rot, &Success, FString());
                     FAdditionalLevelStreamed NewLevel{};
                     NewLevel.bIsServerOnly = false;
                     NewLevel.LevelName = AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName;
@@ -83,7 +83,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     FVector Loc{};
                     FRotator Rot{};
                     bool Success = false;
-                    ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary","Conv_NameToString",AdditionalServerLevels[i].SoftObjectPtr.ObjectID.AssetPathName), Loc, Rot, &Success, FString());
+                    ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::Conv_NameToString(AdditionalServerLevels[i].SoftObjectPtr.ObjectID.AssetPathName), Loc, Rot, &Success, FString());
                     FAdditionalLevelStreamed NewLevel{};
                     NewLevel.bIsServerOnly = true;
                     NewLevel.LevelName = AdditionalServerLevels[i].SoftObjectPtr.ObjectID.AssetPathName;
@@ -92,8 +92,8 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     Levels.Add(NewLevel, StaticClassImpl("AdditionalLevelStreamed")->GetSize());
                 }
 
-                GameState->CallFunc<void>("FortGameState", "OnRep_AdditionalPlaylistLevelsStreamed");
-                GameState->CallFunc<void>("FortGameState", "OnFinishedStreamingAdditionalPlaylistLevel");
+                GameState->OnRep_AdditionalPlaylistLevelsStreamed();
+                GameState->OnFinishedStreamingAdditionalPlaylistLevel();
             }
 
             if (Fortnite_Version == 12.41)
@@ -101,17 +101,17 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 ABuildingFoundation* JerkyFoundation = Runtime::StaticFindObject<ABuildingFoundation>("/Game/Athena/Apollo/Maps/Apollo_POI_Foundations.Apollo_POI_Foundations.PersistentLevel.LF_Athena_POI_19x19_2");
                 JerkyFoundation->SetDynamicFoundationType(EDynamicFoundationType::Static);
                 JerkyFoundation->SetbServerStreamedInLevel(true);
-                JerkyFoundation->CallFunc<void>("BuildingFoundation", "OnRep_ServerStreamedInLevel");
+                JerkyFoundation->OnRep_ServerStreamedInLevel();
                 JerkyFoundation->GetDynamicFoundationRepData().SetEnabledState(EDynamicFoundationEnabledState::Enabled);
-                JerkyFoundation->CallFunc<void>("BuildingFoundation", "OnRep_DynamicFoundationRepData");
-                JerkyFoundation->CallFunc<void>("BuildingFoundation", "SetDynamicFoundationEnabled", true);
+                JerkyFoundation->OnRep_DynamicFoundationRepData();
+                JerkyFoundation->SetDynamicFoundationEnabled(true);
             }
 
-            static const UClass* PlayerPawnClass = (UClass*)GUObjectArray.FindObject("PlayerPawn_Athena_C");
+            static UClass* PlayerPawnClass = (UClass*)GUObjectArray.FindObject("PlayerPawn_Athena_C");
 
             if (GameMode)
             {
-                GameMode->Set("GameModeBase", "DefaultPawnClass", PlayerPawnClass);
+                GameMode->SetDefaultPawnClass(PlayerPawnClass);
             }
             
             if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
@@ -126,14 +126,14 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 
                 auto BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
                 GameMode->GetServerBotManager()->SetCachedBotMutator(BotMutator);
-                BotMutator->Set("FortAthenaMutator", "CachedGameMode", GameMode);
-                BotMutator->Set("FortAthenaMutator", "CachedGameState", GameState);
+                BotMutator->SetCachedGameMode(GameMode);
+                BotMutator->SetCachedGameState(GameState);
                 FBotMutator::Set(BotMutator);
                 GameMode->SetServerBotManagerClass(UFortServerBotManagerAthena::StaticClass());
                 
                 AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
                 GameMode->SetAIDirector(AIDirector);
-                AIDirector->CallFunc<void>("FortAIDirector", "Activate");
+                AIDirector->Activate();
 
                 AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
                 GameMode->SetAIGoalManager(AIGoalManager);
@@ -153,7 +153,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     
     if (!UWorld::GetWorld()->GetNetDriver())
     {
-        FName GameNetDriver = UKismetStringLibrary::GetDefaultObj()->CallFunc<FName>("KismetStringLibrary","Conv_StringToName",FString(L"GameNetDriver"));
+        FName GameNetDriver = UKismetStringLibrary::Conv_StringToName(L"GameNetDriver");
         UNetDriver* NetDriver = nullptr;
 
         if (Fortnite_Version >= 16.40)
@@ -172,7 +172,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         if (UWorld::GetWorld()->GetNetDriver())
         {
             UWorld::GetWorld()->GetNetDriver()->SetNetDriverName(GameNetDriver);
-            UWorld::GetWorld()->GetNetDriver()->Set<UWorld*>("NetDriver", "World", UWorld::GetWorld());
+            UWorld::GetWorld()->GetNetDriver()->SetWorld(UWorld::GetWorld());
 
             FURL URL{};
             URL.Port = 7777;
@@ -194,19 +194,12 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             TArray<AActor*> WarmupActors;
             UClass* WarmupClass = Runtime::StaticLoadObject<UClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_Warmup.Tiered_Athena_FloorLoot_Warmup_C");
             WarmupActors = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), WarmupClass);
-
-            static const UClass* PlayerPawnClass = (UClass*)GUObjectArray.FindObject("PlayerPawn_Athena_C");
-            
-            if (GameMode && PlayerPawnClass)
-            {
-                GameMode->Set("GameModeBase", "DefaultPawnClass", PlayerPawnClass);
-            }
             
             for (auto& WarmupActor : WarmupActors)
             {
                 auto Container = (ABuildingContainer*)WarmupActor;
 
-                Container->CallFunc<void>("BuildingContainer", "BP_SpawnLoot", nullptr);
+                Container->BP_SpawnLoot(nullptr);
 
                 Container->K2_DestroyActor();
             }
@@ -219,7 +212,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             {
                 auto Container = (ABuildingContainer*)WarmupActor;
 
-                Container->CallFunc<void>("BuildingContainer", "BP_SpawnLoot", nullptr);
+                Container->BP_SpawnLoot(nullptr);
 
                 Container->K2_DestroyActor();
             }
@@ -235,10 +228,10 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
         auto WarmupDuration = 60.f;
 
-        GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
-        GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
-        GameMode->Set("FortGameModeAthena", "WarmupCountdownDuration", WarmupDuration);
-        GameMode->Set("FortGameModeAthena", "WarmupEarlyCountdownDuration", WarmupDuration);
+        GameState->SetWarmupCountdownStartTime(Time);
+        GameState->SetWarmupCountdownEndTime(Time + WarmupDuration + 10.f);
+        GameMode->SetWarmupCountdownDuration(WarmupDuration);
+        GameMode->SetWarmupEarlyCountdownDuration(WarmupDuration);
     }
     
     return *Result = GameMode->GetAlivePlayers().Num() >= GameMode->GetWarmupRequiredPlayerCount();;
