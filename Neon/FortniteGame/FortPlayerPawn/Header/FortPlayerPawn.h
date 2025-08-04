@@ -83,7 +83,7 @@ public:
 	}
 
 	// Using the newer version of the func so newer versions dont die
-	AFortWeapon* EquipWeaponDefinition(const UFortWeaponItemDefinition* WeaponData, const FGuid& ItemEntryGuid, const FGuid& TrackerGuid, bool bDisableEquipAnimation)
+	AFortWeapon* EquipWeaponDefinition(const UFortWeaponItemDefinition* WeaponData, const FGuid& ItemEntryGuid)
 	{
 		static SDK::UFunction* Func = nullptr;
 		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPawn", "EquipWeaponDefiniton");
@@ -98,15 +98,11 @@ public:
 		public:
 			const UFortWeaponItemDefinition* WeaponData;
 			FGuid ItemEntryGuid;
-			FGuid TrackerGuid;
-			bool bDisableEquipAnimation;
 			AFortWeapon* ReturnValue;
 		};
 		FortPawn_EquipWeaponDefinition Params;
 		Params.WeaponData = WeaponData;
 		Params.ItemEntryGuid = ItemEntryGuid;
-		Params.TrackerGuid = TrackerGuid;
-		Params.bDisableEquipAnimation = bDisableEquipAnimation;
 		
 		this->ProcessEvent(Func, &Params);
 
