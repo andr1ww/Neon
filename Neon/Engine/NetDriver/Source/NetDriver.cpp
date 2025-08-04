@@ -354,9 +354,6 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             bStartedEvent = true;
         }
     }
-
-    AFortGameModeAthena* GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
-    AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
     
     if (NetDriver->GetClientConnections().Num() > 0)
     {
@@ -368,25 +365,30 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             ServerReplicateActors(NetDriver, DeltaSeconds);
         }
 
-        if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && !bStartedBus)
+        if (!bStartedBus)
         {
-            auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
-            if (GameState->Get<float>("FortGameStateAthena", "WarmupCountdownEndTime") <= Time)
+            AFortGameModeAthena* GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
+            AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
+            
+            if (GameState->GetGamePhase() == EAthenaGamePhase::Warmup && GameMode->GetAlivePlayers().Num() > 0
+                && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) < 100
+                && GameMode->GetAliveBots().Num() < 100)
             {
-                ExecuteConsoleCommand(UWorld::GetWorld(), L"startaircraft", nullptr);
-                bStartedBus = true;
+                if (UKismetMathLibrary::RandomBoolWithWeight(0.05f))
+                {
+                    //         AFortAthenaAIBotController::SpawnPlayerBot(1);
+                }
             }
-        }
-    }
-
-    if (GameState->GetGamePhase() == EAthenaGamePhase::Warmup &&
-        GameMode->GetAlivePlayers().Num() > 0
-        && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) < 100
-        && GameMode->GetAliveBots().Num() < 100)
-    {
-        if (UKismetMathLibrary::RandomBoolWithWeight(0.05f))
-        {
-   //         AFortAthenaAIBotController::SpawnPlayerBot(1);
+            
+            if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
+            {
+                auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
+                if (GameState->Get<float>("FortGameStateAthena", "WarmupCountdownEndTime") <= Time)
+                {
+                    ExecuteConsoleCommand(UWorld::GetWorld(), L"startaircraft", nullptr);
+                    bStartedBus = true;
+                }
+            }
         }
     }
     

@@ -12,8 +12,11 @@ float UGameplayStatics::GetTimeSeconds(UWorld* World)
         return 0.f;
 
     struct { UObject* WorldContextObject; float TimeSeconds; } GetTimeSecondsParams{World};
+
+    static UObject* Object = nullptr;
+    if (!Object) Object = SDK::StaticClassImpl("GameplayStatics")->GetClassDefaultObject();
     
-    SDK::StaticClassImpl("GameplayStatics")->GetClassDefaultObject()->ProcessEvent(Func, &GetTimeSecondsParams);
+    Object->ProcessEvent(Func, &GetTimeSecondsParams);
     
     return GetTimeSecondsParams.TimeSeconds;
 }

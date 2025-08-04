@@ -26,7 +26,10 @@ public:
             bool ReturnValue;
         } KismetMathLibrary_RandomBoolWithWeight{ Weight };
 
-        SDK::StaticClassImpl("KismetMathLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &KismetMathLibrary_RandomBoolWithWeight);
+        static UObject* Object = nullptr;
+        if (!Object) Object = SDK::StaticClassImpl("KismetMathLibrary")->GetClassDefaultObject();
+
+        Object->ProcessEvent(Func, &KismetMathLibrary_RandomBoolWithWeight);
 
         return KismetMathLibrary_RandomBoolWithWeight.ReturnValue;
     }
@@ -63,8 +66,11 @@ public:
             class FName                                   InName;                                            // 0x0000(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
             class FString                                 ReturnValue;                                       // 0x0008(0x0010)(Parm, OutParm, ZeroConstructor, ReturnParm, HasGetValueTypeHash, NativeAccessSpecifierPublic)
         } KismetStringLibrary_Conv_NameToString_Params{ InName };
-    
-        SDK::StaticClassImpl("KismetStringLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &KismetStringLibrary_Conv_NameToString_Params);
+
+        static UObject* Object = nullptr;
+        if (!Object) Object = SDK::StaticClassImpl("KismetStringLibrary")->GetClassDefaultObject();
+        
+        Object->ProcessEvent(Func, &KismetStringLibrary_Conv_NameToString_Params);
     
         return KismetStringLibrary_Conv_NameToString_Params.ReturnValue;
     }
@@ -85,8 +91,11 @@ public:
             class FString                                   inString;                                            // 0x0000(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
             class FText                                 ReturnValue;                                       // 0x0008(0x0010)(Parm, OutParm, ZeroConstructor, ReturnParm, HasGetValueTypeHash, NativeAccessSpecifierPublic)
         } KismetStringLibrary_Conv_NameToString_Params{ InName };
-    
-        SDK::StaticClassImpl("KismetStringLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &KismetStringLibrary_Conv_NameToString_Params);
+
+        static UObject* Object = nullptr;
+        if (!Object) Object = SDK::StaticClassImpl("KismetStringLibrary")->GetClassDefaultObject();
+        
+        Object->ProcessEvent(Func, &KismetStringLibrary_Conv_NameToString_Params);
     
         return KismetStringLibrary_Conv_NameToString_Params.ReturnValue;
     }

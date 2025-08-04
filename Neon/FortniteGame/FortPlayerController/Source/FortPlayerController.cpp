@@ -92,6 +92,7 @@ void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControll
     if (!Entry) {
         return;
     }
+	
     UFortWeaponItemDefinition* ItemDefinition = nullptr;
     if (Entry->GetItemDefinition()->IsA<UFortGadgetItemDefinition>())
     {
@@ -265,7 +266,7 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
     }
     
     for (auto* Building : ExistingBuildings) {
-        if (Building) Building->CallFunc<void>("Actor", "K2_DestroyActor");
+        if (Building) Building->K2_DestroyActor();
     }
     
     auto BuildingActor = UGameplayStatics::SpawnActorOG<ABuildingSMActor>(BuildingClass, CreateBuildingData.BuildLoc, 
