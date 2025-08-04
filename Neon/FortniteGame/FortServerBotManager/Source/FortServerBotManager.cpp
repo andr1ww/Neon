@@ -258,15 +258,29 @@ void UFortServerBotManagerAthena::InitializeForWorld(UNavigationSystemV1* NavSys
     
     if (NavSystem->GetSupportedAgents().Num() > 0)
     {
-        auto& Agent = NavSystem->GetSupportedAgents()[0];
-        static int FNavDataConfigSize = StaticClassImpl("NavDataConfig")->GetSize();
-        FNavDataConfig* Config = (FNavDataConfig*)malloc(FNavDataConfigSize);
-        Config->SetName(UKismetStringLibrary::Conv_StringToName(L"AthenaNavMesh"));
-        Config->SetColor(Agent.GetColor());
-        Config->SetNavigationDataClass(Agent.GetNavigationDataClass());
-        Config->SetDefaultQueryExtent(Agent.GetDefaultQueryExtent());
-        Config->SetNavDataClass(TSoftClassPtr(AAthenaNavMesh::StaticClass()));
-        NavSystem->GetSupportedAgents().Add(*Config, FNavDataConfigSize);
+        /*for (FNavDataConfig& Agent : NavSystem->GetSupportedAgents())
+        {
+            UE_LOG(LogNeon, Log, "Agent: %s", Agent.GetName().ToString().ToString().c_str()); 
+        }*/
+        FNavDataConfig& Agent = NavSystem->GetSupportedAgents()[0];
+        Agent.SetName(UKismetStringLibrary::Conv_StringToName(L"AthenaNavMesh"));
+        Agent.SetNavDataClass(TSoftClassPtr(AAthenaNavMesh::StaticClass()));
+        UE_LOG(LogNeon, Log, "Agent: %s", Agent.GetName().ToString().ToString().c_str());
+        /*if (Agent)
+        {
+            //UE_LOG(LogNeon, Log, "Agent: %s", Agent->GetName().ToString().ToString().c_str());
+            static int FNavDataConfigSize = StaticClassImpl("NavDataConfig")->GetSize();
+            FNavDataConfig* Config = (FNavDataConfig*)malloc(FNavDataConfigSize);
+            Config->SetName(UKismetStringLibrary::Conv_StringToName(L"AthenaNavMesh"));
+            Config->SetColor(FColor());
+            Config->SetNavigationDataClass(Agent->GetNavigationDataClass());
+            Config->SetDefaultQueryExtent(FVector());
+            Config->SetNavDataClass(TSoftClassPtr(AAthenaNavMesh::StaticClass()));
+            NavSystem->GetSupportedAgents().Add(*Config, FNavDataConfigSize);
+        } else
+        {
+            UE_LOG(LogNeon, Warning, "No Agent!");
+        }*/
     }
     
     NavSystem->SetbAutoCreateNavigationData(true);
