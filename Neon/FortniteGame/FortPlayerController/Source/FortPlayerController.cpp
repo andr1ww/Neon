@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "../Header/FortPlayerController.h"
 
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
@@ -418,6 +418,12 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	PlayerState->Set("FortPlayerState", "PawnDeathLocation", DeathLocation);
 	
 	if (DeathInfo) {
+		static int Size = 0;
+		if (Size == 0) {
+			Size = StaticClassImpl("DeathInfo")->GetSize();
+		}
+		
+		RtlSecureZeroMemory(DeathInfo, Size);
 		DeathInfo->SetbDBNO(false);
 		DeathInfo->SetDeathLocation(DeathLocation);
 		DeathInfo->SetDeathTags(DeathTags);
@@ -438,47 +444,63 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
    
 	auto WorldInventory = PlayerController->GetWorldInventory();
 	if (WorldInventory && VictimPawn) {
-		static const UClass* Types[] = {
-			UFortResourceItemDefinition::StaticClass(),
-			UFortWeaponRangedItemDefinition::StaticClass(),
-			UFortConsumableItemDefinition::StaticClass(),
-			UFortAmmoItemDefinition::StaticClass()
-		};
-   	
+		static const UClass* ResourceClass = UFortResourceItemDefinition::StaticClass();
+		static const UClass* WeaponClass = UFortWeaponRangedItemDefinition::StaticClass();
+		static const UClass* ConsumableClass = UFortConsumableItemDefinition::StaticClass();
+		static const UClass* AmmoClass = UFortAmmoItemDefinition::StaticClass();
+		static const UClass* MeleeClass = UFortWeaponMeleeItemDefinition::StaticClass();
+   
 		auto Location = VictimPawn->GetActorLocation();
 		bool bFoundMats = false;
-		
+   
 		const auto& ItemInstances = WorldInventory->GetInventory().GetItemInstances();
-		for (int32 i = 0; i < ItemInstances.Num(); ++i) {
-			const auto& entry = ItemInstances[i];
+   
+		for (const auto& entry : ItemInstances) {
 			auto ItemDef = entry->GetItemEntry().GetItemDefinition();
-			if (ItemDef->IsA<UFortWeaponMeleeItemDefinition>()) continue;
-   		
-			for (int32 j = 0; j < 4; ++j) {
-				if (ItemDef->IsA(Types[j])) {
-					if (!bFoundMats && Types[j] == UFortResourceItemDefinition::StaticClass())
-						bFoundMats = true;
-					AFortInventory::SpawnPickup(Location, &entry->GetItemEntry(), EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn);
-					break;
-				}
+        
+			if (ItemDef->IsA(MeleeClass)) continue;
+        
+			int Count = entry->GetItemEntry().GetCount();
+			int LoadedAmmo = entry->GetItemEntry().GetLoadedAmmo();
+        
+			if (ItemDef->IsA(ResourceClass)) {
+				bFoundMats = true;
+				AFortInventory::SpawnPickupDirect(Location, ItemDef, Count, LoadedAmmo,
+					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
+			}
+			else if (ItemDef->IsA(WeaponClass)) {
+				AFortInventory::SpawnPickupDirect(Location, ItemDef, Count, LoadedAmmo,
+					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
+			}
+			else if (ItemDef->IsA(ConsumableClass)) {
+				AFortInventory::SpawnPickupDirect(Location, ItemDef, Count, LoadedAmmo,
+					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
+			}
+			else if (ItemDef->IsA(AmmoClass)) {
+				AFortInventory::SpawnPickupDirect(Location, ItemDef, Count, LoadedAmmo,
+					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 			}
 		}
-   	
+   
 		if (!bFoundMats) {
 			static auto Wood = Runtime::StaticFindObject<UFortWorldItemDefinition>("/Game/Items/ResourcePickups/WoodItemData.WoodItemData");
 			static auto Stone = Runtime::StaticFindObject<UFortWorldItemDefinition>("/Game/Items/ResourcePickups/StoneItemData.StoneItemData");
 			static auto Metal = Runtime::StaticFindObject<UFortWorldItemDefinition>("/Game/Items/ResourcePickups/MetalItemData.MetalItemData");
-   		
-			AFortInventory::SpawnPickup(Location, AFortInventory::MakeItemEntry(Wood, 50, 0), EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn);
-			AFortInventory::SpawnPickup(Location, AFortInventory::MakeItemEntry(Stone, 50, 0), EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn);
-			AFortInventory::SpawnPickup(Location, AFortInventory::MakeItemEntry(Metal, 50, 0), EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn);
+        
+			AFortInventory::SpawnPickupDirect(Location, Wood, 50, 0,
+				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
+			AFortInventory::SpawnPickupDirect(Location, Stone, 50, 0,
+				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
+			AFortInventory::SpawnPickupDirect(Location, Metal, 50, 0,
+				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 		}
 	}
-
+	
 	if (!KillerPlayerState) KillerPlayerState = PlayerState;
 	if (!KillerPawn) KillerPawn = VictimPawn;
 
-	if (KillerPlayerState && KillerPawn && KillerPawn->GetController() && KillerPawn->GetController() != PlayerController) {
+	if (KillerPlayerState && KillerPawn && KillerPawn->GetController() && KillerPawn->GetController() != PlayerController)
+	{
 		int32 KillerScore = KillerPlayerState->GetKillScore() + 1;
 		int32 TeamScore = KillerPlayerState->GetTeamKillScore() + 1;
 		
@@ -502,7 +524,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			}
 		}
    	
-		KillerPlayerState->ClientReportKill(KillerPlayerState);
+		KillerPlayerState->ClientReportKill(PlayerState);
 		if (auto CPlayerController = (AFortPlayerControllerAthena*)KillerPawn->GetController()) {
 			if (CPlayerController->GetMyFortPawn() && MatchStats) {
 				MatchStats->Stats[3] = KillerScore;
@@ -542,7 +564,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			PlayerController->ClientSendEndBattleRoyaleMatchForPlayer(true, *RewardResult);
 
 			int32 AliveCount = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num();
-			int32 PlayerPlace = AliveCount + 1;
+			int32 PlayerPlace = AliveCount;
 			PlayerState->SetPlace(PlayerPlace);
 			PlayerState->OnRep_Place();
 
