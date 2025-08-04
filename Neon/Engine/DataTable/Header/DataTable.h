@@ -56,7 +56,10 @@ public:
         struct { UCurveTable* CurveTable; FName RowName; float InXY; EEvaluateCurveTableResult OutResult; float OutXY; FString ContextString; }
         Params{CurveTable, RowName, InXY, Erm, Ok, ContextString}; // ts param stolen from rbot
 
-        SDK::StaticClassImpl("DataTableFunctionLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &Params);
+        static UObject* Object = nullptr;
+        if (!Object) Object = SDK::StaticClassImpl("DataTableFunctionLibrary")->GetClassDefaultObject();
+
+        Object->ProcessEvent(Func, &Params);
         
         if (OutResult)
             *OutResult = Params.OutResult;

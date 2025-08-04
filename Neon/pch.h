@@ -63,7 +63,10 @@ static void ExecuteConsoleCommand(SDK::UObject* WorldContextObject, const SDK::F
     Params.Command = std::move(Command);
     Params.PlayerController = Controller;
 
-    SDK::StaticClassImpl("KismetSystemLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &Params);
+    static UObject* Object = nullptr;
+    if (!Object) Object = SDK::StaticClassImpl("KismetSystemLibrary")->GetClassDefaultObject();
+
+    Object->ProcessEvent(Func, &Params);
 }
 
 #define DefHookOg(_Rt, _Name, ...) static inline _Rt (*_Name##OG)(##__VA_ARGS__); static _Rt _Name(##__VA_ARGS__);

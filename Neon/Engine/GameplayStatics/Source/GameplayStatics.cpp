@@ -34,7 +34,10 @@ TArray<AActor*> UGameplayStatics::GetAllActorsOfClass(const UObject* World, UCla
     struct { const UObject* WorldContextObject; UClass* ActorClass; TArray<AActor*> OutActors; }
     UGameplayStatics_GetAllActorsOfClass_Params{ World, ActorClass };
     
-    SDK::StaticClassImpl("GameplayStatics")->GetClassDefaultObject()->ProcessEvent(Func, &UGameplayStatics_GetAllActorsOfClass_Params);
+    static UObject* Object = nullptr;
+    if (!Object) Object = SDK::StaticClassImpl("GameplayStatics")->GetClassDefaultObject();
+    
+    Object->ProcessEvent(Func, &UGameplayStatics_GetAllActorsOfClass_Params);
     
     return UGameplayStatics_GetAllActorsOfClass_Params.OutActors;
 }
@@ -58,8 +61,11 @@ AActor* UGameplayStatics::BeginDeferredActorSpawnFromClass(const UObject* WorldC
         AActor* Owner;                                                    // (Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
         AActor* ReturnValue;                                              // (Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
     } UGameplayStatics_BeginDeferredActorSpawnFromClass_Params{ WorldContextObject, ActorClass, SpawnTransform, CollisionHandlingOverride, Owner };
+
+    static UObject* Object = nullptr;
+    if (!Object) Object = SDK::StaticClassImpl("GameplayStatics")->GetClassDefaultObject();
     
-    SDK::StaticClassImpl("GameplayStatics")->GetClassDefaultObject()->ProcessEvent(Func, &UGameplayStatics_BeginDeferredActorSpawnFromClass_Params);
+    Object->ProcessEvent(Func, &UGameplayStatics_BeginDeferredActorSpawnFromClass_Params);
     
     return UGameplayStatics_BeginDeferredActorSpawnFromClass_Params.ReturnValue;
 }
@@ -81,7 +87,10 @@ AActor* UGameplayStatics::FinishSpawningActor(AActor* Actor, const FTransform& S
         AActor* ReturnValue;                                              // (Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
     } UGameplayStatics_FinishSpawningActor_Params{ Actor, SpawnTransform };
     
-    SDK::StaticClassImpl("GameplayStatics")->GetClassDefaultObject()->ProcessEvent(Func, &UGameplayStatics_FinishSpawningActor_Params);
+    static UObject* Object = nullptr;
+    if (!Object) Object = SDK::StaticClassImpl("GameplayStatics")->GetClassDefaultObject();
+    
+    Object->ProcessEvent(Func, &UGameplayStatics_FinishSpawningActor_Params);
     
     return UGameplayStatics_FinishSpawningActor_Params.ReturnValue;
 }
