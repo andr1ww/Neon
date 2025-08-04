@@ -145,3 +145,88 @@ public:
         return Runtime::StaticLoadObject<T>(UKismetStringLibrary::Conv_NameToString(SoftObjectPtr.ObjectID.AssetPathName).ToString());
     }
 };
+
+template<class T = SDK::UClass>
+struct TSoftClassPtr
+{
+public:
+   FSoftObjectPtr SoftObjectPtr;
+
+   TSoftClassPtr() = default;
+   
+   TSoftClassPtr(UClass* InClass)
+   {
+       if (InClass)
+       {
+           SoftObjectPtr.ObjectID.AssetPathName = InClass->GetFName();
+       }
+   }
+
+   bool IsValid()
+   {
+       return SoftObjectPtr.ObjectID.AssetPathName.GetComparisonIndex();
+   }
+
+   T* Get(UClass* ClassToLoad = nullptr, bool bTryToLoad = false)
+   {
+       if (SoftObjectPtr.ObjectID.AssetPathName.GetComparisonIndex() <= 0)
+           return nullptr;
+
+       if (bTryToLoad && ClassToLoad)
+       {
+           return Runtime::StaticLoadObject<T>(
+               UKismetStringLibrary::Conv_NameToString(SoftObjectPtr.ObjectID.AssetPathName).ToString(), 
+               ClassToLoad
+           );
+       }
+   
+       if (bTryToLoad)
+       {
+           return Runtime::StaticLoadObject<T>(UKismetStringLibrary::Conv_NameToString(SoftObjectPtr.ObjectID.AssetPathName).ToString());
+       }
+
+       return Runtime::StaticFindObject<T>(SoftObjectPtr.ObjectID.AssetPathName.ToString().ToString());
+   }
+
+   T* NewGet()
+   {
+       if (this->SoftObjectPtr.WeakPtr.ObjectIndex != -1)
+       {
+           SDK::FUObjectItem* ObjectItem = GUObjectArray.IndexToObject(this->SoftObjectPtr.WeakPtr.ObjectIndex);
+           if (ObjectItem && ObjectItem->Object)
+           {
+               SDK::UObject* UObj = static_cast<SDK::UObject*>(ObjectItem->Object);
+               return Cast<T>(UObj);
+           }
+       }
+
+       std::string AssetName = UKismetStringLibrary::Conv_NameToString(this->SoftObjectPtr.ObjectID.AssetPathName).ToString();
+   
+       for (int32 i = 0; i < GUObjectArray.GetObjectArrayNum(); ++i)
+       {
+           FUObjectItem* Object = GUObjectArray.IndexToObject(i);
+           if (!Object)
+               continue;
+           
+           if (Object->Object->GetFName().ToString().ToString().contains(AssetName))
+           {
+               SDK::UObject* UObj = static_cast<SDK::UObject*>(Object->Object);
+               T* CastedObject = Cast<T>(UObj);
+               if (CastedObject)
+                   return CastedObject;
+           }
+       }
+
+       return Runtime::StaticLoadObject<T>(UKismetStringLibrary::Conv_NameToString(SoftObjectPtr.ObjectID.AssetPathName).ToString());
+   }
+
+   static TSoftClassPtr<T> FromClass(UClass* InClass)
+   {
+       TSoftClassPtr<T> Result;
+       if (InClass)
+       {
+           Result.SoftObjectPtr.ObjectID.AssetPathName = InClass->GetFName();
+       }
+       return Result;
+   }
+};

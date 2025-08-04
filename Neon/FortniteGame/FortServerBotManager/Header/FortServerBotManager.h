@@ -8,6 +8,7 @@
 #include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
 #include "Engine/DataTable/Header/DataTable.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
+#include "Engine/ObjectPtr/Header/ObjectPtr.h"
 
 class AFortGameModeAthena;
 class UActorComponent;
@@ -201,8 +202,33 @@ class AFortAthenaMutator_SpawningPolicyBase : public AFortAthenaMutator
 {
 };
 
+struct alignas(0x04) FColor final
+{
+    public:
+    uint8                                         B;                                                 // 0x0000(0x0001)(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    uint8                                         G;                                                 // 0x0001(0x0001)(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    uint8                                         R;                                                 // 0x0002(0x0001)(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    uint8                                         A;                                                 // 0x0003(0x0001)(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
+
+struct FNavDataConfig final 
+{
+    DEFINE_MEMBER(FColor, FNavDataConfig, Color); // 0x0000(0x0004)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    DEFINE_MEMBER(FName, FNavDataConfig, Name); // 0x0000(0x0008)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    DEFINE_MEMBER(FVector, FNavDataConfig, DefaultQueryExtent);
+    DEFINE_MEMBER(TSubclassOf<AActor>, FNavDataConfig, NavigationDataClass); // 0x0010(0x0008)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    DEFINE_MEMBER(TSoftClassPtr<class UClass>, FNavDataConfig, NavDataClass); // 0x0000(0x0028)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
+
 class AFortAthenaMutator_SpawningPolicyEQS : public AFortAthenaMutator_SpawningPolicyBase
 {
+};
+
+class AAthenaNavMesh : public UObject
+{
+public:
+    DECLARE_STATIC_CLASS(AAthenaNavMesh)
+    DECLARE_DEFAULT_OBJECT(AAthenaNavMesh)
 };
 
 class AFortAthenaMutator_Bots : public AFortAthenaMutator_SpawningPolicyEQS
@@ -303,6 +329,7 @@ struct FBotInventory {
 class UNavigationSystemV1 : public UObject
 {
 public:
+    DEFINE_MEMBER(TArray<FNavDataConfig>, UNavigationSystemV1, SupportedAgents);
     DEFINE_BOOL(UNavigationSystemV1, bAutoCreateNavigationData);
     DEFINE_PTR(ANavigationData, UNavigationSystemV1, MainNavData);
 public:

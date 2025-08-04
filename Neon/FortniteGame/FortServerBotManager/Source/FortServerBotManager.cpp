@@ -254,6 +254,21 @@ void UFortServerBotManagerAthena::OnAlertLevelChanged(UObject* Context, FFrame& 
 void UFortServerBotManagerAthena::InitializeForWorld(UNavigationSystemV1* NavSystem, UWorld* World, uint8 Mode)
 {
     UE_LOG(LogNeon, Log, "InitializeForWorld For World: '%s' For NavigationSystem: '%s'", World->GetFName().ToString().ToString().c_str(), NavSystem->GetFName().ToString().ToString().c_str());
+    UE_LOG(LogNeon, Log, "SupportedAgents: %d", NavSystem->GetSupportedAgents().Num());
+    
+    if (NavSystem->GetSupportedAgents().Num() > 0)
+    {
+        auto& Agent = NavSystem->GetSupportedAgents()[0];
+        static int FNavDataConfigSize = StaticClassImpl("NavDataConfig")->GetSize();
+        FNavDataConfig* Config = (FNavDataConfig*)malloc(FNavDataConfigSize);
+        Config->SetName(UKismetStringLibrary::Conv_StringToName(L"AthenaNavMesh"));
+        Config->SetColor(Agent.GetColor());
+        Config->SetNavigationDataClass(Agent.GetNavigationDataClass());
+        Config->SetDefaultQueryExtent(Agent.GetDefaultQueryExtent());
+        Config->SetNavDataClass(TSoftClassPtr(AAthenaNavMesh::StaticClass()));
+        NavSystem->GetSupportedAgents().Add(*Config, FNavDataConfigSize);
+    }
+    
     NavSystem->SetbAutoCreateNavigationData(true);
     return InitializeForWorldOG(NavSystem, World, Mode);
 }
