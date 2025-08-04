@@ -402,7 +402,7 @@ bool UNetDriver::InitListen(UWorld* NetWorkNotify, FURL URL, bool bReuseAddressA
     return InitListen(this, World, URL, bReuseAddressAndPort, Error);
 }
 
-void UNetDriver::SetWorld(UWorld* World)
+void UNetDriver::NetDriverSetWorld(UWorld* World)
 {
     static void (*SetWorld)(UNetDriver*, UWorld*) = nullptr;
     if (!SetWorld)
