@@ -60,6 +60,29 @@ public:
     DEFINE_BOOL(ABuildingContainer, bAlreadySearched);
     DEFINE_MEMBER(FName, ABuildingContainer, SearchLootTierGroup);
 public:
+    bool BP_SpawnLoot(AFortPlayerPawn* PlayerPawn) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BuildingContainer", "BP_SpawnLoot");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return false;
+
+        struct BuildingContainer_BP_SpawnLoot final
+        {
+        public:
+            AFortPlayerPawn* PlayerPawn;
+            bool ReturnValue;
+        };
+        BuildingContainer_BP_SpawnLoot Params;
+        Params.PlayerPawn = PlayerPawn;
+
+        this->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+public:
     DECLARE_STATIC_CLASS(ABuildingContainer)
     DECLARE_DEFAULT_OBJECT(ABuildingContainer)
 };
