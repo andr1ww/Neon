@@ -188,7 +188,10 @@ UObject* UGameplayStatics::SpawnObject(TSubclassOf<class UObject> ObjectClass, c
         UObject* ReturnValue;                                              // (Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
     } UGameplayStatics_SpawnObject_Params{ObjectClass, Param_Outer};
     
-    SDK::StaticClassImpl("GameplayStatics")->GetClassDefaultObject()->ProcessEvent(Func, &UGameplayStatics_SpawnObject_Params);
+    static UObject* Object = nullptr;
+    if (!Object) Object = SDK::StaticClassImpl("GameplayStatics")->GetClassDefaultObject();
+    
+    Object->ProcessEvent(Func, &UGameplayStatics_SpawnObject_Params);
     
     return UGameplayStatics_SpawnObject_Params.ReturnValue;
 }
