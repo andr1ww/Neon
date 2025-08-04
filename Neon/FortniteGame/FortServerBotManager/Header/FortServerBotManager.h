@@ -186,17 +186,8 @@ public:
 class AFortAIDirector : public AActor
 {
 public:
-    float Activate() {
-        static class UFunction* Func = nullptr;
-        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortAIDirector", "Activate");
-
-        if (Func == nullptr)
-            Func = Info.Func;
-        if (!Func)
-            return 0.f;
-
-        this->ProcessEvent(Func, nullptr);
-    }
+    DECLARE_STATIC_CLASS(AFortAIDirector);
+    DECLARE_DEFAULT_OBJECT(AFortAIDirector);
 };
 
 class AFortAthenaMutator : public AActor

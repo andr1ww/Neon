@@ -130,10 +130,11 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 BotMutator->Set("FortAthenaMutator", "CachedGameState", GameState);
                 FBotMutator::Set(BotMutator);
                 GameMode->SetServerBotManagerClass(UFortServerBotManagerAthena::StaticClass());
-                
+
                 AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
                 GameMode->SetAIDirector(AIDirector);
-                //AIDirector->CallFunc<void>("FortAIDirector", "Activate");
+                //GameMode->GetAIDirector()->Activate();
+                AIDirector->CallFunc<void>("FortAIDirector", "Activate");
 
                 AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
                 GameMode->SetAIGoalManager(AIGoalManager);
@@ -228,10 +229,10 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
         auto WarmupDuration = 60.f;
 
-        GameState->SetWarmupCountdownStartTime(Time);
-        GameState->SetWarmupCountdownEndTime(Time + WarmupDuration + 10.f);
-        GameMode->SetWarmupCountdownDuration(WarmupDuration);
-        GameMode->SetWarmupEarlyCountdownDuration(WarmupDuration);
+        GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
+        GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
+        GameMode->Set("FortGameModeAthena", "WarmupCountdownDuration", WarmupDuration);
+        GameMode->Set("FortGameModeAthena", "WarmupEarlyCountdownDuration", WarmupDuration);
     }
     
     return *Result = GameMode->GetAlivePlayers().Num() >= GameMode->GetWarmupRequiredPlayerCount();;

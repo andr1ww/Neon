@@ -261,9 +261,6 @@ public:
 
     DEFINE_MEMBER(TSubclassOf<class UFortServerBotManagerAthena>, AFortGameModeAthena, ServerBotManagerClass);
     DEFINE_PTR(UFortServerBotManagerAthena, AFortGameModeAthena, ServerBotManager);
-
-    DEFINE_MEMBER(float, AFortGameStateAthena, WarmupCountdownDuration);
-    DEFINE_MEMBER(float, AFortGameStateAthena, WarmupEarlyCountdownDuration);
 public:
     DECLARE_DEFAULT_OBJECT(AFortGameModeAthena);
     DECLARE_STATIC_CLASS(AFortGameModeAthena);

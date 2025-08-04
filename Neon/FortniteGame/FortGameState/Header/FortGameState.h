@@ -123,9 +123,6 @@ public:
     DEFINE_MEMBER(FGameMemberInfoArray, AFortGameStateAthena, GameMemberInfoArray);
 
     DEFINE_MEMBER(EAthenaGamePhase, AFortGameStateAthena, GamePhase);
-
-    DEFINE_MEMBER(float, AFortGameStateAthena, WarmupCountdownStartTime);
-    DEFINE_MEMBER(float, AFortGameStateAthena, WarmupCountdownEndTime);
 public:
     DECLARE_STATIC_CLASS(AFortGameStateAthena);
     DECLARE_DEFAULT_OBJECT(AFortGameStateAthena)
