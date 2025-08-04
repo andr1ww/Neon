@@ -289,7 +289,7 @@ public:
     DEFINE_MEMBER(TArray<UNetConnection*>, UNetDriver, ClientConnections);
 public:
     bool InitListen(UWorld* Networknotify, FURL URL, bool bReuseAddressAndPort);
-    void NetDriverSetWorld(UWorld* World);
+    void SetWorld(UWorld* World);
     
     static void TickFlush(UNetDriver* NetDriver, float DeltaSeconds);
 

@@ -172,13 +172,13 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         if (UWorld::GetWorld()->GetNetDriver())
         {
             UWorld::GetWorld()->GetNetDriver()->SetNetDriverName(GameNetDriver);
-            UWorld::GetWorld()->GetNetDriver()->NetDriverSetWorld(UWorld::GetWorld());
+            UWorld::GetWorld()->GetNetDriver()->SetWorld(UWorld::GetWorld());
 
             FURL URL{};
             URL.Port = 7777;
 
             UWorld::GetWorld()->GetNetDriver()->InitListen(UWorld::GetWorld(), URL, false);
-            UWorld::GetWorld()->GetNetDriver()->NetDriverSetWorld(UWorld::GetWorld());
+            UWorld::GetWorld()->GetNetDriver()->SetWorld(UWorld::GetWorld());
             
             for (int i = 0; i < UWorld::GetWorld()->GetLevelCollections().Num(); i++)
             {
