@@ -18,6 +18,9 @@ public:
     DEFINE_MEMBER(int32,UFortPlaylist, PlaylistId);
 
     DEFINE_MEMBER(int32, UFortPlaylist, MaxPlayers);
+public:
+    DECLARE_DEFAULT_OBJECT(UFortPlaylist)
+    DECLARE_STATIC_CLASS(UFortPlaylist)
 };
 
 class UFortPlaylistAthena : public UFortPlaylist
@@ -26,4 +29,5 @@ public:
     DEFINE_PTR(UAthenaAISettings, UFortPlaylistAthena, AISettings);
 public:
     DECLARE_STATIC_CLASS(UFortPlaylistAthena);
+    DECLARE_DEFAULT_OBJECT(UFortPlaylistAthena)
 };
