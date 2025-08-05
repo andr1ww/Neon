@@ -232,7 +232,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
             GameMode->Set("FortGameModeAthena", "WarmupCountdownDuration", WarmupDuration);
             GameMode->Set("FortGameModeAthena", "WarmupEarlyCountdownDuration", WarmupDuration);
-        }
+        } 
     }
 
     bool Res = GameMode->GetAlivePlayers().Num() >= GameMode->GetWarmupRequiredPlayerCount();

@@ -112,6 +112,32 @@ public:
 
 		return Params.ReturnValue;
 	}
+
+	AFortWeapon* EquipWeaponDefinition(const UFortWeaponItemDefinition* WeaponData, const FGuid& ItemEntryGuid)
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPawn", "EquipWeaponDefinition");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return nullptr;
+
+		struct FortPawn_EquipWeaponDefinition final
+		{
+		public:
+			const UFortWeaponItemDefinition* WeaponData;
+			FGuid ItemEntryGuid;
+			AFortWeapon* ReturnValue;
+		};
+		FortPawn_EquipWeaponDefinition Params;
+		Params.WeaponData = WeaponData;
+		Params.ItemEntryGuid = ItemEntryGuid;
+		
+		this->ProcessEvent(Func, &Params);
+
+		return Params.ReturnValue;
+	}
 public:
 	DEFINE_PTR(AFortWeapon, AFortPawn, CurrentWeapon);
     DEFINE_BOOL(AFortPawn, bMovingEmote);

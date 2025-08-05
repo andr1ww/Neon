@@ -19,7 +19,6 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     
     if (!BuildingActor || !Controller || !GameState)
     {
-        UE_LOG(LogNeon, Log, "Invalid Params in OnDamageServer!");
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
 
