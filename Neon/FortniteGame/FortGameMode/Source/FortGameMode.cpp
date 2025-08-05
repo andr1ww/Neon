@@ -31,7 +31,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     if (!bSetup)
     {
         bSetup = true;
-        UFortPlaylistAthena* Playlist = (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_Gg_Reverse");
+        UFortPlaylistAthena* Playlist = (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_DefaultSolo");
 
         if (Fortnite_Version >= 6.10)
         {
