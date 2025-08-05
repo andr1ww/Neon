@@ -7,7 +7,7 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
     UAbilitySystemComponent* AbilitySystemComponent, 
     FGameplayAbilitySpecHandle Handle, 
     bool InputPressed, 
-    FPredictionKey& PredictionKey, 
+    void* PredictionKey, 
     FGameplayEventData* TriggerEventData)
 {
     FGameplayAbilitySpec* Spec = nullptr;
@@ -15,11 +15,11 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
     auto& Items = ActivatableAbilities.GetItems();
     int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
     for (int i = 0; i < Items.Num(); i++) {
-        auto CurrentSpec = (FGameplayAbilitySpec*) ((uint8*) Items.GetData() + (i * GameplayAbilitySpecSize));
+        auto& CurrentSpec = *reinterpret_cast<FGameplayAbilitySpec*>(__int64(Items.GetData()) + (i * GameplayAbilitySpecSize));
         
-        if (CurrentSpec->GetHandle().Handle == Handle.Handle)
+        if (CurrentSpec.GetHandle().Handle == Handle.Handle)
         {
-            Spec = CurrentSpec;
+            Spec = &CurrentSpec;
             break; 
         }
     }
@@ -37,7 +37,7 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
     using TryActivateFunc = bool (*)(
         UAbilitySystemComponent*, 
         FGameplayAbilitySpecHandle, 
-        FPredictionKey, 
+        void*, 
         UGameplayAbility**, 
         void*, 
         const FGameplayEventData*
