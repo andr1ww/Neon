@@ -1111,10 +1111,19 @@ uint64 UFinder::SpawnLoot()
     if (CachedResult != 0)
         return CachedResult;
 
-    auto StringAddr = Memcury::Scanner::FindStringRef("ABuildingContainer::SpawnLoot() called on %s (%s)").ScanFor({ 0xE8 }).Get();
-    if (StringAddr != 0)
+    auto Addr = Memcury::Scanner::FindPattern("40 53 48 83 EC ? 80 3D ? ? ? ? ? 48 8B D9 0F 82 ? ? ? ? 48 89 74 24 ? 48 8D 54 24 ? 45 33 C0");
+    if (Addr.Get() != 0)
     {
-        CachedResult = StringAddr;
+        return CachedResult = Addr.Get();
+    }
+
+    auto StringAddr = Memcury::Scanner::FindStringRef("ABuildingContainer::SpawnLoot() called on %s (%s)...");
+    
+    auto Func = FindBytes(StringAddr, { 0x40, 0x55 }, 1000, 0, true);
+    
+    if (Func != 0)
+    {
+        CachedResult = Func;
     }
 
     return CachedResult;
