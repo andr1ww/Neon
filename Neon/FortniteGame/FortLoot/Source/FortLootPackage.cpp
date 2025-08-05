@@ -180,9 +180,14 @@ void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
         static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameState, "CurrentPlaylistInfo");
             
         FPlaylistPropertyArray& CurrentPlaylistInfoPtr = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
-        
-        LootPackages = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootPackages().Get(UCompositeDataTable::StaticClass(), true);
-        LootTierData = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootTierData().Get(UCompositeDataTable::StaticClass(), true);
+
+        static int LootPackagesOffset = Runtime::GetOffset(CurrentPlaylistInfoPtr.GetBasePlaylist(), "LootPackages");
+        static int LootTierDataOffset = Runtime::GetOffset(CurrentPlaylistInfoPtr.GetBasePlaylist(), "LootTierData");
+        static auto ErmOk = *(TSoftObjectPtr<UDataTable>*)(__int64(CurrentPlaylistInfoPtr.GetBasePlaylist()) + LootPackagesOffset);
+        static auto ErmOk2 = *(TSoftObjectPtr<UDataTable>*)(__int64(CurrentPlaylistInfoPtr.GetBasePlaylist()) + LootTierDataOffset);
+
+        LootPackages = ErmOk.Get(UCompositeDataTable::StaticClass(), true);
+        LootTierData = ErmOk2.Get(UCompositeDataTable::StaticClass(), true);
         
         if (!LootPackages) {
             UE_LOG(LogNeon, Log, "LootPackages null");
