@@ -120,7 +120,6 @@ void InitNullsAndRetTrues() {
 	if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.50)
 	{
 		Runtime::Hook(IMAGEBASE + 0x2E688D0, RetTrue); // server context
-		Runtime::Hook(IMAGEBASE + 0x1BDC660, FortLootPackage::SpawnLoot);
 		Runtime::Hook(IMAGEBASE + 0x3F88350, RetTrue); // IsThereAnywhereToBuildNavigation
 	}
 }
@@ -171,6 +170,7 @@ void Main()
 	Runtime::Hook(Finder->SendComplexCustomStatEvent(), UFortQuestManager::SendComplexCustomStatEvent, (void**)&UFortQuestManager::SendComplexCustomStatEventOG);
 	Runtime::Hook(Finder->ClientOnPawnDied(), AFortPlayerControllerAthena::ClientOnPawnDied, (void**)&AFortPlayerControllerAthena::ClientOnPawnDiedOG);
 	Runtime::VFTHook(UAthenaNavSystem::GetDefaultObj()->GetVTable(), 0x53, UFortServerBotManagerAthena::InitializeForWorld, (void**)&UFortServerBotManagerAthena::InitializeForWorldOG);
+	Runtime::Hook(Finder->SpawnLoot(), FortLootPackage::SpawnLoot);
 	
 	if (Finder->CompletePickupAnimation())
 	{

@@ -126,6 +126,8 @@ public:
     uint64 CreateAndConfigureNavigationSystem();
 
     uint64 SendComplexCustomStatEvent();
+
+    uint64 SpawnLoot();
 };
 
 inline UFinder* Finder = new UFinder();

@@ -1104,3 +1104,18 @@ uint64 UFinder::SendComplexCustomStatEvent()
 
     return CachedResult = 0;
 }
+
+uint64 UFinder::SpawnLoot()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+
+    auto StringAddr = Memcury::Scanner::FindStringRef("ABuildingContainer::SpawnLoot() called on %s (%s)").ScanFor({ 0xE8 }).Get();
+    if (StringAddr != 0)
+    {
+        CachedResult = StringAddr;
+    }
+
+    return CachedResult;
+}
