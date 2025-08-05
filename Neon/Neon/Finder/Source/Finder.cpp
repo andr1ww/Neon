@@ -1089,3 +1089,18 @@ uint64 UFinder::CreateAndConfigureNavigationSystem()
 
     return CachedResult = 0;
 }
+
+
+uint64 UFinder::SendComplexCustomStatEvent()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+
+    if (Fortnite_Version >= 7.40 && Fortnite_Version <= 14.40)
+    {
+        return CachedResult = Memcury::Scanner::FindPattern("4C 8B DC 49 89 5B ? 57 48 83 EC ? 33 C0 49 8D 53").Get();
+    }
+
+    return CachedResult = 0;
+}

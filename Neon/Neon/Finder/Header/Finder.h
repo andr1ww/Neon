@@ -124,6 +124,8 @@ public:
     uint64 RegisterComponentWithWorld();
 
     uint64 CreateAndConfigureNavigationSystem();
+
+    uint64 SendComplexCustomStatEvent();
 };
 
 inline UFinder* Finder = new UFinder();
