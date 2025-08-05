@@ -117,7 +117,7 @@ void AFortPlayerControllerAthena::ServerPlayEmoteItem(AFortPlayerControllerAthen
     Stack.StepCompiledIn(&Asset);
     Stack.IncrementCode();
 
-	if (!PlayerController->GetMyFortPawn()) return;
+	if (!PlayerController->GetMyFortPawn() || !Asset) return;
 	
     UAbilitySystemComponent* AbilitySystemComponent = PlayerController->GetPlayerState()->GetAbilitySystemComponent();
     UGameplayAbility* Ability = nullptr;
