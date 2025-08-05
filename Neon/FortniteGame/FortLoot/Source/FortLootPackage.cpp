@@ -181,24 +181,33 @@ void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
             
         FPlaylistPropertyArray& CurrentPlaylistInfoPtr = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
         
-      //  LootPackages = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootPackages().Get(true);
-      //  LootTierData = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootTierData().Get(true);
+        LootPackages = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootPackages().Get(UCompositeDataTable::StaticClass(), true);
+        LootTierData = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootTierData().Get(UCompositeDataTable::StaticClass(), true);
         
-        if (!LootPackages || !LootTierData) {
-            LootPackages = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootPackages_Client.AthenaLootPackages_Client");
-            LootTierData = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootTierData_Client.AthenaLootTierData_Client");
+        if (!LootPackages) {
+            UE_LOG(LogNeon, Log, "LootPackages null");
+            LootPackages = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootPackages().Get(UDataTable::StaticClass(), true);
+            if (!LootPackages)
+            {
+                UE_LOG(LogNeon, Log, "LootPackages still null");
+                LootPackages = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootPackages_Client.AthenaLootPackages_Client");
+            }
+        }
+
+        if (!LootTierData)
+        {
+            UE_LOG(LogNeon, Log, "LootTierData null");
+            LootTierData = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootTierData().Get(UDataTable::StaticClass(), true);
+            if (!LootTierData)
+            {
+                UE_LOG(LogNeon, Log, "LootTierData still null");
+                LootTierData = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootTierData_Client.AthenaLootTierData_Client");
+            }
         }
     }
 
     if (LootPackages)
     {
-        for (TPair<FName, uint8_t*>& RowPair : LootPackages->GetRowMap())
-        {
-            FFortLootPackageData* Val = reinterpret_cast<FFortLootPackageData*>(RowPair.Value);
-            if (IsValidPointer(Val)) {
-                LPGroupsAll.Add(Val);
-            }
-        }
         
         UCompositeDataTable* CompTable = Cast<UCompositeDataTable>(LootPackages);
         if (CompTable) {
@@ -210,6 +219,15 @@ void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
                             LPGroupsAll.Add(Val);
                         }
                     }
+                }
+            }
+        } else
+        {
+            for (TPair<FName, uint8_t*>& RowPair : LootPackages->GetRowMap())
+            {
+                FFortLootPackageData* Val = reinterpret_cast<FFortLootPackageData*>(RowPair.Value);
+                if (IsValidPointer(Val)) {
+                    LPGroupsAll.Add(Val);
                 }
             }
         }
@@ -227,11 +245,13 @@ void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
                     }
                 }
             }
-        }
-        for (const auto& RowPair : LootTierData->GetRowMap()) {
-            FFortLootTierData* Val = reinterpret_cast<FFortLootTierData*>(RowPair.Value);
-            if (IsValidPointer(Val)) {
-                TierDataAllGroups.Add(Val);
+        } else
+        {
+            for (const auto& RowPair : LootTierData->GetRowMap()) {
+                FFortLootTierData* Val = reinterpret_cast<FFortLootTierData*>(RowPair.Value);
+                if (IsValidPointer(Val)) {
+                    TierDataAllGroups.Add(Val);
+                }
             }
         }
     }
