@@ -434,6 +434,10 @@ public:
     DefHookOg(AFortPlayerPawn*, SpawnBot, UFortServerBotManagerAthena *BotManager, FVector SpawnLoc, FRotator SpawnRot, UFortAthenaAIBotCustomizationData *BotData, FFortAthenaAIBotRunTimeCustomizationData &RuntimeBotData);
     DefHookOg(void, OnAlertLevelChanged, UObject* Context, FFrame& Stack);
 public:
+    // Unofficial stuff
+    static void StartTree(UBehaviorTreeComponent* BTComp, UBehaviorTree* BTAsset, EBTExecutionMode::Type Mode = EBTExecutionMode::Looped);
+    static bool RunBehaviorTree(AFortAthenaAIBotController* PC, UBehaviorTree* BTAsset);
+public:
     DECLARE_STATIC_CLASS(UFortServerBotManagerAthena)
     DECLARE_DEFAULT_OBJECT(UFortServerBotManagerAthena)
 };

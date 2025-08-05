@@ -3,7 +3,7 @@
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "Engine/Kismet/Header/Kismet.h"
 
-void StartTree(UBehaviorTreeComponent* BTComp, UBehaviorTree* BTAsset, EBTExecutionMode::Type Mode = EBTExecutionMode::Looped)
+void UFortServerBotManagerAthena::StartTree(UBehaviorTreeComponent* BTComp, UBehaviorTree* BTAsset, EBTExecutionMode::Type Mode)
 {
     if (!BTComp || !BTAsset)
         return;
@@ -13,7 +13,7 @@ void StartTree(UBehaviorTreeComponent* BTComp, UBehaviorTree* BTAsset, EBTExecut
     BTComp->StartLogic();
 }
 
-bool RunBehaviorTree(AFortAthenaAIBotController* PC, UBehaviorTree* BTAsset)
+bool UFortServerBotManagerAthena::RunBehaviorTree(AFortAthenaAIBotController* PC, UBehaviorTree* BTAsset)
 {
     if (!BTAsset || !PC) {
         UE_LOG(LogNeon, Error, "RunBehaviorTree: BTAsset or PC is null!");
@@ -136,7 +136,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                     if (!ItemDef) continue;
                     UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(Controller, ItemDef, 1, 30, 0);
                     if (ItemDef->IsA(UFortWeaponItemDefinition::StaticClass()) && ((UFortWorldItemDefinition*)ItemDef)->GetbCanBeDropped()) {
-                        Ret->CallFunc<void>("FortPawn", "EquipWeaponDefinition", Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry(), false);
+                        Ret->EquipWeaponDefinition((UFortWeaponItemDefinition*)Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry().GetItemGuid(), Item->GetItemEntry().GetTrackerGuid(), false);
                     }
                 }
             }
@@ -194,7 +194,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             }
         }*/
         
-        SpawnLocator->CallFunc<void>("Actor", "K2_DestroyActor");
+        SpawnLocator->K2_DestroyActor();
         
         return Ret;
     }

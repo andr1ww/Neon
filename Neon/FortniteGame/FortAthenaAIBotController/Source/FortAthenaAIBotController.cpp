@@ -5,10 +5,13 @@
 #include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/FortLoot/Header/FortLootPackage.h"
+#include "FortniteGame/FortServerBotManager/Header/FortServerBotManager.h"
 
 void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 	static std::vector<UAthenaCharacterItemDefinition*> Characters = std::vector<UAthenaCharacterItemDefinition*>();
 	static std::vector<UAthenaPickaxeItemDefinition*> Pickaxes = std::vector<UAthenaPickaxeItemDefinition*>();
+
+	static UBehaviorTree* BehaviorTree = Runtime::StaticLoadObject<UBehaviorTree>("/Game/Athena/AI/Phoebe/BehaviorTrees/BT_Phoebe.BT_Phoebe");
 
 	if (Characters.size() == 0)
 	{
@@ -95,6 +98,13 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 				Pawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry().GetItemGuid(), Item->GetItemEntry().GetTrackerGuid(), false);
 				//Pawn->CallFunc<void>("FortPawn", "EquipWeaponDefinition", Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry(), false);
 			}
+		}
+
+		if (BehaviorTree)
+		{
+			UFortServerBotManagerAthena::RunBehaviorTree(PC, BehaviorTree);
+			PC->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhaseStep"), (uint8)EAthenaGamePhaseStep::Warmup);
+			PC->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhase"), (uint8)EAthenaGamePhase::Warmup);
 		}
 	}
 }
