@@ -386,7 +386,7 @@ public:
     DefHookOg(void, ClientOnPawnDied, AFortPlayerControllerAthena* PlayerController, FFortPlayerDeathReport& DeathReport);
 
     DefHookOg(int32, K2_RemoveItemFromPlayerByGuid, UObject*, FFrame&);
-    DefHookOg(int32, K2_RemoveItemFromPlayer, AFortPlayerControllerAthena*, UFortWorldItemDefinition*, int32, bool);
+    DefHookOg(int32, K2_RemoveItemFromPlayer, AFortPlayerControllerAthena*,  FFrame&);
 public:
     DECLARE_STATIC_CLASS(AFortPlayerControllerAthena)
     DECLARE_DEFAULT_OBJECT(AFortPlayerControllerAthena)
