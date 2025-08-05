@@ -211,7 +211,7 @@ void Main()
 		UE_LOG(LogNeon, Log, "CreateAndConfigureNavigationSystem: 0x%x", Finder->CreateAndConfigureNavigationSystem() - IMAGEBASE);
 	}
 
-	Runtime::Exec("/Script/FortniteGame.FortKismetLibrary.K2_RemoveItemFromPlayer", AFortPlayerControllerAthena::K2_RemoveItemFromPlayer, (void**)&AFortPlayerControllerAthena::K2_RemoveItemFromPlayerOG);
+	Runtime::Hook(IMAGEBASE + 0x1EE9720, AFortPlayerControllerAthena::K2_RemoveItemFromPlayer, (void**)&AFortPlayerControllerAthena::K2_RemoveItemFromPlayerOG);
 	Runtime::Hook(IMAGEBASE + 0x2ebf890, ProcessEvent, (void**)&ProcessEventOG);
 	
 	UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);

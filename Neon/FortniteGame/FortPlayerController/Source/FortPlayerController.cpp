@@ -693,14 +693,7 @@ int32 AFortPlayerControllerAthena::K2_RemoveItemFromPlayerByGuid(UObject* Contex
     return K2_RemoveItemFromPlayerByGuidOG(Context, Stack);
 }
 
-int32 AFortPlayerControllerAthena::K2_RemoveItemFromPlayer(AFortPlayerControllerAthena* PC, FFrame& Stack) {
-	UFortWorldItemDefinition* ItemDefinition;
-	int32 AmountToRemove;
-	bool bForceRemoval;
-	Stack.StepCompiledIn(&ItemDefinition);
-	Stack.StepCompiledIn(&AmountToRemove);
-	Stack.StepCompiledIn(&bForceRemoval);
-	
+int32 AFortPlayerControllerAthena::K2_RemoveItemFromPlayer(AFortPlayerControllerAthena* PC, UFortWorldItemDefinition* ItemDefinition, int32 AmountToRemove, bool bForceRemoval) {
     if (!PC || !ItemDefinition) {
 		return AmountToRemove;
     }
@@ -715,4 +708,5 @@ int32 AFortPlayerControllerAthena::K2_RemoveItemFromPlayer(AFortPlayerController
     }
 
     return AmountToRemove;
+    return K2_RemoveItemFromPlayerOG(PC, ItemDefinition, AmountToRemove, bForceRemoval);
 }
