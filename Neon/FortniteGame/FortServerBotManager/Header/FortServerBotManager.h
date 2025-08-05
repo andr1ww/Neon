@@ -64,6 +64,15 @@ namespace EBTTaskStatus
     };
 }
 
+enum class EBTNodeResult : uint8
+{
+    Succeeded                                = 0,
+    Failed                                   = 1,
+    Aborted                                  = 2,
+    InProgress                               = 3,
+    EBTNodeResult_MAX                        = 4,
+};
+
 class UAthenaAISettings final : public UDataAsset {
 
 };

@@ -162,6 +162,7 @@
     <ClInclude Include="Engine\UEngine\Header\UEngine.h" />
     <ClInclude Include="Engine\Vector\Header\Vector.h" />
     <ClInclude Include="FortniteGame\AbilitySystemComponent\Header\AbilitySystemComponent.h" />
+    <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTree.h" />
     <ClInclude Include="FortniteGame\BuildingSMActor\Header\BuildingSMActor.h" />
     <ClInclude Include="FortniteGame\Common\Header\ItemDefinition.h" />
     <ClInclude Include="FortniteGame\Common\Header\Tags.h" />
@@ -200,6 +201,7 @@
     <ClCompile Include="Engine\PlayerController\Source\PlayerController.cpp" />
     <ClCompile Include="Engine\UEngine\Source\UEngine.cpp" />
     <ClCompile Include="FortniteGame\AbilitySystemComponent\Source\AbilitySystemComponent.cpp" />
+    <ClCompile Include="FortniteGame\BehaviorTree\Source\BehaviorTree.cpp" />
     <ClCompile Include="FortniteGame\BuildingSMActor\Source\BuildingSMActor.cpp" />
     <ClCompile Include="FortniteGame\FortAthenaAIBotController\Source\FortAthenaAIBotController.cpp" />
     <ClCompile Include="FortniteGame\FortGameMode\Source\FortGameMode.cpp" />
