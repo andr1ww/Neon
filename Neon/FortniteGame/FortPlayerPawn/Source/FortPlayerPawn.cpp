@@ -181,3 +181,57 @@ void AFortPlayerPawn::GiveItemToInventoryOwner(UObject* Object, FFrame& Stack) {
 
 	return GiveItemToInventoryOwnerOG(Object, Stack);
 }
+
+static void (*ReloadWeaponOG)(AFortWeapon* Weapon, int32 AmmoToRemove);
+
+void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
+{
+    UE_LOG(LogNeon, Log, "ReloadWeapon Called");
+    AActor* Owner = Weapon->Get<AActor*>("Actor", "Owner");
+    AController* Controller = Owner->Get<AController*>("Pawn", "Controller");
+    AFortPlayerControllerAthena* PC = Cast<AFortPlayerControllerAthena>(Controller);
+    AFortInventory* Inventory = nullptr;
+
+    if (!Inventory)
+        Inventory = PC->GetWorldInventory();
+    UFortWeaponItemDefinition* WeaponData = Weapon->GetWeaponData();
+    UFortWorldItemDefinition* AmmoDefinition = WeaponData->GetAmmoWorldItemDefinition_BP();
+    FFortItemList& InventoryList = Inventory->GetInventory();
+    TArray<UFortWorldItem*>& ItemInstances = InventoryList.GetItemInstances();
+   
+    FGuid WeaponGuid = Weapon->Get<FGuid>("FortWeapon", "ItemEntryGuid");
+   
+    FFortItemEntry* WeaponEntry = nullptr;
+    for (int32 i = 0; i < ItemInstances.Num(); ++i)
+    {
+        if (ItemInstances[i]->GetItemEntry().GetItemGuid() == WeaponGuid)
+        {
+            WeaponEntry = &ItemInstances[i]->GetItemEntry();
+            break;
+        }
+    }
+    FFortItemEntry* AmmoEntry = nullptr;
+    for (int32 i = 0; i < ItemInstances.Num(); ++i)
+    {
+        FFortItemEntry& Entry = ItemInstances[i]->GetItemEntry();
+        if (Entry.GetItemDefinition() == AmmoDefinition)
+        {
+            AmmoEntry = &Entry;
+            break;
+        }
+    }
+    int32 OldAmmoCount = AmmoEntry->GetCount();
+    AmmoEntry->SetCount(AmmoEntry->GetCount() - AmmoToRemove);
+    if (AmmoEntry->GetCount() <= 0)
+    {
+        AFortInventory::Remove(PC, AmmoEntry->GetItemGuid());
+    }
+    else
+    {
+        AFortInventory::ReplaceEntry(PC, *AmmoEntry);
+    }
+    int32 OldLoadedAmmo = WeaponEntry->GetLoadedAmmo();
+    WeaponEntry->SetLoadedAmmo(WeaponEntry->GetLoadedAmmo() + AmmoToRemove);
+    AFortInventory::ReplaceEntry(PC, *WeaponEntry);
+  
+}
