@@ -219,7 +219,7 @@ AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry* Entr
         NewPickup->GetPrimaryPickupItemEntry().SetCount(OverrideCount != -1 ? OverrideCount : Entry->GetCount());
         NewPickup->OnRep_PrimaryPickupItemEntry();
             
-        NewPickup->CallFunc<void>("FortPickup", "TossPickup", Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
+        NewPickup->TossPickup(Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
     }
     
     return NewPickup;

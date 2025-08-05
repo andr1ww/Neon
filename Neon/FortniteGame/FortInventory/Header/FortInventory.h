@@ -16,6 +16,35 @@ class AFortPlayerController;
 class AFortPawn;
 class AFortPlayerPawn;
 
+enum class EFortPickupSpawnSource : uint8
+{
+    Unset                                    = 0,
+    PlayerElimination                        = 1,
+    Chest                                    = 2,
+    SupplyDrop                               = 3,
+    AmmoBox                                  = 4,
+    Drone                                    = 5,
+    ItemSpawner                              = 6,
+    BotElimination                           = 7,
+    NPCElimination                           = 8,
+    LootDrop                                 = 9,
+    TossedByPlayer                           = 10,
+    EFortPickupSpawnSource_MAX               = 11,
+};
+
+enum class EFortPickupSourceTypeFlag : uint8
+{
+    Other                                    = 0,
+    Player                                   = 1,
+    Destruction                              = 2,
+    Container                                = 4,
+    AI                                       = 8,
+    Tossed                                   = 16,
+    FloorLoot                                = 32,
+    Fishing                                  = 64,
+    EFortPickupSourceTypeFlag_MAX            = 65,
+};
+
 struct FFortItemEntry : public FFastArraySerializerItem
 {
     DEFINE_MEMBER(TArray<FFortItemEntryStateValue>, FFortItemEntry, StateValues);
@@ -82,6 +111,48 @@ public:
 
         Func->FunctionFlags() = Flgs;
     }
+
+    void TossPickup(const struct FVector& FinalLocation, class AFortPawn* ItemOwner, int32 OverrideMaxStackCount, bool bToss, bool bShouldCombinePickupsWhenTossCompletes, const EFortPickupSourceTypeFlag InPickupSourceTypeFlags, const EFortPickupSpawnSource InPickupSpawnSource)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPickup", "TossPickup");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        if (!this) 
+            return;
+
+        struct FortPickup_TossPickup final
+        {
+        public:
+            struct FVector FinalLocation;
+            class AFortPawn* ItemOwner;
+            int32 OverrideMaxStackCount;
+            bool bToss;
+            bool bShouldCombinePickupsWhenTossCompletes;
+            EFortPickupSourceTypeFlag InPickupSourceTypeFlags;
+            EFortPickupSpawnSource InPickupSpawnSource;
+        };
+        FortPickup_TossPickup Params{};
+
+        Params.FinalLocation = std::move(FinalLocation);
+        Params.ItemOwner = ItemOwner;
+        Params.OverrideMaxStackCount = OverrideMaxStackCount;
+        Params.bToss = bToss;
+        Params.bShouldCombinePickupsWhenTossCompletes = bShouldCombinePickupsWhenTossCompletes;
+        Params.InPickupSourceTypeFlags = InPickupSourceTypeFlags;
+        Params.InPickupSpawnSource = InPickupSpawnSource;
+
+        auto Flgs = Func->FunctionFlags();
+        Func->FunctionFlags() |= 0x400;
+    
+        this->ProcessEvent(Func, &Params);
+
+        Func->FunctionFlags() = Flgs;
+    }
 public:
     DEFINE_BOOL(AFortPickup, bPickedUp);
     DEFINE_BOOL(AFortPickup, bRandomRotation);
@@ -122,36 +193,6 @@ class UFortGadgetItemDefinition : public UFortWorldItemDefinition
 public:
     DECLARE_STATIC_CLASS(UFortGadgetItemDefinition)
     DECLARE_DEFAULT_OBJECT(UFortGadgetItemDefinition)
-};
-
-
-enum class EFortPickupSpawnSource : uint8
-{
-    Unset                                    = 0,
-    PlayerElimination                        = 1,
-    Chest                                    = 2,
-    SupplyDrop                               = 3,
-    AmmoBox                                  = 4,
-    Drone                                    = 5,
-    ItemSpawner                              = 6,
-    BotElimination                           = 7,
-    NPCElimination                           = 8,
-    LootDrop                                 = 9,
-    TossedByPlayer                           = 10,
-    EFortPickupSpawnSource_MAX               = 11,
-};
-
-enum class EFortPickupSourceTypeFlag : uint8
-{
-    Other                                    = 0,
-    Player                                   = 1,
-    Destruction                              = 2,
-    Container                                = 4,
-    AI                                       = 8,
-    Tossed                                   = 16,
-    FloorLoot                                = 32,
-    Fishing                                  = 64,
-    EFortPickupSourceTypeFlag_MAX            = 65,
 };
 
 struct FFortRangedWeaponStats : public FFortBaseWeaponStats
