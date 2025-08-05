@@ -172,7 +172,7 @@ void Main()
 	Runtime::VFTHook(UAthenaNavSystem::GetDefaultObj()->GetVTable(), 0x53, UFortServerBotManagerAthena::InitializeForWorld, (void**)&UFortServerBotManagerAthena::InitializeForWorldOG);
 	Runtime::Hook(Finder->SpawnLoot(), FortLootPackage::SpawnLoot);
 	Runtime::Hook(IMAGEBASE + 0x6BB920, RetTrue);
-	Runtime::Hook(IMAGEBASE + 0x26AA150, AFortPlayerPawn::ReloadWeapon, (void**)&AFortPlayerPawn::ReloadWeaponOG); // this is right um we can make it uni after we get it to fucking call 
+	Runtime::Hook(Finder->ReloadWeapon(), AFortPlayerPawn::ReloadWeapon, (void**)&AFortPlayerPawn::ReloadWeaponOG); // this is right um we can make it uni after we get it to fucking call 
 	
 	if (Finder->CompletePickupAnimation())
 	{

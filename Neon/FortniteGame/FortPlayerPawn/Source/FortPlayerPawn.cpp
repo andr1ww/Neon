@@ -182,8 +182,8 @@ void AFortPlayerPawn::GiveItemToInventoryOwner(UObject* Object, FFrame& Stack) {
 	return GiveItemToInventoryOwnerOG(Object, Stack);
 }
 
-static void (*ReloadWeaponOG)(AFortWeapon* Weapon, int32 AmmoToRemove);
 
+static void (*ReloadWeaponOG)(AFortWeapon* Weapon, int32 AmmoToRemove);
 void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
 {
     UE_LOG(LogNeon, Log, "ReloadWeapon Called");
