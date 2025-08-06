@@ -192,6 +192,13 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
     AFortPlayerControllerAthena* PC = Cast<AFortPlayerControllerAthena>(Controller);
     AFortInventory* Inventory = nullptr;
 
+    if (!PC) return;
+
+    if (auto AI = Cast<AFortAthenaAIBotController>(PC))
+    {
+        Inventory = AI->GetInventory();
+    }
+    
     if (!Inventory)
         Inventory = PC->GetWorldInventory();
     UFortWeaponItemDefinition* WeaponData = Weapon->GetWeaponData();
