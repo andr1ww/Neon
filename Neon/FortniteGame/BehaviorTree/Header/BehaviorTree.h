@@ -51,6 +51,9 @@ private:
     std::vector<BTDecorator*> Decorators;
     std::vector<BTService*> Services;
 public:
+    std::string Name;
+    std::string NodeName;
+public:
     virtual EBTNodeResult ChildTask(BTContext Context) = 0;
 public:
     void AddDecorator(BTDecorator* Decorator) {
@@ -61,7 +64,27 @@ public:
         Services.push_back(Service);
     }
 
-    EBTNodeResult Tick(BTContext& Context);
+    EBTNodeResult Tick(BTContext& Context)
+    {
+        float CurrentTime = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
+
+        // If a decorator fails then we shouldnt execute the task
+        for (BTDecorator* Decorator : Decorators) {
+            if (!Decorator->Evaluate(Context)) {
+                return EBTNodeResult::Failed;
+            }
+        }
+
+        for (BTService* Service : Services) {
+            if (Service->Interval == 0.f || CurrentTime >= Service->NextTickTime) {
+                Service->TickService(Context);
+                Service->NextTickTime = CurrentTime + Service->Interval;
+            }
+        }
+
+        // Run the task once all of the decorators pass
+        return ChildTask(Context);
+    }
 };
 
 class BTComposite_Selector
@@ -87,7 +110,33 @@ public:
         Services.push_back(Service);
     }
 
-    virtual EBTNodeResult Tick(BTContext Context);
+    virtual EBTNodeResult Tick(BTContext Context)
+    {
+        float CurrentTime = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
+
+        // If a global selector decorator fails we shouldnt execute anything inside of the selector (shouldnt be on the root)
+        for (BTDecorator* Decorator : Decorators) {
+            if (!Decorator->Evaluate(Context)) {
+                return EBTNodeResult::Failed;
+            }
+        }
+
+        for (BTService* Service : Services) {
+            if (Service->Interval == 0.f || CurrentTime >= Service->NextTickTime) {
+                Service->TickService(Context);
+                Service->NextTickTime = CurrentTime + Service->Interval;
+            }
+        }
+
+        // Run all of the selectors children then if all fail then return faliure
+        for (BTNode* Child : Children)
+        {
+            EBTNodeResult Result = Child->Tick(Context);
+            if (Result == EBTNodeResult::Succeeded || Result == EBTNodeResult::InProgress)
+                return Result;
+        }
+        return EBTNodeResult::Failed;
+    }
 };
 
 class BehaviorTree

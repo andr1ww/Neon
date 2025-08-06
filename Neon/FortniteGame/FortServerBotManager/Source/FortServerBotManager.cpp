@@ -2,6 +2,8 @@
 #include "../Header/FortServerBotManager.h"
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "Engine/Kismet/Header/Kismet.h"
+#include "FortniteGame/BehaviorTree/Header/BehaviorTreeService.h"
+#include "FortniteGame/BehaviorTree/Header/BehaviorTree/BT_MANG2/BT_MANG2.h"
 
 void UFortServerBotManagerAthena::StartTree(UBehaviorTreeComponent* BTComp, UBehaviorTree* BTAsset, EBTExecutionMode::Type Mode)
 {
@@ -70,6 +72,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
     if (Ret)
     {
         AFortAthenaAIBotController* Controller = (AFortAthenaAIBotController*)Ret->GetController();
+        AFortPlayerStateAthena* PlayerState = (AFortPlayerStateAthena*)Controller->GetPlayerState();
 
         if (BotData->GetStartupInventory())
         {
@@ -157,13 +160,9 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
         bool bRanBehaviorTree = false;
         if (BotData->GetBehaviorTree()) {
 			Controller->SetBehaviorTree(BotData->GetBehaviorTree());
-            if (RunBehaviorTree(Controller, BotData->GetBehaviorTree())) {
+            /*if (RunBehaviorTree(Controller, BotData->GetBehaviorTree())) {
                 Controller->BlueprintOnBehaviorTreeStarted();
 				bRanBehaviorTree = true;
-
-                Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhaseStep"), 6);
-                Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhase"), (uint8)EAthenaGamePhase::SafeZones);
-                Controller->GetBlackboard()->SetValueAsBool(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_IsMovementBlocked"), false);
                 
                 Controller->GetBrainComponent()->RestartLogic();
             }
@@ -171,11 +170,28 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
 				UE_LOG(LogNeon, Warning, "Bot %s Failed to RunBehaviorTree %s!", Ret->GetFName().ToString().ToString().c_str(), BotData->GetBehaviorTree()->GetFName().ToString().ToString().c_str());
 				//RunBehaviorTree(Controller, BotData->GetBehaviorTree());
 				bRanBehaviorTree = false;
-            }
+            }*/
+
+            Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhaseStep"), 6);
+            Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhase"), (uint8)EAthenaGamePhase::SafeZones);
+            Controller->GetBlackboard()->SetValueAsBool(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_IsMovementBlocked"), false);
         }
 
         if (!bRanBehaviorTree) {
-            // start manual ticking
+            BehaviorTreeService::BotBehavior NewBehavior;
+            NewBehavior.Context.Controller = Controller;
+            NewBehavior.Context.Pawn = Ret;
+            NewBehavior.Context.PlayerState = PlayerState;
+            
+            BehaviorTree* BehaviorTree = BT_MANG2::ConstructTree(NewBehavior.Context, true);
+            if (BehaviorTree)
+            {
+                NewBehavior.BehaviorTree = BehaviorTree;
+                BehaviorTreeService::AIToTick.Add(NewBehavior);
+            } else
+            {
+                UE_LOG(LogNeon, Warning, "Could not construct behaviortree!");
+            }
         }
 
         /*static TArray<AActor*> PatrolPaths;

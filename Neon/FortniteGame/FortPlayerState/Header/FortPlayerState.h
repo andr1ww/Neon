@@ -52,7 +52,7 @@ public:
 	DEFINE_MEMBER(TArray<AFortPlayerControllerAthena*>, AFortTeamInfo, TeamMembers); // 0x0280(0x0010)(ZeroConstructor, Protected, UObjectWrapper, NativeAccessSpecifierProtected)
 };
 
-class AFortPlayerState : public UObject
+class AFortPlayerState : public APlayerState
 {
 public:
 	DEFINE_PTR(AFortTeamInfo, AFortPlayerState, PlayerTeam); 

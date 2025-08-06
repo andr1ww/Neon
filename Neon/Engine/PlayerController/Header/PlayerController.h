@@ -2,10 +2,12 @@
 #include "pch.h"
 #include "Engine/Actor/Header/Actor.h"
 #include "Engine/Pawn/Header/Pawn.h"
+#include "Engine/PlayerState/Header/PlayerState.h"
 
 class AController : public AActor
 {
 public:
+    DEFINE_MEMBER(APlayerState*, AController, PlayerState);
     DEFINE_MEMBER(APawn*, AController, Pawn);
 public:
     AActor* GetViewTarget();

@@ -7,6 +7,7 @@
 #include "Engine/UEngine/Header/UEngine.h"
 #include "Neon/Finder/Header/Finder.h"
 #include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
+#include "FortniteGame/BehaviorTree/Header/BehaviorTreeService.h"
 
 UWorld* UWorld::GetWorld()
 {
@@ -357,6 +358,9 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
     
     if (NetDriver->GetClientConnections().Num() > 0)
     {
+        AFortGameModeAthena* GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
+        AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
+        
         if (Finder->RepDriverServerReplicateActors() && Fortnite_Version.GetMajorVersion() <= 20)
         {
             reinterpret_cast<void(*)(UReplicationDriver*)>(NetDriver->GetReplicationDriver()->GetVTable()[Finder->RepDriverServerReplicateActors()])(NetDriver->GetReplicationDriver());
@@ -365,11 +369,13 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             ServerReplicateActors(NetDriver, DeltaSeconds);
         }
 
+        if (GameState->GetGamePhase() >= EAthenaGamePhase::Warmup)
+        {
+            BehaviorTreeService::TickAI();
+        }
+
         if (!bStartedBus)
         {
-            AFortGameModeAthena* GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
-            AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
-            
             if (GameState->GetGamePhase() == EAthenaGamePhase::Warmup && GameMode->GetAlivePlayers().Num() > 0
                 && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) < 100
                 && GameMode->GetAliveBots().Num() < 100)
