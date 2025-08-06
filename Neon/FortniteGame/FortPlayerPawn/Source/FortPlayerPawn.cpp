@@ -186,61 +186,69 @@ void AFortPlayerPawn::GiveItemToInventoryOwner(UObject* Object, FFrame& Stack) {
 static void (*ReloadWeaponOG)(AFortWeapon* Weapon, int32 AmmoToRemove);
 void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
 {
-    UE_LOG(LogNeon, Log, "ReloadWeapon Called");
+    if (!Weapon || AmmoToRemove <= 0)
+        return;
+
     AActor* Owner = Weapon->Get<AActor*>("Actor", "Owner");
-    AController* Controller = Owner->Get<AController*>("Pawn", "Controller");
+    AController* Controller = Owner ? Owner->Get<AController*>("Pawn", "Controller") : nullptr;
     AFortPlayerControllerAthena* PC = Cast<AFortPlayerControllerAthena>(Controller);
+    if (!PC)
+        return;
+
     AFortInventory* Inventory = nullptr;
-
-    if (!PC) return;
-
     if (auto AI = Cast<AFortAthenaAIBotController>(PC))
-    {
         Inventory = AI->GetInventory();
-    }
-    
+
     if (!Inventory)
         Inventory = PC->GetWorldInventory();
+
+    if (!Inventory)
+        return;
+
     UFortWeaponItemDefinition* WeaponData = Weapon->GetWeaponData();
-    UFortWorldItemDefinition* AmmoDefinition = WeaponData->GetAmmoWorldItemDefinition_BP();
+    UFortWorldItemDefinition* AmmoDefinition = WeaponData ? WeaponData->GetAmmoWorldItemDefinition_BP() : nullptr;
+
     FFortItemList& InventoryList = Inventory->GetInventory();
     TArray<UFortWorldItem*>& ItemInstances = InventoryList.GetItemInstances();
-   
+
     FGuid WeaponGuid = Weapon->Get<FGuid>("FortWeapon", "ItemEntryGuid");
-   
+
     FFortItemEntry* WeaponEntry = nullptr;
-    for (int32 i = 0; i < ItemInstances.Num(); ++i)
+    for (UFortWorldItem* Item : ItemInstances)
     {
-        if (ItemInstances[i]->GetItemEntry().GetItemGuid() == WeaponGuid)
+        if (Item && Item->GetItemEntry().GetItemGuid() == WeaponGuid)
         {
-            WeaponEntry = &ItemInstances[i]->GetItemEntry();
+            WeaponEntry = &Item->GetItemEntry();
             break;
         }
     }
+
+    if (!WeaponEntry)
+        return;
+
     FFortItemEntry* AmmoEntry = nullptr;
-    for (int32 i = 0; i < ItemInstances.Num(); ++i)
+    for (UFortWorldItem* Item : ItemInstances)
     {
-        FFortItemEntry& Entry = ItemInstances[i]->GetItemEntry();
-        if (Entry.GetItemDefinition() == AmmoDefinition)
+        if (Item && Item->GetItemEntry().GetItemDefinition() == AmmoDefinition)
         {
-            AmmoEntry = &Entry;
+            AmmoEntry = &Item->GetItemEntry();
             break;
         }
     }
-    int32 OldAmmoCount = AmmoEntry->GetCount();
-    AmmoEntry->SetCount(AmmoEntry->GetCount() - AmmoToRemove);
-    if (AmmoEntry->GetCount() <= 0)
-    {
+
+    if (!AmmoEntry)
+        return;
+
+    int32 NewAmmoCount = AmmoEntry->GetCount() - AmmoToRemove;
+    AmmoEntry->SetCount(NewAmmoCount);
+
+    if (NewAmmoCount <= 0)
         AFortInventory::Remove(PC, AmmoEntry->GetItemGuid());
-    }
     else
-    {
         AFortInventory::ReplaceEntry(PC, *AmmoEntry);
-    }
-    int32 OldLoadedAmmo = WeaponEntry->GetLoadedAmmo();
+
     WeaponEntry->SetLoadedAmmo(WeaponEntry->GetLoadedAmmo() + AmmoToRemove);
     AFortInventory::ReplaceEntry(PC, *WeaponEntry);
-  
 }
 
 void AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues(AFortPlayerPawn* Pawn, FAthenaBatchedDamageGameplayCues_Shared SharedData, FAthenaBatchedDamageGameplayCues_NonShared NonSharedData)
