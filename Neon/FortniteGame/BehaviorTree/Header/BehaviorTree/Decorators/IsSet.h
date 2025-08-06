@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "../../BehaviorTree.h"
 
-class BTDecorator_BlackBoard_IsSet : public BTDecorator {
+class BTDecorator_IsSet : public BTDecorator {
 public:
     FName SelectedKeyName;
 public:

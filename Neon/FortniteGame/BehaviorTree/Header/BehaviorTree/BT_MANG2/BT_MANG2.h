@@ -6,8 +6,10 @@
 #include "../Tasks/SteerMovement.h"
 
 #include "../Decorators/IsSet.h"
+#include "../Decorators/CheckEnum.h"
 
 #include "../Services/HandleFocusing_ScanAroundOnly.h"
+#include "FortniteGame/BehaviorTree/Header/BehaviorTree/Evaluators/CharacterLaunched.h"
 
 class BT_MANG2
 {
@@ -23,7 +25,7 @@ public:
 
         {
             auto* Task = new BTTask_Wait(1.f);
-            auto* Decorator = new BTDecorator_BlackBoard_IsSet();
+            auto* Decorator = new BTDecorator_IsSet();
             Decorator->SelectedKeyName = UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_IsMovementBlocked");
             Task->AddDecorator(Decorator);
             RootSelector->AddChild(Task);
@@ -32,7 +34,17 @@ public:
         {
             auto* Task = new BTTask_SteerMovement(800.f, 1.5f);
             Task->AddService(new BTService_HandleFocusing_ScanAroundOnly(0.5f, 80.f));
+            auto* Decorator = new BTDecorator_CheckEnum();
+            Decorator->SelectedKeyName = UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_CharacterLaunched_ExecutionStatus");
+            Decorator->IntValue = 3;
+            Decorator->Operator = EBlackboardCompareOp::GreaterThanOrEqual;
+            Task->AddDecorator(Decorator);
             RootSelector->AddChild(Task);
+        }
+
+        {
+            auto* Service = new BTEvaluator_CharacterLaunched();
+            RootSelector->AddService(Service);
         }
 
         Tree->RootNode = RootSelector;
