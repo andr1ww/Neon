@@ -14,6 +14,14 @@ class UBrainComponent;
 class UBlackboardComponent;
 class UFortAthenaNpcPatrollingComponent;
 
+enum class EPathFollowingRequestResult : uint8
+{
+    Failed                                   = 0,
+    AlreadyAtGoal                            = 1,
+    RequestSuccessful                        = 2,
+    EPathFollowingRequestResult_MAX          = 3,
+};
+
 class ANavigationData : public AActor
 {
 public:
@@ -109,6 +117,100 @@ public:
         AIController_OnUsingBlackBoard Params;
 		Params.BlackboardComp = BlackboardComp;
         Params.BlackboardAsset = BlackboardAsset;
+
+        this->ProcessEvent(Func, &Params);
+    }
+
+    EPathFollowingRequestResult MoveToActor(class AActor* Goal, float AcceptanceRadius, bool bStopOnOverlap, bool bUsePathfinding, bool bCanStrafe, TSubclassOf<class UNavigationQueryFilter> FilterClass, bool bAllowPartialPath) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("AIController", "MoveToActor");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return EPathFollowingRequestResult::Failed;
+
+        struct AIController_MoveToActor final
+        {
+            public:
+	        class AActor*                                 Goal;                                            
+	        float                                         AcceptanceRadius;                                 
+	        bool                                          bStopOnOverlap;                                   
+	        bool                                          bUsePathfinding;                                   
+	        bool                                          bCanStrafe;                                        
+	        TSubclassOf<class UNavigationQueryFilter>     FilterClass;                                       
+	        bool                                          bAllowPartialPath;                              
+	        EPathFollowingRequestResult                   ReturnValue;     
+        };
+
+        AIController_MoveToActor Params{};
+        Params.Goal = Goal;
+        Params.AcceptanceRadius = AcceptanceRadius;
+        Params.bStopOnOverlap = bStopOnOverlap;
+        Params.bUsePathfinding = bUsePathfinding;
+        Params.bCanStrafe = bCanStrafe;
+        Params.FilterClass = FilterClass;
+        Params.bAllowPartialPath = bAllowPartialPath;
+
+        this->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+
+    EPathFollowingRequestResult MoveToLocation(const struct FVector& Dest, float AcceptanceRadius, bool bStopOnOverlap, bool bUsePathfinding, bool bProjectDestinationToNavigation, bool bCanStrafe, TSubclassOf<class UNavigationQueryFilter> FilterClass, bool bAllowPartialPath) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("AIController", "MoveToLocation");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return EPathFollowingRequestResult::Failed;
+
+        struct AIController_MoveToLocation final
+        {
+        public:
+	        struct FVector                                Dest; 
+	        float                                         AcceptanceRadius;                                  
+	        bool                                          bStopOnOverlap;                                    
+	        bool                                          bUsePathfinding;                                   
+	        bool                                          bProjectDestinationToNavigation;                   
+	        bool                                          bCanStrafe;                                        
+	        TSubclassOf<class UNavigationQueryFilter>     FilterClass;                                       
+	        bool                                          bAllowPartialPath;                                 
+	        EPathFollowingRequestResult                   ReturnValue;                                       
+        };
+
+        AIController_MoveToLocation Params{};
+        Params.Dest = std::move(Dest);
+        Params.AcceptanceRadius = AcceptanceRadius;
+        Params.bStopOnOverlap = bStopOnOverlap;
+        Params.bUsePathfinding = bUsePathfinding;
+        Params.bProjectDestinationToNavigation = bProjectDestinationToNavigation;
+        Params.bCanStrafe = bCanStrafe;
+        Params.FilterClass = FilterClass;
+        Params.bAllowPartialPath = bAllowPartialPath;
+
+        this->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+
+    void K2_SetFocalPoint(const struct FVector& FP) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("AIController", "K2_SetFocalPoint");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct AIController_K2_SetFocalPoint final
+        {
+        public:
+            struct FVector                                FP;
+        };
+        AIController_K2_SetFocalPoint Params;
+        Params.FP = std::move(FP);
 
         this->ProcessEvent(Func, &Params);
     }

@@ -11,6 +11,27 @@ public:
     DEFINE_MEMBER(APawn*, AController, Pawn);
 public:
     AActor* GetViewTarget();
+public:
+    void SetControlRotation(const struct FRotator& NewRotation)
+    {
+        static class SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Controller", "SetControlRotation");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct Controller_SetControlRotation final
+        {
+        public:
+            struct FRotator                               NewRotation;
+        };
+        Controller_SetControlRotation Params{};
+        Params.NewRotation = std::move(NewRotation);
+
+        this->ProcessEvent(Func, &Params);
+    }
 };
 
 class APlayerController : public AController

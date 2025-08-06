@@ -15,6 +15,7 @@ public:
     void K2_DestroyActor();
 	FVector K2_GetActorLocation();
     FTransform GetTransform();
+    bool K2_SetActorRotation(const struct FRotator& NewRotation, bool bTeleportPhysics);
 public:
     DECLARE_STATIC_CLASS(AActor);
     DECLARE_DEFAULT_OBJECT(AActor);

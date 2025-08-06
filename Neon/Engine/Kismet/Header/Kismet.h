@@ -34,6 +34,62 @@ public:
         return KismetMathLibrary_RandomBoolWithWeight.ReturnValue;
     }
 
+    static int32 RandomIntegerInRange(int32 min_0, int32 max_0) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetMathLibrary", "RandomIntegerInRange");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return 0;
+
+        struct KismetMathLibrary_RandomIntegerInRange final
+        {
+        public:
+            int32                                         min_0;
+            int32                                         max_0;
+            int32                                         ReturnValue;
+        };
+        KismetMathLibrary_RandomIntegerInRange Params;
+        Params.min_0 = min_0;
+        Params.max_0 = max_0;
+
+        static UObject* Object = nullptr;
+        if (!Object) Object = SDK::StaticClassImpl("KismetMathLibrary")->GetClassDefaultObject();
+
+        Object->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+
+    static float RandomFloatInRange(int32 min_0, int32 max_0) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetMathLibrary", "RandomFloatInRange");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return 0.f;
+
+        struct KismetMathLibrary_RandomFloatInRange final
+        {
+        public:
+            float                                         min_0; 
+            float                                         max_0;                                             
+            float                                         ReturnValue;                                       
+        };
+        KismetMathLibrary_RandomFloatInRange Params;
+        Params.min_0 = min_0;
+        Params.max_0 = max_0;
+
+        static UObject* Object = nullptr;
+        if (!Object) Object = SDK::StaticClassImpl("KismetMathLibrary")->GetClassDefaultObject();
+
+        Object->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+
 public:
     DECLARE_STATIC_CLASS(UKismetMathLibrary);
     DECLARE_DEFAULT_OBJECT(UKismetMathLibrary);

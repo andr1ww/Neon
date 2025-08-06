@@ -78,4 +78,29 @@ FTransform AActor::GetTransform()
     return Params.ReturnValue;
 }
 
+bool AActor::K2_SetActorRotation(const struct FRotator& NewRotation, bool bTeleportPhysics)
+{
+    static SDK::UFunction* Func = nullptr;
+    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Actor", "K2_SetActorRotation");
+
+    if (Func == nullptr)
+        Func = Info.Func;
+    if (!Func)
+        return false;
+
+    struct Actor_K2_SetActorRotation final
+    {
+    public:
+        struct FRotator                               NewRotation; 
+        bool                                          bTeleportPhysics;                                  
+        bool                                          ReturnValue;                                       
+    };
+    Actor_K2_SetActorRotation Params;
+    Params.NewRotation = std::move(NewRotation);
+    Params.bTeleportPhysics = bTeleportPhysics;
+
+    this->ProcessEvent(Func, &Params);
+
+    return Params.ReturnValue;
+}
 
