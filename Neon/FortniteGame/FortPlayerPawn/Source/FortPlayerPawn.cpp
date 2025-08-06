@@ -253,29 +253,39 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
 
 void AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues(AFortPlayerPawn* Pawn, FAthenaBatchedDamageGameplayCues_Shared SharedData, FAthenaBatchedDamageGameplayCues_NonShared NonSharedData)
 {
+   
     if (!Pawn)
         return;
-
     auto* Controller = Cast<AFortPlayerControllerAthena>(Pawn->GetController());
     if (!Controller)
         return;
-
     AFortWeapon* CurrentWeapon = Pawn->GetCurrentWeapon();
     if (!CurrentWeapon)
         return;
-
-    auto& ReplicatedEntries = Controller->GetWorldInventory()->GetInventory().GetReplicatedEntries();
-
-    FFortItemEntry* Entry = ReplicatedEntries.Search([&](FFortItemEntry& entry) {
-        return entry.GetItemGuid() == CurrentWeapon->GetItemEntryGuid();
-        });
-
-    if (Entry)
+    AFortInventory* Inventory = nullptr;
+    if (auto AI = Cast<AFortAthenaAIBotController>(Controller))
+        Inventory = AI->GetInventory();
+    if (!Inventory)
+        Inventory = Controller->GetWorldInventory();
+    if (!Inventory)
+        return;
+    FGuid WeaponGuid = CurrentWeapon->GetItemEntryGuid();
+    FFortItemList& InventoryList = Inventory->GetInventory();
+    TArray<UFortWorldItem*>& ItemInstances = InventoryList.GetItemInstances();
+    FFortItemEntry* WeaponEntry = nullptr;
+    for (UFortWorldItem* Item : ItemInstances)
     {
-        Entry->SetLoadedAmmo(CurrentWeapon->GetAmmoCount());
-        AFortInventory::ReplaceEntry(Controller, *Entry);
+        if (Item && Item->GetItemEntry().GetItemGuid() == WeaponGuid)
+        {
+            WeaponEntry = &Item->GetItemEntry();
+            break;
+        }
     }
-
+    if (WeaponEntry)
+    {
+        WeaponEntry->SetLoadedAmmo(CurrentWeapon->GetAmmoCount());
+        AFortInventory::ReplaceEntry(Controller, *WeaponEntry);
+    }
     if (NetMulticast_Athena_BatchedDamageCuesOG)
     {
         NetMulticast_Athena_BatchedDamageCuesOG(Pawn, SharedData, NonSharedData);
