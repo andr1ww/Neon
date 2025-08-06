@@ -253,7 +253,7 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
 
 void AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues(AFortPlayerPawn* Pawn, FAthenaBatchedDamageGameplayCues_Shared SharedData, FAthenaBatchedDamageGameplayCues_NonShared NonSharedData)
 {
-    printf("ohio");
+   
     if (!Pawn)
         return;
     auto* Controller = Cast<AFortPlayerControllerAthena>(Pawn->GetController());
