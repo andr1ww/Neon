@@ -346,6 +346,14 @@ template <typename InElementType> class TArray {
         }
 
         FORCEINLINE ElementType &GetFirstData() { return Data[0]; }
+        template <class PT>
+        ElementType* Search(PT Predicate, int32 ElementSize = sizeof(ElementType)) {
+            for (int i = 0; i < Num(); i++) {
+                auto& Element = *reinterpret_cast<ElementType*>(__int64(GetData()) + (i * ElementSize));
+                if (Predicate(Element)) return &Element;
+            }
+            return nullptr;
+        }
 
         /**
          * Helper function for returning a typed pointer to the first array

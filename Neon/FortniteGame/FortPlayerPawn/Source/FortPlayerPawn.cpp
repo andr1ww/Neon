@@ -192,6 +192,13 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
     AFortPlayerControllerAthena* PC = Cast<AFortPlayerControllerAthena>(Controller);
     AFortInventory* Inventory = nullptr;
 
+    if (!PC) return;
+
+    if (auto AI = Cast<AFortAthenaAIBotController>(PC))
+    {
+        Inventory = AI->GetInventory();
+    }
+    
     if (!Inventory)
         Inventory = PC->GetWorldInventory();
     UFortWeaponItemDefinition* WeaponData = Weapon->GetWeaponData();
@@ -234,4 +241,39 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
     WeaponEntry->SetLoadedAmmo(WeaponEntry->GetLoadedAmmo() + AmmoToRemove);
     AFortInventory::ReplaceEntry(PC, *WeaponEntry);
   
+}
+
+void AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues(AFortPlayerPawn* Pawn, FAthenaBatchedDamageGameplayCues_Shared SharedData, FAthenaBatchedDamageGameplayCues_NonShared NonSharedData)
+{
+    if (!Pawn)
+        return;
+
+    auto* Controller = Cast<AFortPlayerControllerAthena>(Pawn->GetController());
+    if (!Controller)
+        return;
+
+    AFortWeapon* CurrentWeapon = Pawn->GetCurrentWeapon();
+    if (!CurrentWeapon)
+        return;
+
+    auto& ReplicatedEntries = Controller->GetWorldInventory()->GetInventory().GetReplicatedEntries();
+
+    FFortItemEntry* Entry = ReplicatedEntries.Search([&](FFortItemEntry& entry) {
+        return entry.GetItemGuid() == CurrentWeapon->GetItemEntryGuid();
+        });
+
+    if (Entry)
+    {
+        Entry->SetLoadedAmmo(CurrentWeapon->GetAmmoCount());
+        AFortInventory::ReplaceEntry(Controller, *Entry);
+    }
+
+    if (NetMulticast_Athena_BatchedDamageCuesOG)
+    {
+        NetMulticast_Athena_BatchedDamageCuesOG(Pawn, SharedData, NonSharedData);
+    }
+    else
+    {
+        UE_LOG(LogNeon, Error, TEXT("NetMulticast_Athena_BatchedDamageCuesOG is nullptr!"));
+    }
 }

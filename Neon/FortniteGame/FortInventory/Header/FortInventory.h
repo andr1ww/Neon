@@ -47,6 +47,10 @@ enum class EFortPickupSourceTypeFlag : uint8
 
 struct FFortItemEntry : public FFastArraySerializerItem
 {
+    static UClass* StaticClass()
+    {
+        return StaticClassImpl("FortItemEntry");
+    }
     DEFINE_MEMBER(TArray<FFortItemEntryStateValue>, FFortItemEntry, StateValues);
     DEFINE_MEMBER(int32, FFortItemEntry, Count);
     DEFINE_MEMBER(int32, FFortItemEntry, LoadedAmmo);

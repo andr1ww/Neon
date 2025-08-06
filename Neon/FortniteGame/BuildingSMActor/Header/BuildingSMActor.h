@@ -26,7 +26,8 @@ class AFortWeapon : public AActor
 {
 public:
     DEFINE_MEMBER(FGuid, AFortWeapon, ItemEntryGuid)
-	DEFINE_PTR(UFortWeaponItemDefinition, AFortWeapon, WeaponData)
+    DEFINE_PTR(UFortWeaponItemDefinition, AFortWeapon, WeaponData);
+    DEFINE_MEMBER(int32, AFortWeapon, AmmoCount);
 public:
     DECLARE_STATIC_CLASS(AFortWeapon)
     DECLARE_DEFAULT_OBJECT(AFortWeapon)
