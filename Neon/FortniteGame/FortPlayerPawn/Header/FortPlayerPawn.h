@@ -22,7 +22,6 @@ public:
 	public:
 		uint8 FireModeNum;
 	};
-
 	struct FortPawn_PawnStopFire final
 	{
 	public:
@@ -164,12 +163,43 @@ public:
 	uint8                                         Pad_31[0x7];                                       // 0x0031(0x0007)(Fixing Struct Size After Last Property [ Dumper-7 ])
 };
 
+struct FAthenaBatchedDamageGameplayCues_Shared final
+{
+public:
+	struct FVector_NetQuantize10                  Location;                                          // 0x0000(0x0018)(NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	struct FVector_NetQuantizeNormal              Normal;                                            // 0x0018(0x0018)(NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	float                                         Magnitude;                                         // 0x0030(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          bWeaponActivate;                                   // 0x0034(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          bIsFatal;                                          // 0x0035(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          bIsCritical;                                       // 0x0036(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          bIsShield;                                         // 0x0037(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          bIsShieldDestroyed;                                // 0x0038(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          bIsShieldApplied;                                  // 0x0039(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          bIsBallistic;                                      // 0x003A(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          bIsBeam;                                           // 0x003B(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	uint8                                         Pad_3C[0x4];                                       // 0x003C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
+	struct FVector_NetQuantize10                  NonPlayerLocation;                                 // 0x0040(0x0018)(RepSkip, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	struct FVector_NetQuantizeNormal              NonPlayerNormal;                                   // 0x0058(0x0018)(RepSkip, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	float                                         NonPlayerMagnitude;                                // 0x0070(0x0004)(ZeroConstructor, IsPlainOldData, RepSkip, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          NonPlayerbIsFatal;                                 // 0x0074(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          NonPlayerbIsCritical;                              // 0x0075(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          bIsValid;                                          // 0x0076(0x0001)(ZeroConstructor, IsPlainOldData, RepSkip, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	uint8                                         Pad_77[0x1];                                       // 0x0077(0x0001)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
+struct FAthenaBatchedDamageGameplayCues_NonShared final
+{
+public:
+	class AActor* HitActor;                                          // 0x0000(0x0008)(ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	class AActor* NonPlayerHitActor;                                 // 0x0008(0x0008)(ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
 
 class AFortPlayerPawn : public AFortPawn
 {
 public:
 	DEFINE_MEMBER(TArray<class AFortPickup*>, AFortPlayerPawn, IncomingPickups); 
     DEFINE_PTR(FFortAthenaLoadout, AFortPlayerPawn, CosmeticLoadout);
+
 public:
 	void BeginSkydiving(bool NewValue)
 	{
@@ -201,10 +231,11 @@ public:
 public:
     static void ServerHandlePickupInfo(AFortPlayerPawn* Pawn, FFrame& Stack);
 	static void ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack);
+
 	DefHookOg(void, ReloadWeapon, AFortWeapon* Weapon, int AmmoToRemove);
 	DefHookOg(void, CompletePickupAnimation, AFortPickup* Pickup);
-
 	DefHookOg(void, GiveItemToInventoryOwner, UObject*, FFrame&);
+	DefHookOg(void, NetMulticast_Athena_BatchedDamageCues, AFortPlayerPawn*, FAthenaBatchedDamageGameplayCues_Shared, FAthenaBatchedDamageGameplayCues_NonShared);
 };
 
 class ADefaultPawn : public APawn

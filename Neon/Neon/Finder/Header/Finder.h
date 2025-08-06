@@ -130,6 +130,7 @@ public:
     uint64 SpawnLoot();
 
     uint64 ReloadWeapon();
+
 };
 
 inline UFinder* Finder = new UFinder();
