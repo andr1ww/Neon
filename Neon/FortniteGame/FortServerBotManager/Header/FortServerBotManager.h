@@ -165,6 +165,30 @@ public:
 
         this->ProcessEvent(Func, &Params);
     }
+
+    bool GetValueAsBool(const class FName& KeyName) {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BlackboardComponent", "GetValueAsBool");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return false;
+
+        struct BlackboardComponent_GetValueAsBool final
+        {
+        public:
+            class FName KeyName;
+            bool ReturnValue;
+        };
+
+        BlackboardComponent_GetValueAsBool Params;
+        Params.KeyName = KeyName;
+
+        this->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
 public:
 	DECLARE_STATIC_CLASS(UBlackboardComponent);
 	DECLARE_DEFAULT_OBJECT(UBlackboardComponent);

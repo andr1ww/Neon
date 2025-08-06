@@ -166,6 +166,7 @@
     <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTree.h" />
     <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTreeService.h" />
     <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTree\BT_MANG2\BT_MANG2.h" />
+    <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTree\Decorators\IsSet.h" />
     <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTree\Tasks\Wait.h" />
     <ClInclude Include="FortniteGame\BuildingSMActor\Header\BuildingSMActor.h" />
     <ClInclude Include="FortniteGame\Common\Header\ItemDefinition.h" />
@@ -205,8 +206,6 @@
     <ClCompile Include="Engine\PlayerController\Source\PlayerController.cpp" />
     <ClCompile Include="Engine\UEngine\Source\UEngine.cpp" />
     <ClCompile Include="FortniteGame\AbilitySystemComponent\Source\AbilitySystemComponent.cpp" />
-    <ClCompile Include="FortniteGame\BehaviorTree\Source\BehaviorTree\BT_MANG2\BT_MANG2.cpp" />
-    <ClCompile Include="FortniteGame\BehaviorTree\Source\BehaviorTree\Tasks\Wait.cpp" />
     <ClCompile Include="FortniteGame\BuildingSMActor\Source\BuildingSMActor.cpp" />
     <ClCompile Include="FortniteGame\FortAthenaAIBotController\Source\FortAthenaAIBotController.cpp" />
     <ClCompile Include="FortniteGame\FortGameMode\Source\FortGameMode.cpp" />
