@@ -60,6 +60,7 @@ public:
 
         {
             auto* Service = new BTEvaluator_AvoidThreat();
+            Service->RandDirOffset = 500.f;
             RootSelector->AddService(Service);
         }
 
