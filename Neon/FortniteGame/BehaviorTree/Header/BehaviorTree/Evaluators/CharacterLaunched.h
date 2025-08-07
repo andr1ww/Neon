@@ -6,8 +6,9 @@
 class BTEvaluator_CharacterLaunched : public BTService {
 public:
     BTEvaluator_CharacterLaunched() {
-        Name = "FortAthenaBTService_AIEvaluator_39";
         NodeName = "Evaluating...Character Launched";
+
+        Interval = 1.f;
     }
 
     void TickService(BTContext Context) override {

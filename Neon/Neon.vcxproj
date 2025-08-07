@@ -168,8 +168,10 @@
     <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTree\BT_MANG2\BT_MANG2.h" />
     <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTree\Decorators\CheckEnum.h" />
     <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTree\Decorators\IsSet.h" />
+    <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTree\Evaluators\AvoidThreat.h" />
     <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTree\Evaluators\CharacterLaunched.h" />
     <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTree\Services\HandleFocusing_ScanAroundOnly.h" />
+    <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTree\Tasks\MoveTo.h" />
     <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTree\Tasks\SteerMovement.h" />
     <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTree\Tasks\Wait.h" />
     <ClInclude Include="FortniteGame\BuildingSMActor\Header\BuildingSMActor.h" />

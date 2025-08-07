@@ -9,7 +9,7 @@ public:
     int IntValue = 0;
     EBlackboardCompareOp Operator = EBlackboardCompareOp::Equal;
 public:
-    virtual bool Evaluate(BTContext Context) override {
+    bool Evaluate(BTContext Context) override {
         if (!Context.Controller || !Context.Controller->GetBlackboard()) {
             return false;
         }

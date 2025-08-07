@@ -15,7 +15,7 @@ public:
         DirectionChangeInterval = DestChangeInterval;
     }
     
-    virtual EBTNodeResult ChildTask(BTContext Context) override {
+    EBTNodeResult ChildTask(BTContext Context) override {
         if (!Context.Pawn || !Context.Controller) {
             return EBTNodeResult::Failed;
         }
@@ -37,9 +37,6 @@ public:
             {
                 return EBTNodeResult::InProgress;
             }
-        } else
-        {
-            return EBTNodeResult::Succeeded;
         }
         
         return EBTNodeResult::Failed;

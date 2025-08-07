@@ -6,13 +6,22 @@
 #include "FortniteGame/FortPlayerPawn/Header/FortPlayerPawn.h"
 #include "FortniteGame/FortPlayerState/Header/FortPlayerState.h"
 #include "FortniteGame/Common/Header/ItemDefinition.h"
-#include "FortniteGame/FortServerBotManager/Header/FortServerBotManager.h"
 
 
 class UBehaviorTree;
 class UBrainComponent;
 class UBlackboardComponent;
 class UFortAthenaNpcPatrollingComponent;
+
+enum class EAlertLevel : uint8
+{
+    Unaware                                  = 0,
+    Alerted                                  = 1,
+    LKP                                      = 2,
+    Threatened                               = 3,
+    Count                                    = 4,
+    EAlertLevel_MAX                          = 5,
+};
 
 enum class EPathFollowingRequestResult : uint8
 {
@@ -233,6 +242,7 @@ public:
     DEFINE_MEMBER(float, AFortAthenaAIBotController, Skill);
 
     DEFINE_PTR(UFortAthenaNpcPatrollingComponent, AFortAthenaAIBotController, CachedPatrollingComponent);
+    DEFINE_MEMBER(EAlertLevel, AFortAthenaAIBotController, CurrentAlertLevel);
 
 public:
     DefHookOg(void, OnPossessedPawnDied, AFortAthenaAIBotController*, AActor*, float, AFortPlayerControllerAthena*, AActor*, FVector, UPrimitiveComponent*, FName, FVector);

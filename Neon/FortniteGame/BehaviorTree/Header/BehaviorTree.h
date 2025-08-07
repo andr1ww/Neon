@@ -132,7 +132,7 @@ public:
         for (BTNode* Child : Children)
         {
             EBTNodeResult Result = Child->Tick(Context);
-            if (Result == EBTNodeResult::Succeeded || Result == EBTNodeResult::InProgress)
+            if (Result == EBTNodeResult::Succeeded)
                 return Result;
         }
         return EBTNodeResult::Failed;

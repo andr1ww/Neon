@@ -4,11 +4,14 @@
 
 #include "../Tasks/Wait.h"
 #include "../Tasks/SteerMovement.h"
+#include "../Tasks/MoveTo.h"
 
 #include "../Decorators/IsSet.h"
 #include "../Decorators/CheckEnum.h"
 
 #include "../Services/HandleFocusing_ScanAroundOnly.h"
+
+#include "FortniteGame/BehaviorTree/Header/BehaviorTree/Evaluators/AvoidThreat.h"
 #include "FortniteGame/BehaviorTree/Header/BehaviorTree/Evaluators/CharacterLaunched.h"
 
 class BT_MANG2
@@ -40,6 +43,24 @@ public:
             Decorator->Operator = EBlackboardCompareOp::GreaterThanOrEqual;
             Task->AddDecorator(Decorator);
             RootSelector->AddChild(Task);
+        }
+
+        {
+            auto* Task = new BTTask_BotMoveTo();
+            Task->bShouldSetFocalPoint = false;
+            Task->SelectedKeyName = UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_AvoidThreat_Destination");
+            Task->MovementResultKey = UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_AvoidThreat_ExecutionStatus"); // cheap way to stop it from executing afterwards
+            auto* Decorator = new BTDecorator_CheckEnum();
+            Decorator->SelectedKeyName = UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_AvoidThreat_ExecutionStatus");
+            Decorator->IntValue = (int)EExecutionStatus::ExecutionAllowed;
+            Decorator->Operator = EBlackboardCompareOp::GreaterThanOrEqual;
+            Task->AddDecorator(Decorator);
+            RootSelector->AddChild(Task);
+        }
+
+        {
+            auto* Service = new BTEvaluator_AvoidThreat();
+            RootSelector->AddService(Service);
         }
 
         {

@@ -14,16 +14,6 @@ class AFortGameModeAthena;
 class UActorComponent;
 class ANavigationData;
 
-enum class EAlertLevel : uint8
-{
-    Unaware                                  = 0,
-    Alerted                                  = 1,
-    LKP                                      = 2,
-    Threatened                               = 3,
-    Count                                    = 4,
-    EAlertLevel_MAX                          = 5,
-};
-
 enum class EExecutionStatus : uint8
 {
     ExecutionError = 0,
@@ -166,6 +156,29 @@ public:
         this->ProcessEvent(Func, &Params);
     }
 
+    void SetValueAsVector(const class FName& KeyName, const struct FVector& VectorValue) {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BlackboardComponent", "SetValueAsVector");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct BlackboardComponent_SetValueAsVector final
+        {
+        public:
+            class FName                                   KeyName;
+            struct FVector                                VectorValue;
+        };
+
+        BlackboardComponent_SetValueAsVector Params;
+        Params.KeyName = KeyName;
+        Params.VectorValue = std::move(VectorValue);
+
+        this->ProcessEvent(Func, &Params);
+    }
+
     bool GetValueAsBool(const class FName& KeyName) {
         static SDK::UFunction* Func = nullptr;
         SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BlackboardComponent", "GetValueAsBool");
@@ -207,6 +220,30 @@ public:
         };
 
         BlackboardComponent_GetValueAsEnum Params;
+        Params.KeyName = KeyName;
+
+        this->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+
+    FVector GetValueAsVector(const class FName& KeyName) {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BlackboardComponent", "GetValueAsVector");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return FVector();
+
+        struct BlackboardComponent_GetValueAsVector final
+        {
+        public:
+            class FName                                   KeyName;
+            struct FVector                                ReturnValue;                                       
+        };
+
+        BlackboardComponent_GetValueAsVector Params;
         Params.KeyName = KeyName;
 
         this->ProcessEvent(Func, &Params);

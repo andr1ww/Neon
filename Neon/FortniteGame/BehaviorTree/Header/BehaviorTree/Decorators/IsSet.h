@@ -6,7 +6,7 @@ class BTDecorator_IsSet : public BTDecorator {
 public:
     FName SelectedKeyName;
 public:
-    virtual bool Evaluate(BTContext Context) override {
+    bool Evaluate(BTContext Context) override {
         if (!Context.Controller || !Context.Controller->GetBlackboard()) {
             return false;
         }
