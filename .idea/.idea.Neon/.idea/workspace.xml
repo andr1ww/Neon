@@ -5,8 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortGameSessionDedicated/Header/FortGameSessionDedicated.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortGameSessionDedicated/Source/FortGameSessionDedicated.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/Engine/ItemAndCount/Source/ItemAndCount.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Engine/ItemAndCount/Source/ItemAndCount.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Neon.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon.vcxproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Neon/Config.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Neon/Runtime/Runtime.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Runtime/Runtime.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/dllmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/dllmain.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,7 +71,7 @@
       <workItem from="1754443081140" duration="31378000" />
       <workItem from="1754535593930" duration="252000" />
       <workItem from="1754541197232" duration="1269000" />
-      <workItem from="1754576129358" duration="8120000" />
+      <workItem from="1754576129358" duration="13273000" />
     </task>
     <servers />
   </component>
@@ -75,5 +81,16 @@
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortGameSessionDedicated/Header/FortGameSessionDedicated.h</url>
+          <line>1</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

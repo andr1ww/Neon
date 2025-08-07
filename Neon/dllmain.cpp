@@ -6,10 +6,12 @@
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
 #include "FortniteGame/BuildingSMActor/Header/BuildingSMActor.h"
 #include "FortniteGame/FortGameMode/Header/FortGameMode.h"
+#include "FortniteGame/FortGameSessionDedicated/Header/FortGameSessionDedicated.h"
 #include "FortniteGame/FortLoot/Header/FortLootPackage.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "FortniteGame/FortSafeZoneIndicator/Header/FortSafeZoneIndicator.h"
+#include "Neon/Config.h"
 #include "Neon/Finder/Header/Finder.h"
 #include "Neon/Runtime/Runtime.h"
 
@@ -102,6 +104,11 @@ void InitNullsAndRetTrues() {
 
 		FuncsTo85.push_back(Addr);
 	}
+
+	if (Config::bGameSessions)
+	{
+		NullFuncs.push_back(Memcury::Scanner::FindPattern("0F 84 ? ? ? ? 48 8B CF E8 ? ? ? ? 48 8B 4E").Get());
+	}
 	
 	for (auto& Func : NullFuncs) {
 		if (Func == 0x0) continue;
@@ -118,6 +125,7 @@ void InitNullsAndRetTrues() {
 		if (Func == 0x0) continue;
 		Runtime::Patch(Func, 0x85);
 	}
+	
 	if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.50)
 	{
 		Runtime::Hook(IMAGEBASE + 0x2E688D0, RetTrue); // server context
@@ -222,7 +230,11 @@ void Main()
 
 	Runtime::Hook(IMAGEBASE + 0x1EE9720, AFortPlayerControllerAthena::K2_RemoveItemFromPlayer, (void**)&AFortPlayerControllerAthena::K2_RemoveItemFromPlayerOG);
 	Runtime::Hook(IMAGEBASE + 0x2ebf890, ProcessEvent, (void**)&ProcessEventOG); 
-		
+
+	auto ListenInstruction = Memcury::Scanner::FindPattern("E8 ? ? ? ? 84 C0 75 ? 80 3D ? ? ? ? ? 72 ? 45 33 C0 48 8D 55").Get();
+	Runtime::ModifyInstruction(ListenInstruction, Finder->InstructionForCollision());
+	Runtime::Hook(Finder->InstructionForCollision(), FortGameSessionDedicated::UWorld_Listen);
+	
 	UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
 	FString WorldName;
 	if (Fortnite_Version <= 10.40)

@@ -210,6 +210,22 @@ namespace Runtime
 
 		return Idx;
 	}
+
+	
+	__forceinline static void ModifyInstruction(uintptr_t pinstrAddr, uintptr_t pDetourAddr)
+	{
+		uint8_t *DetourAddr = (uint8_t *)pDetourAddr;
+		uint8_t *instrAddr = (uint8_t *)pinstrAddr;
+		int64_t delta = (int64_t)(DetourAddr - (instrAddr + 5));
+		auto addr = reinterpret_cast<int32_t *>(instrAddr + 1);
+		DWORD dwProtection;
+		VirtualProtect(addr, 4, PAGE_EXECUTE_READWRITE, &dwProtection);
+
+		*addr = static_cast<int32_t>(delta);
+
+		DWORD dwTemp;
+		VirtualProtect(addr, 4, dwProtection, &dwTemp);
+	}
 	
 	static void VFTHook(void** vft, int idx, void* newFunc, void** original = nullptr)
 	{

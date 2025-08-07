@@ -136,6 +136,8 @@ public:
     uint64 ReloadWeapon();
 
     uint64 OnSafeZoneStateChange();
+
+    uint64 InstructionForCollision();
 };
 
 inline UFinder* Finder = new UFinder();

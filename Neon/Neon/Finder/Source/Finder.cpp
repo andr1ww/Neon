@@ -1226,3 +1226,14 @@ uint64 UFinder::StartNewSafeZonePhase()
 
     return 0;
 }
+
+uint64 UFinder::InstructionForCollision()
+{
+    auto InstructionForCollision = Memcury::Scanner::FindPattern("40 53 48 83 EC ? 33 C0 48 89 7C 24 ? 48 89 44 24 ? 48 8D 54 24 ? 48 89 44 24 ? 48 8B D9").Get();
+
+    if (InstructionForCollision)
+    {
+        return InstructionForCollision;
+    }
+}
+

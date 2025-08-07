@@ -121,6 +121,15 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     GameMode->SetAISettings(Playlist->GetAISettings());
                 }
 
+                // base time set cause of UNetDriver::TickFlush 
+                auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
+                auto WarmupDuration = 9000.f;
+
+                GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
+                GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
+                GameMode->Set("FortGameModeAthena", "WarmupCountdownDuration", WarmupDuration);
+                GameMode->Set("FortGameModeAthena", "WarmupEarlyCountdownDuration", WarmupDuration);
+                
                 if (!Config::bLateGame)
                 {
                     GameMode->SetServerBotManager((UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode));
@@ -144,6 +153,8 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
                     GameMode->SetAIGoalManager(AIGoalManager);
                 }
+
+                GameMode->SetbWorldIsReady(true);
             }
         } else
         {
@@ -157,12 +168,12 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             GameState->OnRep_CurrentPlaylistData();
         }
     }
-    
-    if (!UWorld::GetWorld()->GetNetDriver())
+
+    UNetDriver* NetDriver = UWorld::GetWorld()->GetNetDriver();
+    if (!NetDriver && !Finder->InstructionForCollision())
     {
         FName GameNetDriver = UKismetStringLibrary::Conv_StringToName(L"GameNetDriver");
-        UNetDriver* NetDriver = nullptr;
-
+    
         if (Fortnite_Version >= 16.40)
         {
             static void* (*GetWorldContextFromObject)(UEngine*, UWorld*) = decltype(GetWorldContextFromObject)(Finder->GetWorldContextFromObject());
@@ -171,75 +182,59 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             NetDriver = CreateNetDriver_Local(UEngine::GetEngine(), WorldContext, GameNetDriver);
         } else
         {
-			NetDriver = ((UNetDriver * (*)(UObject*, UObject*, FName)) Finder->CreateNetDriver())(UEngine::GetEngine(), UWorld::GetWorld(), GameNetDriver);
+            NetDriver = ((UNetDriver * (*)(UObject*, UObject*, FName)) Finder->CreateNetDriver())(UEngine::GetEngine(), UWorld::GetWorld(), GameNetDriver);
         }
         
         UWorld::GetWorld()->SetNetDriver(NetDriver);
+    
+        NetDriver->SetNetDriverName(GameNetDriver);
+        NetDriver->NetDriverSetWorld(UWorld::GetWorld());
 
-        if (UWorld::GetWorld()->GetNetDriver())
+        FURL URL{};
+        URL.Port = 7777;
+
+        NetDriver->InitListen(UWorld::GetWorld(), URL, false);
+        NetDriver->NetDriverSetWorld(UWorld::GetWorld());
+            
+        for (int i = 0; i < UWorld::GetWorld()->GetLevelCollections().Num(); i++)
         {
-            UWorld::GetWorld()->GetNetDriver()->SetNetDriverName(GameNetDriver);
-            UWorld::GetWorld()->GetNetDriver()->NetDriverSetWorld(UWorld::GetWorld());
+            UWorld::GetWorld()->GetLevelCollections()[i].NetDriver = NetDriver;
+        }
 
-            FURL URL{};
-            URL.Port = 7777;
-
-            UWorld::GetWorld()->GetNetDriver()->InitListen(UWorld::GetWorld(), URL, false);
-            UWorld::GetWorld()->GetNetDriver()->NetDriverSetWorld(UWorld::GetWorld());
-            
-            for (int i = 0; i < UWorld::GetWorld()->GetLevelCollections().Num(); i++)
-            {
-                UWorld::GetWorld()->GetLevelCollections()[i].NetDriver = UWorld::GetWorld()->GetNetDriver();
-            }
-
-            SetConsoleTitleA("Neon | Listening on Port: 7777");
-            GameMode->SetbWorldIsReady(true);
-
-            GameState->OnRep_CurrentPlaylistId();
-            GameState->OnRep_CurrentPlaylistInfo();
-
-            TArray<AActor*> WarmupActors;
-            UClass* WarmupClass = Runtime::StaticLoadObject<UClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_Warmup.Tiered_Athena_FloorLoot_Warmup_C");
-            WarmupActors = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), WarmupClass);
-            
-            for (auto& WarmupActor : WarmupActors)
-            {
-                auto Container = (ABuildingContainer*)WarmupActor;
-
-                Container->BP_SpawnLoot(nullptr);
-
-                Container->K2_DestroyActor();
-            }
-            WarmupActors.Free();
-
-            WarmupClass = Runtime::StaticLoadObject<UClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_01.Tiered_Athena_FloorLoot_01_C");
-            WarmupActors = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), WarmupClass);
-
-            for (auto& WarmupActor : WarmupActors)
-            {
-                auto Container = (ABuildingContainer*)WarmupActor;
-
-                Container->BP_SpawnLoot(nullptr);
-
-                Container->K2_DestroyActor();
-            }
-            WarmupActors.Free();
-
-            static void (*Build)(UNavigationSystemV1* System) = decltype(Build)(IMAGEBASE + 0x48C50C0);
-            Build(UWorld::GetWorld()->GetNavigationSystem());
-
-            // base time set cause of UNetDriver::TickFlush 
-            auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
-            auto WarmupDuration = 9000.f;
-
-            GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
-            GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
-            GameMode->Set("FortGameModeAthena", "WarmupCountdownDuration", WarmupDuration);
-            GameMode->Set("FortGameModeAthena", "WarmupEarlyCountdownDuration", WarmupDuration);
-        } 
+        SetConsoleTitleA("Neon | Listening on Port: 7777");
     }
-
+    
     bool Res = GameMode->GetAlivePlayers().Num() >= GameMode->GetWarmupRequiredPlayerCount();
+
+    if (Res)
+    {
+        TArray<AActor*> WarmupActors;
+        UClass* WarmupClass = Runtime::StaticLoadObject<UClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_Warmup.Tiered_Athena_FloorLoot_Warmup_C");
+        WarmupActors = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), WarmupClass);
+            
+        for (auto& WarmupActor : WarmupActors)
+        {
+            auto Container = (ABuildingContainer*)WarmupActor;
+
+            Container->BP_SpawnLoot(nullptr);
+
+            Container->K2_DestroyActor();
+        }
+        WarmupActors.Free();
+
+        WarmupClass = Runtime::StaticLoadObject<UClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_01.Tiered_Athena_FloorLoot_01_C");
+        WarmupActors = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), WarmupClass);
+
+        for (auto& WarmupActor : WarmupActors)
+        {
+            auto Container = (ABuildingContainer*)WarmupActor;
+
+            Container->BP_SpawnLoot(nullptr);
+
+            Container->K2_DestroyActor();
+        }
+        WarmupActors.Free();
+    }
     
     if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && Res)
     {
