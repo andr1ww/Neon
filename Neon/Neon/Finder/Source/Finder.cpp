@@ -3,6 +3,46 @@
 
 #include "Engine/NetDriver/Header/NetDriver.h"
 
+uint64 UFinder::StartAircraftPhase()
+{
+    if (Engine_Version < 427) 
+    {
+        auto strRef = Memcury::Scanner::FindStringRef(L"STARTAIRCRAFT").Get();
+
+        if (!strRef)
+            return 0;
+
+        int NumCalls = 0;
+
+        for (int i = 0; i < 150; i++)
+        {
+            if (*(uint8_t*)(strRef + i) == 0xE8)
+            {
+                NumCalls++;
+
+                if (NumCalls == 2) 
+                {
+                    return Memcury::Scanner(strRef + i).RelativeOffset(1).Get();
+                }
+            }
+        }
+    }
+    else
+    {
+        auto StatAddress = Memcury::Scanner::FindStringRef(L"STAT_StartAircraftPhase").Get();
+
+        for (int i = 0; i < 1000; i++)
+        {
+            if (*(uint8_t*)(uint8_t*)(StatAddress - i) == 0x48 && *(uint8_t*)(uint8_t*)(StatAddress - i + 1) == 0x8B && *(uint8_t*)(uint8_t*)(StatAddress - i + 2) == 0xC4)
+            {
+                return StatAddress - i;
+            }
+        }
+    }
+
+    return 0;
+}
+
 uint64_t UFinder::WorldNetMode()
 {
     if (Fortnite_Version == 23.50)
@@ -1141,4 +1181,48 @@ uint64 UFinder::ReloadWeapon()
     }
 
     return CachedResult = 0;
+}
+
+uint64 UFinder::OnSafeZoneStateChange()
+{
+    auto OnSafeZoneStateChangeAddr = Memcury::FindFunction(L"OnSafeZoneStateChange", Fortnite_Version <= 2.4 ? std::vector<uint8_t>{ 0x48, 0x89, 0x54 } : std::vector<uint8_t>{ 0x48, 0x89, 0x5C });
+
+    if (OnSafeZoneStateChangeAddr)
+    {
+        return OnSafeZoneStateChangeAddr;
+    }
+
+    return 0;
+}
+
+uint64 UFinder::StartNewSafeZonePhase()
+{
+    auto Addr = Memcury::Scanner::FindStringRef(L"FortGameModeAthena: No MegaStorm on SafeZone[%d].  GridCellThickness is less than 1.0.", true, 0, Engine_Version >= 427).Get();
+
+    if (!Addr)
+        return 0;
+
+    for (int i = 0; i < 100000; i++)
+    {
+        if ((*(uint8_t*)(uint8_t*)(Addr - i) == 0x40 && *(uint8_t*)(uint8_t*)(Addr - i + 1) == 0x53) 
+            || (*(uint8_t*)(uint8_t*)(Addr - i) == 0x40 && *(uint8_t*)(uint8_t*)(Addr - i + 1) == 0x55))
+        {
+            return Addr - i;
+        }
+
+        if (Fortnite_Version < 8)
+        {
+            if (*(uint8_t*)(uint8_t*)(Addr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(Addr - i + 2) == 0x5C)
+            {
+                return Addr - i;
+            }
+        }
+
+        if (*(uint8_t*)(uint8_t*)(Addr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addr - i + 1) == 0x8B && *(uint8_t*)(uint8_t*)(Addr - i + 2) == 0xC4)
+        {
+            return Addr - i;
+        }
+    }
+
+    return 0;
 }

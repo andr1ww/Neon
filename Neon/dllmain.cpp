@@ -9,6 +9,7 @@
 #include "FortniteGame/FortLoot/Header/FortLootPackage.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
+#include "FortniteGame/FortSafeZoneIndicator/Header/FortSafeZoneIndicator.h"
 #include "Neon/Finder/Header/Finder.h"
 #include "Neon/Runtime/Runtime.h"
 
@@ -126,6 +127,8 @@ void InitNullsAndRetTrues() {
 
 void Main()
 {
+	std::srand(static_cast<unsigned int>(std::time(nullptr)));
+	
 	AllocConsole();
 	FILE* File = nullptr;
 	freopen_s(&File, "CONOUT$", "w+", stdout);
@@ -174,7 +177,10 @@ void Main()
 	Runtime::VFTHook(StaticClassImpl("FortPlayerPawnAthena")->GetClassDefaultObject()->GetVTable(), 0x119, AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues, (void**)&AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCuesOG);
 	Runtime::Hook(IMAGEBASE + 0x6BB920, RetTrue);
 	Runtime::Hook(Finder->ReloadWeapon(), AFortPlayerPawn::ReloadWeapon, (void**)&AFortPlayerPawn::ReloadWeaponOG); // this is right um we can make it uni after we get it to fucking call 
-	
+	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);
+	Runtime::Hook(Finder->OnSafeZoneStateChange(), AFortSafeZoneIndicator::OnSafeZoneStateChange, (void**)&AFortSafeZoneIndicator::OnSafeZoneStateChangeOG);
+	Runtime::Hook(Finder->StartNewSafeZonePhase(), AFortGameModeAthena::StartNewSafeZonePhase, (void**)&AFortGameModeAthena::StartNewSafeZonePhaseOG);
+
 	if (Finder->CompletePickupAnimation())
 	{
 		Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.ServerHandlePickup", AFortPlayerPawn::ServerHandlePickup);

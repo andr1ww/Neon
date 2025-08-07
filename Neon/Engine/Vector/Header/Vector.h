@@ -80,7 +80,6 @@ struct FVector {
         return FVector(-X, -Y, -Z);
     }
     
-    // Utility functions
     float Size() const {
         return sqrtf(X * X + Y * Y + Z * Z);
     }
@@ -121,4 +120,8 @@ struct FVector_NetQuantize10 final : public FVector
 struct FVector_NetQuantizeNormal final : public FVector
 {
 
+};
+
+struct FVector_NetQuantize100 final : public FVector
+{
 };

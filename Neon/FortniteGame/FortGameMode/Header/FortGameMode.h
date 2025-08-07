@@ -17,11 +17,12 @@ class AFortAIGoalManager;
 class AFortAthenaMutator_Bots;
 class UFortServerBotManagerAthena;
 
-struct FItemAndCount final 
+struct FItemAndCount final
 {
 public:
-    DEFINE_MEMBER(int32, FItemAndCount, Count);
-    DEFINE_PTR(UFortItemDefinition, FItemAndCount, Item);
+    int32                                         Count;                                             // 0x0000(0x0004)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    uint8                                         Pad_4[0x4];                                        // 0x0004(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
+    class UFortItemDefinition*                    Item;                                              // 0x0008(0x0008)(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 };
 
 class AGameSession : public UObject
@@ -274,8 +275,9 @@ public:
     DEFINE_MEMBER(Redirect, AFortGameModeAthena, RedirectAthenaLootTierGroups);
     DEFINE_MEMBER(int32, AFortGameModeAthena, WarmupRequiredPlayerCount);
     DEFINE_MEMBER(TArray<FItemAndCount>, AFortGameModeAthena, StartingItems);
-
+DEFINE_MEMBER(TArray<struct FVector>, AFortGameModeAthena, SafeZoneLocations);
     DEFINE_MEMBER(int32, AFortGameModeAthena, NumPlayers);
+    DEFINE_MEMBER(int, AFortGameModeAthena, SafeZonePhase);
     DEFINE_MEMBER(int32, AFortGameModeAthena, NumBots);
 
     DEFINE_MEMBER(TArray<AFortPlayerControllerAthena*>, AFortGameModeAthena, AlivePlayers);
@@ -293,6 +295,8 @@ public:
 public:
     static bool ReadyToStartMatch(AFortGameModeAthena* GameMode, FFrame& Stack, bool* Result);
     static APawn* SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer, AActor* StartSpot);
+    DefHookOg(void, StartAircraftPhase, AFortGameModeAthena* GameMode, char a2);
+    DefHookOg(void, StartNewSafeZonePhase, AFortGameModeAthena* GameMode, int Phase);
 };
 
 inline bool (*ReadyToStartMatchOriginal)(AFortGameModeAthena* GameMode);

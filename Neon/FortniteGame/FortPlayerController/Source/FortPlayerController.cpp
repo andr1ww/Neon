@@ -3,11 +3,13 @@
 
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "Engine/Guid/Header/Guid.h"
+#include "Engine/ItemAndCount/Header/ItemAndCount.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
 #include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
 #include "FortniteGame/FortLoot/Header/FortLootPackage.h"
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
+#include "Neon/Config.h"
 #include "Neon/Finder/Header/Finder.h"
 
 void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) 
@@ -198,6 +200,67 @@ void AFortPlayerControllerAthena::ServerAttemptAircraftJump(UActorComponent* Com
         PlayerController->Set("Controller", "ControlRotation", Rotation);
 
         PlayerController->GetMyFortPawn()->BeginSkydiving(true);
+    	if (Config::bLateGame)
+    	{
+    		PlayerController->GetMyFortPawn()->SetHealth(100);
+    		PlayerController->GetMyFortPawn()->SetShield(100);
+
+    		AFortInventory::GiveItem(PlayerController, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Wood), 500, 500, 1);
+    		AFortInventory::GiveItem(PlayerController, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Stone), 500, 500, 1);
+    		AFortInventory::GiveItem(PlayerController, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Metal), 500, 500, 1);
+
+    		const std::map<EAmmoType, int> Ammo = {
+    			{EAmmoType::Assault, 250},
+				{EAmmoType::Shotgun, 50},
+				{EAmmoType::Submachine, 400},
+				{EAmmoType::Rocket, 6},
+				{EAmmoType::Sniper, 20}
+    		};
+
+    		for (const auto& [Type, Count] : Ammo) {
+    			AFortInventory::GiveItem(PlayerController, ItemAndCount::GetAmmo(Type), Count, Count, 1);
+    		}
+
+    		FItemAndCount Shotgun;
+    		do {
+    			Shotgun = ItemAndCount::GetShotguns();
+    		} while (!Shotgun.Item);
+
+    		FItemAndCount AssaultRifle;
+    		do {
+    			AssaultRifle = ItemAndCount::GetAssaultRifles();
+    		} while (!AssaultRifle.Item);
+
+    		FItemAndCount Sniper;
+    		do {
+    			Sniper = ItemAndCount::GetSnipers();
+    		} while (!Sniper.Item);
+
+    		FItemAndCount Heal;
+    		do {
+    			Heal = ItemAndCount::GetHeals();
+    		} while (!Heal.Item);
+
+    		FItemAndCount HealSlot2;
+    		do {
+    			HealSlot2 = ItemAndCount::GetHeals();
+    			if (HealSlot2.Item == Heal.Item) {
+    				HealSlot2 = ItemAndCount::GetHeals();
+    			}
+    		} while (!HealSlot2.Item);
+
+    		int ShotgunClipSize = AFortInventory::GetStats((UFortWeaponItemDefinition*)Shotgun.Item)->GetClipSize();
+    		int AssaultRifleClipSize = AFortInventory::GetStats((UFortWeaponItemDefinition*)AssaultRifle.Item)->GetClipSize();
+    		int SniperClipSize = AFortInventory::GetStats((UFortWeaponItemDefinition*)Sniper.Item)->GetClipSize();
+    		int HealClipSize = Heal.Item->IsA<UFortWeaponItemDefinition>() ? AFortInventory::GetStats((UFortWeaponItemDefinition*)Heal.Item)->GetClipSize() : 0;
+    		int HealSlot2ClipSize = HealSlot2.Item->IsA<UFortWeaponItemDefinition>() ? AFortInventory::GetStats((UFortWeaponItemDefinition*)HealSlot2.Item)->GetClipSize() : 0;
+
+    		AFortInventory::GiveItem(PlayerController, AssaultRifle.Item, AssaultRifle.Count, AssaultRifleClipSize, 1);
+    		AFortInventory::GiveItem(PlayerController, Shotgun.Item, Shotgun.Count, ShotgunClipSize, 1);
+    		AFortInventory::GiveItem(PlayerController, Sniper.Item, Sniper.Count, SniperClipSize, 1);
+    		AFortInventory::GiveItem(PlayerController, Heal.Item, Heal.Count, HealClipSize, 1);
+    		AFortInventory::GiveItem(PlayerController, HealSlot2.Item, HealSlot2.Count, HealSlot2ClipSize, 1);
+    	}
     }
 }
 

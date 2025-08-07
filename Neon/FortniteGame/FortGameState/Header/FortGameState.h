@@ -100,6 +100,17 @@ public:
 
 using Map = TMap<TSubclassOf<ABuildingActor>, int32>;
 
+class AFortAthenaAircraft : public AActor
+{
+public:
+    DEFINE_MEMBER(FAircraftFlightInfo, AFortAthenaAircraft, FlightInfo)
+    DEFINE_MEMBER(float, AFortAthenaAircraft, FlightStartTime)
+    DEFINE_MEMBER(float, AFortAthenaAircraft, FlightEndTime)
+public:
+    DECLARE_STATIC_CLASS(AFortAthenaAircraft)
+    DECLARE_DEFAULT_OBJECT(AFortAthenaAircraft)
+};
+
 class AFortGameStateAthena : public AFortGameState
 {
 public:
@@ -129,14 +140,19 @@ public:
         this->ProcessEvent(Func, nullptr);
     }
 public:
+    DEFINE_MEMBER(TArray<AFortAthenaAircraft*>, AFortGameStateAthena, Aircrafts);
     DEFINE_MEMBER(Map, AFortGameStateAthena, AllPlayerBuildableClassesIndexLookup);
     DEFINE_MEMBER(TArray<TSubclassOf<ABuildingActor>>, UWorld, BuildingActorClasses);
     DEFINE_PTR(FPlaylistPropertyArray, AFortGameStateAthena, CurrentPlaylistInfo)
+    DEFINE_BOOL(AFortGameStateAthena, bGameModeWillSkipAircraft)
+    DEFINE_MEMBER(float, AFortGameStateAthena, SafeZonesStartTime)
+    DEFINE_BOOL(AFortGameStateAthena, bAircraftIsLocked)
     DEFINE_PTR(UFortPlaylistAthena, AFortGameStateAthena, CurrentPlaylistData)
     void OnRep_CurrentPlaylistId();
     void OnRep_CurrentPlaylistData();
     void OnRep_CurrentPlaylistInfo();
     DEFINE_MEMBER(int32, AFortGameStateAthena, CurrentPlaylistId);
+    DEFINE_MEMBER(int, AFortGameModeAthena, SafeZonePhase);
     DEFINE_PTR(AFortAthenaMapInfo, AFortGameStateAthena, MapInfo);
     DEFINE_MEMBER(FGameMemberInfoArray, AFortGameStateAthena, GameMemberInfoArray);
 

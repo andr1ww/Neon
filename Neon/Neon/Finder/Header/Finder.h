@@ -37,6 +37,10 @@ public:
         return -1;
     }
 
+    uint64 StartAircraftPhase();
+
+    uint64 StartNewSafeZonePhase();
+
     uint64_t WorldNetMode();
 
     uint64 GIsClient();
@@ -131,6 +135,7 @@ public:
 
     uint64 ReloadWeapon();
 
+    uint64 OnSafeZoneStateChange();
 };
 
 inline UFinder* Finder = new UFinder();

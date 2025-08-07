@@ -9,6 +9,7 @@
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
 #include "FortniteGame/FortLoot/Header/FortLootPackage.h"
+#include "Neon/Config.h"
 #include "Neon/Finder/Header/Finder.h"
 #include "Neon/Runtime/Runtime.h"
 
@@ -120,26 +121,29 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     GameMode->SetAISettings(Playlist->GetAISettings());
                 }
 
-                GameMode->SetServerBotManager((UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode));
-                GameMode->GetServerBotManager()->SetCachedGameMode(GameMode);
-                GameMode->GetServerBotManager()->SetCachedGameState(GameState);
-                
-                auto BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
-                GameMode->GetServerBotManager()->SetCachedBotMutator(BotMutator);
-                BotMutator->Set("FortAthenaMutator", "CachedGameMode", GameMode);
-                BotMutator->Set("FortAthenaMutator", "CachedGameState", GameState);
-                FBotMutator::Set(BotMutator);
-                GameMode->SetServerBotManagerClass(UFortServerBotManagerAthena::StaticClass());
-
-                AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
-                GameMode->SetAIDirector(AIDirector);
-                if (GameMode->GetAIDirector())
+                if (!Config::bLateGame)
                 {
-                    GameMode->GetAIDirector()->CallFunc<void>("FortAIDirector", "Activate");
-                }
+                    GameMode->SetServerBotManager((UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode));
+                    GameMode->GetServerBotManager()->SetCachedGameMode(GameMode);
+                    GameMode->GetServerBotManager()->SetCachedGameState(GameState);
+                
+                    auto BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
+                    GameMode->GetServerBotManager()->SetCachedBotMutator(BotMutator);
+                    BotMutator->Set("FortAthenaMutator", "CachedGameMode", GameMode);
+                    BotMutator->Set("FortAthenaMutator", "CachedGameState", GameState);
+                    FBotMutator::Set(BotMutator);
+                    GameMode->SetServerBotManagerClass(UFortServerBotManagerAthena::StaticClass());
 
-                AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
-                GameMode->SetAIGoalManager(AIGoalManager);
+                    AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
+                    GameMode->SetAIDirector(AIDirector);
+                    if (GameMode->GetAIDirector())
+                    {
+                        GameMode->GetAIDirector()->CallFunc<void>("FortAIDirector", "Activate");
+                    }
+
+                    AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
+                    GameMode->SetAIGoalManager(AIGoalManager);
+                }
             }
         } else
         {
@@ -277,7 +281,7 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
             return Pawn;
         }
     
-        AFortInventory::GiveItem(NewPlayer, Item->GetItem(), Item->GetCount(), 1, 1);
+        AFortInventory::GiveItem(NewPlayer, Item->Item, Item->Count, 1, 1);
     }
     
     if (Fortnite_Version.GetMajorVersion() <= 8.50) {
@@ -294,34 +298,96 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         NewPlayer->SetMatchReport((UAthenaPlayerMatchReport*)UGameplayStatics::SpawnObject(UAthenaPlayerMatchReport::StaticClass(), NewPlayer));
     }
     
-  /* TScriptInterface<IAbilitySystemInterface> AbilitySystemInterface{};
-
-    static void* (*GetInterfaceAddress)(UObject* Object, UClass* Class) = decltype(GetInterfaceAddress)(Finder->GetInterfaceAddress());
-    
-    AbilitySystemInterface.ObjectPointer = Cast<AFortPlayerStateZone>(NewPlayer->GetPlayerState());
-    AbilitySystemInterface.InterfacePointer = GetInterfaceAddress(Cast<AFortPlayerStateZone>(NewPlayer->GetPlayerState()), IAbilitySystemInterface::StaticClass());
-
-    static UFunction* Func = nullptr;
-    FFunctionInfo Info = PropLibrary->GetFunctionByName("FortKismetLibrary", "EquipFortAbilitySet");
-
-    if (Func == nullptr)
-        Func = Info.Func;
-    if (!Func)
-        return Pawn;
-    
-    struct FortKismetLibrary_EquipFortAbilitySet final
-    {
-    public:
-        TScriptInterface<IAbilitySystemInterface> AbilitySystemInterfaceActor; 
-        UFortAbilitySet*                        AbilitySet;                
-        UObject*                                OverrideSourceObject;
-    } Params {
-        .AbilitySystemInterfaceActor = AbilitySystemInterface,
-        .AbilitySet = AbilitySet,
-        .OverrideSourceObject = nullptr
-    };
-    
-    StaticClassImpl("FortKismetLibrary")->GetClassDefaultObject()->ProcessEvent(Func, &Params);
-    */
     return Pawn;
+}
+
+void AFortGameModeAthena::StartAircraftPhase(AFortGameModeAthena* GameMode, char a2)
+{
+    if (!GameMode) return(StartAircraftPhaseOG(GameMode, a2));
+    StartAircraftPhaseOG(GameMode, a2);
+
+    if (Config::bLateGame)
+    {
+        auto GameState = UWorld::GetWorld()->GetGameState();
+        if (!GameState || GameState->GetAircrafts().Num() == 0)
+            return;
+
+		auto LocalAircraft = GameState->GetAircrafts()[0];
+		FRotator AircraftRotation = LocalAircraft->K2_GetActorRotation();
+
+		float Pitch = AircraftRotation.Pitch * (3.14159265359f / 180.0f);
+		float Yaw = AircraftRotation.Yaw * (3.14159265359f / 180.0f);
+
+		FVector AircraftForward{};
+		AircraftForward.X = cos(Yaw) * cos(Pitch);
+		AircraftForward.Y = sin(Yaw) * cos(Pitch);
+		AircraftForward.Z = sin(Pitch);
+
+		float Length = sqrt(AircraftForward.X * AircraftForward.X +
+			AircraftForward.Y * AircraftForward.Y +
+			AircraftForward.Z * AircraftForward.Z);
+
+		if (Length > 0.0f) {
+			AircraftForward.X /= Length;
+			AircraftForward.Y /= Length;
+			AircraftForward.Z /= Length;
+		}
+
+        int Index = GameMode->GetAlivePlayers().Num() >= 25 ? 4 : 5;
+        
+        FVector SafeZoneCenter = GameMode->GetSafeZoneLocations()[Index];
+        SafeZoneCenter.Z += 15000.f;
+
+        const FVector NewLocation = SafeZoneCenter - AircraftForward * 24000.f;
+        LocalAircraft->CallFunc<void>("Actor", "K2_SetActorLocation", NewLocation, false, nullptr, true);
+
+        auto MapInfo = GameState->GetMapInfo();
+        if (!MapInfo)
+            return;
+
+        for (auto& FlightInfo : MapInfo->GetFlightInfos())
+        {
+            FlightInfo.FlightStartLocation = FVector_NetQuantize100(NewLocation);
+            FlightInfo.FlightSpeed = 2000;
+            FlightInfo.TimeTillFlightEnd = 8.25f;
+            FlightInfo.TimeTillDropEnd = 8.25f;
+            FlightInfo.TimeTillDropStart = 0.0f;
+
+            const float CurrentTime = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
+            LocalAircraft->SetFlightStartTime(CurrentTime);
+            LocalAircraft->SetFlightEndTime(CurrentTime + 8.25f);
+            LocalAircraft->SetFlightInfo(FlightInfo);
+
+            GameState->SetbGameModeWillSkipAircraft(true);
+            MapInfo->GetAircraftDesiredDoorOpenTime().Value = 1;
+
+            GameState->SetbAircraftIsLocked(true);
+            GameState->SetSafeZonesStartTime(0.0001f);
+
+            GameState->CallFunc<void>("FortGameStateAthena", "OnRep_MapInfo");
+        }
+    }
+}
+
+void AFortGameModeAthena::StartNewSafeZonePhase(AFortGameModeAthena* GameMode, int Phase)
+{
+    AFortGameStateAthena* GameState = GameMode->GetGameState();
+
+    int Index = GameMode->GetAlivePlayers().Num() >= 25 ? 3 : 4;
+    
+    if (Config::bLateGame)
+    {
+        GameState->SetSafeZonePhase(GameState->GetSafeZonePhase() <= Index ? Index : GameState->GetSafeZonePhase());
+        GameMode->SetSafeZonePhase(GameState->GetSafeZonePhase());
+        GameState->SetSafeZonesStartTime(0.0001f);
+        if (Fortnite_Version <= 13.40)
+        {
+            return StartNewSafeZonePhaseOG(GameMode, GameState->GetSafeZonePhase());
+        }
+    }
+
+    if (Fortnite_Version <= 13.40)
+    {
+        StartNewSafeZonePhaseOG(GameMode, Phase);
+    }
 }

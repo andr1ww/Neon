@@ -14,6 +14,7 @@ public:
     FVector GetActorRightVector();
     void K2_DestroyActor();
 	FVector K2_GetActorLocation();
+    FRotator K2_GetActorRotation();
     FTransform GetTransform();
     bool K2_SetActorRotation(const struct FRotator& NewRotation, bool bTeleportPhysics);
 public:

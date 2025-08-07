@@ -49,6 +49,46 @@ public:
 		return Params.ReturnValue;
 	}
 
+	void SetHealth(float Health)
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPawn", "SetHealth");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+
+		struct Erm final
+		{
+		public:
+			float Health;
+		} Params;
+		Params.Health = Health;
+		
+		this->ProcessEvent(Func, &Params);
+	}
+
+	void SetShield(float Shield)
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPawn", "SetShield");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+
+		struct Erm final
+		{
+		public:
+			float Shield;
+		} Params;
+		Params.Shield = Shield;
+		
+		this->ProcessEvent(Func, &Params);
+	}
+	
 	void PawnStartFire(uint8 FireModeNum)
 	{
 		static SDK::UFunction* Func = nullptr;
@@ -228,6 +268,7 @@ public:
 		
 		this->ProcessEvent(Func, nullptr);
 	}
+	
 public:
     static void ServerHandlePickupInfo(AFortPlayerPawn* Pawn, FFrame& Stack);
 	static void ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack);

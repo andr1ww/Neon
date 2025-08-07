@@ -149,6 +149,7 @@
     <ClInclude Include="Engine\GameplayStatics\Header\GameplayStatics.h" />
     <ClInclude Include="Engine\Guid\Header\Guid.h" />
     <ClInclude Include="Engine\HTTP\Header\HTTP.h" />
+    <ClInclude Include="Engine\ItemAndCount\Header\ItemAndCount.h" />
     <ClInclude Include="Engine\Kismet\Header\Kismet.h" />
     <ClInclude Include="Engine\Level\Header\Level.h" />
     <ClInclude Include="Engine\NetDriver\Header\NetDriver.h" />
@@ -188,6 +189,8 @@
     <ClInclude Include="FortniteGame\FortPlayerState\Header\FortPlayerState.h" />
     <ClInclude Include="FortniteGame\FortPlaylistAthena\Header\FortPlaylistAthena.h" />
     <ClInclude Include="FortniteGame\FortQuestManager\Header\FortQuestManager.h" />
+    <ClInclude Include="FortniteGame\FortSafeZoneIndicator\Header\FortSafeZoneIndicator.h" />
+    <ClInclude Include="Neon\Config.h" />
     <ClInclude Include="Neon\Finder\Header\Finder.h" />
     <ClInclude Include="Neon\Runtime\Runtime.h" />
     <ClInclude Include="pch.h" />
@@ -208,6 +211,7 @@
     <ClCompile Include="Engine\Actor\Source\Actor.cpp" />
     <ClCompile Include="Engine\GameplayStatics\Source\GameplayStatics.cpp" />
     <ClCompile Include="Engine\HTTP\Source\HTTP.cpp" />
+    <ClCompile Include="Engine\ItemAndCount\Source\ItemAndCount.cpp" />
     <ClCompile Include="Engine\NetDriver\Source\NetDriver.cpp" />
     <ClCompile Include="Engine\PlayerController\Source\PlayerController.cpp" />
     <ClCompile Include="Engine\UEngine\Source\UEngine.cpp" />
@@ -222,6 +226,7 @@
     <ClCompile Include="FortniteGame\FortPlayerController\Source\FortPlayerController.cpp" />
     <ClCompile Include="FortniteGame\FortPlayerPawn\Source\FortPlayerPawn.cpp" />
     <ClCompile Include="FortniteGame\FortQuestManager\Source\FortQuestManager.cpp" />
+    <ClCompile Include="FortniteGame\FortSafeZoneIndicator\Source\FortSafeZoneIndicator.cpp" />
     <ClCompile Include="FortniteGame\FortServerBotManager\Source\FortServerBotManager.cpp" />
     <ClCompile Include="Neon\Finder\Source\Finder.cpp" />
     <ClCompile Include="pch.cpp">
