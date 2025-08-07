@@ -1237,3 +1237,40 @@ uint64 UFinder::InstructionForCollision()
     }
 }
 
+uint64 UFinder::GetGameSessionClass() // IM LAZY TO TRY AND MAKE A SIG (ITS NOT EASY FOR THIS FUNC)))GOIJ02OIGOIWEGOIWG
+{
+    if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.60)
+    {
+        return IMAGEBASE + 0x1E4F780;
+    }
+}
+
+uint64 UFinder::GetCommandLet()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+
+    auto StringRef = Memcury::Scanner::FindStringRef(L"Attempting to get the command line but it hasn't been initialized yet.", false);
+    
+    if (StringRef.Get())
+    {
+        CachedResult = StringRef.ScanFor({ 0x40, 0x53 }, false, 0, 0, 1000).Get();
+        
+        if (!CachedResult)
+            CachedResult = StringRef.ScanFor({ 0x48, 0x89, 0x5C }, false, 0, 0, 1000).Get();
+            
+        if (!CachedResult)
+            CachedResult = StringRef.ScanFor({ 0x48, 0x8B, 0xC4 }, false, 0, 0, 1000).Get();
+    }
+
+    return CachedResult;
+}
+
+uint64 UFinder::MatchmakingSerivcePerms()
+{
+    if (Fortnite_Version <= 15.50 && Fortnite_Version >= 9.40)
+    {
+        return Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 41 56 48 83 EC ? 33 DB 4C 8B F2 48 8B F1 39 99 ? ? ? ? 7E ? 8B FB 66 0F 1F 84 00 ? ? ? ? 41 83 7E ? ? 48 8B 86 ? ? ? ? 74 ? 49 8B 16 EB ? 48 8D 15 ? ? ? ? 83 7C 07").Get();
+    } 
+}

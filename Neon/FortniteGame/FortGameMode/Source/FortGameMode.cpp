@@ -26,6 +26,8 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     {
         return *Result = false;
     }
+
+    GameMode->SetbWorldIsReady(true);
     
     static bool bSetup = false;
 
@@ -153,8 +155,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
                     GameMode->SetAIGoalManager(AIGoalManager);
                 }
-
-                GameMode->SetbWorldIsReady(true);
             }
         } else
         {

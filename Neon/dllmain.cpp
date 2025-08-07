@@ -107,7 +107,11 @@ void InitNullsAndRetTrues() {
 
 	if (Config::bGameSessions)
 	{
-		NullFuncs.push_back(Memcury::Scanner::FindPattern("0F 84 ? ? ? ? 48 8B CF E8 ? ? ? ? 48 8B 4E").Get());
+		Runtime::Hook(Finder->GetCommandLet(), FortGameSessionDedicated::Get, (void**)&FortGameSessionDedicated::GetOG);
+		Runtime::Hook(Finder->MatchmakingSerivcePerms(), FortGameSessionDedicated::MatchmakingServicePerms);
+		Runtime::Hook(Finder->GetGameSessionClass(), FortGameSessionDedicated::GetGameSessionClass);
+		FuncsTo85.push_back(Memcury::Scanner::FindPattern("0F 84 ? ? ? ? 48 8B CF E8 ? ? ? ? 48 8B 4E").Get());
+		RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B D9 4D 8B F1").Get());
 	}
 	
 	for (auto& Func : NullFuncs) {
@@ -234,8 +238,8 @@ void Main()
 	auto ListenInstruction = Memcury::Scanner::FindPattern("E8 ? ? ? ? 84 C0 75 ? 80 3D ? ? ? ? ? 72 ? 45 33 C0 48 8D 55").Get();
 	Runtime::ModifyInstruction(ListenInstruction, Finder->InstructionForCollision());
 	Runtime::Hook(Finder->InstructionForCollision(), FortGameSessionDedicated::UWorld_Listen);
-	
-	UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
+
+	if (!Config::bGameSessions) UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
 	FString WorldName;
 	if (Fortnite_Version <= 10.40)
 	{

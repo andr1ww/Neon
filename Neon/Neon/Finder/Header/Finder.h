@@ -135,9 +135,15 @@ public:
 
     uint64 ReloadWeapon();
 
+    uint64 GetCommandLet();
+    
     uint64 OnSafeZoneStateChange();
 
     uint64 InstructionForCollision();
+
+    uint64 GetGameSessionClass();
+
+    uint64 MatchmakingSerivcePerms();
 };
 
 inline UFinder* Finder = new UFinder();
