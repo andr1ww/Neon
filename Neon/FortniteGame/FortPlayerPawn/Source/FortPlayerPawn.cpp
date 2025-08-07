@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "../Header/FortPlayerPawn.h"
 
-#include "FortniteGame/FortLoot/Header/FortLootPackage.h"
+#include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 
 void AFortPlayerPawn::ServerHandlePickupInfo(AFortPlayerPawn* Pawn, FFrame& Stack)
 {

@@ -2,7 +2,7 @@
 #include "pch.h"
 
 #include "FortniteGame/Common/Header/Tags.h"
-#include "FortniteGame/FortLoot/Header/FortLootPackage.h"
+#include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 
 enum class EFortQuestObjectiveStatEvent : uint8

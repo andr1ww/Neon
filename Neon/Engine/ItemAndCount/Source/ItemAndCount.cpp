@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
-#include "FortniteGame/FortLoot/Header/FortLootPackage.h"
+#include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 #include "../Header/ItemAndCount.h"
 
 FItemAndCount ItemAndCount::GetShotguns()

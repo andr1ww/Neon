@@ -2,7 +2,7 @@
 #include "FortniteGame/FortInventory/Header/FortInventory.h"
 
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
-#include "FortniteGame/FortLoot/Header/FortLootPackage.h"
+#include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 
 void AFortInventory::HandleInventoryLocalUpdate()
 {

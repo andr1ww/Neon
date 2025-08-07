@@ -4,7 +4,7 @@
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
-#include "FortniteGame/FortLoot/Header/FortLootPackage.h"
+#include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 #include "FortniteGame/FortServerBotManager/Header/FortServerBotManager.h"
 
 void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {

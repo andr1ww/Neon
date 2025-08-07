@@ -3,7 +3,7 @@
 
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "Engine/UEngine/Header/UEngine.h"
-#include "FortniteGame/FortLoot/Header/FortLootPackage.h"
+#include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 
 UClass** FortGameSessionDedicated::GetGameSessionClass(AFortGameModeAthena* GameMode, UClass** ClassRet)
 {

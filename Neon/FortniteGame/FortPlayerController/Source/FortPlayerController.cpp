@@ -7,7 +7,7 @@
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
 #include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
-#include "FortniteGame/FortLoot/Header/FortLootPackage.h"
+#include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "Neon/Config.h"
 #include "Neon/Finder/Header/Finder.h"
