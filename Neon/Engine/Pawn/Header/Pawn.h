@@ -47,6 +47,7 @@ public:
         };
         NavMovementComponent_IsFalling Params;
 
+        if (!this) return false;
         this->ProcessEvent(Func, &Params);
 
         return Params.ReturnValue;
