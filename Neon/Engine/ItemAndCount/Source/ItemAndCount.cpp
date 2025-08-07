@@ -25,8 +25,7 @@ FItemAndCount ItemAndCount::GetAssaultRifles()
         FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Assault_Suppressed_Athena_SR_Ore_T03.WID_Assault_Suppressed_Athena_SR_Ore_T03")), // suppresed gold
         FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Assault_Heavy_Athena_R_Ore_T03.WID_Assault_Heavy_Athena_R_Ore_T03")), // gold p90
         FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/Boss/WID_Boss_Adventure_AR.WID_Boss_Adventure_AR")), // skyes mythic ar
-        FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Assault_SemiAuto_Athena_SR_Ore_T03.WID_Assault_SemiAuto_Athena_SR_Ore_T03")), // burst gold
-        FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Assault_SemiAuto_Athena_VR_Ore_T03.WID_Assault_SemiAuto_Athena_VR_Ore_T03")), // burst purple
+        FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/Boss/WID_Boss_Midas.WID_Boss_Midas")), // midas drum
     };
 
     return AssaultRifles[rand() % (AssaultRifles.size())];
@@ -36,8 +35,9 @@ FItemAndCount ItemAndCount::GetSnipers()
 {
     static std::vector<FItemAndCount> Snipers{
         FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Sniper_Heavy_Athena_VR_Ore_T03.WID_Sniper_Heavy_Athena_VR_Ore_T03")), // heavy sniper
-        FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Sniper_Heavy_Athena_SR_Ore_T03.WID_Sniper_Heavy_Athena_SR_Ore_T03")), // heavy sniper
+        FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/LTM/WID_Sniper_NoScope_Athena_VR_Ore_T03.WID_Sniper_NoScope_Athena_VR_Ore_T03")), // hunting
         FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Pistol_HandCannon_Athena_VR_Ore_T03.WID_Pistol_HandCannon_Athena_VR_Ore_T03")), // digle
+        FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Pistol_HandCannon_Athena_SR_Ore_T03.WID_Pistol_HandCannon_Athena_SR_Ore_T03")), // digle
         FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Sniper_BoltAction_Scope_Athena_R_Ore_T03.WID_Sniper_BoltAction_Scope_Athena_R_Ore_T03")), // bolt sniper
     };
 
@@ -52,6 +52,10 @@ FItemAndCount ItemAndCount::GetHeals()
         FItemAndCount(6, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Consumables/ShockwaveGrenade/Athena_ShockGrenade.Athena_ShockGrenade")), // shockwave
         FItemAndCount(4, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Consumables/ChillBronco/Athena_ChillBronco.Athena_ChillBronco")), // chug splash
         FItemAndCount(3, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Consumables/Flopper/WID_Athena_Flopper.WID_Athena_Flopper")), // flopper
+        FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/Boss/WID_Boss_Adventure_G.WID_Boss_Adventure_G")), // Skyes Grappler
+        FItemAndCount(3, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Consumables/AppleSun/WID_Athena_AppleSun.WID_Athena_AppleSun")), // Crash Pad
+        FItemAndCount(2, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Consumables/PurpleStuff/Athena_PurpleStuff.Athena_PurpleStuff")), // Slurp Juice
+        
      };
 
     return Heals[rand() % (Heals.size() - 1)];
