@@ -66,8 +66,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
    
     AActor *SpawnLocator = UGameplayStatics::SpawnActorOG<ADefaultPawn>(ADefaultPawn::StaticClass(), SpawnLoc, SpawnRot);
     AFortPlayerPawn* Ret = BotManager->GetCachedBotMutator()->SpawnBot(BotData->GetPawnClass(), SpawnLocator, SpawnLoc, SpawnRot, true);
-
- //   Ret->CallFunc<void>("Actor", "K2_TeleportTo", SpawnLoc, SpawnRot);
+    SpawnLocator->K2_DestroyActor();
     
     if (Ret)
     {
@@ -209,8 +208,6 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                 break;
             }
         }*/
-        
-        SpawnLocator->K2_DestroyActor();
         
         return Ret;
     }

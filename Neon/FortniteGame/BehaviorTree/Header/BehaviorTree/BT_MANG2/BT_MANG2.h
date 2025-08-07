@@ -32,7 +32,7 @@ public:
         }
 
         {
-            auto* Task = new BTTask_SteerMovement(800.f, 1.5f);
+            auto* Task = new BTTask_SteerMovement(500.f, 1.5f);
             Task->AddService(new BTService_HandleFocusing_ScanAroundOnly(0.5f, 80.f));
             auto* Decorator = new BTDecorator_CheckEnum();
             Decorator->SelectedKeyName = UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_CharacterLaunched_ExecutionStatus");
