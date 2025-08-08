@@ -256,19 +256,6 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         UE_LOG(LogNeon, Warning, "SpawnDefaultPawnFor: Cannot Spawn Pawn!");
         return 0;
     }
-
-    AFortInventory* WorldInventory = NewPlayer->GetWorldInventory();
-    FFortItemList& Inventory = WorldInventory->GetInventory();
-    TArray<FGuid> GuidsToRemove;
-        
-    for (UFortWorldItem* Item : Inventory.GetItemInstances()) {
-        if (Item) GuidsToRemove.Add(Item->GetItemEntry().GetItemGuid());
-    }
-        
-    for (const FGuid& Guid : GuidsToRemove) { AFortInventory::Remove(NewPlayer, Guid, -1); }
-        
-    WorldInventory->SetbRequiresLocalUpdate(true);
-    WorldInventory->HandleInventoryLocalUpdate();
     
     auto& StartingItemsArray = GameMode->GetStartingItems();
     int32 FItemAndCountSize = StaticClassImpl("ItemAndCount")->GetSize();
@@ -345,49 +332,22 @@ void AFortGameModeAthena::StartAircraftPhase(AFortGameModeAthena* GameMode, char
         if (!MapInfo)
             return;
 
-        for (auto& FlightInfo : MapInfo->GetFlightInfos())
-        {
-            FlightInfo.FlightStartLocation = FVector_NetQuantize100(NewLocation);
-            FlightInfo.FlightSpeed = 2000;
-            FlightInfo.TimeTillFlightEnd = 8.25f;
-            FlightInfo.TimeTillDropEnd = 8.25f;
-            FlightInfo.TimeTillDropStart = 0.0f;
-
-            const float CurrentTime = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
-            LocalAircraft->SetFlightStartTime(CurrentTime);
-            LocalAircraft->SetFlightEndTime(CurrentTime + 8.25f);
-            LocalAircraft->SetFlightInfo(FlightInfo);
-
-            GameState->SetbGameModeWillSkipAircraft(true);
-            MapInfo->GetAircraftDesiredDoorOpenTime().Value = 1;
-
-            GameState->SetbAircraftIsLocked(true);
-            GameState->SetSafeZonesStartTime(0.0001f);
-
-            GameState->CallFunc<void>("FortGameStateAthena", "OnRep_MapInfo");
-        }
-    }
-}
-
-void AFortGameModeAthena::StartNewSafeZonePhase(AFortGameModeAthena* GameMode, int Phase)
-{
-    AFortGameStateAthena* GameState = GameMode->GetGameState();
-
-    int Index = GameMode->GetAlivePlayers().Num() >= 25 ? 3 : 4;
-    
-    if (Config::bLateGame)
-    {
         for (auto& Player : GameMode->GetAlivePlayers())
         {
             if (!Player) continue;
-            if (!Player->IsInAircraft()) continue;
+
+            AFortInventory* WorldInventory = Player->GetWorldInventory();
+            FFortItemList& Inventory = WorldInventory->GetInventory();
+            TArray<FGuid> GuidsToRemove;
         
-            GameMode->RestartPlayer(Player);
-            Player->GetMyFortPawn()->BeginSkydiving(true);
-            
-            auto Pawn = Player->GetMyFortPawn();
-            Pawn->SetHealth(100);
-            Pawn->SetShield(100);
+            for (UFortWorldItem* Item : Inventory.GetItemInstances()) {
+                if (Item) GuidsToRemove.Add(Item->GetItemEntry().GetItemGuid());
+            }
+        
+            for (const FGuid& Guid : GuidsToRemove) { AFortInventory::Remove(Player, Guid, -1); }
+        
+            WorldInventory->SetbRequiresLocalUpdate(true);
+            WorldInventory->HandleInventoryLocalUpdate();
 
             AFortInventory::GiveItem(Player, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Wood), 500, 500, 1);
             AFortInventory::GiveItem(Player, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Stone), 500, 500, 1);
@@ -426,7 +386,39 @@ void AFortGameModeAthena::StartNewSafeZonePhase(AFortGameModeAthena* GameMode, i
             GiveItem(Heal);
             GiveItem(HealSlot2);
         }
-        
+
+        for (auto& FlightInfo : MapInfo->GetFlightInfos())
+        {
+            FlightInfo.FlightStartLocation = FVector_NetQuantize100(NewLocation);
+            FlightInfo.FlightSpeed = 2000;
+            FlightInfo.TimeTillFlightEnd = 8.25f;
+            FlightInfo.TimeTillDropEnd = 8.25f;
+            FlightInfo.TimeTillDropStart = 0.0f;
+
+            const float CurrentTime = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
+            LocalAircraft->SetFlightStartTime(CurrentTime);
+            LocalAircraft->SetFlightEndTime(CurrentTime + 8.25f);
+            LocalAircraft->SetFlightInfo(FlightInfo);
+
+            GameState->SetbGameModeWillSkipAircraft(true);
+            MapInfo->GetAircraftDesiredDoorOpenTime().Value = 1;
+
+            GameState->SetbAircraftIsLocked(true);
+            GameState->SetSafeZonesStartTime(0.0001f);
+
+            GameState->CallFunc<void>("FortGameStateAthena", "OnRep_MapInfo");
+        }
+    }
+}
+
+void AFortGameModeAthena::StartNewSafeZonePhase(AFortGameModeAthena* GameMode, int Phase)
+{
+    AFortGameStateAthena* GameState = GameMode->GetGameState();
+
+    int Index = GameMode->GetAlivePlayers().Num() >= 25 ? 3 : 4;
+    
+    if (Config::bLateGame)
+    {
         GameState->SetSafeZonePhase(GameState->GetSafeZonePhase() <= Index ? Index : GameState->GetSafeZonePhase());
         GameMode->SetSafeZonePhase(GameState->GetSafeZonePhase());
         GameState->SetSafeZonesStartTime(0.0001f);
