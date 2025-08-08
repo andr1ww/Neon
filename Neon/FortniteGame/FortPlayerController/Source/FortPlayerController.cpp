@@ -43,24 +43,19 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
 	PlayerState->Set("FortPlayerStateAthena", "SquadId", PlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex") - 3);
 	PlayerState->OnRep_SquadId();
 
-	static FGameMemberInfo* Member = nullptr;
-	if (!Member) {
-		static const int32 FGameMemberInfoSize = StaticClassImpl("GameMemberInfo")->GetSize();
-		Member = (FGameMemberInfo*)malloc(FGameMemberInfoSize);
-		memset(Member, 0, FGameMemberInfoSize);
-	}
+	FGameMemberInfo Member{};
 	
-	Member->MostRecentArrayReplicationKey = -1;
-	Member->ReplicationID = -1;
-	Member->ReplicationKey = -1;
-	Member->TeamIndex = PlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex");
-	Member->SquadId = PlayerState->Get<uint8>("FortPlayerStateAthena", "SquadId");
-	Member->MemberUniqueId = PlayerState->Get<FUniqueNetIdRepl>("PlayerState", "UniqueId");
+	Member.MostRecentArrayReplicationKey = -1;
+	Member.ReplicationID = -1;
+	Member.ReplicationKey = -1;
+	Member.TeamIndex = PlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex");
+	Member.SquadId = PlayerState->Get<uint8>("FortPlayerStateAthena", "SquadId");
+	Member.MemberUniqueId = PlayerState->Get<FUniqueNetIdRepl>("PlayerState", "UniqueId");
 
-	GameState->GetGameMemberInfoArray().GetMembers().Add(*Member);
-	GameState->GetGameMemberInfoArray().MarkItemDirty(*Member);
+	GameState->GetGameMemberInfoArray().GetMembers().Add(Member);
+	GameState->GetGameMemberInfoArray().MarkItemDirty(Member);
 
-	PlayerController->GetQuestManager(1)->InitializeQuestAbilities(PlayerController->GetPawn());
+	PlayerController->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1)->CallFunc<void>("FortQuestManager", "InitializeQuestAbilities", PlayerController->GetPawn());
 	PlayerState->Set("FortPlayerStateAthena", "SeasonLevelUIDisplay", PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "CurrentLevel"));
 	PlayerState->OnRep_SeasonLevelUIDisplay();
 	PlayerController->GetXPComponent()->Set("FortPlayerControllerAthenaXPComponent", "bRegisteredWithQuestManager", true);

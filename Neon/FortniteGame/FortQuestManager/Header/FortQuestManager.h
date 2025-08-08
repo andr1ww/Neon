@@ -347,8 +347,14 @@ public:
 			Func = Info.Func;
 		if (!Func)
 			return;
+
+		struct FortQuestManager_InitializeQuestAbilities final
+		{
+		public:
+			class APawn*                                  PlayerPawn;                                        // 0x0000(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+		} Params{Pawn};
     
-		this->ProcessEvent(Func, &Pawn);
+		this->ProcessEvent(Func, &Params);
 	}
 
 	inline bool HasCompletedQuest(const class UFortQuestItemDefinition* Definition)
