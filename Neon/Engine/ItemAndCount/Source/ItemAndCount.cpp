@@ -17,8 +17,6 @@ FItemAndCount ItemAndCount::GetShotguns()
 FItemAndCount ItemAndCount::GetAssaultRifles()
 {
     static std::vector<FItemAndCount> AssaultRifles{
-        FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Assault_Heavy_Athena_R_Ore_T03.WID_Assault_Heavy_Athena_R_Ore_T03")), // heavy ar 
-        FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Assault_Auto_Athena_R_Ore_T03.WID_Assault_Auto_Athena_R_Ore_T03")), // scar blue
         FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Assault_AutoHigh_Athena_VR_Ore_T03.WID_Assault_AutoHigh_Athena_VR_Ore_T03")), // scar epic
         FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Assault_AutoHigh_Athena_SR_Ore_T03.WID_Assault_AutoHigh_Athena_SR_Ore_T03")), // scar gold 
         FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Assault_Suppressed_Athena_VR_Ore_T03.WID_Assault_Suppressed_Athena_VR_Ore_T03")), // suppresed epic 
@@ -36,8 +34,6 @@ FItemAndCount ItemAndCount::GetSnipers()
     static std::vector<FItemAndCount> Snipers{
         FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Sniper_Heavy_Athena_VR_Ore_T03.WID_Sniper_Heavy_Athena_VR_Ore_T03")), // heavy sniper
         FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/LTM/WID_Sniper_NoScope_Athena_VR_Ore_T03.WID_Sniper_NoScope_Athena_VR_Ore_T03")), // hunting
-        FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Pistol_HandCannon_Athena_VR_Ore_T03.WID_Pistol_HandCannon_Athena_VR_Ore_T03")), // digle
-        FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Pistol_HandCannon_Athena_SR_Ore_T03.WID_Pistol_HandCannon_Athena_SR_Ore_T03")), // digle
         FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Sniper_BoltAction_Scope_Athena_R_Ore_T03.WID_Sniper_BoltAction_Scope_Athena_R_Ore_T03")), // bolt sniper
     };
 

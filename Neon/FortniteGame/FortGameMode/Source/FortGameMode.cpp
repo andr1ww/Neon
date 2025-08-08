@@ -2,6 +2,7 @@
 #include "../Header/FortGameMode.h"
 
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
+#include "Engine/ItemAndCount/Header/ItemAndCount.h"
 #include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "Engine/UEngine/Header/UEngine.h"
@@ -122,15 +123,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 if (Playlist->GetAISettings()) {
                     GameMode->SetAISettings(Playlist->GetAISettings());
                 }
-
-                // base time set cause of UNetDriver::TickFlush 
-                auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
-                auto WarmupDuration = 9000.f;
-
-                GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
-                GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
-                GameMode->Set("FortGameModeAthena", "WarmupCountdownDuration", WarmupDuration);
-                GameMode->Set("FortGameModeAthena", "WarmupEarlyCountdownDuration", WarmupDuration);
                 
                 if (!Config::bLateGame)
                 {
@@ -264,6 +256,19 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         UE_LOG(LogNeon, Warning, "SpawnDefaultPawnFor: Cannot Spawn Pawn!");
         return 0;
     }
+
+    AFortInventory* WorldInventory = NewPlayer->GetWorldInventory();
+    FFortItemList& Inventory = WorldInventory->GetInventory();
+    TArray<FGuid> GuidsToRemove;
+        
+    for (UFortWorldItem* Item : Inventory.GetItemInstances()) {
+        if (Item) GuidsToRemove.Add(Item->GetItemEntry().GetItemGuid());
+    }
+        
+    for (const FGuid& Guid : GuidsToRemove) { AFortInventory::Remove(NewPlayer, Guid, -1); }
+        
+    WorldInventory->SetbRequiresLocalUpdate(true);
+    WorldInventory->HandleInventoryLocalUpdate();
     
     auto& StartingItemsArray = GameMode->GetStartingItems();
     int32 FItemAndCountSize = StaticClassImpl("ItemAndCount")->GetSize();
@@ -372,6 +377,56 @@ void AFortGameModeAthena::StartNewSafeZonePhase(AFortGameModeAthena* GameMode, i
     
     if (Config::bLateGame)
     {
+        for (auto& Player : GameMode->GetAlivePlayers())
+        {
+            if (!Player) continue;
+            if (!Player->IsInAircraft() || !Player->GetWorldInventory()) continue;
+        
+            GameMode->RestartPlayer(Player);
+            Player->GetMyFortPawn()->BeginSkydiving(true);
+            
+            auto Pawn = Player->GetMyFortPawn();
+            Pawn->SetHealth(100);
+            Pawn->SetShield(100);
+
+            AFortInventory::GiveItem(Player, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Wood), 500, 500, 1);
+            AFortInventory::GiveItem(Player, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Stone), 500, 500, 1);
+            AFortInventory::GiveItem(Player, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Metal), 500, 500, 1);
+
+            const std::map<EAmmoType, int> Ammo = {{EAmmoType::Assault, 250}, {EAmmoType::Shotgun, 50}, {EAmmoType::Submachine, 400}, {EAmmoType::Rocket, 6}, {EAmmoType::Sniper, 20}};
+            for (const auto& [Type, Count] : Ammo) {
+                AFortInventory::GiveItem(Player, ItemAndCount::GetAmmo(Type), Count, Count, 1);
+            }
+
+            auto GetItem = [](auto GetItemFunc) {
+                FItemAndCount Item;
+                do { Item = GetItemFunc(); } while (!Item.Item);
+                return Item;
+            };
+
+            auto Shotgun = GetItem(ItemAndCount::GetShotguns);
+            auto AssaultRifle = GetItem(ItemAndCount::GetAssaultRifles);
+            auto Sniper = GetItem(ItemAndCount::GetSnipers);
+            auto Heal = GetItem(ItemAndCount::GetHeals);
+            
+            FItemAndCount HealSlot2;
+            do {
+                HealSlot2 = ItemAndCount::GetHeals();
+            } while (!HealSlot2.Item || HealSlot2.Item == Heal.Item);
+
+            auto GiveItem = [&](const FItemAndCount& Item) {
+                int ClipSize = Item.Item->IsA<UFortWeaponItemDefinition>() ? 
+                    AFortInventory::GetStats((UFortWeaponItemDefinition*)Item.Item)->GetClipSize() : 0;
+                AFortInventory::GiveItem(Player, Item.Item, Item.Count, ClipSize, 1);
+            };
+
+            GiveItem(AssaultRifle);
+            GiveItem(Shotgun);
+            GiveItem(Sniper);
+            GiveItem(Heal);
+            GiveItem(HealSlot2);
+        }
+        
         GameState->SetSafeZonePhase(GameState->GetSafeZonePhase() <= Index ? Index : GameState->GetSafeZonePhase());
         GameMode->SetSafeZonePhase(GameState->GetSafeZonePhase());
         GameState->SetSafeZonesStartTime(0.0001f);
@@ -380,7 +435,7 @@ void AFortGameModeAthena::StartNewSafeZonePhase(AFortGameModeAthena* GameMode, i
             return StartNewSafeZonePhaseOG(GameMode, GameState->GetSafeZonePhase());
         }
     }
-
+    
     if (Fortnite_Version <= 13.40)
     {
         StartNewSafeZonePhaseOG(GameMode, Phase);

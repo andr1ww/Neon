@@ -144,6 +144,8 @@ public:
     uint64 GetGameSessionClass();
 
     uint64 MatchmakingSerivcePerms();
+
+    uint64 EnterAircraft();
 };
 
 inline UFinder* Finder = new UFinder();

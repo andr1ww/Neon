@@ -192,7 +192,8 @@ void Main()
 	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);
 	Runtime::Hook(Finder->OnSafeZoneStateChange(), AFortSafeZoneIndicator::OnSafeZoneStateChange, (void**)&AFortSafeZoneIndicator::OnSafeZoneStateChangeOG);
 	Runtime::Hook(Finder->StartNewSafeZonePhase(), AFortGameModeAthena::StartNewSafeZonePhase, (void**)&AFortGameModeAthena::StartNewSafeZonePhaseOG);
-
+	//Runtime::Hook(Finder->EnterAircraft(), AFortPlayerControllerAthena::EnterAircraft, (void**)&AFortPlayerControllerAthena::EnterAircraftOG);
+	
 	if (Finder->CompletePickupAnimation())
 	{
 		Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.ServerHandlePickup", AFortPlayerPawn::ServerHandlePickup);

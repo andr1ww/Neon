@@ -4,5 +4,5 @@
 namespace Config
 {
     inline bool bLateGame = true;
-    inline bool bGameSessions = true;
+    inline bool bGameSessions = false;
 }

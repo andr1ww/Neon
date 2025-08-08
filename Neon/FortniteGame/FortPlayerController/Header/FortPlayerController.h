@@ -10,6 +10,7 @@
 
 class AFortInventory;
 class UFortWeaponItemDefinition;
+class AFortAthenaAircraft;
 
 class UAthenaCharacterItemDefinition : public UObject 
 {
@@ -90,6 +91,24 @@ public:
         Params.bDestroyed = bDestroyed;
         Params.bJustHitWeakspot = bJustHitWeakspot;
 
+        this->ProcessEvent(Func, &Params);
+    }
+
+    bool IsInAircraft() {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerController", "IsInAircraft");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return false;
+
+        struct Ok final
+        {
+        public:
+            bool ReturnValue;
+        } Params{};
+ 
         this->ProcessEvent(Func, &Params);
     }
 };
@@ -372,6 +391,7 @@ public:
     DEFINE_PTR(AFortPlayerStateAthena, AFortPlayerControllerAthena, PlayerState);
     DEFINE_BOOL(AFortPlayerControllerAthena, bHasServerFinishedLoading);
 public:
+    DefHookOg(void, EnterAircraft, AFortPlayerControllerAthena* PlayerController, AFortAthenaAircraft* Aircraft);
     static void ServerAttemptAircraftJump(UActorComponent* Comp, FFrame& Stack);
     static void ServerLoadingScreenDropped(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
     static void ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);

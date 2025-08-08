@@ -376,6 +376,8 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 
         if (!bStartedBus)
         {
+            static bool bSet = false;
+            
             if (GameState->GetGamePhase() == EAthenaGamePhase::Warmup && GameMode->GetAlivePlayers().Num() > 0
                 && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) < 100
                 && GameMode->GetAliveBots().Num() < 100)
@@ -386,7 +388,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
                 }
             }
             
-            if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
+            if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && bSet)
             {
                 auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
                 if (GameState->Get<float>("FortGameStateAthena", "WarmupCountdownEndTime") <= Time)
@@ -394,6 +396,19 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
                     ExecuteConsoleCommand(UWorld::GetWorld(), L"startaircraft", nullptr);
                     bStartedBus = true;
                 }
+            }
+
+            if (!bSet)
+            {
+                // base time set cause of UNetDriver::TickFlush 
+                auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
+                auto WarmupDuration = 9000.f;
+
+                GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
+                GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
+                GameMode->Set("FortGameModeAthena", "WarmupCountdownDuration", WarmupDuration);
+                GameMode->Set("FortGameModeAthena", "WarmupEarlyCountdownDuration", WarmupDuration);
+                bSet = true;
             }
         }
     }

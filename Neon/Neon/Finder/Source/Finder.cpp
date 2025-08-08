@@ -1274,3 +1274,32 @@ uint64 UFinder::MatchmakingSerivcePerms()
         return Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 41 56 48 83 EC ? 33 DB 4C 8B F2 48 8B F1 39 99 ? ? ? ? 7E ? 8B FB 66 0F 1F 84 00 ? ? ? ? 41 83 7E ? ? 48 8B 86 ? ? ? ? 74 ? 49 8B 16 EB ? 48 8D 15 ? ? ? ? 83 7C 07").Get();
     } 
 }
+
+uint64 UFinder::EnterAircraft()
+{
+    auto Addr = Memcury::Scanner::FindStringRef(L"EnterAircraft: [%s] is attempting to enter aircraft after having already exited.", true, 0, Engine_Version >= 5.00 && Fortnite_Version < 24.00).Get();
+
+    for (int i = 0; i < 1000; i++)
+    {
+        if ((*(uint8_t*)(uint8_t*)(Addr - i) == 0x40 && *(uint8_t*)(uint8_t*)(Addr - i + 1) == 0x53)
+            || (*(uint8_t*)(uint8_t*)(Addr - i) == 0x40 && *(uint8_t*)(uint8_t*)(Addr - i + 1) == 0x55))
+        {
+            return Addr - i;
+        }
+
+        if (Fortnite_Version >= 15)
+        {
+            if (*(uint8_t*)(uint8_t*)(Addr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(Addr - i + 2) == 0x5C && *(uint8_t*)(uint8_t*)(Addr - i + 3) == 0x24)
+            {
+                return Addr - i;
+            }
+        }
+
+        if (*(uint8_t*)(uint8_t*)(Addr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(Addr - i + 2) == 0x74) // 4.1
+        {
+            return Addr - i;
+        }
+    }
+
+    return 0;
+}

@@ -175,93 +175,172 @@ void AFortPlayerControllerAthena::ServerPlayEmoteItem(AFortPlayerControllerAthen
     }
 }
 
-void AFortPlayerControllerAthena::ServerAttemptAircraftJump(UActorComponent* Comp, FFrame& Stack)
+void AFortPlayerControllerAthena::EnterAircraft(AFortPlayerControllerAthena* PlayerController, AFortAthenaAircraft* Aircraft)
 {
-    FRotator Rotation;
-    Stack.StepCompiledIn(&Rotation);
-    Stack.IncrementCode();
-    
-    auto PlayerController = (AFortPlayerControllerAthena*)Comp->CallFunc<AActor*>("ActorComponent", "GetOwner", Comp);
-    auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
-
 	if (PlayerController && PlayerController->GetWorldInventory())
 	{
-		for (int i = PlayerController->GetWorldInventory()->GetInventory().GetItemInstances().Num() - 1; i >= 0; --i) {
-			PlayerController->GetWorldInventory()->GetInventory().GetItemInstances().Remove(i);
+		AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+		FFortItemList& Inventory = WorldInventory->GetInventory();
+		TArray<UFortWorldItem*>& ItemInstances = Inventory.GetItemInstances();
+        
+		TArray<FGuid> GuidsToRemove;
+		for (UFortWorldItem* Item : ItemInstances) {
+			if (Item) {
+				GuidsToRemove.Add(Item->GetItemEntry().GetItemGuid());
+			}
 		}
-		for (int i = PlayerController->GetWorldInventory()->GetInventory().GetReplicatedEntries().Num() - 1; i >= 0; --i) {
-			PlayerController->GetWorldInventory()->GetInventory().GetReplicatedEntries().Remove(i);
+        
+		for (const FGuid& Guid : GuidsToRemove) {
+			AFortInventory::Remove(PlayerController, Guid, -1); 
 		}
+        
+		WorldInventory->SetbRequiresLocalUpdate(true);
+		WorldInventory->HandleInventoryLocalUpdate();
 	}
+
+	if (Config::bLateGame)
+	{
+		PlayerController->GetMyFortPawn()->SetHealth(100);
+		PlayerController->GetMyFortPawn()->SetShield(100);
+
+		AFortInventory::GiveItem(PlayerController, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Wood), 500, 500, 1);
+		AFortInventory::GiveItem(PlayerController, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Stone), 500, 500, 1);
+		AFortInventory::GiveItem(PlayerController, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Metal), 500, 500, 1);
+
+		const std::map<EAmmoType, int> Ammo = {
+			{EAmmoType::Assault, 250},
+			{EAmmoType::Shotgun, 50},
+			{EAmmoType::Submachine, 400},
+			{EAmmoType::Rocket, 6},
+			{EAmmoType::Sniper, 20}
+		};
+
+		for (const auto& [Type, Count] : Ammo) {
+			AFortInventory::GiveItem(PlayerController, ItemAndCount::GetAmmo(Type), Count, Count, 1);
+		}
+
+		FItemAndCount Shotgun;
+		do {
+			Shotgun = ItemAndCount::GetShotguns();
+		} while (!Shotgun.Item);
+
+		FItemAndCount AssaultRifle;
+		do {
+			AssaultRifle = ItemAndCount::GetAssaultRifles();
+		} while (!AssaultRifle.Item);
+
+		FItemAndCount Sniper;
+		do {
+			Sniper = ItemAndCount::GetSnipers();
+		} while (!Sniper.Item);
+
+		FItemAndCount Heal;
+		do {
+			Heal = ItemAndCount::GetHeals();
+		} while (!Heal.Item);
+
+		FItemAndCount HealSlot2;
+		do {
+			HealSlot2 = ItemAndCount::GetHeals();
+			if (HealSlot2.Item == Heal.Item) {
+				HealSlot2 = ItemAndCount::GetHeals();
+			}
+		} while (!HealSlot2.Item);
+
+		int ShotgunClipSize = AFortInventory::GetStats((UFortWeaponItemDefinition*)Shotgun.Item)->GetClipSize();
+		int AssaultRifleClipSize = AFortInventory::GetStats((UFortWeaponItemDefinition*)AssaultRifle.Item)->GetClipSize();
+		int SniperClipSize = AFortInventory::GetStats((UFortWeaponItemDefinition*)Sniper.Item)->GetClipSize();
+		int HealClipSize = Heal.Item->IsA<UFortWeaponItemDefinition>() ? AFortInventory::GetStats((UFortWeaponItemDefinition*)Heal.Item)->GetClipSize() : 0;
+		int HealSlot2ClipSize = HealSlot2.Item->IsA<UFortWeaponItemDefinition>() ? AFortInventory::GetStats((UFortWeaponItemDefinition*)HealSlot2.Item)->GetClipSize() : 0;
+
+		AFortInventory::GiveItem(PlayerController, AssaultRifle.Item, AssaultRifle.Count, AssaultRifleClipSize, 1);
+		AFortInventory::GiveItem(PlayerController, Shotgun.Item, Shotgun.Count, ShotgunClipSize, 1);
+		AFortInventory::GiveItem(PlayerController, Sniper.Item, Sniper.Count, SniperClipSize, 1);
+		AFortInventory::GiveItem(PlayerController, Heal.Item, Heal.Count, HealClipSize, 1);
+		AFortInventory::GiveItem(PlayerController, HealSlot2.Item, HealSlot2.Count, HealSlot2ClipSize, 1);
+	}
+
+	return EnterAircraftOG(PlayerController, Aircraft);
+}
+
+void AFortPlayerControllerAthena::ServerAttemptAircraftJump(UActorComponent* Comp, FFrame& Stack)
+{
+	FRotator Rotation;
+	Stack.StepCompiledIn(&Rotation);
+	Stack.IncrementCode();
+    
+	auto PlayerController = (AFortPlayerControllerAthena*)Comp->CallFunc<AActor*>("ActorComponent", "GetOwner", Comp);
+	auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
 	
-    if (PlayerController && GameMode)
-    {
-        GameMode->RestartPlayer(PlayerController);
-        PlayerController->Set("Controller", "ControlRotation", Rotation);
+	if (PlayerController && GameMode)
+	{
+		GameMode->RestartPlayer(PlayerController);
+		PlayerController->Set("Controller", "ControlRotation", Rotation);
 
-        PlayerController->GetMyFortPawn()->BeginSkydiving(true);
-    	if (Config::bLateGame)
-    	{
-    		PlayerController->GetMyFortPawn()->SetHealth(100);
-    		PlayerController->GetMyFortPawn()->SetShield(100);
+		PlayerController->GetMyFortPawn()->BeginSkydiving(true);
 
-    		AFortInventory::GiveItem(PlayerController, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Wood), 500, 500, 1);
-    		AFortInventory::GiveItem(PlayerController, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Stone), 500, 500, 1);
-    		AFortInventory::GiveItem(PlayerController, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Metal), 500, 500, 1);
+		if (Config::bLateGame)
+		{
+			PlayerController->GetMyFortPawn()->SetHealth(100);
+			PlayerController->GetMyFortPawn()->SetShield(100);
 
-    		const std::map<EAmmoType, int> Ammo = {
-    			{EAmmoType::Assault, 250},
+			AFortInventory::GiveItem(PlayerController, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Wood), 500, 500, 1);
+			AFortInventory::GiveItem(PlayerController, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Stone), 500, 500, 1);
+			AFortInventory::GiveItem(PlayerController, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Metal), 500, 500, 1);
+
+			const std::map<EAmmoType, int> Ammo = {
+				{EAmmoType::Assault, 250},
 				{EAmmoType::Shotgun, 50},
 				{EAmmoType::Submachine, 400},
 				{EAmmoType::Rocket, 6},
 				{EAmmoType::Sniper, 20}
-    		};
+			};
 
-    		for (const auto& [Type, Count] : Ammo) {
-    			AFortInventory::GiveItem(PlayerController, ItemAndCount::GetAmmo(Type), Count, Count, 1);
-    		}
+			for (const auto& [Type, Count] : Ammo) {
+				AFortInventory::GiveItem(PlayerController, ItemAndCount::GetAmmo(Type), Count, Count, 1);
+			}
 
-    		FItemAndCount Shotgun;
-    		do {
-    			Shotgun = ItemAndCount::GetShotguns();
-    		} while (!Shotgun.Item);
+			FItemAndCount Shotgun;
+			do {
+				Shotgun = ItemAndCount::GetShotguns();
+			} while (!Shotgun.Item);
 
-    		FItemAndCount AssaultRifle;
-    		do {
-    			AssaultRifle = ItemAndCount::GetAssaultRifles();
-    		} while (!AssaultRifle.Item);
+			FItemAndCount AssaultRifle;
+			do {
+				AssaultRifle = ItemAndCount::GetAssaultRifles();
+			} while (!AssaultRifle.Item);
 
-    		FItemAndCount Sniper;
-    		do {
-    			Sniper = ItemAndCount::GetSnipers();
-    		} while (!Sniper.Item);
+			FItemAndCount Sniper;
+			do {
+				Sniper = ItemAndCount::GetSnipers();
+			} while (!Sniper.Item);
 
-    		FItemAndCount Heal;
-    		do {
-    			Heal = ItemAndCount::GetHeals();
-    		} while (!Heal.Item);
+			FItemAndCount Heal;
+			do {
+				Heal = ItemAndCount::GetHeals();
+			} while (!Heal.Item);
 
-    		FItemAndCount HealSlot2;
-    		do {
-    			HealSlot2 = ItemAndCount::GetHeals();
-    			if (HealSlot2.Item == Heal.Item) {
-    				HealSlot2 = ItemAndCount::GetHeals();
-    			}
-    		} while (!HealSlot2.Item);
+			FItemAndCount HealSlot2;
+			do {
+				HealSlot2 = ItemAndCount::GetHeals();
+				if (HealSlot2.Item == Heal.Item) {
+					HealSlot2 = ItemAndCount::GetHeals();
+				}
+			} while (!HealSlot2.Item);
 
-    		int ShotgunClipSize = AFortInventory::GetStats((UFortWeaponItemDefinition*)Shotgun.Item)->GetClipSize();
-    		int AssaultRifleClipSize = AFortInventory::GetStats((UFortWeaponItemDefinition*)AssaultRifle.Item)->GetClipSize();
-    		int SniperClipSize = AFortInventory::GetStats((UFortWeaponItemDefinition*)Sniper.Item)->GetClipSize();
-    		int HealClipSize = Heal.Item->IsA<UFortWeaponItemDefinition>() ? AFortInventory::GetStats((UFortWeaponItemDefinition*)Heal.Item)->GetClipSize() : 0;
-    		int HealSlot2ClipSize = HealSlot2.Item->IsA<UFortWeaponItemDefinition>() ? AFortInventory::GetStats((UFortWeaponItemDefinition*)HealSlot2.Item)->GetClipSize() : 0;
+			int ShotgunClipSize = AFortInventory::GetStats((UFortWeaponItemDefinition*)Shotgun.Item)->GetClipSize();
+			int AssaultRifleClipSize = AFortInventory::GetStats((UFortWeaponItemDefinition*)AssaultRifle.Item)->GetClipSize();
+			int SniperClipSize = AFortInventory::GetStats((UFortWeaponItemDefinition*)Sniper.Item)->GetClipSize();
+			int HealClipSize = Heal.Item->IsA<UFortWeaponItemDefinition>() ? AFortInventory::GetStats((UFortWeaponItemDefinition*)Heal.Item)->GetClipSize() : 0;
+			int HealSlot2ClipSize = HealSlot2.Item->IsA<UFortWeaponItemDefinition>() ? AFortInventory::GetStats((UFortWeaponItemDefinition*)HealSlot2.Item)->GetClipSize() : 0;
 
-    		AFortInventory::GiveItem(PlayerController, AssaultRifle.Item, AssaultRifle.Count, AssaultRifleClipSize, 1);
-    		AFortInventory::GiveItem(PlayerController, Shotgun.Item, Shotgun.Count, ShotgunClipSize, 1);
-    		AFortInventory::GiveItem(PlayerController, Sniper.Item, Sniper.Count, SniperClipSize, 1);
-    		AFortInventory::GiveItem(PlayerController, Heal.Item, Heal.Count, HealClipSize, 1);
-    		AFortInventory::GiveItem(PlayerController, HealSlot2.Item, HealSlot2.Count, HealSlot2ClipSize, 1);
-    	}
-    }
+			AFortInventory::GiveItem(PlayerController, AssaultRifle.Item, AssaultRifle.Count, AssaultRifleClipSize, 1);
+			AFortInventory::GiveItem(PlayerController, Shotgun.Item, Shotgun.Count, ShotgunClipSize, 1);
+			AFortInventory::GiveItem(PlayerController, Sniper.Item, Sniper.Count, SniperClipSize, 1);
+			AFortInventory::GiveItem(PlayerController, Heal.Item, Heal.Count, HealClipSize, 1);
+			AFortInventory::GiveItem(PlayerController, HealSlot2.Item, HealSlot2.Count, HealSlot2ClipSize, 1);
+		}
+	}
 }
 
 void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
@@ -376,10 +455,18 @@ void AFortPlayerControllerAthena::ServerBeginEditingBuildingActor(AFortPlayerCon
 
     if (!ItemEntry)
         return;
-    
-    PlayerController->CallFunc<void>("FortPlayerController", "ServerExecuteInventoryItem",ItemEntry->GetItemGuid());
 
-    AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->GetMyFortPawn()->Get<AFortWeapon*>("FortPawn", "CurrentWeapon"));
+	static class UFunction* Func = nullptr;
+	SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerController", "ServerExecuteInventoryItem");
+
+	if (Func == nullptr)
+		Func = Info.Func;
+	if (!Func)
+		return;
+	
+    PlayerController->ProcessEvent(Func, &ItemEntry->GetItemGuid());
+
+    AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->GetMyFortPawn()->GetCurrentWeapon());
     if (EditingTool)
     {
         EditingTool->Set("FortWeap_EditingTool", "EditActor", BuildingSMActor);
@@ -775,3 +862,5 @@ int32 AFortPlayerControllerAthena::K2_RemoveItemFromPlayer(AFortPlayerController
     return AmountToRemove;
     return K2_RemoveItemFromPlayerOG(PC, ItemDefinition, AmountToRemove, bForceRemoval);
 }
+
+
