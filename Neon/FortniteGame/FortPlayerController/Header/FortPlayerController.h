@@ -110,6 +110,8 @@ public:
         } Params{};
  
         this->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
     }
 };
 
