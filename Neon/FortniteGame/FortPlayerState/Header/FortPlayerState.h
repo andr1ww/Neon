@@ -164,6 +164,32 @@ public:
 		this->ProcessEvent(Func, nullptr);
 	}
 
+	void OnRep_SeasonLevelUIDisplay()
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerStateAthena", "OnRep_SeasonLevelUIDisplay");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+		
+		this->ProcessEvent(Func, nullptr);
+	}
+
+	void OnRep_SquadId()
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerStateAthena", "OnRep_SquadId");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+		
+		this->ProcessEvent(Func, nullptr);
+	}
+
 	void OnRep_TeamKillScore()
 	{
 		static SDK::UFunction* Func = nullptr;

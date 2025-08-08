@@ -7,8 +7,8 @@
 class AController : public AActor
 {
 public:
-    DEFINE_MEMBER(APlayerState*, AController, PlayerState);
-    DEFINE_MEMBER(APawn*, AController, Pawn);
+    DEFINE_PTR(APlayerState, AController, PlayerState);
+    DEFINE_PTR(APawn, AController, Pawn);
 public:
     AActor* GetViewTarget();
 public:

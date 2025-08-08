@@ -113,6 +113,30 @@ public:
 
         return Params.ReturnValue;
     }
+    
+    class UFortQuestManager* GetQuestManager(int32 SubGame) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerController", "GetQuestManager");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return nullptr;
+
+        struct FortPlayerController_GetQuestManager final
+        {
+        public:
+            int32                                      SubGame;                                           // 0x0000(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            uint8                                         Pad_1[0x7];                                        // 0x0001(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
+            class UFortQuestManager*                      ReturnValue;                                       // 0x0008(0x0008)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        } Params{};
+
+        Params.SubGame = SubGame;
+ 
+        this->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
 };
 
 class UBlueprintGeneratedClass : public UClass
@@ -372,6 +396,19 @@ public:
         Params.XPEvent = Param_HighPrioXPEvent;
         
         this->ProcessEvent(Func, &Params);
+    }
+
+    void OnRep_bRegisteredWithQuestManager()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerControllerAthenaXPComponent", "OnRep_bRegisteredWithQuestManager");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+		
+        this->ProcessEvent(Func, nullptr);
     }
 public:
     DECLARE_STATIC_CLASS(UFortPlayerControllerAthenaXPComponent)

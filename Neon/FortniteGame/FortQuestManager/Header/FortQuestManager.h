@@ -338,6 +338,19 @@ public:
 		return Params.ReturnValue;
 	}
 
+	void InitializeQuestAbilities(APawn* Pawn)
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortQuestManager", "InitializeQuestAbilities");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+    
+		this->ProcessEvent(Func, &Pawn);
+	}
+
 	inline bool HasCompletedQuest(const class UFortQuestItemDefinition* Definition)
 	{
 		static SDK::UFunction* Func = nullptr;

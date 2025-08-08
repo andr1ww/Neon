@@ -380,7 +380,7 @@ void AFortGameModeAthena::StartNewSafeZonePhase(AFortGameModeAthena* GameMode, i
         for (auto& Player : GameMode->GetAlivePlayers())
         {
             if (!Player) continue;
-            if (!Player->IsInAircraft() || !Player->GetWorldInventory()) continue;
+            if (!Player->IsInAircraft()) continue;
         
             GameMode->RestartPlayer(Player);
             Player->GetMyFortPawn()->BeginSkydiving(true);

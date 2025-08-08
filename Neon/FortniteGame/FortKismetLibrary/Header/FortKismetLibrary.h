@@ -4,6 +4,8 @@
 #include "FortniteGame/BuildingSMActor/Header/BuildingSMActor.h"
 #include "FortniteGame/FortInventory/Header/FortInventory.h"
 
+class AFortPlayerStateAthena;
+
 class UFortResourceItemDefinition : public UFortWorldItemDefinition
 {
 public:
@@ -43,6 +45,21 @@ class UFortKismetLibrary : public UObject
 {
 public:
     static UFortResourceItemDefinition* K2_GetResourceItemDefinition(const EFortResourceType ResourceType);
+    static void UpdatePlayerCustomCharacterPartsVisualization(AFortPlayerStateAthena* PlayerState)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortKismetLibrary", "UpdatePlayerCustomCharacterPartsVisualization");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        static UObject* Object = nullptr;
+        if (!Object) Object = SDK::StaticClassImpl("FortKismetLibrary")->GetClassDefaultObject();
+    
+        Object->ProcessEvent(Func, &PlayerState);
+    }
 public:
     DECLARE_STATIC_CLASS(UFortKismetLibrary);
     DECLARE_DEFAULT_OBJECT(UFortKismetLibrary);
