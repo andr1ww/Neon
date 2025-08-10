@@ -168,19 +168,13 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 		if (XPPlayerControllerCount) 
 		{
 			UE_LOG(LogNeon, Log, "Granting XP");
-			static FXPEventEntry* QuestEntry = nullptr;
-			if (!QuestEntry)
-			{
-				int FXPEventSize = StaticClassImpl("XPEventEntry")->GetSize();
-				QuestEntry = (FXPEventEntry*)malloc(FXPEventSize);
-				memset(QuestEntry, 0, FXPEventSize);
-			}
+			FXPEventEntry QuestEntry{};
 			
-			QuestEntry->SetEventXpValue(XPPlayerControllerCount);
-			QuestEntry->SetQuestDef(QuestDefinition);
-			QuestEntry->SetTime(UGameplayStatics::GetTimeSeconds(UWorld::GetWorld()));
-			QuestEntry->SetTotalXpEarnedInMatch(PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "TotalXpEarned") + XPPlayerControllerCount);
-			QuestEntry->SetSimulatedXpEvent(UKismetStringLibrary::Conv_StringToText(FString(L"Objective completed")));
+			QuestEntry.EventXpValue = XPPlayerControllerCount;
+			QuestEntry.QuestDef = QuestDefinition;
+			QuestEntry.Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
+			QuestEntry.TotalXpEarnedInMatch = PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "TotalXpEarned") + XPPlayerControllerCount;
+			QuestEntry.SimulatedXpEvent = UKismetStringLibrary::Conv_StringToText(FString(L"Objective completed"));
 			
 			int32 CurrentChallengeXp = PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "ChallengeXp");
 			int32 CurrentTotalXp = PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "TotalXpEarned");
@@ -201,7 +195,8 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 			
 			PlayerController->GetXPComponent()->CallFunc<void>("FortPlayerControllerAthenaXPComponent", "OnInMatchProfileUpdate", CurrentProfileVer + 1);
 			PlayerController->GetXPComponent()->CallFunc<void>("FortPlayerControllerAthenaXPComponent", "OnProfileUpdated");
-	//		PlayerController->GetXPComponent()->OnXPEvent(*QuestEntry);
+			PlayerController->GetXPComponent()->GetWaitingQuestXp().Add(QuestEntry);
+	//		PlayerController->GetXPComponent()->CallFunc<void>("FortPlayerControllerAthenaXPComponent", "HighPrioXPEvent", QuestEntry);
 		}
 		
 	//	QuestManager->CallFunc<void>("FortQuestManager", "ClaimQuestReward", QuestItem);

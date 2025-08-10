@@ -371,7 +371,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 
         if (GameState->GetGamePhase() >= EAthenaGamePhase::Warmup)
         {
-            BehaviorTreeService::TickAI();
+      //      BehaviorTreeService::TickAI();
         }
 
         if (!bStartedBus)

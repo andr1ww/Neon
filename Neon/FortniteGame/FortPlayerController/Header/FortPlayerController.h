@@ -364,14 +364,31 @@ public:
     DEFINE_MEMBER(FRotator, FFortPlayerDeathReport, ViewRotationAtTimeOfDeath);
 };
 
+struct FPrimaryAssetType final
+{
+public:
+    class FName                                   Name;                                              // 0x0000(0x0008)(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
+// ScriptStruct CoreUObject.PrimaryAssetId
+// 0x0010 (0x0010 - 0x0000)
+struct FPrimaryAssetId final
+{
+public:
+    struct FPrimaryAssetType                      PrimaryAssetType;                                  // 0x0000(0x0008)(Edit, BlueprintVisible, ZeroConstructor, SaveGame, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    class FName                                   PrimaryAssetName;                                  // 0x0008(0x0008)(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
+
 struct FXPEventEntry final : public FFastArraySerializerItem
 {
 public:
-    DEFINE_MEMBER(FText, FXPEventEntry, SimulatedXpEvent);
-    DEFINE_PTR(class UFortQuestItemDefinition, FXPEventEntry, QuestDef);
-    DEFINE_MEMBER(float, FXPEventEntry, Time);
-    DEFINE_MEMBER(int32, FXPEventEntry, EventXpValue);
-    DEFINE_MEMBER(int32, FXPEventEntry, TotalXpEarnedInMatch);
+    uint8                                         Pad_C[0x4];                                        // 0x000C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
+    class FText                                   SimulatedXpEvent;                                  // 0x0010(0x0018)(NativeAccessSpecifierPublic)
+    class UFortQuestItemDefinition*               QuestDef;                                          // 0x0028(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    struct FPrimaryAssetId                        Accolade;                                          // 0x0030(0x0010)(ZeroConstructor, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    float                                         Time;                                              // 0x0040(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    int32                                         EventXpValue;                                      // 0x0044(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    int32                                         TotalXpEarnedInMatch;                              // 0x0048(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    uint8                                         Pad_4C[0x4];                                       // 0x004C(0x0004)(Fixing Struct Size After Last Property [ Dumper-7 ])
 };
 
 class UFortPlayerControllerAthenaXPComponent : public UObject
@@ -411,6 +428,7 @@ public:
         this->ProcessEvent(Func, nullptr);
     }
 public:
+    DEFINE_MEMBER(TArray<struct FXPEventEntry>, UFortPlayerControllerAthenaXPComponent, WaitingQuestXp);
     DECLARE_STATIC_CLASS(UFortPlayerControllerAthenaXPComponent)
     DECLARE_DEFAULT_OBJECT(UFortPlayerControllerAthenaXPComponent)
 };
