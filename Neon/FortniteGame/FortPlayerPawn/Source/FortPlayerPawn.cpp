@@ -295,3 +295,20 @@ void AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues(AFortPlayerPawn* Paw
         UE_LOG(LogNeon, Error, TEXT("NetMulticast_Athena_BatchedDamageCuesOG is nullptr!"));
     }
 }
+
+void AFortPlayerPawn::ServerSendZiplineState(AFortPlayerPawn* Pawn, FFrame& Stack)
+{
+    FZiplinePawnState State;
+    Stack.StepCompiledIn(&State);
+    Stack.IncrementCode();
+    Pawn->Set("FortPlayerPawn", "ZiplineState", State);
+    ((void (*)(AFortPlayerPawn*))Finder->OnRep_ZiplineState())(Pawn); 
+
+    if (State.bJumped)
+    {
+        auto Velocity = Pawn->Get<UObject*>("Character", "CharacterMovement")->Get<FVector>("MovementComponent", "Velocity");
+        auto VelocityX = Velocity.X * -0.5f;
+        auto VelocityY = Velocity.Y * -0.5f;
+        Pawn->CallFunc<void>("FortPawn", "LaunchCharacterJump", FVector{ VelocityX >= -750 ? fminf(VelocityX, 750) : -750, VelocityY >= -750 ? fminf(VelocityY, 750) : -750, 1200 }, false, false, true, true);
+    }
+}

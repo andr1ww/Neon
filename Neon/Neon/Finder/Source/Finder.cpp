@@ -1303,3 +1303,41 @@ uint64 UFinder::EnterAircraft()
 
     return 0;
 }
+
+uint64 UFinder::OnRep_ZiplineState()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+    
+    auto Addrr = Memcury::Scanner::FindStringRef(L"ZIPLINES!! Role(%s)  AFortPlayerPawn::OnRep_ZiplineState ZiplineState.bIsZiplining=%d", false).Get();
+
+    if (!Addrr)
+        Addrr = Memcury::Scanner::FindStringRef(L"ZIPLINES!! GetLocalRole()(%s)  AFortPlayerPawn::OnRep_ZiplineState ZiplineState.bIsZiplining=%d", false).Get();
+
+    if (!Addrr)
+        Addrr = Memcury::Scanner::FindStringRef("AFortPlayerPawn::HandleZiplineStateChanged").Get(); 
+
+    if (!Addrr)
+        return 0;
+
+    for (int i = 0; i < 400; i++)
+    {
+        if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x40 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x53)
+        {
+            return CachedResult = Addrr - i;
+        }
+
+        if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(Addrr - i + 2) == 0x5C)
+        {
+            return CachedResult = Addrr - i;
+        }
+
+        if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x8B && *(uint8_t*)(uint8_t*)(Addrr - i + 2) == 0xC4)
+        {
+            return CachedResult = Addrr - i;
+        }
+    }
+	
+    return 0;
+}

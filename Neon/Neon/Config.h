@@ -3,6 +3,6 @@
 
 namespace Config
 {
-    inline bool bLateGame = true;
+    inline bool bLateGame = false;
     inline bool bGameSessions = false;
 }

@@ -234,6 +234,77 @@ public:
 	class AActor* NonPlayerHitActor;                                 // 0x0008(0x0008)(ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 };
 
+struct FTimerHandle
+{
+	FTimerHandle()
+		: Handle(0)
+	{
+	}
+
+	bool IsValid() const
+	{
+		return Handle != 0;
+	}
+
+	void Invalidate()
+	{
+		Handle = 0;
+	}
+
+	bool operator==(const FTimerHandle& Other) const
+	{
+		return Handle == Other.Handle;
+	}
+
+	bool operator!=(const FTimerHandle& Other) const
+	{
+		return Handle != Other.Handle;
+	}
+
+	static const uint32 IndexBits = 24;
+	static const uint32 SerialNumberBits = 40;
+
+	static_assert(IndexBits + SerialNumberBits == 64, "The space for the timer index and serial number should total 64 bits");
+
+	static const int32  MaxIndex = (int32)1 << IndexBits;
+	static const uint64 MaxSerialNumber = (uint64)1 << SerialNumberBits;
+
+	void SetIndexAndSerialNumber(int32 Index, uint64 SerialNumber)
+	{
+		Handle = (SerialNumber << IndexBits) | (uint64)(uint32)Index;
+	}
+
+	FORCEINLINE int32 GetIndex() const
+	{
+		return (int32)(Handle & (uint64)(MaxIndex - 1));
+	}
+
+	FORCEINLINE uint64 GetSerialNumber() const
+	{
+		return Handle >> IndexBits;
+	}
+
+	uint64 Handle;
+};
+
+struct FZiplinePawnState final
+{
+public:
+	TWeakObjectPtr<class AFortAthenaZiplineBase>  Zipline;                                           // 0x0000(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	TWeakObjectPtr<class AFortAthenaZiplineBase>  PreviousZipline;                                   // 0x0008(0x0008)(ZeroConstructor, IsPlainOldData, RepSkip, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	TWeakObjectPtr<class UPrimitiveComponent>     InteractComponent;                                 // 0x0010(0x0008)(ExportObject, ZeroConstructor, InstancedReference, IsPlainOldData, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          bIsZiplining;                                      // 0x0018(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          bJumped;                                           // 0x0019(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          bReachedEnd;                                       // 0x001A(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	uint8                                         Pad_1B[0x1];                                       // 0x001B(0x0001)(Fixing Size After Last Property [ Dumper-7 ])
+	int32                                         AuthoritativeValue;                                // 0x001C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	struct FVector                                SocketOffset;                                      // 0x0020(0x0018)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	float                                         TimeZipliningBegan;                                // 0x0038(0x0004)(ZeroConstructor, IsPlainOldData, RepSkip, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	float                                         TimeZipliningEndedFromJump;                        // 0x003C(0x0004)(ZeroConstructor, IsPlainOldData, RepSkip, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	struct FTimerHandle                           RemoveZiplineFromIgnoreWhenMovingTimerHandle;      // 0x0040(0x0008)(RepSkip, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	uint8                                         Pad_48[0x18];                                      // 0x0048(0x0018)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
 class AFortPlayerPawn : public AFortPawn
 {
 public:
@@ -272,6 +343,7 @@ public:
 public:
     static void ServerHandlePickupInfo(AFortPlayerPawn* Pawn, FFrame& Stack);
 	static void ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack);
+	static void ServerSendZiplineState(AFortPlayerPawn* Pawn, FFrame& Stack);
 
 	DefHookOg(void, ReloadWeapon, AFortWeapon* Weapon, int AmmoToRemove);
 	DefHookOg(void, CompletePickupAnimation, AFortPickup* Pickup);

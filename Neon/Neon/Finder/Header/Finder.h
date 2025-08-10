@@ -146,6 +146,8 @@ public:
     uint64 MatchmakingSerivcePerms();
 
     uint64 EnterAircraft();
+
+    uint64 OnRep_ZiplineState();
 };
 
 inline UFinder* Finder = new UFinder();

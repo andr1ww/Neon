@@ -92,11 +92,11 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 			bool Found = false;
 			for (auto& ObjComp : ObjCompArray[PlayerController])
 			{
-				if (QuestObj.GetBackendName().ToString().ToString() == ObjComp.GetBackendName().ToString().ToString())
-				{
-					Found = true;
-					break;
-				}
+			//	if (QuestObj.GetBackendName().ToString().ToString() == ObjComp.GetBackendName().ToString().ToString())
+			//	{
+			//		Found = true;
+			//		break;
+			//	}
 			}
 			if (Found)
 			{
