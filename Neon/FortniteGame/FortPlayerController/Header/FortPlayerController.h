@@ -391,6 +391,34 @@ public:
     uint8                                         Pad_4C[0x4];                                       // 0x004C(0x0004)(Fixing Struct Size After Last Property [ Dumper-7 ])
 };
 
+
+// Enum FortniteGame.EXPEventPriorityType
+// NumValues: 0x0005
+enum class EXPEventPriorityType : uint8
+{
+    NearReticle                              = 0,
+    XPBarOnly                                = 1,
+    TopCenter                                = 2,
+    Feed                                     = 3,
+    EXPEventPriorityType_MAX                 = 4,
+};
+
+struct FXPEventInfo final
+{
+public:
+	class FName                                   EventName;                                         // 0x0000(0x0008)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	class FText                                   SimulatedText;                                     // 0x0008(0x0018)(Edit, BlueprintVisible, BlueprintReadOnly, NativeAccessSpecifierPublic)
+	class UFortQuestItemDefinition*               QuestDef;                                          // 0x0020(0x0008)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	EXPEventPriorityType                          Priority;                                          // 0x0028(0x0001)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	uint8                                         Pad_29[0x3];                                       // 0x0029(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+	int32                                         EventXpValue;                                      // 0x002C(0x0004)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	int32                                         TotalXpEarnedInMatch;                              // 0x0030(0x0004)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	struct FPrimaryAssetId                        Accolade;                                          // 0x0034(0x0010)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	int32                                         RestedValuePortion;                                // 0x0044(0x0004)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	int32                                         SeasonBoostValuePortion;                           // 0x0048(0x0004)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	int32                                         RestedXPRemaining;                                 // 0x004C(0x0004)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
+
 class UFortPlayerControllerAthenaXPComponent : public UObject
 {
 public:
@@ -411,6 +439,24 @@ public:
         } Params {};
 
         Params.XPEvent = Param_HighPrioXPEvent;
+        
+        this->ProcessEvent(Func, &Params);
+    }
+
+    void HighPrioXPEvent(const struct FXPEventEntry& Param_HighPrioXPEvent)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerControllerAthenaXPComponent", "HighPrioXPEvent");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct
+        {
+            struct FXPEventEntry               HighPrioXPEvent;
+        }Params{ Param_HighPrioXPEvent };
         
         this->ProcessEvent(Func, &Params);
     }
