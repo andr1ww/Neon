@@ -256,6 +256,20 @@ namespace Runtime
 		return Offset;
 	}
 
+	inline int GetOffsetClass(const std::string& Class, UObject* Obj, const std::string& PropName)
+	{
+		int Offset = -1;
+		auto FuncInfo = SDK::PropLibrary->GetPropertyByName(
+			Class, PropName);
+
+		Offset = FuncInfo.Offset;
+
+		if (Offset != -1)
+			return 0;
+			
+		return Offset;
+	}
+
 	inline int GetOffsetStruct(const std::string& StructName, const std::string& PropName) {
 		int Offset = -1;
 		for (UStruct* Struct = (UStruct*)GUObjectArray.FindObject(StructName); Struct;

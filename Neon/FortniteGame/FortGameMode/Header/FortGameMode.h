@@ -90,6 +90,7 @@ public:
 class AFortGameMode : public AGameModeBase
 {
 public:
+    DEFINE_MEMBER(FString, AFortGameMode, CurrentBucketId);
     DEFINE_MEMBER(int32, AFortGameMode, CurrentPlaylistId);
     DEFINE_MEMBER(FName, AFortGameMode, CurrentPlaylistName);
     DEFINE_BOOL(AFortGameMode, bWorldIsReady);

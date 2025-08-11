@@ -1256,6 +1256,11 @@ class FString {
         FString( const std::wstring &Str ) : FString( Str.c_str() ) {}
 
       public:
+        bool IsValid() const
+        {
+                return Data.Num() > 0;
+        }
+        
         DataType GetData()
         {
                 return Data;

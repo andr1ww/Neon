@@ -29,6 +29,18 @@ void* ProcessEvent(UObject* Obj, UFunction* Function, void* Params)
 	return ProcessEventOG(Obj, Function, Params);
 }
 
+
+inline bool IsInFrontend()
+{
+	if (auto World = UWorld::GetWorld())
+	{
+		if (World->GetFName().ToString().ToString().contains("Frontend"))
+		{
+			return true;
+		}
+	}
+}
+
 void InitNullsAndRetTrues() {
 	if (Fortnite_Version >= 23)
 		NullFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ? 4C 8B E2 4C 8B F1").Get());
@@ -132,6 +144,8 @@ void InitNullsAndRetTrues() {
 	
 	if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.50)
 	{
+		Runtime::Patch(IMAGEBASE + 0x2154F9E, 0x90);
+		Runtime::Hook(IMAGEBASE + 0x2154F70, RetTrue);
 		Runtime::Hook(IMAGEBASE + 0x1EE9720, AFortPlayerControllerAthena::K2_RemoveItemFromPlayer, (void**)&AFortPlayerControllerAthena::K2_RemoveItemFromPlayerOG);
 		Runtime::Hook(IMAGEBASE + 0x2ebf890, ProcessEvent, (void**)&ProcessEventOG); 
 		Runtime::Hook(IMAGEBASE + 0x2E688D0, RetTrue); // server context
@@ -153,18 +167,48 @@ void Main()
 	
 	MH_Initialize();
 	Sleep(5000);
+	while (!IsInFrontend())
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	}
 	
 	if (Finder->GIsClient())
 	{
 		*(bool*)(Finder->GIsClient()) = false; 
 		*(bool*)(Finder->GIsClient() + 1) = true;
-	} else
-	{
-		*(bool*)(IMAGEBASE + 0xEBD8A4C) = false; 
-		*(bool*)(IMAGEBASE + 0xEBD8A4C + 1) = true; // 23.50
-	}
+	} 
 	
 	InitNullsAndRetTrues();
+
+	auto ListenInstruction = Memcury::Scanner::FindPattern("E8 ? ? ? ? 84 C0 75 ? 80 3D ? ? ? ? ? 72 ? 45 33 C0 48 8D 55").Get();
+	Runtime::ModifyInstruction(ListenInstruction, Finder->InstructionForCollision());
+	Runtime::Hook(Finder->InstructionForCollision(), FortGameSessionDedicated::UWorld_Listen);
+
+	if (!Config::bGameSessions) UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
+	FString WorldName;
+	if (Fortnite_Version <= 10.40)
+	{
+		WorldName = L"open Athena_Terrain";
+	}
+	else if (Fortnite_Version <= 18.40 && Fortnite_Version >= 10.40)
+	{
+		WorldName = L"open Apollo_Terrain";
+	}
+	else if (Fortnite_Version <= 22.40 && Fortnite_Version >= 19.00)
+	{
+		WorldName = L"open Artemis_Terrain";
+	} else if (Fortnite_Version >= 23.00)
+	{
+		WorldName = L"open Asteria_Terrain";
+	}
+	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAthenaBots VeryVerbose", nullptr);
+	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogNavigationDataBuild VeryVerbose", nullptr);
+
+	ExecuteConsoleCommand(UWorld::GetWorld(), WorldName, nullptr);
+	if (Fortnite_Version >= 19.10)
+	{
+		ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortUIDirector", nullptr);
+	}
 	
 	Runtime::Exec("/Script/Engine.GameMode.ReadyToStartMatch", AFortGameModeAthena::ReadyToStartMatch, (void**)&ReadyToStartMatchOriginal);
 	Runtime::Hook<&AFortGameModeAthena::StaticClass>("SpawnDefaultPawnFor", AFortGameModeAthena::SpawnDefaultPawnFor);
@@ -234,36 +278,6 @@ void Main()
 	if (Finder->CreateAndConfigureNavigationSystem()) {
 		Runtime::Hook(Finder->CreateAndConfigureNavigationSystem(), UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem, (void**)&UFortServerBotManagerAthena::CreateAndConfigureNavigationSystemOG);
 		UE_LOG(LogNeon, Log, "CreateAndConfigureNavigationSystem: 0x%x", Finder->CreateAndConfigureNavigationSystem() - IMAGEBASE);
-	}
-
-	auto ListenInstruction = Memcury::Scanner::FindPattern("E8 ? ? ? ? 84 C0 75 ? 80 3D ? ? ? ? ? 72 ? 45 33 C0 48 8D 55").Get();
-	Runtime::ModifyInstruction(ListenInstruction, Finder->InstructionForCollision());
-	Runtime::Hook(Finder->InstructionForCollision(), FortGameSessionDedicated::UWorld_Listen);
-
-	if (!Config::bGameSessions) UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
-	FString WorldName;
-	if (Fortnite_Version <= 10.40)
-	{
-		WorldName = L"open Athena_Terrain";
-	}
-	else if (Fortnite_Version <= 18.40 && Fortnite_Version >= 10.40)
-	{
-		WorldName = L"open Apollo_Terrain";
-	}
-	else if (Fortnite_Version <= 22.40 && Fortnite_Version >= 19.00)
-	{
-		WorldName = L"open Artemis_Terrain";
-	} else if (Fortnite_Version >= 23.00)
-	{
-		WorldName = L"open Asteria_Terrain";
-	}
-	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAthenaBots VeryVerbose", nullptr);
-	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogNavigationDataBuild VeryVerbose", nullptr);
-
-	ExecuteConsoleCommand(UWorld::GetWorld(), WorldName, nullptr);
-	if (Fortnite_Version >= 19.10)
-	{
-		ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortUIDirector", nullptr);
 	}
 }
 

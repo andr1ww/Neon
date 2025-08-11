@@ -14,11 +14,170 @@
 #include "Neon/Finder/Header/Finder.h"
 #include "Neon/Runtime/Runtime.h"
 
+std::vector<std::string> split(std::string s, std::string delimiter) {
+    size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+    std::string token;
+    std::vector<std::string> res;
+
+    while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos) {
+        token = s.substr(pos_start, pos_end - pos_start);
+        pos_start = pos_end + delim_len;
+        res.push_back(token);
+    }
+
+    res.push_back(s.substr(pos_start));
+    return res;
+}
+
+void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
+{
+    AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
+    
+    if (!GameState || !GameMode)
+    {
+        return;
+    }
+    
+    
+    if (Fortnite_Version >= 6.10)
+    {
+        static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameState, "CurrentPlaylistInfo");
+
+        FPlaylistPropertyArray* CurrentPlaylistInfoPtr = reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
+
+        if (!CurrentPlaylistInfoPtr) {
+            return;
+        }
+            
+        FPlaylistPropertyArray& CurrentPlaylistInfo = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
+            
+        CurrentPlaylistInfo.SetBasePlaylist(Playlist);
+        CurrentPlaylistInfo.SetOverridePlaylist(Playlist);
+        CurrentPlaylistInfo.SetPlaylistReplicationKey(CurrentPlaylistInfo.GetPlaylistReplicationKey() + 1);
+        CurrentPlaylistInfo.MarkArrayDirty();
+
+        GameState->SetCurrentPlaylistId(Playlist->GetPlaylistId());
+        GameMode->SetCurrentPlaylistId(Playlist->GetPlaylistId());
+        GameMode->SetCurrentPlaylistName(Playlist->GetPlaylistName());
+        
+        GameState->OnRep_CurrentPlaylistId();
+        GameState->OnRep_CurrentPlaylistInfo();
+        GameState->OnRep_AdditionalPlaylistLevelsStreamed();
+        GameMode->GetGameSession()->SetMaxPlayers(Playlist->GetMaxPlayers());
+            
+        GameMode->SetWarmupRequiredPlayerCount(1);
+
+        static int AdditionalLevelsOffset = Runtime::GetOffset(Playlist, "AdditionalLevels");
+        static int AdditionalLevelsServerOffset = Runtime::GetOffset(Playlist, "AdditionalLevelsServerOnly");
+
+        if (AdditionalLevelsOffset != -1)
+        {
+            auto AdditionalLevels = *reinterpret_cast<TArray<TSoftObjectPtr<UWorld>>*>(__int64(Playlist) + AdditionalLevelsOffset);
+            for (size_t i = 0; i < AdditionalLevels.Num(); i++)
+            {
+                if (!AdditionalLevels[i].Get()) continue;
+                FVector Loc{};
+                FRotator Rot{};
+                bool Success = false;
+                ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::Conv_NameToString(AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName), Loc, Rot, &Success, FString());
+                FAdditionalLevelStreamed NewLevel{};
+                NewLevel.bIsServerOnly = false;
+                NewLevel.LevelName = AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName;
+                UE_LOG(LogNeon, Log, "Additional Level: %s", NewLevel.LevelName.ToString().ToString().c_str());
+                TArray<FAdditionalLevelStreamed>& Levels = GameState->GetAdditionalPlaylistLevelsStreamed();
+                Levels.Add(NewLevel, StaticClassImpl("AdditionalLevelStreamed")->GetSize());
+            }
+        }
+
+        if (AdditionalLevelsServerOffset != -1)
+        {
+            auto AdditionalServerLevels = *reinterpret_cast<TArray<TSoftObjectPtr<UWorld>>*>(__int64(Playlist) + AdditionalLevelsServerOffset);
+            for (size_t i = 0; i < AdditionalServerLevels.Num(); i++)
+            {
+                if (!AdditionalServerLevels[i].Get()) continue;
+                FVector Loc{};
+                FRotator Rot{};
+                bool Success = false;
+                ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::Conv_NameToString(AdditionalServerLevels[i].SoftObjectPtr.ObjectID.AssetPathName), Loc, Rot, &Success, FString());
+                FAdditionalLevelStreamed NewLevel{};
+                NewLevel.bIsServerOnly = true;
+                NewLevel.LevelName = AdditionalServerLevels[i].SoftObjectPtr.ObjectID.AssetPathName;
+                UE_LOG(LogNeon, Log, "Additional Server Level: %s", NewLevel.LevelName.ToString().ToString().c_str());
+                TArray<FAdditionalLevelStreamed>& Levels = GameState->GetAdditionalPlaylistLevelsStreamed();
+                Levels.Add(NewLevel, StaticClassImpl("AdditionalLevelStreamed")->GetSize());
+            }
+
+            GameState->OnRep_AdditionalPlaylistLevelsStreamed();
+            GameState->OnFinishedStreamingAdditionalPlaylistLevel();
+        }
+
+        if (Fortnite_Version == 12.41)
+        {
+            ABuildingFoundation* JerkyFoundation = Runtime::StaticFindObject<ABuildingFoundation>("/Game/Athena/Apollo/Maps/Apollo_POI_Foundations.Apollo_POI_Foundations.PersistentLevel.LF_Athena_POI_19x19_2");
+            JerkyFoundation->SetDynamicFoundationType(EDynamicFoundationType::Static);
+            JerkyFoundation->SetbServerStreamedInLevel(true);
+            JerkyFoundation->OnRep_ServerStreamedInLevel();
+            JerkyFoundation->GetDynamicFoundationRepData().SetEnabledState(EDynamicFoundationEnabledState::Enabled);
+            JerkyFoundation->OnRep_DynamicFoundationRepData();
+            JerkyFoundation->SetDynamicFoundationEnabled(true);
+        }
+
+        static UClass* PlayerPawnClass = (UClass*)GUObjectArray.FindObject("PlayerPawn_Athena_C");
+
+        if (GameMode)
+        {
+            GameMode->SetDefaultPawnClass(PlayerPawnClass);
+        }
+            
+        if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
+        {
+            if (Playlist->GetAISettings()) {
+                GameMode->SetAISettings(Playlist->GetAISettings());
+            }
+                
+            if (!Config::bLateGame)
+            {
+                GameMode->SetServerBotManager((UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode));
+                GameMode->GetServerBotManager()->SetCachedGameMode(GameMode);
+                GameMode->GetServerBotManager()->SetCachedGameState(GameState);
+                
+                auto BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
+                GameMode->GetServerBotManager()->SetCachedBotMutator(BotMutator);
+                BotMutator->Set("FortAthenaMutator", "CachedGameMode", GameMode);
+                BotMutator->Set("FortAthenaMutator", "CachedGameState", GameState);
+                FBotMutator::Set(BotMutator);
+                GameMode->SetServerBotManagerClass(UFortServerBotManagerAthena::StaticClass());
+
+                AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
+                GameMode->SetAIDirector(AIDirector);
+                if (GameMode->GetAIDirector())
+                {
+                    GameMode->GetAIDirector()->CallFunc<void>("FortAIDirector", "Activate");
+                }
+
+                AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
+                GameMode->SetAIGoalManager(AIGoalManager);
+            }
+        }
+    } else
+    {
+        GameState->Set("FortGameStateAthena", "CurrentPlaylistData", Playlist);
+            
+        GameState->SetCurrentPlaylistId(Playlist->GetPlaylistId());
+        GameMode->SetCurrentPlaylistId(Playlist->GetPlaylistId());
+        GameMode->SetCurrentPlaylistName(Playlist->GetPlaylistName());
+        
+        GameState->OnRep_CurrentPlaylistId();
+        GameState->OnRep_CurrentPlaylistData();
+    }
+}
+
 bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFrame& Stack, bool* Result)
 {
     Stack.IncrementCode();
-    AFortGameStateAthena* GameState = GameMode->GetGameState();
-    if (!GameState)
+    AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
+    
+    if (!GameState || !GameMode)
     {
         return *Result = false;
     }
@@ -29,138 +188,43 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     }
 
     GameMode->SetbWorldIsReady(true);
-    
-    static bool bSetup = false;
 
-    if (!bSetup)
+    static bool bInit = false;
+    if (!bInit)
     {
-        bSetup = true;
+        bInit = true;
         UFortPlaylistAthena* Playlist = (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_DefaultSolo");
-
-        if (Fortnite_Version >= 6.10)
+        SetPlaylist(GameMode, Playlist);
+    }
+    
+    if (Config::bGameSessions)
+    {
+        static bool bSetPlaylist = false;
+        if (!bSetPlaylist)
         {
-            static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameState, "CurrentPlaylistInfo");
-            
-            FPlaylistPropertyArray& CurrentPlaylistInfoPtr = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
-            CurrentPlaylistInfoPtr.SetBasePlaylist(Playlist);
-            CurrentPlaylistInfoPtr.SetOverridePlaylist(Playlist);
-            CurrentPlaylistInfoPtr.SetPlaylistReplicationKey(CurrentPlaylistInfoPtr.GetPlaylistReplicationKey() + 1);
-            CurrentPlaylistInfoPtr.MarkArrayDirty();
-
-            GameState->SetCurrentPlaylistId(Playlist->GetPlaylistId());
-            GameMode->SetCurrentPlaylistId(Playlist->GetPlaylistId());
-            GameMode->SetCurrentPlaylistName(Playlist->GetPlaylistName());
-        
-            GameState->OnRep_CurrentPlaylistId();
-            GameState->OnRep_CurrentPlaylistInfo();
-            GameState->OnRep_AdditionalPlaylistLevelsStreamed();
-            GameMode->GetGameSession()->SetMaxPlayers(Playlist->GetMaxPlayers());
-            
-            GameMode->SetWarmupRequiredPlayerCount(1);
-
-            static int AdditionalLevelsOffset = Runtime::GetOffset(Playlist, "AdditionalLevels");
-            static int AdditionalLevelsServerOffset = Runtime::GetOffset(Playlist, "AdditionalLevelsServerOnly");
-
-            if (AdditionalLevelsOffset != -1)
-            {
-                auto AdditionalLevels = *reinterpret_cast<TArray<TSoftObjectPtr<UWorld>>*>(__int64(Playlist) + AdditionalLevelsOffset);
-                for (size_t i = 0; i < AdditionalLevels.Num(); i++)
-                {
-                    FVector Loc{};
-                    FRotator Rot{};
-                    bool Success = false;
-                    ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::Conv_NameToString(AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName), Loc, Rot, &Success, FString());
-                    FAdditionalLevelStreamed NewLevel{};
-                    NewLevel.bIsServerOnly = false;
-                    NewLevel.LevelName = AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName;
-                    UE_LOG(LogNeon, Log, "Additional Level: %s", NewLevel.LevelName.ToString().ToString().c_str());
-                    TArray<FAdditionalLevelStreamed>& Levels = GameState->GetAdditionalPlaylistLevelsStreamed();
-                    Levels.Add(NewLevel, StaticClassImpl("AdditionalLevelStreamed")->GetSize());
+            UFortPlaylistAthena* Playlist = nullptr;
+            if (!GameMode->GetCurrentBucketId().IsValid()) return *Result = false;
+            UE_LOG(LogNeon, Log, "Current Bucket ID: %s", GameMode->GetCurrentBucketId().ToString().c_str());
+            auto splitBucket = split(GameMode->GetCurrentBucketId().ToString(), ":");
+            if (splitBucket.size() > 5) {
+                auto PlaylistName = splitBucket[5];
+                auto PathPart = split(PlaylistName, "_")[1];
+                if (PathPart == "showdownalt") PathPart = "showdown";
+                Playlist = Runtime::StaticFindObject<UFortPlaylistAthena>("/Game/Athena/Playlists/" + (PathPart.starts_with("default") ? "" : (PathPart + "/")) + PlaylistName + "." + PlaylistName);
+                UE_LOG(LogNeon, Log, PlaylistName.c_str());
+                if (PlaylistName.contains("showdownalt")) {
+                    Config::bLateGame = true;
                 }
-            }
-
-            if (AdditionalLevelsServerOffset != -1)
-            {
-                auto AdditionalServerLevels = *reinterpret_cast<TArray<TSoftObjectPtr<UWorld>>*>(__int64(Playlist) + AdditionalLevelsServerOffset);
-                for (size_t i = 0; i < AdditionalServerLevels.Num(); i++)
-                {
-                    FVector Loc{};
-                    FRotator Rot{};
-                    bool Success = false;
-                    ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::Conv_NameToString(AdditionalServerLevels[i].SoftObjectPtr.ObjectID.AssetPathName), Loc, Rot, &Success, FString());
-                    FAdditionalLevelStreamed NewLevel{};
-                    NewLevel.bIsServerOnly = true;
-                    NewLevel.LevelName = AdditionalServerLevels[i].SoftObjectPtr.ObjectID.AssetPathName;
-                    UE_LOG(LogNeon, Log, "Additional Server Level: %s", NewLevel.LevelName.ToString().ToString().c_str());
-                    TArray<FAdditionalLevelStreamed>& Levels = GameState->GetAdditionalPlaylistLevelsStreamed();
-                    Levels.Add(NewLevel, StaticClassImpl("AdditionalLevelStreamed")->GetSize());
+                else if (PlaylistName.contains("showdown")) {
+// tournament stuff
                 }
-
-                GameState->OnRep_AdditionalPlaylistLevelsStreamed();
-                GameState->OnFinishedStreamingAdditionalPlaylistLevel();
+                if (!Playlist) Playlist = Runtime::StaticFindObject<UFortPlaylistAthena>("/Game/Athena/Playlists/Barrier/Playlist_Barrier_16_B_Lava.Playlist_Barrier_16_B_Lava");
             }
 
-            if (Fortnite_Version == 12.41)
-            {
-                ABuildingFoundation* JerkyFoundation = Runtime::StaticFindObject<ABuildingFoundation>("/Game/Athena/Apollo/Maps/Apollo_POI_Foundations.Apollo_POI_Foundations.PersistentLevel.LF_Athena_POI_19x19_2");
-                JerkyFoundation->SetDynamicFoundationType(EDynamicFoundationType::Static);
-                JerkyFoundation->SetbServerStreamedInLevel(true);
-                JerkyFoundation->OnRep_ServerStreamedInLevel();
-                JerkyFoundation->GetDynamicFoundationRepData().SetEnabledState(EDynamicFoundationEnabledState::Enabled);
-                JerkyFoundation->OnRep_DynamicFoundationRepData();
-                JerkyFoundation->SetDynamicFoundationEnabled(true);
-            }
-
-            static UClass* PlayerPawnClass = (UClass*)GUObjectArray.FindObject("PlayerPawn_Athena_C");
-
-            if (GameMode)
-            {
-                GameMode->SetDefaultPawnClass(PlayerPawnClass);
-            }
-            
-            if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
-            {
-                if (Playlist->GetAISettings()) {
-                    GameMode->SetAISettings(Playlist->GetAISettings());
-                }
-                
-                if (!Config::bLateGame)
-                {
-                    GameMode->SetServerBotManager((UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode));
-                    GameMode->GetServerBotManager()->SetCachedGameMode(GameMode);
-                    GameMode->GetServerBotManager()->SetCachedGameState(GameState);
-                
-                    auto BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
-                    GameMode->GetServerBotManager()->SetCachedBotMutator(BotMutator);
-                    BotMutator->Set("FortAthenaMutator", "CachedGameMode", GameMode);
-                    BotMutator->Set("FortAthenaMutator", "CachedGameState", GameState);
-                    FBotMutator::Set(BotMutator);
-                    GameMode->SetServerBotManagerClass(UFortServerBotManagerAthena::StaticClass());
-
-                    AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
-                    GameMode->SetAIDirector(AIDirector);
-                    if (GameMode->GetAIDirector())
-                    {
-                        GameMode->GetAIDirector()->CallFunc<void>("FortAIDirector", "Activate");
-                    }
-
-                    AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
-                    GameMode->SetAIGoalManager(AIGoalManager);
-                }
-            }
-        } else
-        {
-            GameState->Set("FortGameStateAthena", "CurrentPlaylistData", Playlist);
-            
-            GameState->SetCurrentPlaylistId(Playlist->GetPlaylistId());
-            GameMode->SetCurrentPlaylistId(Playlist->GetPlaylistId());
-            GameMode->SetCurrentPlaylistName(Playlist->GetPlaylistName());
-        
-            GameState->OnRep_CurrentPlaylistId();
-            GameState->OnRep_CurrentPlaylistData();
+            SetPlaylist(GameMode, Playlist);
         }
     }
-
+    
     UNetDriver* NetDriver = UWorld::GetWorld()->GetNetDriver();
     if (!NetDriver && !Finder->InstructionForCollision())
     {
