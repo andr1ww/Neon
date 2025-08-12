@@ -2,6 +2,7 @@
 #include "pch.h"
 
 #include "Engine/Array/Header/Array.h"
+#include "Engine/UniqueID/Header/UniqueId.h"
 #include "FortniteGame/BuildingSMActor/Header/BuildingSMActor.h"
 #include "FortniteGame/FortAthenaMapInfo/Header/FortAthenaMapInfo.h"
 #include "FortniteGame/FortPlaylistAthena/Header/FortPlaylistAthena.h"
@@ -36,26 +37,13 @@ enum class EAthenaGamePhaseStep : uint8
     EAthenaGamePhaseStep_MAX                 = 13,
 };
 
-struct FUniqueNetIdWrapper
-{
-public:
-    uint8                                         Pad_18[0x1];                                       // 0x0000(0x0001)(Fixing Struct Size After Last Property [ Dumper-7 ])
-};
-
-struct FUniqueNetIdRepl final : public FUniqueNetIdWrapper
-{
-public:
-    uint8                                         Pad_B8[0x17];                                      // 0x0001(0x0017)(Fixing Size After Last Property [ Dumper-7 ])
-    TArray<uint8>                                 ReplicationBytes;                                  // 0x0018(0x0010)(ZeroConstructor, Transient, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
-};
-
 struct FGameMemberInfo final : public FFastArraySerializerItem
 {
 public:
     uint8                                         SquadId;                                           // 0x000C(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
     uint8                                         TeamIndex;                                         // 0x000D(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
     uint8                                         Pad_1B81[0x2];                                     // 0x000E(0x0002)(Fixing Size After Last Property [ Dumper-7 ])
-    struct FUniqueNetIdRepl                       MemberUniqueId;                                    // 0x0010(0x0028)(HasGetValueTypeHash, NativeAccessSpecifierPublic)
+     FUniqueNetIdRepl                       MemberUniqueId;                                    // 0x0010(0x0028)(HasGetValueTypeHash, NativeAccessSpecifierPublic)
 };
 
 class AFortGameState : public UObject

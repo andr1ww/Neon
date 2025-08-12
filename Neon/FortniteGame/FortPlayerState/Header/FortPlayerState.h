@@ -7,6 +7,8 @@
 #include "FortniteGame/Common/Header/Tags.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 
+class APlayerState;
+
 enum class EFortCustomPartType : uint8
 {
     Head                                     = 0,

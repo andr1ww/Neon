@@ -162,6 +162,7 @@
     <ClInclude Include="Engine\Text\Header\Text.h" />
     <ClInclude Include="Engine\Transform\Header\Transform.h" />
     <ClInclude Include="Engine\UEngine\Header\UEngine.h" />
+    <ClInclude Include="Engine\UniqueID\Header\UniqueId.h" />
     <ClInclude Include="Engine\Vector\Header\Vector.h" />
     <ClInclude Include="FortniteGame\AbilitySystemComponent\Header\AbilitySystemComponent.h" />
     <ClInclude Include="FortniteGame\BehaviorTree\Header\BehaviorTree.h" />
@@ -193,6 +194,7 @@
     <ClInclude Include="FortniteGame\FortSafeZoneIndicator\Header\FortSafeZoneIndicator.h" />
     <ClInclude Include="Neon\Config.h" />
     <ClInclude Include="Neon\Finder\Header\Finder.h" />
+    <ClInclude Include="Neon\Nexa\NexaHelpers.h" />
     <ClInclude Include="Neon\Runtime\Runtime.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SDK\include\SDK.h" />
