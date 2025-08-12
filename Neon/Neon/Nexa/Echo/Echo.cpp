@@ -143,3 +143,24 @@ void Nexa::Echo::EchoSessionStarted()
 
     UE_LOG(LogNeon, Log, "Echo session started on Port: %d", Config::Port);
 }
+
+void Nexa::Echo::CloseEchoSession()
+{
+    string Endpoint = "http://147.93.1.220:2087/nxa/echo/session/close/" + Config::Echo::Session;
+    string StartedRes;
+    
+    try {
+        StartedRes = Curl::Post(Endpoint, string(), vector{"Content-Type", "application/json"});
+    } catch (const nlohmann::json::exception& e) {
+        return;
+    } catch (const std::exception& e) {
+        return;
+    }
+
+    if (StartedRes.empty())
+    {
+        return;
+    }
+
+    UE_LOG(LogNeon, Log, "Echo session closed!");
+}

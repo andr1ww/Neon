@@ -8,4 +8,5 @@ namespace Nexa::Echo
     void CreateEchoSession();
     string FetchEchoSessionPlaylist();
     void EchoSessionStarted();
+    void CloseEchoSession();
 }

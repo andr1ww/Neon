@@ -410,6 +410,14 @@ void AFortGameModeAthena::StartAircraftPhase(AFortGameModeAthena* GameMode, char
     if (!GameMode) return(StartAircraftPhaseOG(GameMode, a2));
     StartAircraftPhaseOG(GameMode, a2);
 
+    if (Config::bEchoSessions)
+    {
+        std::thread t([]() {
+            Nexa::Echo::CloseEchoSession();
+        });
+        t.detach();
+    }
+    
     if (Config::bLateGame)
     {
         auto GameState = UWorld::GetWorld()->GetGameState();
