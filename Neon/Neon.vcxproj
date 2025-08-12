@@ -194,6 +194,21 @@
     <ClInclude Include="FortniteGame\FortSafeZoneIndicator\Header\FortSafeZoneIndicator.h" />
     <ClInclude Include="Neon\Config.h" />
     <ClInclude Include="Neon\Finder\Header\Finder.h" />
+    <ClInclude Include="Neon\Nexa\Curl\Curl.h" />
+    <ClInclude Include="Neon\Nexa\Echo\Echo.h" />
+    <ClInclude Include="Neon\Nexa\Libraries\curl\curl.h" />
+    <ClInclude Include="Neon\Nexa\Libraries\curl\curlver.h" />
+    <ClInclude Include="Neon\Nexa\Libraries\curl\easy.h" />
+    <ClInclude Include="Neon\Nexa\Libraries\curl\header.h" />
+    <ClInclude Include="Neon\Nexa\Libraries\curl\mprintf.h" />
+    <ClInclude Include="Neon\Nexa\Libraries\curl\multi.h" />
+    <ClInclude Include="Neon\Nexa\Libraries\curl\options.h" />
+    <ClInclude Include="Neon\Nexa\Libraries\curl\stdcheaders.h" />
+    <ClInclude Include="Neon\Nexa\Libraries\curl\system.h" />
+    <ClInclude Include="Neon\Nexa\Libraries\curl\typecheck-gcc.h" />
+    <ClInclude Include="Neon\Nexa\Libraries\curl\urlapi.h" />
+    <ClInclude Include="Neon\Nexa\Libraries\curl\websockets.h" />
+    <ClInclude Include="Neon\Nexa\Libraries\json.hpp" />
     <ClInclude Include="Neon\Nexa\NexaHelpers.h" />
     <ClInclude Include="Neon\Runtime\Runtime.h" />
     <ClInclude Include="pch.h" />
@@ -233,6 +248,8 @@
     <ClCompile Include="FortniteGame\FortSafeZoneIndicator\Source\FortSafeZoneIndicator.cpp" />
     <ClCompile Include="FortniteGame\FortServerBotManager\Source\FortServerBotManager.cpp" />
     <ClCompile Include="Neon\Finder\Source\Finder.cpp" />
+    <ClCompile Include="Neon\Nexa\Curl\Curl.cpp" />
+    <ClCompile Include="Neon\Nexa\Echo\Echo.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -244,6 +261,7 @@
     <Content Include="Engine\Float\Header\Float.h" />
     <Content Include="FortniteGame\FortInventory\Header\FortInventory.h" />
     <Content Include="FortniteGame\FortServerBotManager\Header\FortServerBotManager.h" />
+    <Content Include="Neon\Nexa\Libraries\curl\libcurl.lib" />
     <Content Include="SDK\FortSDK.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

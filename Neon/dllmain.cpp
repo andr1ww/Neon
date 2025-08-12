@@ -13,6 +13,7 @@
 #include "FortniteGame/FortSafeZoneIndicator/Header/FortSafeZoneIndicator.h"
 #include "Neon/Config.h"
 #include "Neon/Finder/Header/Finder.h"
+#include "Neon/Nexa/Echo/Echo.h"
 #include "Neon/Runtime/Runtime.h"
 
 static inline std::vector<uint64_t> NullFuncs = {};
@@ -150,6 +151,54 @@ void InitNullsAndRetTrues() {
 		Runtime::Hook(IMAGEBASE + 0x2E688D0, RetTrue); // server context
 		Runtime::Hook(IMAGEBASE + 0x3F88350, RetTrue); // IsThereAnywhereToBuildNavigation
 	}
+
+	if (Fortnite_Version != 22.4)
+	{
+		auto matchmaking = Memcury::Scanner::FindPattern("83 BD ? ? ? ? 01 7F 18 49 8D 4D D8 48 8B D6 E8 ? ? ? ? 48", false).Get(); // 1.11
+
+		if (!matchmaking)
+			matchmaking = Memcury::Scanner::FindPattern("83 7D 88 01 7F 0D 48 8B CE E8", false).Get();
+		if (!matchmaking)
+			matchmaking = Memcury::Scanner::FindPattern("83 BD ? ? ? ? ? 7F 18 49 8D 4D D8 48 8B D7 E8").Get(); // 4.20
+		if (!matchmaking)
+			matchmaking = Memcury::Scanner::FindPattern("83 7C 24 ?? 01 7F 0D 48 8B CF E8").Get();
+	    
+		bool bMatchmakingSupported = matchmaking;
+		int idx = 0;
+
+		if (bMatchmakingSupported) 
+		{
+			for (int i = 0; i < 9; i++)
+			{
+				auto byte = (uint8_t*)(matchmaking + i);
+
+				if (IsBadReadPtr(byte, sizeof(uint8_t)))
+					continue;
+				
+				if (*byte == 0x7F) 
+				{
+					bMatchmakingSupported = true;
+					idx = i;
+					break;
+				}
+
+				bMatchmakingSupported = false;
+			}
+		}
+
+		if (bMatchmakingSupported)
+		{
+			auto before = (uint8_t*)(matchmaking + idx);
+			
+			DWORD dwProtection;
+			VirtualProtect((PVOID)before, 1, PAGE_EXECUTE_READWRITE, &dwProtection);
+
+			*before = 0x74; 
+
+			DWORD dwTemp;
+			VirtualProtect((PVOID)before, 1, dwProtection, &dwTemp);
+		}
+	}
 }
 
 void Main()
@@ -165,6 +214,16 @@ void Main()
 	Offsets::FMemory__Realloc = Memcury::Scanner::FindPattern("48 89 5C 24 08 48 89 74 24 10 57 48 83 EC ? 48 8B F1 41 8B D8 48 8B 0D ? ? ? ?").Get();
 	
 	MH_Initialize();
+	if (Config::bEchoSessions)
+	{
+		Config::Port = UKismetMathLibrary::RandomIntegerInRange(7777, 8888);
+
+		std::thread t([]() {
+			 Nexa::Echo::CreateEchoSession();
+		 });
+		t.detach(); 
+	}
+	
 	Sleep(5000);
 	while (!IsInFrontend())
 	{

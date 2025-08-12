@@ -12,6 +12,7 @@
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 #include "Neon/Config.h"
 #include "Neon/Finder/Header/Finder.h"
+#include "Neon/Nexa/Echo/Echo.h"
 #include "Neon/Runtime/Runtime.h"
 
 std::vector<std::string> split(std::string s, std::string delimiter) {
@@ -155,20 +156,61 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     }
 
     GameMode->SetbWorldIsReady(true);
-
-    static bool bInit = false;
-    if (!bInit)
+    
+    if (GameMode->GetCurrentPlaylistId() == -1)
     {
-        bInit = true;
         UFortPlaylistAthena* Playlist = (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_DefaultSolo");
-        SetPlaylist(GameMode, Playlist);
         
-        if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
+        if (!Config::bEchoSessions)
         {
+            SetPlaylist(GameMode, Playlist);
             if (Playlist->GetAISettings()) {
                 GameMode->SetAISettings(Playlist->GetAISettings());
             }
+        }
+        else
+        {
+            string PlaylistName = Nexa::Echo::FetchEchoSessionPlaylist();
+            if (!PlaylistName.empty())
+            {
+                std::string PlaylistDirectory = PlaylistName;
+                if (PlaylistDirectory == "showdownalt") PlaylistDirectory = "showdown";
+
+                std::string PlaylistBaseName = PlaylistName;
+                size_t underscorePos = PlaylistBaseName.find('_');
+                if (underscorePos != std::string::npos) {
+                    PlaylistBaseName = PlaylistBaseName.substr(0, underscorePos);
+                }
+
+                std::string DirectoryPath = PlaylistBaseName;
+                if (DirectoryPath == "showdownalt") DirectoryPath = "showdown";
+
+                std::string path = "/Game/Athena/Playlists/" + 
+                    (PlaylistName.substr(0, 7) == "default" ? "" : (DirectoryPath + "/")) + 
+                    "playlist_" + PlaylistName + ".playlist_" + PlaylistName;
+
+                std::cout << path << std::endl;
+                Playlist = Runtime::StaticFindObject<UFortPlaylistAthena>(path);
+
+                if (PlaylistName.contains("showdownalt")) {
+                    UE_LOG(LogNeon, Log, "Enabling LateGame");
+                    Config::bLateGame = true;
+                }
                 
+                if (Playlist)
+                {
+                    SetPlaylist(GameMode, Playlist);
+                }
+            } else
+            {
+                return *Result = false;
+            }
+        }
+        
+        static bool bInit = false;
+        if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && !bInit)
+        {
+            bInit = true;
             if (!Config::bLateGame)
             {
                 GameMode->SetServerBotManager((UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode));
@@ -256,6 +298,19 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         }
 
         SetConsoleTitleA("Neon | Listening on Port: 7777");
+    }
+
+    if (Config::bEchoSessions)
+    {
+        static bool bStarted = false;
+        if (!bStarted)
+        {
+            bStarted = true;
+            std::thread t([]() {
+                Nexa::Echo::EchoSessionStarted();
+            });
+            t.detach();
+        }
     }
     
     bool Res = GameMode->GetAlivePlayers().Num() >= GameMode->GetWarmupRequiredPlayerCount();

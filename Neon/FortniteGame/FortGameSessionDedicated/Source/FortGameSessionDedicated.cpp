@@ -4,6 +4,7 @@
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "Engine/UEngine/Header/UEngine.h"
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
+#include "Neon/Config.h"
 
 UClass** FortGameSessionDedicated::GetGameSessionClass(AFortGameModeAthena* GameMode, UClass** ClassRet)
 {
@@ -44,7 +45,7 @@ void FortGameSessionDedicated::UWorld_Listen()
     NetDriver->NetDriverSetWorld(UWorld::GetWorld());
 
     FURL URL{};
-    URL.Port = 7777;
+    URL.Port = Config::Port;
 
     NetDriver->InitListen(UWorld::GetWorld(), URL, false);
     NetDriver->NetDriverSetWorld(UWorld::GetWorld());
@@ -54,7 +55,8 @@ void FortGameSessionDedicated::UWorld_Listen()
         UWorld::GetWorld()->GetLevelCollections()[i].NetDriver = NetDriver;
     }
 
-    SetConsoleTitleA("Neon | Listening on Port: 7777");
+    std::string title = "Neon | Listening on Port: " + std::to_string(Config::Port);
+    SetConsoleTitleA(title.c_str());
 
    // return true;
 }

@@ -15,6 +15,7 @@
 #include "SDK/include/SDK.h"
 #pragma comment(lib, "SDK/FortSDK.lib")
 using namespace SDK;
+using namespace std;
 DEFINE_LOG_CATEGORY(LogNeon);
 
 #define IMAGEBASE uint64_t(GetModuleHandle(0))
