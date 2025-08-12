@@ -9,4 +9,5 @@ namespace Nexa::Echo
     string FetchEchoSessionPlaylist();
     void EchoSessionStarted();
     void CloseEchoSession();
+    void LowerEchoSessionCount();
 }

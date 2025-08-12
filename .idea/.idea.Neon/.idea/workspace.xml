@@ -5,18 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Neon/Neon/Nexa/Curl/Curl.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Neon/Neon/Nexa/Curl/Curl.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Neon/Neon/Nexa/Echo/Echo.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Neon/Neon/Nexa/Echo/Echo.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Neon/Neon/Nexa/Libraries/json.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortGameSessionDedicated/Source/FortGameSessionDedicated.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortGameSessionDedicated/Source/FortGameSessionDedicated.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/Neon.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon.vcxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/Neon/Config.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Config.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/dllmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/dllmain.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/pch.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/pch.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Neon/Nexa/Echo/Echo.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Nexa/Echo/Echo.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Neon/Nexa/Echo/Echo.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Nexa/Echo/Echo.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,7 +74,7 @@
       <workItem from="1754800261763" duration="3000" />
       <workItem from="1754844857997" duration="8706000" />
       <workItem from="1754921099595" duration="22720000" />
-      <workItem from="1755003375865" duration="14341000" />
+      <workItem from="1755003375865" duration="15566000" />
     </task>
     <servers />
   </component>
@@ -126,6 +117,11 @@
           <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp</url>
           <line>159</line>
           <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/Neon/Neon/Nexa/Curl/Curl.cpp</url>
+          <line>14</line>
+          <option name="timeStamp" value="15" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

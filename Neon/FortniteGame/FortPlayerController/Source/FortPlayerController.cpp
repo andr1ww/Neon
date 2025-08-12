@@ -11,6 +11,7 @@
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "Neon/Config.h"
 #include "Neon/Finder/Header/Finder.h"
+#include "Neon/Nexa/Echo/Echo.h"
 
 void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) 
 {
@@ -708,6 +709,14 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 				GameState->OnRep_WinningPlayerState();
 			}
 		}
+	}
+
+	if (Config::bEchoSessions)
+	{
+		std::thread t([]() {
+			Nexa::Echo::LowerEchoSessionCount();
+		});
+		t.detach();
 	}
    
 	ClientOnPawnDiedOG(PlayerController, DeathReport);
