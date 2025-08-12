@@ -159,7 +159,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
         bool bRanBehaviorTree = false;
         if (BotData->GetBehaviorTree()) {
 			Controller->SetBehaviorTree(BotData->GetBehaviorTree());
-            /*if (RunBehaviorTree(Controller, BotData->GetBehaviorTree())) {
+            if (RunBehaviorTree(Controller, BotData->GetBehaviorTree())) {
                 Controller->BlueprintOnBehaviorTreeStarted();
 				bRanBehaviorTree = true;
                 
@@ -169,7 +169,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
 				UE_LOG(LogNeon, Warning, "Bot %s Failed to RunBehaviorTree %s!", Ret->GetFName().ToString().ToString().c_str(), BotData->GetBehaviorTree()->GetFName().ToString().ToString().c_str());
 				//RunBehaviorTree(Controller, BotData->GetBehaviorTree());
 				bRanBehaviorTree = false;
-            }*/
+            }
 
             Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhaseStep"), 6);
             Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhase"), (uint8)EAthenaGamePhase::SafeZones);
@@ -245,19 +245,23 @@ void UFortServerBotManagerAthena::OnAlertLevelChanged(UObject* Context, FFrame& 
     return OnAlertLevelChangedOG(Context, Stack);
 }
 
-void UFortServerBotManagerAthena::InitializeForWorld(UNavigationSystemV1* NavSystem, UWorld* World, uint8 Mode)
+void UFortServerBotManagerAthena::InitializeForWorld(UFortNavSystem* NavSystem, UWorld* World, uint8 Mode)
 {
+    NavSystem->SetbAllowAutoRebuild(true);
+    NavSystem->SetbAutoCreateNavigationData(true);
+    InitializeForWorldOG(NavSystem, World, Mode);
+
     UE_LOG(LogNeon, Log, "InitializeForWorld For World: '%s' For NavigationSystem: '%s'", World->GetFName().ToString().ToString().c_str(), NavSystem->GetFName().ToString().ToString().c_str());
     UE_LOG(LogNeon, Log, "SupportedAgents: %d", NavSystem->GetSupportedAgents().Num());
     
     if (NavSystem->GetSupportedAgents().Num() > 0)
-    {
+    { 
         /*for (FNavDataConfig& Agent : NavSystem->GetSupportedAgents())
         {
             UE_LOG(LogNeon, Log, "Agent: %s", Agent.GetName().ToString().ToString().c_str()); 
         }*/
-        FNavDataConfig& Agent = NavSystem->GetSupportedAgents()[0];
-        Agent.SetName(UKismetStringLibrary::Conv_StringToName(L"AthenaNavMesh"));
+        FNavDataConfig& Agent = NavSystem->GetSupportedAgents()[3];
+        Agent.SetName(UKismetStringLibrary::Conv_StringToName(L"Phoebe"));
         Agent.SetNavDataClass(TSoftClassPtr(AAthenaNavMesh::StaticClass()));
         UE_LOG(LogNeon, Log, "Agent: %s", Agent.GetName().ToString().ToString().c_str());
         /*if (Agent)
@@ -276,9 +280,6 @@ void UFortServerBotManagerAthena::InitializeForWorld(UNavigationSystemV1* NavSys
             UE_LOG(LogNeon, Warning, "No Agent!");
         }*/
     }
-    
-    NavSystem->SetbAutoCreateNavigationData(true);
-    return InitializeForWorldOG(NavSystem, World, Mode);
 }
 
 void UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem(UAthenaNavSystemConfig* Config, UWorld* World)

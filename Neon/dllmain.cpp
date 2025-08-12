@@ -113,7 +113,7 @@ void InitNullsAndRetTrues() {
 		uintptr_t Offset = rawAddress - IMAGEBASE; 
 		Offset = Offset + 1;                  
 		uintptr_t Addr = Offset + IMAGEBASE;  
-
+ 
 		FuncsTo85.push_back(Addr);
 	}
 
@@ -121,7 +121,7 @@ void InitNullsAndRetTrues() {
 	{
 		Runtime::Hook(Finder->GetCommandLet(), FortGameSessionDedicated::Get, (void**)&FortGameSessionDedicated::GetOG);
 		Runtime::Hook(Finder->MatchmakingSerivcePerms(), FortGameSessionDedicated::MatchmakingServicePerms);
-		Runtime::Hook(Finder->GetGameSessionClass(), FortGameSessionDedicated::GetGameSessionClass);
+		Runtime::VFTHook(AFortGameModeAthena::GetDefaultObj()->GetVTable(), 0xD3, FortGameSessionDedicated::GetGameSessionClass);
 		FuncsTo85.push_back(Memcury::Scanner::FindPattern("0F 84 ? ? ? ? 48 8B CF E8 ? ? ? ? 48 8B 4E").Get());
 		RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B D9 4D 8B F1").Get());
 	}
@@ -144,8 +144,7 @@ void InitNullsAndRetTrues() {
 	
 	if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.50)
 	{
-		Runtime::Patch(IMAGEBASE + 0x2154F9E, 0x90);
-		Runtime::Hook(IMAGEBASE + 0x2154F70, RetTrue);
+		Runtime::Hook(IMAGEBASE + 0x6BB920, RetTrue);
 		Runtime::Hook(IMAGEBASE + 0x1EE9720, AFortPlayerControllerAthena::K2_RemoveItemFromPlayer, (void**)&AFortPlayerControllerAthena::K2_RemoveItemFromPlayerOG);
 		Runtime::Hook(IMAGEBASE + 0x2ebf890, ProcessEvent, (void**)&ProcessEventOG); 
 		Runtime::Hook(IMAGEBASE + 0x2E688D0, RetTrue); // server context
@@ -176,8 +175,8 @@ void Main()
 	{
 		*(bool*)(Finder->GIsClient()) = false; 
 		*(bool*)(Finder->GIsClient() + 1) = true;
-	} 
-	
+	}
+
 	InitNullsAndRetTrues();
 
 	auto ListenInstruction = Memcury::Scanner::FindPattern("E8 ? ? ? ? 84 C0 75 ? 80 3D ? ? ? ? ? 72 ? 45 33 C0 48 8D 55").Get();
@@ -234,7 +233,6 @@ void Main()
 	Runtime::VFTHook(UAthenaNavSystem::GetDefaultObj()->GetVTable(), 0x53, UFortServerBotManagerAthena::InitializeForWorld, (void**)&UFortServerBotManagerAthena::InitializeForWorldOG);
 	Runtime::Hook(Finder->SpawnLoot(), FortLootPackage::SpawnLoot);
 	Runtime::VFTHook(StaticClassImpl("FortPlayerPawnAthena")->GetClassDefaultObject()->GetVTable(), 0x119, AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues, (void**)&AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCuesOG);
-	Runtime::Hook(IMAGEBASE + 0x6BB920, RetTrue);
 	Runtime::Hook(Finder->ReloadWeapon(), AFortPlayerPawn::ReloadWeapon, (void**)&AFortPlayerPawn::ReloadWeaponOG); // this is right um we can make it uni after we get it to fucking call 
 	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);
 	Runtime::Hook(Finder->OnSafeZoneStateChange(), AFortSafeZoneIndicator::OnSafeZoneStateChange, (void**)&AFortSafeZoneIndicator::OnSafeZoneStateChangeOG);

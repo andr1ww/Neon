@@ -416,12 +416,38 @@ T* StaticLoadObjectOnly(std::string name) {
 		MH_EnableHook(LPVOID(Address));
 	}
 	
+	struct Info {
+		uintptr_t address;
+		uint8_t originalByte;
+	};
+
+	static std::vector<Info> patches;
+
 	static void Patch(uintptr_t ptr, uint8_t byte)
 	{
 		DWORD og;
 		VirtualProtect(LPVOID(ptr), sizeof(byte), PAGE_EXECUTE_READWRITE, &og);
+    
+		uint8_t originalByte = *(uint8_t*)ptr;
+		patches.push_back({ptr, originalByte});
+    
 		*(uint8_t*)ptr = byte;
 		VirtualProtect(LPVOID(ptr), sizeof(byte), og, &og);
+	}
+
+	static void Unpatch(uintptr_t ptr)
+	{
+		for (int i = patches.size() - 1; i >= 0; i--) {
+			if (patches[i].address == ptr) {
+				DWORD og;
+				VirtualProtect(LPVOID(ptr), 1, PAGE_EXECUTE_READWRITE, &og);
+				*(uint8_t*)ptr = patches[i].originalByte;
+				VirtualProtect(LPVOID(ptr), 1, og, &og);
+            
+				patches.erase(patches.begin() + i);
+				break;
+			}
+		}
 	}
 
 	static bool PatchDword(void* address, uint32_t newValue) {

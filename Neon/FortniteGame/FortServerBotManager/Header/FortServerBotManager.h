@@ -434,6 +434,8 @@ public:
 class UFortNavSystem : public UNavigationSystemV1
 {
 public:
+    DEFINE_BOOL(UFortNavSystem, bAllowAutoRebuild);
+public:
     DECLARE_STATIC_CLASS(UFortNavSystem);
     DECLARE_DEFAULT_OBJECT(UFortNavSystem)
 };
@@ -522,7 +524,7 @@ public:
     DEFINE_PTR(AFortGameStateAthena, UFortServerBotManagerAthena, CachedGameState);
     DEFINE_PTR(AFortAthenaMutator_Bots, UFortServerBotManagerAthena, CachedBotMutator);
 public:
-    DefHookOg(void, InitializeForWorld, UNavigationSystemV1*, UWorld*, uint8);
+    DefHookOg(void, InitializeForWorld, UFortNavSystem*, UWorld*, uint8);
     DefHookOg(void, CreateAndConfigureNavigationSystem, UAthenaNavSystemConfig*, UWorld*);
 
     DefHookOg(AFortPlayerPawn*, SpawnBot, UFortServerBotManagerAthena *BotManager, FVector SpawnLoc, FRotator SpawnRot, UFortAthenaAIBotCustomizationData *BotData, FFortAthenaAIBotRunTimeCustomizationData &RuntimeBotData);

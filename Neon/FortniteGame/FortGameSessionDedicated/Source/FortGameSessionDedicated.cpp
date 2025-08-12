@@ -7,13 +7,13 @@
 
 UClass** FortGameSessionDedicated::GetGameSessionClass(AFortGameModeAthena* GameMode, UClass** ClassRet)
 {
-    *ClassRet = AFortGameSessionDedicatedAthena::StaticClass();
+    *ClassRet = StaticClassImpl("FortGameSessionDedicatedAthena");
     return ClassRet;
 }
 
 const wchar_t* FortGameSessionDedicated::Get()
 {
-    static auto cmdLine = std::wstring(GetOG()) + L" -AllowAllPlaylistsInShipping -EnableMMS";
+    static auto cmdLine = std::wstring(GetOG()) + L" -AllowAllPlaylistsInShipping";
     return cmdLine.c_str(); // -EnableMMS may work for backfill?
 }
 

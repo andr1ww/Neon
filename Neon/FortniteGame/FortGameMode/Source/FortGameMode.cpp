@@ -75,7 +75,6 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
             auto AdditionalLevels = *reinterpret_cast<TArray<TSoftObjectPtr<UWorld>>*>(__int64(Playlist) + AdditionalLevelsOffset);
             for (size_t i = 0; i < AdditionalLevels.Num(); i++)
             {
-                if (!AdditionalLevels[i].Get()) continue;
                 FVector Loc{};
                 FRotator Rot{};
                 bool Success = false;
@@ -94,7 +93,6 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
             auto AdditionalServerLevels = *reinterpret_cast<TArray<TSoftObjectPtr<UWorld>>*>(__int64(Playlist) + AdditionalLevelsServerOffset);
             for (size_t i = 0; i < AdditionalServerLevels.Num(); i++)
             {
-                if (!AdditionalServerLevels[i].Get()) continue;
                 FVector Loc{};
                 FRotator Rot{};
                 bool Success = false;
@@ -127,37 +125,6 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
         if (GameMode)
         {
             GameMode->SetDefaultPawnClass(PlayerPawnClass);
-        }
-            
-        if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
-        {
-            if (Playlist->GetAISettings()) {
-                GameMode->SetAISettings(Playlist->GetAISettings());
-            }
-                
-            if (!Config::bLateGame)
-            {
-                GameMode->SetServerBotManager((UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode));
-                GameMode->GetServerBotManager()->SetCachedGameMode(GameMode);
-                GameMode->GetServerBotManager()->SetCachedGameState(GameState);
-                
-                auto BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
-                GameMode->GetServerBotManager()->SetCachedBotMutator(BotMutator);
-                BotMutator->Set("FortAthenaMutator", "CachedGameMode", GameMode);
-                BotMutator->Set("FortAthenaMutator", "CachedGameState", GameState);
-                FBotMutator::Set(BotMutator);
-                GameMode->SetServerBotManagerClass(UFortServerBotManagerAthena::StaticClass());
-
-                AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
-                GameMode->SetAIDirector(AIDirector);
-                if (GameMode->GetAIDirector())
-                {
-                    GameMode->GetAIDirector()->CallFunc<void>("FortAIDirector", "Activate");
-                }
-
-                AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
-                GameMode->SetAIGoalManager(AIGoalManager);
-            }
         }
     } else
     {
@@ -195,6 +162,37 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         bInit = true;
         UFortPlaylistAthena* Playlist = (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_DefaultSolo");
         SetPlaylist(GameMode, Playlist);
+        
+        if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
+        {
+            if (Playlist->GetAISettings()) {
+                GameMode->SetAISettings(Playlist->GetAISettings());
+            }
+                
+            if (!Config::bLateGame)
+            {
+                GameMode->SetServerBotManager((UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode));
+                GameMode->GetServerBotManager()->SetCachedGameMode(GameMode);
+                GameMode->GetServerBotManager()->SetCachedGameState(GameState);
+                
+                auto BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
+                GameMode->GetServerBotManager()->SetCachedBotMutator(BotMutator);
+                BotMutator->Set("FortAthenaMutator", "CachedGameMode", GameMode);
+                BotMutator->Set("FortAthenaMutator", "CachedGameState", GameState);
+                FBotMutator::Set(BotMutator);
+                GameMode->SetServerBotManagerClass(UFortServerBotManagerAthena::StaticClass());
+
+                AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
+                GameMode->SetAIDirector(AIDirector);
+                if (GameMode->GetAIDirector())
+                {
+                    GameMode->GetAIDirector()->CallFunc<void>("FortAIDirector", "Activate");
+                }
+
+                AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
+                GameMode->SetAIGoalManager(AIGoalManager);
+            }
+        }
     }
     
     if (Config::bGameSessions)
@@ -322,7 +320,7 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
     }
     
     auto& StartingItemsArray = GameMode->GetStartingItems();
-    int32 FItemAndCountSize = StaticClassImpl("ItemAndCount")->GetSize();
+    static int32 FItemAndCountSize = StaticClassImpl("ItemAndCount")->GetSize();
     for (int i = 0; i < StartingItemsArray.Num(); i++)
     {
         auto Item = (FItemAndCount*) ((uint8*) StartingItemsArray.GetData() + (i * FItemAndCountSize));
