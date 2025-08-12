@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "pch.h"
 #include <Neon/Neon/Nexa/Libraries/json.hpp>
+
+#include "FortniteGame/FortPlaylistAthena/Header/FortPlaylistAthena.h"
 using json = nlohmann::json;
 
 namespace Nexa::Echo
@@ -10,4 +12,5 @@ namespace Nexa::Echo
     void EchoSessionStarted();
     void CloseEchoSession();
     void LowerEchoSessionCount();
+    void EchoSessionUpdate(UFortPlaylistAthena* Playlist);
 }

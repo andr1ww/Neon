@@ -183,3 +183,63 @@ void Nexa::Echo::LowerEchoSessionCount()
         return;
     }
 }
+
+void Nexa::Echo::EchoSessionUpdate(UFortPlaylistAthena* Playlist)
+{
+    if (Config::Echo::Session.empty())
+    {
+        UE_LOG(LogNeon, Log, TEXT("No active echo session to update"));
+        return;
+    }
+
+    json UpdateData;
+    try {
+        UpdateData = {
+            {"Secret", ""}, 
+            {"Attributes", {
+                {"GameType", Playlist->GetGameType()},
+                {"bIsTournament", Playlist->GetbIsTournament()},
+                {"bLimitedTimeMode", Playlist->GetbLimitedTimeMode()},
+                {"MaxPlayers", Playlist->GetMaxPlayers()},
+                {"MaxTeamCount", Playlist->GetMaxTeamCount()},
+                {"MaxTeamSize", Playlist->GetMaxTeamSize()},
+            }}
+        };
+    } catch (const nlohmann::json::exception& e) {
+        UE_LOG(LogNeon, Log, TEXT("Failed to create echo session update JSON: %hs"), e.what());
+        return;
+    }
+
+    string Endpoint = "http://147.93.1.220:2087/nxa/echo/session/update/" + Config::Echo::Session;
+    string UpdateRes;
+
+    try {
+        string jsonStr = UpdateData.dump();
+        vector<const char*> postHeaders = {"Content-Type: application/json"};
+        UpdateRes = Curl::Post(Endpoint, jsonStr, postHeaders);
+    } catch (const nlohmann::json::exception& e) {
+        UE_LOG(LogNeon, Log, TEXT("Failed to update echo session: %hs"), e.what());
+        return;
+    } catch (const std::exception& e) {
+        UE_LOG(LogNeon, Log, TEXT("Error updating echo session: %hs"), e.what());
+        return;
+    }
+
+    if (UpdateRes.empty())
+    {
+        UE_LOG(LogNeon, Log, TEXT("Empty response from echo session update"));
+        return;
+    }
+
+    try {
+        json UpdateJson = json::parse(UpdateRes);
+        if (UpdateJson.contains("success") && UpdateJson["success"]) {
+            UE_LOG(LogNeon, Log, TEXT("Echo session updated successfully"));
+        } else {
+            UE_LOG(LogNeon, Log, TEXT("Failed to update echo session"));
+        }
+    } catch (const nlohmann::json::exception& e) {
+        UE_LOG(LogNeon, Log, TEXT("Failed to parse echo session update response: %hs"), e.what());
+    }
+}
+

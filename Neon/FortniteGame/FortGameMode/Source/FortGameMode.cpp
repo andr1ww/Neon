@@ -200,6 +200,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 if (Playlist)
                 {
                     SetPlaylist(GameMode, Playlist);
+                    Nexa::Echo::EchoSessionUpdate(Playlist);
                 }
             } else
             {
