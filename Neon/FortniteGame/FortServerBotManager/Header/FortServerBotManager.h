@@ -485,7 +485,6 @@ public:
     DECLARE_DEFAULT_OBJECT(UNavigationSystemConfig);
 };
 
-
 class UNavigationSystemModuleConfig : public UNavigationSystemConfig {
 public:
     uint8                                         bStrictlyStatic : 1;                               // 0x0050(0x0001)(BitIndex: 0x00, PropSize: 0x0001 (Edit, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected))
@@ -532,8 +531,16 @@ public:
     DECLARE_DEFAULT_OBJECT(AFortAthenaPatrolPoint);
 };
 
+enum class EPatrollingMode : uint8
+{
+    BackAndForth                             = 0,
+    Loop                                     = 1,
+    EPatrollingMode_MAX                      = 2,
+};
+
 class AFortAthenaPatrolPath final : public AActor {
 public:
+    DEFINE_MEMBER(EPatrollingMode, AFortAthenaPatrolPath, Mode);
     DEFINE_MEMBER(TArray<class AFortAthenaPatrolPoint*>, AFortAthenaPatrolPath, PatrolPoints);
 public:
 	DECLARE_STATIC_CLASS(AFortAthenaPatrolPath);
@@ -550,7 +557,7 @@ public:
 public:
     void SetPatrolPath(const AFortAthenaPatrolPath* NewPatrolPath) {
         static class UFunction* Func = nullptr;
-        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("AIController", "OnUsingBlackBoard");
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortAthenaNpcPatrollingComponent", "SetPatrolPath");
 
         if (Func == nullptr)
             Func = Info.Func;
@@ -563,6 +570,9 @@ public:
         this->ProcessEvent(Func, &Params);
     }
 public:
+
+    DEFINE_PTR(AFortAthenaAIBotController, UFortAthenaNpcPatrollingComponent, CachedBotController);
+    
     DECLARE_STATIC_CLASS(UFortAthenaNpcPatrollingComponent);
     DECLARE_DEFAULT_OBJECT(UFortAthenaNpcPatrollingComponent);
 };

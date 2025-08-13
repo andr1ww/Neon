@@ -61,7 +61,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
     {
         return SpawnBotOG(BotManager, SpawnLoc, SpawnRot, BotData, RuntimeBotData);
     }
-    
+
     static void (*BotManagerSetup)(__int64 BotManaager, __int64 Pawn, __int64 BehaviorTree, __int64 a4, DWORD* SkillLevel, __int64 idk, __int64 StartupInventory, __int64 BotNameSettings, __int64 idk_1, BYTE* CanRespawnOnDeath, unsigned __int8 BitFieldDataThing, BYTE* CustomSquadId, FFortAthenaAIBotRunTimeCustomizationData InRuntimeBotData) = decltype(BotManagerSetup)(Finder->BotManagerSetup());
    
     AActor *SpawnLocator = UGameplayStatics::SpawnActorOG<ADefaultPawn>(ADefaultPawn::StaticClass(), SpawnLoc, SpawnRot);
@@ -121,13 +121,15 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             }
         }
 
+        DWORD CustomSquadId = RuntimeBotData.CustomSquadId;
+        BYTE TrueByte = 1;
+        BYTE FalseByte = 0;
+        BotManagerSetup(__int64(BotManager), __int64(Ret), __int64(BotData->GetBehaviorTree()), 0, &CustomSquadId, 0, __int64(BotData->GetStartupInventory()), __int64(BotData->GetBotNameSettings()), 0, &FalseByte, 0, &TrueByte, RuntimeBotData);
+
+        
         if (BotData->GetFName().ToString().ToString().contains("MANG"))
         {
-            DWORD CustomSquadId = RuntimeBotData.CustomSquadId;
-            BYTE TrueByte = 1;
-            BYTE FalseByte = 0;
-            BotManagerSetup(__int64(BotManager), __int64(Ret), __int64(BotData->GetBehaviorTree()), 0, &CustomSquadId, 0, __int64(BotData->GetStartupInventory()), __int64(BotData->GetBotNameSettings()), 0, &FalseByte, 0, &TrueByte, RuntimeBotData);
-            if (!Controller->GetInventory()) {
+        if (!Controller->GetInventory()) {
                 Controller->SetInventory(UGameplayStatics::SpawnActorOG<AFortInventory>(AFortInventory::StaticClass(), {}, {}, Ret));
             }
 
@@ -176,7 +178,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
 				//RunBehaviorTree(Controller, BotData->GetBehaviorTree());
 				bRanBehaviorTree = false;
             }
-
+            
             Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhaseStep"), 6);
             Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhase"), (uint8)EAthenaGamePhase::SafeZones);
             Controller->GetBlackboard()->SetValueAsBool(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_IsMovementBlocked"), false);
@@ -199,21 +201,30 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             }
         }
 
-        /*static TArray<AActor*> PatrolPaths;
+        static TArray<AActor*> PatrolPaths;
         if (PatrolPaths.Num() == 0) {
             PatrolPaths = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), AFortAthenaPatrolPath::StaticClass());
 		}
         for (int i = 0; i < PatrolPaths.Num(); i++) {
 			AFortAthenaPatrolPath* PatrolPath = (AFortAthenaPatrolPath*)PatrolPaths[i];
-            if (PatrolPath->GetPatrolPoints()[0]->K2_GetActorLocation() == SpawnLoc) {
-                if (!Controller->GetCachedPatrollingComponent()) {
-					Controller->SetCachedPatrollingComponent((UFortAthenaNpcPatrollingComponent*)UGameplayStatics::SpawnActorOG(UFortAthenaNpcPatrollingComponent::StaticClass(), {}, {}, Controller));
+            if (PatrolPath)
+            {
+                if (auto Loc = PatrolPath->GetPatrolPoints()[0])
+                {
+                    if (Loc->GetActorLocation() == SpawnLoc)
+                    {
+                        if (!Controller->GetCachedPatrollingComponent()) {
+                            Controller->SetCachedPatrollingComponent((UFortAthenaNpcPatrollingComponent*)UGameplayStatics::SpawnActorOG(UFortAthenaNpcPatrollingComponent::StaticClass(), {}, {}, Controller));
+                        }
+
+                        PatrolPath->SetMode(EPatrollingMode::BackAndForth);
+                        Controller->GetCachedPatrollingComponent()->SetPatrolPath(PatrolPath);
+                        Controller->GetCachedPatrollingComponent()->SetCachedBotController(Controller);
+                        break;
+                    }
                 }
-                //UE_LOG(LogNeon, Log, "Found Patrol Path!");
-                Controller->GetCachedPatrollingComponent()->SetPatrolPath(PatrolPath);
-                break;
             }
-        }*/
+        }
         
         return Ret;
     }

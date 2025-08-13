@@ -100,6 +100,44 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 			}
 		}
 
+		for (size_t i = 0; i < PC->GetDigestedBotSkillSets().Num(); i++)
+		{
+			if (PC->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotAimingDigestedSkillSet::StaticClass()))
+			{
+				PC->Set("FortAthenaAIBotController", "CacheAimingDigestedSkillSet", (UFortAthenaAIBotAimingDigestedSkillSet*)PC->GetDigestedBotSkillSets()[i]);
+			}
+
+			if (PC->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotHarvestDigestedSkillSet::StaticClass()))
+			{
+				PC->Set("FortAthenaAIBotController", "CacheHarvestDigestedSkillSet", (UFortAthenaAIBotHarvestDigestedSkillSet*)PC->GetDigestedBotSkillSets()[i]);
+			}
+	
+			if (PC->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotInventoryDigestedSkillSet::StaticClass()))
+			{
+				PC->Set("FortAthenaAIBotController", "CacheInventoryDigestedSkillSet", (UFortAthenaAIBotInventoryDigestedSkillSet*)PC->GetDigestedBotSkillSets()[i]);
+			}
+
+			if (PC->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotLootingDigestedSkillSet::StaticClass()))
+			{
+				PC->Set("FortAthenaAIBotController", "CacheLootingSkillSet", (UFortAthenaAIBotLootingDigestedSkillSet*)PC->GetDigestedBotSkillSets()[i]);
+			}
+
+			if (PC->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotMovementDigestedSkillSet::StaticClass()))
+			{
+				PC->Set("FortAthenaAIBotController", "CacheMovementSkillSet", (UFortAthenaAIBotMovementDigestedSkillSet*)PC->GetDigestedBotSkillSets()[i]);
+			}
+
+			if (PC->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotPerceptionDigestedSkillSet::StaticClass()))
+			{
+				PC->Set("FortAthenaAIBotController", "CachePerceptionDigestedSkillSet", (UFortAthenaAIBotPerceptionDigestedSkillSet*)PC->GetDigestedBotSkillSets()[i]);
+			}
+
+			if (PC->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotPlayStyleDigestedSkillSet::StaticClass()))
+			{
+				PC->Set("FortAthenaAIBotController", "CachePlayStyleSkillSet", (UFortAthenaAIBotPlayStyleDigestedSkillSet*)PC->GetDigestedBotSkillSets()[i]);
+			}
+		}
+
 		if (BehaviorTree)
 		{
 			UBlackboardComponent* Blackboard = PC->GetBlackboard();

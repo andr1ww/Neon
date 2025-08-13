@@ -232,9 +232,66 @@ public:
     DECLARE_DEFAULT_OBJECT(UPrimitiveComponent)
 };
 
+class UFortAthenaAIBotDigestedSkillSet : public UObject
+{
+public:
+    DECLARE_STATIC_CLASS(UFortAthenaAIBotDigestedSkillSet)
+DECLARE_DEFAULT_OBJECT(UFortAthenaAIBotDigestedSkillSet)
+};
+
+class UFortAthenaAIBotAimingDigestedSkillSet : public UFortAthenaAIBotDigestedSkillSet
+{
+public:
+    DECLARE_STATIC_CLASS(UFortAthenaAIBotAimingDigestedSkillSet)
+    DECLARE_DEFAULT_OBJECT(UFortAthenaAIBotAimingDigestedSkillSet)
+};
+
+class UFortAthenaAIBotHarvestDigestedSkillSet : public UFortAthenaAIBotDigestedSkillSet
+{
+public:
+    DECLARE_STATIC_CLASS(UFortAthenaAIBotHarvestDigestedSkillSet)
+    DECLARE_DEFAULT_OBJECT(UFortAthenaAIBotHarvestDigestedSkillSet)
+};
+
+class UFortAthenaAIBotInventoryDigestedSkillSet : public UFortAthenaAIBotDigestedSkillSet
+{
+public:
+    DECLARE_STATIC_CLASS(UFortAthenaAIBotInventoryDigestedSkillSet)
+    DECLARE_DEFAULT_OBJECT(UFortAthenaAIBotInventoryDigestedSkillSet)
+};
+
+class UFortAthenaAIBotLootingDigestedSkillSet : public UFortAthenaAIBotDigestedSkillSet
+{
+public:
+    DECLARE_STATIC_CLASS(UFortAthenaAIBotLootingDigestedSkillSet)
+    DECLARE_DEFAULT_OBJECT(UFortAthenaAIBotLootingDigestedSkillSet)
+};
+
+class UFortAthenaAIBotPerceptionDigestedSkillSet : public UFortAthenaAIBotDigestedSkillSet
+{
+public:
+    DECLARE_STATIC_CLASS(UFortAthenaAIBotPerceptionDigestedSkillSet)
+    DECLARE_DEFAULT_OBJECT(UFortAthenaAIBotPerceptionDigestedSkillSet)
+};
+
+class UFortAthenaAIBotPlayStyleDigestedSkillSet : public UFortAthenaAIBotDigestedSkillSet
+{
+public:
+    DECLARE_STATIC_CLASS(UFortAthenaAIBotPlayStyleDigestedSkillSet)
+    DECLARE_DEFAULT_OBJECT(UFortAthenaAIBotPlayStyleDigestedSkillSet)
+};
+
+class UFortAthenaAIBotMovementDigestedSkillSet : public UFortAthenaAIBotDigestedSkillSet
+{
+public:
+    DECLARE_STATIC_CLASS(UFortAthenaAIBotMovementDigestedSkillSet)
+    DECLARE_DEFAULT_OBJECT(UFortAthenaAIBotMovementDigestedSkillSet)
+};
+
 class AFortAthenaAIBotController : public AAIController
 {
 public:
+    DEFINE_MEMBER(TArray<class UFortAthenaAIBotDigestedSkillSet*>, AFortAthenaAIBotController, DigestedBotSkillSets);
     DEFINE_PTR(AFortInventory, AFortAthenaAIBotController, Inventory);
     DEFINE_PTR(UFortAthenaAIBotInventoryItems, AFortAthenaAIBotController, StartupInventory);
 
