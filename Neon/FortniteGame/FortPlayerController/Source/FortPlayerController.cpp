@@ -273,10 +273,21 @@ void AFortPlayerControllerAthena::ServerAttemptAircraftJump(UActorComponent* Com
     
 	auto PlayerController = (AFortPlayerControllerAthena*)Comp->CallFunc<AActor*>("ActorComponent", "GetOwner", Comp);
 	auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
-	
+	auto GameState = UWorld::GetWorld()->GetGameState();
+
 	if (PlayerController && GameMode)
 	{
 		GameMode->RestartPlayer(PlayerController);
+		if (Config::bLateGame)
+		{
+			auto SpawnLocation = GameState->GetAircrafts()[0]->K2_GetActorLocation();
+			SpawnLocation.Z -= UKismetMathLibrary::RandomIntegerInRange(370, 700);
+			SpawnLocation.X += UKismetMathLibrary::RandomIntegerInRange(200, 750);
+			SpawnLocation.X -= UKismetMathLibrary::RandomIntegerInRange(200, 400);
+
+			PlayerController->GetMyFortPawn()->K2_TeleportTo(SpawnLocation, {});
+		}
+		
 		PlayerController->Set("Controller", "ControlRotation", Rotation);
 
 		PlayerController->GetMyFortPawn()->BeginSkydiving(true);

@@ -412,6 +412,14 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             }
         }
     }
+
+    if (bStartedBus)
+    {
+        if (NetDriver->GetClientConnections().Num() == 0)
+        {
+            TerminateProcess(GetCurrentProcess(), 0);
+        }
+    }
     
 	return TickFlushOriginal(NetDriver, DeltaSeconds);
 }

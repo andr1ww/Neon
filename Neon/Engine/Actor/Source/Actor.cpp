@@ -126,3 +126,30 @@ bool AActor::K2_SetActorRotation(const struct FRotator& NewRotation, bool bTelep
     return Params.ReturnValue;
 }
 
+void AActor::K2_TeleportTo(const FVector Location, const FRotator Rot)
+{
+    static SDK::UFunction* Func = nullptr;
+    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Actor", "K2_TeleportTo");
+
+    if (Func == nullptr)
+        Func = Info.Func;
+    if (!Func)
+        return;
+
+    struct Actor_K2_TeleportTo final
+    {
+    public:
+        struct FVector                                DestLocation;                                      // 0x0000(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        struct FRotator                               DestRotation;                                      // 0x000C(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, NativeAccessSpecifierPublic)
+        bool                                          ReturnValue;                                       // 0x0018(0x0001)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        uint8                                         Pad_19[0x3];                                       // 0x0019(0x0003)(Fixing Struct Size After Last Property [ Dumper-7 ])
+    };
+    
+    Actor_K2_TeleportTo Params;
+    Params.DestLocation = Location;
+    Params.DestRotation = Rot;
+
+    this->ProcessEvent(Func, &Params);
+}
+
+
