@@ -440,6 +440,24 @@ void AFortGameModeAthena::StartAircraftPhase(AFortGameModeAthena* GameMode, char
         });
         t.detach();
     }
+
+    for (auto& Player : GameMode->GetAlivePlayers())
+    {
+        if (!Player) continue;
+
+        AFortInventory* WorldInventory = Player->GetWorldInventory();
+        FFortItemList& Inventory = WorldInventory->GetInventory();
+
+        if (WorldInventory)
+        {
+            for (int i = Inventory.GetItemInstances().Num() - 1; i >= 0; --i) {
+                Inventory.GetItemInstances().Remove(i);
+            }
+            for (int i = Inventory.GetReplicatedEntries().Num() - 1; i >= 0; --i) {
+                Inventory.GetReplicatedEntries().Remove(i);
+            }
+        }
+    }
     
     if (Config::bLateGame)
     {
@@ -486,13 +504,6 @@ void AFortGameModeAthena::StartAircraftPhase(AFortGameModeAthena* GameMode, char
 
             AFortInventory* WorldInventory = Player->GetWorldInventory();
             FFortItemList& Inventory = WorldInventory->GetInventory();
-            TArray<FGuid> GuidsToRemove;
-        
-            for (UFortWorldItem* Item : Inventory.GetItemInstances()) {
-                if (Item) GuidsToRemove.Add(Item->GetItemEntry().GetItemGuid());
-            }
-        
-            for (const FGuid& Guid : GuidsToRemove) { AFortInventory::Remove(Player, Guid, -1); }
         
             WorldInventory->SetbRequiresLocalUpdate(true);
             WorldInventory->HandleInventoryLocalUpdate();
