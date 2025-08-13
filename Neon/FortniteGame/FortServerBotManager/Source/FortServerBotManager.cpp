@@ -144,12 +144,18 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             }
         }
 
-        Controller->GetPathFollowingComponent()->SetMyNavData(UWorld::GetWorld()->GetNavigationSystem()->GetMainNavData());
-        Controller->GetPathFollowingComponent()->CallFunc<void>("PathFollowingComponent", "OnNavDataRegistered", UWorld::GetWorld()->GetNavigationSystem()->GetMainNavData());
-        Controller->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "Activate", true);
-        Controller->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "SetActivate", true, true);
-        Controller->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "OnRep_IsActive");
-
+        if (auto System = UWorld::GetWorld()->GetNavigationSystem())
+        {
+            if (auto Nav = System->GetMainNavData())
+            {
+                Controller->GetPathFollowingComponent()->SetMyNavData(Nav);
+                Controller->GetPathFollowingComponent()->CallFunc<void>("PathFollowingComponent", "OnNavDataRegistered", Nav);
+                Controller->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "Activate", true);
+                Controller->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "SetActivate", true, true);
+                Controller->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "OnRep_IsActive");
+            }
+        }
+        
         UBlackboardComponent* Blackboard = Controller->GetBlackboard();
         Controller->UseBlackboard(Controller->GetBehaviorTree()->GetBlackboardAsset(), &Blackboard);
         Controller->OnUsingBlackBoard(Blackboard, Controller->GetBehaviorTree()->GetBlackboardAsset());
@@ -257,11 +263,14 @@ void UFortServerBotManagerAthena::InitializeForWorld(UNavigationSystemV1* NavSys
     return InitializeForWorldOG(NavSystem, World, Mode);
 }
 
-void UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem(UAthenaNavSystemConfig* Config, UWorld* World)
+void UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem(UAthenaNavSystemConfig* ModuleConfig, UWorld* World)
 {
-	UE_LOG(LogNeon, Log, "CreateAndConfigureNavigationSystem For World: '%s' For Config: '%s'", World->GetFName().ToString().ToString().c_str(), Config->GetFName().ToString().ToString().c_str());
-    Config->SetbPrioritizeNavigationAroundSpawners(true);
-	Config->SetbAutoSpawnMissingNavData(true);
-    Config->SetbSpawnNavDataInNavBoundsLevel(true);
-    return CreateAndConfigureNavigationSystemOG(Config, World);
+	UE_LOG(LogNeon, Log, "CreateAndConfigureNavigationSystem For World: '%s' For Config: '%s'", World->GetFName().ToString().ToString().c_str(), ModuleConfig->GetFName().ToString().ToString().c_str());
+    ModuleConfig->bCreateOnClient = true;
+    ModuleConfig->bPrioritizeNavigationAroundSpawners = true;
+    ModuleConfig->bAutoSpawnMissingNavData = true;
+    ModuleConfig->bAllowAutoRebuild = true;
+    ModuleConfig->bSupportRuntimeNavmeshDisabling = false;
+    
+    return CreateAndConfigureNavigationSystemOG(ModuleConfig, World);
 }

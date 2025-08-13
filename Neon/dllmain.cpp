@@ -243,7 +243,7 @@ void Main()
 	Runtime::ModifyInstruction(ListenInstruction, Finder->InstructionForCollision());
 	Runtime::Hook(Finder->InstructionForCollision(), FortGameSessionDedicated::UWorld_Listen);
 
-	if (!Config::bGameSessions) UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
+	UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
 	FString WorldName;
 	if (Fortnite_Version <= 10.40)
 	{
@@ -262,13 +262,13 @@ void Main()
 	}
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAthenaBots VeryVerbose", nullptr);
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogNavigationDataBuild VeryVerbose", nullptr);
+	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogNavigation VeryVerbose", nullptr);
 
 	ExecuteConsoleCommand(UWorld::GetWorld(), WorldName, nullptr);
 	if (Fortnite_Version >= 19.10)
 	{
 		ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortUIDirector", nullptr);
 	}
-
 	
 	if (Finder->CreateAndConfigureNavigationSystem()) {
 		Runtime::Hook(Finder->CreateAndConfigureNavigationSystem(), UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem, (void**)&UFortServerBotManagerAthena::CreateAndConfigureNavigationSystemOG);

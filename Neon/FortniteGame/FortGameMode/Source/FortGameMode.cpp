@@ -165,10 +165,10 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         
         if (!Config::bEchoSessions)
         {
-            SetPlaylist(GameMode, Playlist);
             if (Playlist->GetAISettings()) {
                 GameMode->SetAISettings(Playlist->GetAISettings());
             }
+            SetPlaylist(GameMode, Playlist);
         }
         else
         {
@@ -236,25 +236,19 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             bInit = true;
             if (!Config::bLateGame)
             {
-                GameMode->SetServerBotManager((UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode));
-                GameMode->GetServerBotManager()->SetCachedGameMode(GameMode);
-                GameMode->GetServerBotManager()->SetCachedGameState(GameState);
-                
-                auto BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
-                GameMode->GetServerBotManager()->SetCachedBotMutator(BotMutator);
-                BotMutator->Set("FortAthenaMutator", "CachedGameMode", GameMode);
-                BotMutator->Set("FortAthenaMutator", "CachedGameState", GameState);
-                FBotMutator::Set(BotMutator);
-                GameMode->SetServerBotManagerClass(UFortServerBotManagerAthena::StaticClass());
-
-                AFortAIDirector* AIDirector = UGameplayStatics::SpawnActor<AFortAIDirector>({});
-                GameMode->SetAIDirector(AIDirector);
-                if (GameMode->GetAIDirector())
+                if (auto Manager = (UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode))
                 {
-                    GameMode->GetAIDirector()->CallFunc<void>("FortAIDirector", "Activate");
+                    *(bool*)(__int64(Manager) + 0x4d0) = 1;
+                    Manager->SetCachedGameMode(GameMode);
+                    Manager->SetCachedGameState(GameState);
+                    GameMode->SetServerBotManager(Manager);
                 }
+                
+                AFortAIDirector* AIDirector = UGameplayStatics::SpawnActorOG<AFortAIDirector>(AFortAIDirector::StaticClass(), {});
+                GameMode->SetAIDirector(AIDirector);
+                GameMode->GetAIDirector()->CallFunc<void>("FortAIDirector", "Activate");
 
-                AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActor<AFortAIGoalManager>({});
+                AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActorOG<AFortAIGoalManager>(AFortAIGoalManager::StaticClass(), {});
                 GameMode->SetAIGoalManager(AIGoalManager);
             }
         }

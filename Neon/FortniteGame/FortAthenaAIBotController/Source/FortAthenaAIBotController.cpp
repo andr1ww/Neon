@@ -102,6 +102,10 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 
 		if (BehaviorTree)
 		{
+			UBlackboardComponent* Blackboard = PC->GetBlackboard();
+			PC->UseBlackboard(PC->GetBehaviorTree()->GetBlackboardAsset(), &Blackboard);
+			PC->OnUsingBlackBoard(Blackboard, PC->GetBehaviorTree()->GetBlackboardAsset());
+			
 			UFortServerBotManagerAthena::RunBehaviorTree(PC, BehaviorTree);
 			PC->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhaseStep"), (uint8)EAthenaGamePhaseStep::Warmup);
 			PC->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhase"), (uint8)EAthenaGamePhase::Warmup);

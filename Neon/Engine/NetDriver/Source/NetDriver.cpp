@@ -384,7 +384,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             {
                 if (UKismetMathLibrary::RandomBoolWithWeight(0.05f))
                 {
-                   // AFortAthenaAIBotController::SpawnPlayerBot(1);
+                    AFortAthenaAIBotController::SpawnPlayerBot(1);
                 }
             }
             

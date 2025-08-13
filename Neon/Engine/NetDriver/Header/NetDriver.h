@@ -377,7 +377,7 @@ public:
     DEFINE_PTR(ULevel, UWorld, CurrentLevelPendingVisibility);
     DEFINE_PTR(ULevel, UWorld, CurrentLevelPendingInvisibility);
     DEFINE_PTR(AFortGameModeAthena, UWorld, AuthorityGameMode);
-    DEFINE_PTR(UAthenaNavSystem, UWorld, NavigationSystem);
+    DEFINE_MEMBER(UAthenaNavSystem*, UWorld, NavigationSystem);
 public:
     DECLARE_STATIC_CLASS(UWorld);
     DECLARE_DEFAULT_OBJECT(UWorld);
