@@ -87,6 +87,15 @@ public:
     DECLARE_DEFAULT_OBJECT(AGameModeBase)
 };
 
+enum class FNavigationSystemRunMode : uint8
+{
+    InvalidMode,
+    GameMode,
+    EditorMode,
+    SimulationMode,
+    PIEMode,
+};
+
 class AFortGameMode : public AGameModeBase
 {
 public:

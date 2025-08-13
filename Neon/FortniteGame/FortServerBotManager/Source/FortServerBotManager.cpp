@@ -200,31 +200,6 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                 UE_LOG(LogNeon, Warning, "Could not construct behaviortree!");
             }
         }
-
-        static TArray<AActor*> PatrolPaths;
-        if (PatrolPaths.Num() == 0) {
-            PatrolPaths = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), AFortAthenaPatrolPath::StaticClass());
-		}
-        for (int i = 0; i < PatrolPaths.Num(); i++) {
-			AFortAthenaPatrolPath* PatrolPath = (AFortAthenaPatrolPath*)PatrolPaths[i];
-            if (PatrolPath)
-            {
-                if (auto Loc = PatrolPath->GetPatrolPoints()[0])
-                {
-                    if (Loc->GetActorLocation() == SpawnLoc)
-                    {
-                        if (!Controller->GetCachedPatrollingComponent()) {
-                            Controller->SetCachedPatrollingComponent((UFortAthenaNpcPatrollingComponent*)UGameplayStatics::SpawnActorOG(UFortAthenaNpcPatrollingComponent::StaticClass(), {}, {}, Controller));
-                        }
-
-                        PatrolPath->SetMode(EPatrollingMode::BackAndForth);
-                        Controller->GetCachedPatrollingComponent()->SetPatrolPath(PatrolPath);
-                        Controller->GetCachedPatrollingComponent()->SetCachedBotController(Controller);
-                        break;
-                    }
-                }
-            }
-        }
         
         return Ret;
     }
@@ -265,7 +240,7 @@ void UFortServerBotManagerAthena::OnAlertLevelChanged(UObject* Context, FFrame& 
 void UFortServerBotManagerAthena::InitializeForWorld(UNavigationSystemV1* NavSystem, UWorld* World, uint8 Mode)
 {
     NavSystem->SetbAutoCreateNavigationData(true);
-
+    
     UE_LOG(LogNeon, Log, "InitializeForWorld For World: '%s' For NavigationSystem: '%s'", World->GetFName().ToString().ToString().c_str(), NavSystem->GetFName().ToString().ToString().c_str());
     UE_LOG(LogNeon, Log, "SupportedAgents: %d", NavSystem->GetSupportedAgents().Num());
     
@@ -282,6 +257,8 @@ void UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem(UAthenaNavS
     ModuleConfig->bAutoSpawnMissingNavData = true;
     ModuleConfig->bAllowAutoRebuild = true;
     ModuleConfig->bSupportRuntimeNavmeshDisabling = false;
+    ModuleConfig->bDiscardNavDataFromSublevels = false;
+    ModuleConfig->bSpawnNavDataInNavBoundsLevel = true;
     
     return CreateAndConfigureNavigationSystemOG(ModuleConfig, World);
 }

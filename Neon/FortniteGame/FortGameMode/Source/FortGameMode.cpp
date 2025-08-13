@@ -86,7 +86,7 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
                 UE_LOG(LogNeon, Log, "Additional Level: %s", NewLevel.LevelName.ToString().ToString().c_str());
                 TArray<FAdditionalLevelStreamed>& Levels = GameState->GetAdditionalPlaylistLevelsStreamed();
                 Levels.Add(NewLevel, StaticClassImpl("AdditionalLevelStreamed")->GetSize());
-            }
+           }
         }
 
         if (AdditionalLevelsServerOffset != -1)
@@ -360,6 +360,9 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             Container->K2_DestroyActor();
         }
         WarmupActors.Free();
+
+        static void (*Build)(UNavigationSystemV1* System) = decltype(Build)(IMAGEBASE + 0x48C50C0);
+        Build(UWorld::GetWorld()->GetNavigationSystem());
     }
     
     if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && Res)

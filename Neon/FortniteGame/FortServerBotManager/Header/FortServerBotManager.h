@@ -448,6 +448,8 @@ public:
     DEFINE_MEMBER(FNavAgentSelector, UNavigationSystemV1, SupportedAgentsMask);
     DEFINE_MEMBER(TArray<FNavDataConfig>, UNavigationSystemV1, SupportedAgents);
     DEFINE_BOOL(UNavigationSystemV1, bAutoCreateNavigationData);
+    DEFINE_BOOL(UNavigationSystemV1, bAllowClientSideNavigation)
+    DEFINE_BOOL(UNavigationSystemV1, bSupportRebuilding);
     DEFINE_PTR(ANavigationData, UNavigationSystemV1, MainNavData);
 public:
     DECLARE_DEFAULT_OBJECT(UNavigationSystemV1)
