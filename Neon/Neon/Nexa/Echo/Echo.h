@@ -13,4 +13,17 @@ namespace Nexa::Echo
     void CloseEchoSession();
     void LowerEchoSessionCount();
     void EchoSessionUpdate(UFortPlaylistAthena* Playlist);
+    void EchoSessionHeartbeat();
+
+    inline DWORD WINAPI Heartbeat(LPVOID)
+    {
+        while (true)
+        {
+            Sleep(30000);
+            std::thread t([]() {
+                Nexa::Echo::EchoSessionHeartbeat();
+            });
+            t.detach(); 
+        }
+    }
 }

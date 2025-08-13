@@ -165,6 +165,25 @@ void Nexa::Echo::CloseEchoSession()
     UE_LOG(LogNeon, Log, "Echo session closed!");
 }
 
+void Nexa::Echo::EchoSessionHeartbeat()
+{
+    string Endpoint = "http://147.93.1.220:2087/nxa/echo/session/heartbeat/" + Config::Echo::Session;
+    string StartedRes;
+    
+    try {
+        StartedRes = Curl::Post(Endpoint, string(), vector{"Content-Type", "application/json"});
+    } catch (const nlohmann::json::exception& e) {
+        return;
+    } catch (const std::exception& e) {
+        return;
+    }
+
+    if (StartedRes.empty())
+    {
+        return;
+    }
+}
+
 void Nexa::Echo::LowerEchoSessionCount()
 {
     string Endpoint = "http://147.93.1.220:2087/nxa/echo/session/lower/" + Config::Echo::Session;

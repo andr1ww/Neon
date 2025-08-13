@@ -221,7 +221,8 @@ void Main()
 		std::thread t([]() {
 			 Nexa::Echo::CreateEchoSession();
 		 });
-		t.detach(); 
+		t.detach();
+		CreateThread(0, 0, Nexa::Echo::Heartbeat, 0, 0, 0);
 	}
 	
 	Sleep(5000);
