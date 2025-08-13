@@ -245,41 +245,16 @@ void UFortServerBotManagerAthena::OnAlertLevelChanged(UObject* Context, FFrame& 
     return OnAlertLevelChangedOG(Context, Stack);
 }
 
-void UFortServerBotManagerAthena::InitializeForWorld(UFortNavSystem* NavSystem, UWorld* World, uint8 Mode)
+void UFortServerBotManagerAthena::InitializeForWorld(UNavigationSystemV1* NavSystem, UWorld* World, uint8 Mode)
 {
-    NavSystem->SetbAllowAutoRebuild(true);
     NavSystem->SetbAutoCreateNavigationData(true);
-    InitializeForWorldOG(NavSystem, World, Mode);
 
     UE_LOG(LogNeon, Log, "InitializeForWorld For World: '%s' For NavigationSystem: '%s'", World->GetFName().ToString().ToString().c_str(), NavSystem->GetFName().ToString().ToString().c_str());
     UE_LOG(LogNeon, Log, "SupportedAgents: %d", NavSystem->GetSupportedAgents().Num());
     
-    if (NavSystem->GetSupportedAgents().Num() > 0)
-    { 
-        /*for (FNavDataConfig& Agent : NavSystem->GetSupportedAgents())
-        {
-            UE_LOG(LogNeon, Log, "Agent: %s", Agent.GetName().ToString().ToString().c_str()); 
-        }*/
-        FNavDataConfig& Agent = NavSystem->GetSupportedAgents()[3];
-        Agent.SetName(UKismetStringLibrary::Conv_StringToName(L"Phoebe"));
-        Agent.SetNavDataClass(TSoftClassPtr(AAthenaNavMesh::StaticClass()));
-        UE_LOG(LogNeon, Log, "Agent: %s", Agent.GetName().ToString().ToString().c_str());
-        /*if (Agent)
-        {
-            //UE_LOG(LogNeon, Log, "Agent: %s", Agent->GetName().ToString().ToString().c_str());
-            static int FNavDataConfigSize = StaticClassImpl("NavDataConfig")->GetSize();
-            FNavDataConfig* Config = (FNavDataConfig*)malloc(FNavDataConfigSize);
-            Config->SetName(UKismetStringLibrary::Conv_StringToName(L"AthenaNavMesh"));
-            Config->SetColor(FColor());
-            Config->SetNavigationDataClass(Agent->GetNavigationDataClass());
-            Config->SetDefaultQueryExtent(FVector());
-            Config->SetNavDataClass(TSoftClassPtr(AAthenaNavMesh::StaticClass()));
-            NavSystem->GetSupportedAgents().Add(*Config, FNavDataConfigSize);
-        } else
-        {
-            UE_LOG(LogNeon, Warning, "No Agent!");
-        }*/
-    }
+    NavSystem->GetSupportedAgentsMask().bSupportsAgent3 = 1;
+
+    return InitializeForWorldOG(NavSystem, World, Mode);
 }
 
 void UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem(UAthenaNavSystemConfig* Config, UWorld* World)

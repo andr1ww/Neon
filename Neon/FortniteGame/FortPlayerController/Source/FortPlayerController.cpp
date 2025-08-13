@@ -640,6 +640,8 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			}
 		}
 		
+		int32 AliveCount = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num();
+		
 		((void (*)(AFortGameModeAthena*, AFortPlayerController*, AFortPlayerStateAthena*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char, bool))(Finder->RemoveFromAlivePlayers()))
 		  (GameMode, PlayerController, KillerPlayerState, KillerPawn, ItemDef, DeathCause, 0, false);
 
@@ -650,7 +652,6 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			MatchReport->SetEndOfMatchResults(*RewardResult);
 			PlayerController->ClientSendEndBattleRoyaleMatchForPlayer(true, *RewardResult);
 
-			int32 AliveCount = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num();
 			int32 PlayerPlace = AliveCount;
 			PlayerState->SetPlace(PlayerPlace);
 			PlayerState->OnRep_Place();

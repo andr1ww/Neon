@@ -6,10 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/Engine/Actor/Header/Actor.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Engine/Actor/Header/Actor.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/Engine/Actor/Source/Actor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Engine/Actor/Source/Actor.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/Engine/NetDriver/Source/NetDriver.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Engine/NetDriver/Source/NetDriver.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortServerBotManager/Header/FortServerBotManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortServerBotManager/Header/FortServerBotManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortServerBotManager/Source/FortServerBotManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortServerBotManager/Source/FortServerBotManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Neon/Config.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Neon/Finder/Source/Finder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Finder/Source/Finder.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Neon/Nexa/Curl/Curl.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Nexa/Curl/Curl.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Neon/Nexa/Echo/Echo.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Nexa/Echo/Echo.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/dllmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/dllmain.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,7 +82,8 @@
       <workItem from="1754921099595" duration="22720000" />
       <workItem from="1755003375865" duration="22125000" />
       <workItem from="1755053105598" duration="168000" />
-      <workItem from="1755087138542" duration="3289000" />
+      <workItem from="1755087138542" duration="5921000" />
+      <workItem from="1755097387843" duration="2767000" />
     </task>
     <servers />
   </component>

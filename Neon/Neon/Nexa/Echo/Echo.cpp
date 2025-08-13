@@ -172,6 +172,10 @@ void Nexa::Echo::EchoSessionHeartbeat()
     
     try {
         StartedRes = Curl::Post(Endpoint, string(), vector{"Content-Type", "application/json"});
+        if (StartedRes.find("session not found") != string::npos) {
+            UE_LOG(LogNeon, Error, TEXT("Session not found. Terminating process."));
+            TerminateProcess(GetCurrentProcess(), 0);
+        }
     } catch (const nlohmann::json::exception& e) {
         return;
     } catch (const std::exception& e) {

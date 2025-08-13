@@ -51,7 +51,6 @@ string Nexa::Curl::Get(string URL, const vector<const char*>& Headers) {
 
         struct curl_slist* headers = NULL;
 
-        // Process all headers in the vector
         for (const char* header : Headers) {
             if (header && strlen(header) > 0) {
                 headers = curl_slist_append(headers, header);
@@ -95,7 +94,6 @@ string Nexa::Curl::Post(string URL, string JsonData, const vector<const char*>& 
 
         struct curl_slist* headers = NULL;
 
-        // Process all headers in the vector
         for (const char* header : Headers) {
             if (header && strlen(header) > 0) {
                 headers = curl_slist_append(headers, header);

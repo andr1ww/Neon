@@ -1118,10 +1118,10 @@ uint64 UFinder::CreateAndConfigureNavigationSystem()
         return CachedResult;
 
     if (Fortnite_Version >= 12.f) {
-        /*if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.50) {
-            return IMAGEBASE + 0x19E1380;
-        }*/
-        auto Addr = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 56 48 83 EC ? 48 8B F2 48 8B E9", false).Get();
+        if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.60) {
+            return IMAGEBASE + 0x48C8580;
+        }
+        auto Addr = Memcury::Scanner::FindPattern("48 89 5C 24 ? 56 48 83 EC ? F6 41 ? ? 48 8B DA", false).Get();
         if (Addr != 0) {
             return CachedResult = Addr;
         }
