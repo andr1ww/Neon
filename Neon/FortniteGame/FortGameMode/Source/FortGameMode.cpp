@@ -156,7 +156,9 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     }
 
     GameMode->SetbWorldIsReady(true);
-    
+
+    static bool bInit = false;
+
     if (GameMode->GetCurrentPlaylistId() == -1)
     {
         UFortPlaylistAthena* Playlist = (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_DefaultSolo");
@@ -196,6 +198,11 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     UE_LOG(LogNeon, Log, "Enabling LateGame");
                     Config::bLateGame = true;
                 }
+
+                if (PlaylistName.contains("showdownalt"))
+                {
+                    bInit = true; // ts is temp idk why they crash on showdown?
+                }
                 
                 if (Playlist)
                 {
@@ -224,7 +231,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             }
         }
         
-        static bool bInit = false;
         if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && !bInit)
         {
             bInit = true;
