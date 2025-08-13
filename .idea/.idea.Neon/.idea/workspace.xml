@@ -7,9 +7,6 @@
     <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlaylistAthena/Header/FortPlaylistAthena.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlaylistAthena/Header/FortPlaylistAthena.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/Neon/Nexa/Echo/Echo.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Nexa/Echo/Echo.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/Neon/Nexa/Echo/Echo.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Nexa/Echo/Echo.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,7 +73,7 @@
       <workItem from="1754800261763" duration="3000" />
       <workItem from="1754844857997" duration="8706000" />
       <workItem from="1754921099595" duration="22720000" />
-      <workItem from="1755003375865" duration="17343000" />
+      <workItem from="1755003375865" duration="20499000" />
     </task>
     <servers />
   </component>

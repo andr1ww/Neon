@@ -192,7 +192,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 std::cout << path << std::endl;
                 Playlist = Runtime::StaticFindObject<UFortPlaylistAthena>(path);
 
-                if (PlaylistName.contains("showdownalt")) {
+                if (PlaylistName.contains("vamp")) {
                     UE_LOG(LogNeon, Log, "Enabling LateGame");
                     Config::bLateGame = true;
                 }
@@ -201,6 +201,22 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 {
                     SetPlaylist(GameMode, Playlist);
                     Nexa::Echo::EchoSessionUpdate(Playlist);
+                } else
+                {
+                    std::string path = "/Game/Athena/Playlists/" + 
+               (PlaylistName.substr(0, 7) == "default" ? "" : (DirectoryPath + "/")) + 
+               "playlist_" + PlaylistName + (PlaylistName.contains("duo") || PlaylistName.contains("trio") || PlaylistName.contains("squad") ? "s" : "") + 
+               ".playlist_" + PlaylistName + (PlaylistName.contains("duo") || PlaylistName.contains("trio") || PlaylistName.contains("squad") ? "s" : "");
+                    std::cout << path << std::endl;
+                    Playlist = Runtime::StaticFindObject<UFortPlaylistAthena>(path);
+                    if (Playlist)
+                    {
+                        SetPlaylist(GameMode, Playlist);
+                        Nexa::Echo::EchoSessionUpdate(Playlist);
+                    } else
+                    {
+                        return *Result = false;
+                    }
                 }
             } else
             {
