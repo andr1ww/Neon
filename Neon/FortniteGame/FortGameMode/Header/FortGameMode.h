@@ -312,8 +312,10 @@ public:
 public:
     static bool ReadyToStartMatch(AFortGameModeAthena* GameMode, FFrame& Stack, bool* Result);
     static APawn* SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer, AActor* StartSpot);
+    DefHookOg(void, HandleStartingNewPlayer, AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer);
     DefHookOg(void, StartAircraftPhase, AFortGameModeAthena* GameMode, char a2);
     DefHookOg(void, StartNewSafeZonePhase, AFortGameModeAthena* GameMode, int Phase);
+    DefHookOg(EFortTeam, PickTeam, AFortGameModeAthena* GameMode, uint8_t PreferredTeam, AFortPlayerControllerAthena* Controller)
 };
 
 inline bool (*ReadyToStartMatchOriginal)(AFortGameModeAthena* GameMode);

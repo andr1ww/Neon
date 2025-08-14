@@ -31,6 +31,7 @@ public:
     DEFINE_MEMBER(FName, UFortPlaylist, PlaylistName);
     DEFINE_MEMBER(int32,UFortPlaylist, PlaylistId);
     DEFINE_MEMBER(int32, UFortPlaylist, MaxTeamSize);
+    DEFINE_MEMBER(int32, UFortPlaylist, MaxSquadSize);
     DEFINE_MEMBER(int32, UFortPlaylist, MaxTeamCount);
     DEFINE_MEMBER(int32, UFortPlaylist, MaxPlayers);
 public:

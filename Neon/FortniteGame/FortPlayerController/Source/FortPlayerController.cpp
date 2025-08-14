@@ -44,23 +44,7 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
 	static UFortAbilitySet* AbilitySet = nullptr;
 	if (!AbilitySet) AbilitySet = (UFortAbilitySet*)GUObjectArray.FindObject("GAS_AthenaPlayer");
 	UAbilitySystemComponent::GiveAbilitySet(PlayerController->GetPlayerState()->GetAbilitySystemComponent(), AbilitySet);
-	AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
 	AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState();
-	
-	PlayerState->Set("FortPlayerStateAthena", "SquadId", PlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex") - 3);
-	PlayerState->OnRep_SquadId();
-
-	FGameMemberInfo Member{};
-	
-	Member.MostRecentArrayReplicationKey = -1;
-	Member.ReplicationID = -1;
-	Member.ReplicationKey = -1;
-	Member.TeamIndex = PlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex");
-	Member.SquadId = PlayerState->Get<uint8>("FortPlayerStateAthena", "SquadId");
-	Member.MemberUniqueId = PlayerState->Get<FUniqueNetIdRepl>("PlayerState", "UniqueId");
-
-	GameState->GetGameMemberInfoArray().GetMembers().Add(Member);
-	GameState->GetGameMemberInfoArray().MarkItemDirty(Member);
 
 	PlayerController->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1)->CallFunc<void>("FortQuestManager", "InitializeQuestAbilities", PlayerController->GetPawn());
 	PlayerState->Set("FortPlayerStateAthena", "SeasonLevelUIDisplay", PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "CurrentLevel"));
@@ -498,9 +482,11 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	FAthenaRewardResult* RewardResult = MatchReport ? &MatchReport->GetEndOfMatchResults() : nullptr;
 	FAthenaMatchStats* MatchStats = MatchReport ? &MatchReport->GetMatchStats() : nullptr;
 	FAthenaMatchTeamStats* TeamStats = MatchReport ? &MatchReport->GetTeamStats() : nullptr;
-	
+
+	bool bIsDBNO = VictimPawn && VictimPawn->IsDBNO();
+
 	auto DeathTags = DeathReport.GetTags();
-	EDeathCause DeathCause = PlayerState->CallFunc<EDeathCause>("FortPlayerStateAthena", "ToDeathCause", DeathTags, false);
+	EDeathCause DeathCause = PlayerState->CallFunc<EDeathCause>("FortPlayerStateAthena", "ToDeathCause", DeathTags, bIsDBNO);
 
 	PlayerState->Set("FortPlayerState", "PawnDeathLocation", DeathLocation);
 	
@@ -511,11 +497,11 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		}
 		
 		RtlSecureZeroMemory(DeathInfo, Size);
-		DeathInfo->SetbDBNO(false);
+		DeathInfo->SetbDBNO(bIsDBNO);
 		DeathInfo->SetDeathLocation(DeathLocation);
 		DeathInfo->SetDeathTags(DeathTags);
 		DeathInfo->SetDeathCause(DeathCause);
-		DeathInfo->SetDowner((AActor*)KillerPlayerState);
+		DeathInfo->SetDowner(bIsDBNO ? (AActor*)KillerPlayerState : nullptr);
 		DeathInfo->SetFinisherOrDowner((AActor*)KillerPlayerState);
 
 		if (VictimPawn) {
@@ -619,29 +605,41 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			}
 		}
 	}
-   
-	bool bIsDBNO = VictimPawn && VictimPawn->IsDBNO();
-	if (!bIsDBNO) {
-		static int DamageCauserOffset = Runtime::GetOffsetStruct("FortPlayerDeathReport", "DamageCauser");
-		AActor* DamageCauser = *(AActor**)((char*)&DeathReport + DamageCauserOffset);
-		UFortWeaponItemDefinition* ItemDef = nullptr;
-		
-		if (DamageCauser)
-		{
-			if (DamageCauser->IsA<AFortProjectileBase>())
-			{
-				auto Owner = Cast<AFortWeapon>(DamageCauser->CallFunc<AActor*>("Actor", "GetOwner"));
-				ItemDef = Owner->IsValidLowLevel() ? Owner->GetWeaponData() : nullptr; 
-			}
 
-			if (auto WeaponDef = Cast<AFortWeapon>(DamageCauser))
-			{
-				ItemDef = WeaponDef->GetWeaponData();
-			}
+	bool bRebooting = PlayerState->GetPlayerTeam()->GetTeamMembers().Num() > 1;
+	if (bRebooting&& DeathInfo->GetbDBNO()) for (auto& Member : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
+		auto MemberController = (AFortPlayerControllerAthena*)Member;
+		if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) bRebooting = false;
+	}
+
+	static int DamageCauserOffset = Runtime::GetOffsetStruct("FortPlayerDeathReport", "DamageCauser");
+	AActor* DamageCauser = *(AActor**)((char*)&DeathReport + DamageCauserOffset);
+	UFortWeaponItemDefinition* ItemDef = nullptr;
+		
+	if (DamageCauser)
+	{
+		if (DamageCauser->IsA<AFortProjectileBase>())
+		{
+			auto Owner = Cast<AFortWeapon>(DamageCauser->CallFunc<AActor*>("Actor", "GetOwner"));
+			ItemDef = Owner->IsValidLowLevel() ? Owner->GetWeaponData() : nullptr; 
 		}
+
+		if (auto WeaponDef = Cast<AFortWeapon>(DamageCauser))
+		{
+			ItemDef = WeaponDef->GetWeaponData();
+		}
+	}
 		
-		int32 AliveCount = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num();
-		
+	int32 AliveCount = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num();
+
+	if (bRebooting) {
+		((void (*)(AFortGameModeAthena*, AFortPlayerController*, AFortPlayerStateAthena*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char, bool))(Finder->RemoveFromAlivePlayers()))
+		  (GameMode, PlayerController, KillerPlayerState, KillerPawn, ItemDef, DeathCause, 0, false);
+		PlayerController->SetbMarkedAlive(false);
+		return ClientOnPawnDiedOG(PlayerController, DeathReport);
+	}
+	
+	if (!bIsDBNO) {
 		((void (*)(AFortGameModeAthena*, AFortPlayerController*, AFortPlayerStateAthena*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char, bool))(Finder->RemoveFromAlivePlayers()))
 		  (GameMode, PlayerController, KillerPlayerState, KillerPawn, ItemDef, DeathCause, 0, false);
 

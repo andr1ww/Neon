@@ -481,7 +481,7 @@ T* StaticLoadObjectOnly(std::string name) {
 	}
 	
 	template<typename Ct, typename Ot = void*>
-	__forceinline static void ExecVFT(const char* Name, void* Detour, Ot& Orig = nullptrForHook) {
+	__forceinline static void ExecVFT(const char* Name, void* Detour, void** original = nullptr) {
 		auto Fn = StaticFindObject<UFunction>(Name);
 		if (!Fn) return;
 
@@ -489,7 +489,7 @@ T* StaticLoadObjectOnly(std::string name) {
 		auto Vt = Ct::GetDefaultObj()->GetVTable();
     
 		if (!std::is_same_v<Ot, void*>)
-			Orig = (Ot)Vt[Ind];
+			*original = (Ot)Vt[Ind];
     
 		DWORD Vo;
 		VirtualProtect(Vt + Ind, sizeof(void*), PAGE_EXECUTE_READWRITE, &Vo);

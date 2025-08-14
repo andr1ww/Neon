@@ -148,6 +148,8 @@ public:
     uint64 EnterAircraft();
 
     uint64 OnRep_ZiplineState();
+
+    uint64 PickTeam();
 };
 
 inline UFinder* Finder = new UFinder();

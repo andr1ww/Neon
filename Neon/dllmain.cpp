@@ -42,30 +42,7 @@ inline bool IsInFrontend()
 	}
 }
 
-class UFortAthenaAIBotEvaluator_SelectNextPOI : public UObject
-{
-public:
-	DECLARE_DEFAULT_OBJECT(UFortAthenaAIBotEvaluator_SelectNextPOI)
-	DECLARE_STATIC_CLASS(UFortAthenaAIBotEvaluator_SelectNextPOI)
-};
-
-DefHookOg(void, Test, UFortAthenaAIBotEvaluator_SelectNextPOI *a1,
-		UBehaviorTreeComponent *OwnerComp,
-		const int EvaluationFlags,
-		const bool bSearchingForNextBTTask)
-
-void Test(UFortAthenaAIBotEvaluator_SelectNextPOI* a1, UBehaviorTreeComponent* OwnerComp, const int EvaluationFlags, const bool bSearchingForNextBTTask)
-{
-	UE_LOG(LogNeon, Log,  "%s called with a1: %s",
-		__FUNCTION__, a1->GetFName().ToString().ToString().c_str());
-
-	a1->Set("FortAthenaAIBotEvaluator_SelectNextPOI", "NextPOIKeyName", UKismetStringLibrary::Conv_StringToName(L"Retail Row"));
-
-	TestOG(a1, OwnerComp, EvaluationFlags, bSearchingForNextBTTask);
-}
-
 void InitNullsAndRetTrues() {
-	Runtime::Hook(IMAGEBASE + 0x188AF60, Test, (void**)&TestOG);
 	if (Fortnite_Version >= 23)
 		NullFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ? 4C 8B E2 4C 8B F1").Get());
 	
@@ -239,7 +216,7 @@ void Main()
 	MH_Initialize();
 	if (Config::bEchoSessions)
 	{
-		Config::Port = UKismetMathLibrary::RandomIntegerInRange(7777, 8888);
+		//Config::Port = UKismetMathLibrary::RandomIntegerInRange(7777, 8888);
 
 		std::thread t([]() {
 			 Nexa::Echo::CreateEchoSession();
@@ -323,7 +300,9 @@ void Main()
 	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);
 	Runtime::Hook(Finder->OnSafeZoneStateChange(), AFortSafeZoneIndicator::OnSafeZoneStateChange, (void**)&AFortSafeZoneIndicator::OnSafeZoneStateChangeOG);
 	Runtime::Hook(Finder->StartNewSafeZonePhase(), AFortGameModeAthena::StartNewSafeZonePhase, (void**)&AFortGameModeAthena::StartNewSafeZonePhaseOG);
+	Runtime::Hook<&AFortGameModeAthena::StaticClass>("HandleStartingNewPlayer", AFortGameModeAthena::HandleStartingNewPlayer, AFortGameModeAthena::HandleStartingNewPlayerOG);
 	//Runtime::Hook(Finder->EnterAircraft(), AFortPlayerControllerAthena::EnterAircraft, (void**)&AFortPlayerControllerAthena::EnterAircraftOG);
+	if (Config::bEchoSessions) Runtime::Hook(Finder->PickTeam(), AFortGameModeAthena::PickTeam, (void**)&AFortGameModeAthena::PickTeamOG);
 	
 	if (Finder->CompletePickupAnimation())
 	{

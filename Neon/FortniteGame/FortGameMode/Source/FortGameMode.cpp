@@ -12,6 +12,8 @@
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 #include "Neon/Config.h"
 #include "Neon/Finder/Header/Finder.h"
+#include "Neon/Nexa/NexaHelpers.h"
+#include "Neon/Nexa/Curl/Curl.h"
 #include "Neon/Nexa/Echo/Echo.h"
 #include "Neon/Runtime/Runtime.h"
 
@@ -416,11 +418,6 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         auto WeaponDef = Pickaxe->GetWeaponDefinition();
         AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 0, 1); 
     }
-
-    if (!NewPlayer->GetMatchReport())
-    {
-        NewPlayer->SetMatchReport((UAthenaPlayerMatchReport*)UGameplayStatics::SpawnObject(UAthenaPlayerMatchReport::StaticClass(), NewPlayer));
-    }
     
     return Pawn;
 }
@@ -588,4 +585,109 @@ void AFortGameModeAthena::StartNewSafeZonePhase(AFortGameModeAthena* GameMode, i
     {
         StartNewSafeZonePhaseOG(GameMode, Phase);
     }
+}
+
+void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer)
+{
+    if (!NewPlayer->GetMatchReport())
+    {
+        NewPlayer->SetMatchReport((UAthenaPlayerMatchReport*)UGameplayStatics::SpawnObject(UAthenaPlayerMatchReport::StaticClass(), NewPlayer));
+    }
+    
+    AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
+    AFortPlayerStateAthena* PlayerState = NewPlayer->GetPlayerState();
+	
+    PlayerState->SetSquadId(PlayerState->GetTeamIndex() - 3);
+    PlayerState->OnRep_SquadId();
+
+    FGameMemberInfo Member{};
+	
+    Member.MostRecentArrayReplicationKey = -1;
+    Member.ReplicationID = -1;
+    Member.ReplicationKey = -1;
+    Member.TeamIndex = PlayerState->GetTeamIndex();
+    Member.SquadId = PlayerState->GetSquadId();
+    Member.MemberUniqueId = PlayerState->GetUniqueId();
+
+    GameState->GetGameMemberInfoArray().GetMembers().Add(Member);
+    GameState->GetGameMemberInfoArray().MarkItemDirty(Member);
+
+    return HandleStartingNewPlayerOG(GameMode, NewPlayer);
+}
+
+EFortTeam AFortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t PreferredTeam, AFortPlayerControllerAthena* Controller)
+{
+    static uint8_t CurrentTeam = 3;
+    static uint8_t PlayersOnCurTeam = 0;
+    
+    uint8_t ret = CurrentTeam;
+    std::string PlayerName = Controller->GetPlayerState()->GetPlayerName().ToString();
+    static std::string TeamsJson = "";
+    
+    if (TeamsJson == "")
+    {
+        TeamsJson = Nexa::Curl::Get("http://147.93.1.220:2087/nxa/echo/session/list/teams/" + Config::Echo::Session);
+    }
+
+    static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameMode->GetGameState(), "CurrentPlaylistInfo");
+    FPlaylistPropertyArray& CurrentPlaylistInfo = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameMode->GetGameState()) + CurrentPlaylistInfoOffset);
+    
+    if (!TeamsJson.empty())
+    {
+        try 
+        {
+            auto teamsArray = nlohmann::json::parse(TeamsJson);
+            
+            for (size_t teamIndex = 0; teamIndex < teamsArray.size(); ++teamIndex)
+            {
+                const auto& team = teamsArray[teamIndex];
+                
+                bool playerInTeam = false;
+                for (const auto& member : team)
+                {
+                    if (member.get<std::string>() == PlayerName)
+                    {
+                        playerInTeam = true;
+                        break;
+                    }
+                }
+                
+                if (playerInTeam)
+                {
+                    static std::map<size_t, uint8_t> teamIndexToGameTeam;
+                    
+                    if (teamIndexToGameTeam.find(teamIndex) != teamIndexToGameTeam.end())
+                    {
+                        ret = teamIndexToGameTeam[teamIndex];
+                    }
+                    else
+                    {
+                        ret = CurrentTeam;
+                        teamIndexToGameTeam[teamIndex] = ret;
+                        
+                        PlayersOnCurTeam += team.size(); 
+                        if (PlayersOnCurTeam >= CurrentPlaylistInfo.GetBasePlaylist()->GetMaxSquadSize())
+                        {
+                            CurrentTeam++;
+                            PlayersOnCurTeam = 0;
+                        }
+                    }
+                    
+                    return EFortTeam(ret);
+                }
+            }
+        }
+        catch (const std::exception& e)
+        {
+        }
+    }
+
+    PlayersOnCurTeam++;
+    if (PlayersOnCurTeam >= CurrentPlaylistInfo.GetBasePlaylist()->GetMaxTeamSize())
+    {
+        CurrentTeam++;
+        PlayersOnCurTeam = 1;
+    }
+
+    return EFortTeam(ret);
 }

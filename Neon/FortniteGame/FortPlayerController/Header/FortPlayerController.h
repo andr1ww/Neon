@@ -489,6 +489,7 @@ public:
 class AFortPlayerControllerAthena : public AFortPlayerController 
 {
 public:
+    DEFINE_BOOL(AFortPlayerControllerAthena, bMarkedAlive)
     DEFINE_PTR(UFortPlayerControllerAthenaXPComponent, AFortPlayerControllerAthena, XPComponent);
     DEFINE_PTR(UAthenaPlayerMatchReport, AFortPlayerControllerAthena, MatchReport);
     DEFINE_PTR(AFortPlayerStateAthena, AFortPlayerControllerAthena, PlayerState);
