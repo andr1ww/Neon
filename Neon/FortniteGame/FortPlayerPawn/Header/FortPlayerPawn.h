@@ -17,6 +17,8 @@ class AFGF_Character : public ACharacter
 class AFortPawn : public AFGF_Character
 {
 public:
+	DEFINE_BOOL(AFortPawn, bIsDBNO)
+	DEFINE_MEMBER(FGameplayTagContainer, AFortPawn, GameplayTags);
 	struct FortPawn_PawnStartFire final
 	{
 	public:
@@ -119,6 +121,20 @@ public:
 		Params.FireModeNum = FireModeNum;
 		
 		this->ProcessEvent(Func, &Params);
+	}
+
+	
+	void OnRep_IsDBNO()
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPawn", "OnRep_IsDBNO");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+		
+		this->ProcessEvent(Func, nullptr);
 	}
 
 	// Using the newer version of the func so newer versions dont die
@@ -305,9 +321,17 @@ public:
 	uint8                                         Pad_48[0x18];                                      // 0x0048(0x0018)(Fixing Struct Size After Last Property [ Dumper-7 ])
 };
 
+class UGAB_AthenaDBNO_C : public UObject
+{
+public:
+	DECLARE_STATIC_CLASS(UGAB_AthenaDBNO_C)
+	DECLARE_DEFAULT_OBJECT(UGAB_AthenaDBNO_C)
+};
+
 class AFortPlayerPawn : public AFortPawn
 {
 public:
+	DEFINE_MEMBER(FGameplayTag, AFortPlayerPawn, EventReviveTag)
 	DEFINE_MEMBER(TArray<class AFortPickup*>, AFortPlayerPawn, IncomingPickups); 
     DEFINE_PTR(FFortAthenaLoadout, AFortPlayerPawn, CosmeticLoadout);
 
@@ -344,11 +368,19 @@ public:
     static void ServerHandlePickupInfo(AFortPlayerPawn* Pawn, FFrame& Stack);
 	static void ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack);
 	static void ServerSendZiplineState(AFortPlayerPawn* Pawn, FFrame& Stack);
-
+	
+	DefHookOg(void, ServerReviveFromDBNO, AFortPlayerPawn* Pawn, FFrame& Stack);
 	DefHookOg(void, ReloadWeapon, AFortWeapon* Weapon, int AmmoToRemove);
 	DefHookOg(void, CompletePickupAnimation, AFortPickup* Pickup);
 	DefHookOg(void, GiveItemToInventoryOwner, UObject*, FFrame&);
 	DefHookOg(void, NetMulticast_Athena_BatchedDamageCues, AFortPlayerPawn*, FAthenaBatchedDamageGameplayCues_Shared, FAthenaBatchedDamageGameplayCues_NonShared);
+};
+
+class AFortPlayerPawnAthena : public AFortPlayerPawn
+{
+public:
+	DECLARE_STATIC_CLASS(AFortPlayerPawnAthena)
+	DECLARE_DEFAULT_OBJECT(AFortPlayerPawnAthena)
 };
 
 class ADefaultPawn : public APawn

@@ -302,6 +302,7 @@ void Main()
 	Runtime::Hook(Finder->StartNewSafeZonePhase(), AFortGameModeAthena::StartNewSafeZonePhase, (void**)&AFortGameModeAthena::StartNewSafeZonePhaseOG);
 	Runtime::Hook<&AFortGameModeAthena::StaticClass>("HandleStartingNewPlayer", AFortGameModeAthena::HandleStartingNewPlayer, AFortGameModeAthena::HandleStartingNewPlayerOG);
 	//Runtime::Hook(Finder->EnterAircraft(), AFortPlayerControllerAthena::EnterAircraft, (void**)&AFortPlayerControllerAthena::EnterAircraftOG);
+	Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.ServerReviveFromDBNO", AFortPlayerPawn::ServerReviveFromDBNO);
 	if (Config::bEchoSessions) Runtime::Hook(Finder->PickTeam(), AFortGameModeAthena::PickTeam, (void**)&AFortGameModeAthena::PickTeamOG);
 	
 	if (Finder->CompletePickupAnimation())

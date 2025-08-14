@@ -312,3 +312,53 @@ void AFortPlayerPawn::ServerSendZiplineState(AFortPlayerPawn* Pawn, FFrame& Stac
         Pawn->CallFunc<void>("FortPawn", "LaunchCharacterJump", FVector{ VelocityX >= -750 ? fminf(VelocityX, 750) : -750, VelocityY >= -750 ? fminf(VelocityY, 750) : -750, 1200 }, false, false, true, true);
     }
 }
+
+void AFortPlayerPawn::ServerReviveFromDBNO(AFortPlayerPawn* Pawn, FFrame& Stack)
+{
+    AFortPlayerControllerAthena* EventInstigator;
+    Stack.StepCompiledIn(&EventInstigator);
+    Stack.IncrementCode();
+
+    UE_LOG(LogNeon, Log, __FUNCTION__);
+    
+    if (!Pawn || !EventInstigator) return;
+
+	auto PlayerState = reinterpret_cast<AFortPlayerStateAthena*>(Pawn->GetPlayerState());
+	auto Controller = reinterpret_cast<AFortPlayerControllerAthena*>(Pawn->GetController());
+
+	if (!PlayerState) return;
+
+	static UClass* Class = UGAB_AthenaDBNO_C::StaticClass();
+
+	if (!Class) return;
+
+	/*FGameplayEventData EventData{};
+	EventData.EventTag = Pawn->GetEventReviveTag();
+	EventData.ContextHandle = PlayerState->GetAbilitySystemComponent()->MakeEffectContext();
+	EventData.Instigator = EventInstigator;
+	EventData.InstigatorTags = ((AFortPlayerPawnAthena*)EventInstigator->GetPawn())->GetGameplayTags();
+	EventData.Target = Pawn;
+	EventData.TargetData = UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(Pawn);
+	EventData.TargetTags = Pawn->GetGameplayTags();
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Pawn, Pawn->GetEventReviveTag(), EventData);
+
+	for (auto& Item : PlayerState->GetAbilitySystemComponent()->GetActivatableAbilities().GetItems())
+	{
+		if (!Item.GetAbility()) continue; 
+		if (Item.GetAbility()->GetClass() == Class)
+		{
+			PlayerState->GetAbilitySystemComponent()->ClientCancelAbility(Item.GetHandle(), Item.ActivationInfo);
+			PlayerState->GetAbilitySystemComponent()->ClientEndAbility(Item.GetHandle(), Item.ActivationInfo);
+			PlayerState->GetAbilitySystemComponent()->ServerEndAbility(Item.GetHandle(), Item.ActivationInfo, Item.ActivationInfo.PredictionKeyWhenActivated);
+			PlayerState->GetAbilitySystemComponent()->ServerCancelAbility(Item.GetHandle(), Item.ActivationInfo);
+		}
+	}
+    */
+	Pawn->SetbIsDBNO(false);
+	Pawn->OnRep_IsDBNO();
+	Pawn->SetHealth(30);
+	PlayerState->SetDeathInfo({});
+	PlayerState->OnRep_DeathInfo();
+	Controller->CallFunc<void>("FortPlayerControllerZone", "ClientOnPawnRevived", EventInstigator);
+}
+

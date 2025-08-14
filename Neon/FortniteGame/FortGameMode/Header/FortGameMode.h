@@ -106,6 +106,7 @@ public:
 class AFortGameMode : public AGameModeBase
 {
 public:
+    DEFINE_BOOL(AFortGameMode, bDBNOEnabled)
     DEFINE_MEMBER(FString, AFortGameMode, CurrentBucketId);
     DEFINE_MEMBER(int32, AFortGameMode, CurrentPlaylistId);
     DEFINE_MEMBER(FName, AFortGameMode, CurrentPlaylistName);
@@ -292,6 +293,7 @@ public:
     DEFINE_MEMBER(Redirect, AFortGameModeAthena, RedirectAthenaLootTierGroups);
     DEFINE_MEMBER(int32, AFortGameModeAthena, WarmupRequiredPlayerCount);
     DEFINE_MEMBER(TArray<FItemAndCount>, AFortGameModeAthena, StartingItems);
+    DEFINE_BOOL(AFortGameModeAthena, bAlwaysDBNO)
 DEFINE_MEMBER(TArray<struct FVector>, AFortGameModeAthena, SafeZoneLocations);
     DEFINE_MEMBER(int32, AFortGameModeAthena, NumPlayers);
     DEFINE_MEMBER(int, AFortGameModeAthena, SafeZonePhase);
@@ -299,7 +301,6 @@ DEFINE_MEMBER(TArray<struct FVector>, AFortGameModeAthena, SafeZoneLocations);
 
     DEFINE_MEMBER(TArray<AFortPlayerControllerAthena*>, AFortGameModeAthena, AlivePlayers);
     DEFINE_MEMBER(TArray<AFortAthenaAIBotController*>, AFortGameModeAthena, AliveBots);
-
     DEFINE_PTR(AFortAIDirector, AFortGameModeAthena, AIDirector);
     DEFINE_PTR(AFortAIGoalManager, AFortGameModeAthena, AIGoalManager);
     DEFINE_PTR(UAthenaAISettings, AFortGameModeAthena, AISettings);

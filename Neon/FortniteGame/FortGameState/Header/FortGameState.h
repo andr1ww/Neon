@@ -49,6 +49,7 @@ public:
 class AFortGameState : public UObject
 {
 public:
+    DEFINE_BOOL(AFortGameState, bDBNOEnabledForGameMode)
     DEFINE_MEMBER(int32, AFortGameState, WorldLevel);
     DEFINE_MEMBER(TArray<struct FAdditionalLevelStreamed>, AFortGameState, AdditionalPlaylistLevelsStreamed);
 public:
@@ -99,9 +100,16 @@ public:
     DECLARE_DEFAULT_OBJECT(AFortAthenaAircraft)
 };
 
-class AFortGameStateAthena : public AFortGameState
+class AFortGameStateZone : public AFortGameState
 {
 public:
+    DEFINE_BOOL(AFortGameStateZone, bDBNODeathEnabled)
+};
+
+class AFortGameStateAthena : public AFortGameStateZone
+{
+public:
+    
     void OnRep_WinningPlayerState()
     {
         static SDK::UFunction* Func = nullptr;

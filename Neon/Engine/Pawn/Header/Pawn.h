@@ -4,6 +4,7 @@
 #include "Engine/Actor/Header/Actor.h"
 
 class AController;
+class APlayerState;
 
 class UNavMovementComponent : public UObject
 {
@@ -67,6 +68,7 @@ public:
 class APawn : public AActor
 {
 public:
+    DEFINE_PTR(APlayerState, APawn, PlayerState)
     DEFINE_PTR(AController, APawn, Controller);
 public:
     UPawnMovementComponent* GetMovementComponent() {
