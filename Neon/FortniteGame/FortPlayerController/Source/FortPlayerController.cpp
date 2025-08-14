@@ -46,7 +46,7 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
 	UAbilitySystemComponent::GiveAbilitySet(PlayerController->GetPlayerState()->GetAbilitySystemComponent(), AbilitySet);
 	AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState();
 
-	PlayerController->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1)->CallFunc<void>("FortQuestManager", "InitializeQuestAbilities", PlayerController->GetPawn());
+	PlayerController->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1)->InitializeQuestAbilities(PlayerController->GetPawn()); 
 	PlayerState->Set("FortPlayerStateAthena", "SeasonLevelUIDisplay", PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "CurrentLevel"));
 	PlayerState->OnRep_SeasonLevelUIDisplay();
 	PlayerController->GetXPComponent()->Set("FortPlayerControllerAthenaXPComponent", "bRegisteredWithQuestManager", true);
