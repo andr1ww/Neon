@@ -374,6 +374,25 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
       //      BehaviorTreeService::TickAI();
         }
 
+            
+        if (GetAsyncKeyState(VK_F6) & 0x1) {
+            for (auto& ClientConnection : NetDriver->GetClientConnections())
+            {
+                if (ClientConnection->GetPlayerController() && ClientConnection->GetPlayerController()->GetPawn())
+                {
+                    static TArray<AActor*> PlayerStarts = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), AFortAthenaVehicleSpawner::StaticClass());
+                    if (PlayerStarts.Num() == 0) {
+                        return;
+                    }
+                    
+                    FRotator Rot = FRotator();
+                    int RandomIndex = rand() % PlayerStarts.Num();
+                    ClientConnection->GetPlayerController()->GetPawn()->K2_SetActorRotation(Rot, true);
+                    ClientConnection->GetPlayerController()->GetPawn()->K2_TeleportTo(PlayerStarts[RandomIndex]->GetActorLocation(), Rot);
+                }
+            }
+        }
+        
         if (!bStartedBus)
         {
             static bool bSet = false;
@@ -384,7 +403,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             {
                 if (UKismetMathLibrary::RandomBoolWithWeight(0.05f))
                 {
-           //         AFortAthenaAIBotController::SpawnPlayerBot(1);
+                    AFortAthenaAIBotController::SpawnPlayerBot(1);
                 }
             }
             

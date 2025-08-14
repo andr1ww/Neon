@@ -96,6 +96,13 @@ enum class FNavigationSystemRunMode : uint8
     PIEMode,
 };
 
+class AFortAthenaVehicleSpawner : public AActor
+{
+public:
+    DECLARE_STATIC_CLASS(AFortAthenaVehicleSpawner)
+    DECLARE_DEFAULT_OBJECT(AFortAthenaVehicleSpawner)
+};
+
 class AFortGameMode : public AGameModeBase
 {
 public:

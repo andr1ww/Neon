@@ -181,7 +181,6 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             
             Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhaseStep"), 6);
             Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhase"), (uint8)EAthenaGamePhase::SafeZones);
-            Controller->GetBlackboard()->SetValueAsBool(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_IsMovementBlocked"), false);
         }
 
         if (!bRanBehaviorTree) {
@@ -240,18 +239,13 @@ void UFortServerBotManagerAthena::OnAlertLevelChanged(UObject* Context, FFrame& 
 void UFortServerBotManagerAthena::InitializeForWorld(UNavigationSystemV1* NavSystem, UWorld* World, uint8 Mode)
 {
     NavSystem->SetbAutoCreateNavigationData(true);
-    
-    UE_LOG(LogNeon, Log, "InitializeForWorld For World: '%s' For NavigationSystem: '%s'", World->GetFName().ToString().ToString().c_str(), NavSystem->GetFName().ToString().ToString().c_str());
-    UE_LOG(LogNeon, Log, "SupportedAgents: %d", NavSystem->GetSupportedAgents().Num());
-    
     NavSystem->GetSupportedAgentsMask().bSupportsAgent3 = 1;
-
+ 
     return InitializeForWorldOG(NavSystem, World, Mode);
 }
 
 void UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem(UAthenaNavSystemConfig* ModuleConfig, UWorld* World)
 {
-	UE_LOG(LogNeon, Log, "CreateAndConfigureNavigationSystem For World: '%s' For Config: '%s'", World->GetFName().ToString().ToString().c_str(), ModuleConfig->GetFName().ToString().ToString().c_str());
     ModuleConfig->bCreateOnClient = true;
     ModuleConfig->bPrioritizeNavigationAroundSpawners = true;
     ModuleConfig->bAutoSpawnMissingNavData = true;
@@ -259,6 +253,8 @@ void UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem(UAthenaNavS
     ModuleConfig->bSupportRuntimeNavmeshDisabling = false;
     ModuleConfig->bDiscardNavDataFromSublevels = false;
     ModuleConfig->bSpawnNavDataInNavBoundsLevel = true;
+    ModuleConfig->bUsesStreamedInNavLevel = true;
+    ModuleConfig->bUseBuildingGridAsNavigableSpace = true;
     
     return CreateAndConfigureNavigationSystemOG(ModuleConfig, World);
 }

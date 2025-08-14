@@ -24,12 +24,12 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		return;
 	}
 
-	static TArray<AActor*> PlayerStarts = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), AFortPlayerStartWarmup::StaticClass());
+	auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
+	
+	static TArray<AActor*> PlayerStarts = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), AFortAthenaVehicleSpawner::StaticClass());
 	if (PlayerStarts.Num() == 0) {
 		return;
 	}
-
-	auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
 
 	TArray<AActor*> Spawns = PlayerStarts;
 	
@@ -37,8 +37,10 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		int RandomIndex = rand() % Spawns.Num();
 		AActor* BotSpawn = Spawns[RandomIndex];
 		Spawns.Remove(RandomIndex);
+		FVector Loc = BotSpawn->GetActorLocation();
+		Loc.Z += 250;
 		
-		AFortPlayerPawn* Pawn = GameMode->GetServerBotManager()->GetCachedBotMutator()->SpawnBot(BotBP, BotSpawn, BotSpawn->GetActorLocation(), {}, false);
+		AFortPlayerPawn* Pawn = GameMode->GetServerBotManager()->GetCachedBotMutator()->SpawnBot(BotBP, BotSpawn, Loc, {}, false);
 		AFortAthenaAIBotController* PC = (AFortAthenaAIBotController*)Pawn->GetController();
 
 		if (Characters.size() != 0)
@@ -141,12 +143,23 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		if (BehaviorTree)
 		{
 			UBlackboardComponent* Blackboard = PC->GetBlackboard();
+			
 			PC->UseBlackboard(PC->GetBehaviorTree()->GetBlackboardAsset(), &Blackboard);
 			PC->OnUsingBlackBoard(Blackboard, PC->GetBehaviorTree()->GetBlackboardAsset());
-			
+
 			UFortServerBotManagerAthena::RunBehaviorTree(PC, BehaviorTree);
-			PC->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhaseStep"), (uint8)EAthenaGamePhaseStep::Warmup);
-			PC->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhase"), (uint8)EAthenaGamePhase::Warmup);
+
+			if (auto System = UWorld::GetWorld()->GetNavigationSystem())
+			{
+				if (auto Nav = System->GetMainNavData())
+				{
+					PC->GetPathFollowingComponent()->SetMyNavData(Nav);
+					PC->GetPathFollowingComponent()->CallFunc<void>("PathFollowingComponent", "OnNavDataRegistered", Nav);
+					PC->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "Activate", true);
+					PC->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "SetActivate", true, true);
+					PC->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "OnRep_IsActive");
+				}
+			}
 		}
 	}
 }
