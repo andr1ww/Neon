@@ -160,10 +160,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     GameMode->SetbWorldIsReady(true);
 
     static bool bInit = false;
-    GameMode->SetbDBNOEnabled(true);
-    GameState->SetbDBNOEnabledForGameMode(true);
-    GameState->SetbDBNODeathEnabled(true);
-    GameMode->SetbAlwaysDBNO(true);
 
     if (GameMode->GetCurrentPlaylistId() == -1)
     {
