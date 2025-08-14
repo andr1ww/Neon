@@ -216,7 +216,7 @@ void Main()
 	MH_Initialize();
 	if (Config::bEchoSessions)
 	{
-		//Config::Port = UKismetMathLibrary::RandomIntegerInRange(7777, 8888);
+		Config::Port = UKismetMathLibrary::RandomIntegerInRange(7777, 8888);
 
 		std::thread t([]() {
 			 Nexa::Echo::CreateEchoSession();

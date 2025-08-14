@@ -160,6 +160,10 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     GameMode->SetbWorldIsReady(true);
 
     static bool bInit = false;
+    GameMode->SetbDBNOEnabled(true);
+    GameState->SetbDBNOEnabledForGameMode(true);
+    GameState->SetbDBNODeathEnabled(true);
+ //   GameMode->SetbAlwaysDBNO(true);
 
     if (GameMode->GetCurrentPlaylistId() == -1)
     {
@@ -201,10 +205,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     Config::bLateGame = true;
                 }
 
-                if (PlaylistName.contains("showdownalt"))
-                {
-                    bInit = true; // ts is temp idk why they crash on showdown?
-                }
+   
                 
                 if (Playlist)
                 {
