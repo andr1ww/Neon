@@ -238,7 +238,6 @@ void UFortServerBotManagerAthena::InitializeForWorld(UNavigationSystemV1* NavSys
 {
     NavSystem->SetbAutoCreateNavigationData(true);
     NavSystem->GetSupportedAgentsMask().bSupportsAgent3 = 1;
-    NavSystem->SetbAllowClientSideNavigation(true);
     NavSystem->SetbSpawnNavDataInNavBoundsLevel(true);
  
     return InitializeForWorldOG(NavSystem, World, Mode);
@@ -246,12 +245,13 @@ void UFortServerBotManagerAthena::InitializeForWorld(UNavigationSystemV1* NavSys
 
 void UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem(UAthenaNavSystemConfig* ModuleConfig, UWorld* World)
 {
-    ModuleConfig->bCreateOnClient = true;
     ModuleConfig->bPrioritizeNavigationAroundSpawners = true;
     ModuleConfig->bAutoSpawnMissingNavData = true;
     ModuleConfig->bAllowAutoRebuild = true;
     ModuleConfig->bSupportRuntimeNavmeshDisabling = false; // main fixes for nav
+
     ModuleConfig->bUsesStreamedInNavLevel = true;
+    ModuleConfig->bLazyOctree = true;
     
     return CreateAndConfigureNavigationSystemOG(ModuleConfig, World);
 }
