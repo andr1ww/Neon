@@ -238,6 +238,8 @@ void UFortServerBotManagerAthena::InitializeForWorld(UNavigationSystemV1* NavSys
 {
     NavSystem->SetbAutoCreateNavigationData(true);
     NavSystem->GetSupportedAgentsMask().bSupportsAgent3 = 1;
+    NavSystem->SetbAllowClientSideNavigation(true);
+    NavSystem->SetbSpawnNavDataInNavBoundsLevel(true);
  
     return InitializeForWorldOG(NavSystem, World, Mode);
 }
@@ -249,14 +251,7 @@ void UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem(UAthenaNavS
     ModuleConfig->bAutoSpawnMissingNavData = true;
     ModuleConfig->bAllowAutoRebuild = true;
     ModuleConfig->bSupportRuntimeNavmeshDisabling = false; // main fixes for nav
-    
-    ModuleConfig->bDiscardNavDataFromSublevels = false; // attempts to fix empty tile
-    ModuleConfig->bSpawnNavDataInNavBoundsLevel = true;
     ModuleConfig->bUsesStreamedInNavLevel = true;
-    ModuleConfig->bUseBuildingGridAsNavigableSpace = true;
-    ModuleConfig->bResetDirtyAreasOnInitialBuildingRelease = true;
-    ModuleConfig->bRebuildOnInitialUnlock = true;
-    
     
     return CreateAndConfigureNavigationSystemOG(ModuleConfig, World);
 }

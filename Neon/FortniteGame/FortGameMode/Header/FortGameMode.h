@@ -103,6 +103,13 @@ public:
     DECLARE_DEFAULT_OBJECT(AFortAthenaVehicleSpawner)
 };
 
+class AFortAthenaVehicle : public AActor
+{
+public:
+    DECLARE_STATIC_CLASS(AFortAthenaVehicle)
+    DECLARE_DEFAULT_OBJECT(AFortAthenaVehicle)
+};
+
 class AFortGameMode : public AGameModeBase
 {
 public:

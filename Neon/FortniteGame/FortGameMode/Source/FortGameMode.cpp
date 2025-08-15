@@ -361,6 +361,14 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             Container->K2_DestroyActor();
         }
         WarmupActors.Free();
+
+        TArray<AActor*> VehicleSpawners = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), AFortAthenaVehicleSpawner::StaticClass());
+        for (auto& VehicleSpawner : VehicleSpawners)
+        {
+            auto Spawner = (AFortAthenaVehicleSpawner*)VehicleSpawner;
+            FTransform Transform = Spawner->GetTransform();
+            UGameplayStatics::SpawnActorOG<AFortAthenaVehicle>(Spawner->CallFunc<UClass*>("FortAthenaVehicleSpawner", "GetVehicleClass"), Transform.Translation, Spawner->K2_GetActorRotation());
+        }
     }
     
     if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && Res)
