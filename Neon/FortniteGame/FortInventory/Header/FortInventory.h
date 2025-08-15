@@ -116,6 +116,28 @@ public:
         Func->FunctionFlags() = Flgs;
     }
 
+    void OnRep_TossedFromContainer()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPickup", "OnRep_TossedFromContainer");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        if (!this) 
+            return;
+
+        auto Flgs = Func->FunctionFlags();
+        Func->FunctionFlags() |= 0x400;
+    
+        this->ProcessEvent(Func, nullptr);
+
+        Func->FunctionFlags() = Flgs;
+    }
+
+
     void TossPickup(const struct FVector& FinalLocation, class AFortPawn* ItemOwner, int32 OverrideMaxStackCount, bool bToss, bool bShouldCombinePickupsWhenTossCompletes, const EFortPickupSourceTypeFlag InPickupSourceTypeFlags, const EFortPickupSpawnSource InPickupSpawnSource)
     {
         static SDK::UFunction* Func = nullptr;
@@ -158,6 +180,7 @@ public:
         Func->FunctionFlags() = Flgs;
     }
 public:
+    DEFINE_BOOL(AFortPickup, bTossedFromContainer)
     DEFINE_BOOL(AFortPickup, bPickedUp);
     DEFINE_BOOL(AFortPickup, bRandomRotation);
     DEFINE_MEMBER(FFortPickupLocationData, AFortPickup, PickupLocationData);

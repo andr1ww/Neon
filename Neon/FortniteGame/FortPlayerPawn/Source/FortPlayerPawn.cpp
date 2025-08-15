@@ -192,7 +192,7 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
     AController* Controller = Owner ? Owner->Get<AController*>("Pawn", "Controller") : nullptr;
     AFortPlayerControllerAthena* PC = Cast<AFortPlayerControllerAthena>(Controller);
     if (!PC)
-        return;
+        return ReloadWeaponOG(Weapon, AmmoToRemove);
 
     AFortInventory* Inventory = nullptr;
     if (auto AI = Cast<AFortAthenaAIBotController>(PC))
@@ -202,7 +202,7 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
         Inventory = PC->GetWorldInventory();
 
     if (!Inventory)
-        return;
+        return ReloadWeaponOG(Weapon, AmmoToRemove);
 
     UFortWeaponItemDefinition* WeaponData = Weapon->GetWeaponData();
     UFortWorldItemDefinition* AmmoDefinition = WeaponData ? WeaponData->GetAmmoWorldItemDefinition_BP() : nullptr;
@@ -223,7 +223,7 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
     }
 
     if (!WeaponEntry)
-        return;
+        return ReloadWeaponOG(Weapon, AmmoToRemove);
 
     FFortItemEntry* AmmoEntry = nullptr;
     for (UFortWorldItem* Item : ItemInstances)
@@ -236,7 +236,7 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
     }
 
     if (!AmmoEntry)
-        return;
+        return ReloadWeaponOG(Weapon, AmmoToRemove);
 
     int32 NewAmmoCount = AmmoEntry->GetCount() - AmmoToRemove;
     AmmoEntry->SetCount(NewAmmoCount);

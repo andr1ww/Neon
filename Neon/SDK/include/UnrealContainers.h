@@ -780,6 +780,20 @@ struct FBitSet {
         }
 };
 
+    static FORCEINLINE uint32 CountLeadingZeros(uint32 Value)
+    {
+        unsigned long Log2;
+        if (_BitScanReverse(&Log2, Value) != 0)
+        {
+            return 31 - Log2;
+        }
+
+        return 32;
+    }
+
+#define NumBitsPerDWORD ((int32)32)
+#define NumBitsPerDWORDLogTwo ((int32)5)
+
 class TBitArray {
         typedef uint32 WordType;
         static constexpr WordType FullWordMask = (WordType)-1;
@@ -800,7 +814,20 @@ class TBitArray {
         FORCEINLINE explicit TBitArray( bool bValue, int32 InNumBits )
             : MaxBits( AllocatorInstance.GetInitialCapacity() *
                        NumBitsPerDWORD ) {}
+        
+    struct FRelativeBitReference
+        {
+        public:
+            FORCEINLINE explicit FRelativeBitReference(int32 BitIndex)
+                : DWORDIndex(BitIndex >> NumBitsPerDWORDLogTwo)
+                , Mask(1 << (BitIndex & (NumBitsPerDWORD -1)))
+            {
+            }
 
+            int32 DWORDIndex;
+            uint32 Mask;
+        };
+    
       public:
         void CheckInvariants() const {
 
@@ -847,6 +874,237 @@ class TBitArray {
                 return (Word & (1u << BitIndex)) != 0;
         }
 
+        struct FBitReference
+        {
+            FORCEINLINE FBitReference(uint32& InData, uint32 InMask)
+                : Data(InData)
+                , Mask(InMask)
+            {
+            }
+            FORCEINLINE FBitReference(const uint32& InData, const uint32 InMask)
+                : Data(const_cast<uint32&>(InData))
+                , Mask(InMask)
+            {
+            }
+
+            FORCEINLINE void SetBit(const bool Value)
+            {
+                Value ? Data |= Mask : Data &= ~Mask;
+
+                // 10011101 - Data			 // 10011101 - Data
+                // 00000010 - Mask - true |	 // 00000010 - Mask - false
+                // 10011111	-  |=			 // 11111101 -  ~
+                //							 // 10011111 -  &=
+            }
+
+            FORCEINLINE operator bool() const
+            {
+                return (Data & Mask) != 0;
+            }
+            FORCEINLINE void operator=(const bool Value)
+            {
+                this->SetBit(Value);
+            }
+
+        private:
+            uint32& Data;
+            uint32 Mask;
+        };
+
+               class FBitIterator : public FRelativeBitReference
+    {
+    private:
+        int32 Index;
+        const TBitArray& IteratedArray;
+
+    public:
+        FORCEINLINE FBitIterator(const TBitArray& ToIterate, const int32 StartIndex) // Begin
+            : IteratedArray(ToIterate)
+            , Index(StartIndex)
+            , FRelativeBitReference(StartIndex)
+        {
+        }
+        FORCEINLINE FBitIterator(const TBitArray& ToIterate) // End
+            : IteratedArray(ToIterate)
+            , Index(ToIterate.NumBits)
+            , FRelativeBitReference(ToIterate.NumBits)
+        {
+        }
+
+        FORCEINLINE explicit operator bool() const
+        {
+            return Index < IteratedArray.NumBits;
+        }
+        FORCEINLINE FBitIterator& operator++()
+        {
+            ++Index;
+            this->Mask <<= 1;
+            if (!this->Mask)
+            {
+                this->Mask = 1;
+                ++this->DWORDIndex;
+            }
+            return *this;
+        }
+        FORCEINLINE bool operator*() const
+        {
+            // Thesis: Once there are more elements in the BitArray than InlineData can hold it'll just allocate all of 
+            // them through SecondaryElements, leaving InlineData all true
+
+            if (IteratedArray.NumBits < IteratedArray.NumBits)
+            {
+                return (bool)FBitReference(IteratedArray.GetData()[this->DWORDIndex], this->Mask);
+            }
+            else
+            {
+                return (bool)FBitReference(IteratedArray.GetData()[this->DWORDIndex], this->Mask);
+            }
+        }
+        FORCEINLINE bool operator==(const FBitIterator& OtherIt) const
+        {
+            return Index == OtherIt.Index;
+        }
+        FORCEINLINE bool operator!=(const FBitIterator& OtherIt) const
+        {
+            return Index </*=*/ OtherIt.Index;
+        }
+        FORCEINLINE bool operator < (const int32 Other) const
+        {
+            return Index < Other;
+        }
+        FORCEINLINE bool operator > (const int32 Other) const
+        {
+            return Index < Other;
+        }
+
+        FORCEINLINE int32 GetIndex() const
+        {
+            return Index;
+        }
+    };    
+    
+
+      class FSetBitIterator : public FRelativeBitReference
+    {
+    private:
+        const TBitArray& IteratedArray;
+
+        uint32 UnvisitedBitMask;
+        int32  CurrentBitIndex;
+        int32  BaseBitIndex;
+
+    public:
+            
+        FORCEINLINE FSetBitIterator(const TBitArray& ToIterate, int32 StartIndex)
+            : FRelativeBitReference(StartIndex)
+            , IteratedArray(const_cast<TBitArray&>(ToIterate))
+            , UnvisitedBitMask((~0U) << (StartIndex & (NumBitsPerDWORD - 1)))
+            , CurrentBitIndex(StartIndex)
+            , BaseBitIndex(StartIndex & ~(NumBitsPerDWORD - 1))
+        {
+            if (StartIndex != IteratedArray.NumBits)
+            {
+                FindNextSetBit();
+            }
+        }
+        FORCEINLINE FSetBitIterator(const TBitArray& ToIterate)
+            : FRelativeBitReference(ToIterate.NumBits)
+            , IteratedArray(const_cast<TBitArray&>(ToIterate))
+            , UnvisitedBitMask(0)
+            , CurrentBitIndex(ToIterate.NumBits)
+            , BaseBitIndex(ToIterate.NumBits)
+        {
+        }
+
+        FORCEINLINE FSetBitIterator& operator++()
+        {
+            UnvisitedBitMask &= ~this->Mask;
+
+            FindNextSetBit();
+
+            return *this;
+        }
+        FORCEINLINE bool operator*() const
+        {
+            return true;
+        }
+
+        FORCEINLINE bool operator==(const FSetBitIterator& Other) const
+        {
+            return CurrentBitIndex == Other.CurrentBitIndex;
+        }
+        FORCEINLINE bool operator!=(const FSetBitIterator& Other) const
+        {
+            return CurrentBitIndex </*=*/ Other.CurrentBitIndex;
+        }
+
+        FORCEINLINE explicit operator bool() const
+        {
+            return CurrentBitIndex < IteratedArray.NumBits;
+        }
+
+        FORCEINLINE int32 GetIndex() const
+        {
+            return CurrentBitIndex;
+        }
+
+    private:
+
+        void FindNextSetBit()
+        {
+            const uint32* ArrayData = IteratedArray.GetData();
+
+            if (!ArrayData)
+                return;
+
+            const int32 ArrayNum = IteratedArray.NumBits;
+            const int32 LastDWORDIndex = (ArrayNum - 1) / NumBitsPerDWORD;
+
+            uint32 RemainingBitMask = ArrayData[this->DWORDIndex] & UnvisitedBitMask;
+
+            while (!RemainingBitMask)
+            {
+                ++this->DWORDIndex;
+                BaseBitIndex += NumBitsPerDWORD;
+
+                if (this->DWORDIndex > LastDWORDIndex)
+                {
+                    CurrentBitIndex = ArrayNum;
+                    return;
+                }
+
+                RemainingBitMask = ArrayData[this->DWORDIndex];
+                UnvisitedBitMask = ~0;
+            }
+
+            const uint32 NewRemainingBitMask = RemainingBitMask & (RemainingBitMask - 1);
+
+            this->Mask = NewRemainingBitMask ^ RemainingBitMask;
+
+            CurrentBitIndex = BaseBitIndex + NumBitsPerDWORD - 1 - CountLeadingZeros(this->Mask);
+
+            if (CurrentBitIndex > ArrayNum)
+            {
+                CurrentBitIndex = ArrayNum;
+            }
+        }
+    };
+
+        FORCEINLINE bool IsSet(int32 Index) const
+        {
+            return *FBitIterator(*this, Index);
+        }
+        FORCEINLINE void Set(const int32 Index, const bool Value, bool bIsSettingAllZero = false)
+        {
+            const int32 DWORDIndex = (Index >> ((int32)5));
+            const int32 Mask = (1 << (Index & (((int32)32) - 1)));
+
+            if (!bIsSettingAllZero)
+                NumBits = Index >= NumBits ? Index < MaxBits ? Index + 1 : NumBits : NumBits;
+
+            FBitReference(GetData()[DWORDIndex], Mask).SetBit(Value);
+        }
+    
       private:
         TInlineAllocator<4>::ForElementType<int32> AllocatorInstance;
         int32 NumBits;
@@ -901,60 +1159,262 @@ class TBitArray {
         void Reset() { NumBits = 0; }
 };
 
-template <typename InElementType> class TSparseArray
+    
+#define INDEX_NONE -1
+
+    template <typename ElementType>
+    union TSparseArrayElementOrListLink
+    {
+        TSparseArrayElementOrListLink(ElementType& InElement)
+            : ElementData(InElement)
+        {
+        }
+        TSparseArrayElementOrListLink(ElementType&& InElement)
+            : ElementData(InElement)
+        {
+        }
+
+        TSparseArrayElementOrListLink(int32 InPrevFree, int32 InNextFree)
+            : PrevFreeIndex(InPrevFree)
+            , NextFreeIndex(InNextFree)
+        {
+        }
+
+        TSparseArrayElementOrListLink<ElementType> operator=(const TSparseArrayElementOrListLink<ElementType>& Other)
+        {
+            return TSparseArrayElementOrListLink(Other.NextFreeIndex, Other.PrevFreeIndex);
+        }
+
+        /** If the element is allocated, its value is stored here. */
+        ElementType ElementData;
+
+        struct
+        {
+            /** If the element isn't allocated, this is a link to the previous element in the array's free list. */
+            int PrevFreeIndex;
+
+            /** If the element isn't allocated, this is a link to the next element in the array's free list. */
+            int NextFreeIndex;
+        };
+    };
+
+template <typename ArrayType>
+class TSparseArray
 {
-private:
-        typedef TSparseArrayElementOrFreeListLink<
-            TAlignedBytes<sizeof( InElementType ), alignof( InElementType )>>
-            FElementOrFreeListLink;
+public:
+    typedef TSparseArrayElementOrListLink<ArrayType> FSparseArrayElement;
+
+    TArray<FSparseArrayElement> Data;
+    TBitArray AllocationFlags;
+    int32 FirstFreeIndex;
+    int32 NumFreeIndices;
+
+    FORCEINLINE int32 Num() const
+    {
+        return Data.Num() - NumFreeIndices;
+    }
+
+    class FBaseIterator
+    {
+    private:
+        TSparseArray<ArrayType>& IteratedArray;
+        TBitArray::FSetBitIterator BitArrayIt;
+
+    public:
+        FORCEINLINE FBaseIterator(const TSparseArray<ArrayType>& Array, const TBitArray::FSetBitIterator BitIterator)
+            : IteratedArray(const_cast<TSparseArray<ArrayType>&>(Array))
+            , BitArrayIt(const_cast<TBitArray::FSetBitIterator&>(BitIterator))
+        {
+        }
+
+        FORCEINLINE explicit operator bool() const
+        {
+            return (bool)BitArrayIt;
+        }
+        FORCEINLINE TSparseArray<ArrayType>::FBaseIterator& operator++()
+        {
+            ++BitArrayIt;
+            return *this;
+        }
+        FORCEINLINE ArrayType& operator*()
+        {
+            return IteratedArray[BitArrayIt.GetIndex()].ElementData;
+        }
+        FORCEINLINE const ArrayType& operator*() const
+        {
+            return IteratedArray[BitArrayIt.GetIndex()].ElementData;
+        }
+        FORCEINLINE ArrayType* operator->()
+        {
+            return &IteratedArray[BitArrayIt.GetIndex()].ElementData;
+        }
+        FORCEINLINE const ArrayType* operator->() const
+        {
+            return &IteratedArray[BitArrayIt.GetIndex()].ElementData;
+        }
+        FORCEINLINE bool operator==(const TSparseArray<ArrayType>::FBaseIterator& Other) const
+        {
+            return BitArrayIt == Other.BitArrayIt;
+        }
+        FORCEINLINE bool operator!=(const TSparseArray<ArrayType>::FBaseIterator& Other) const
+        {
+            return BitArrayIt != Other.BitArrayIt;
+        }
+
+        FORCEINLINE int32 GetIndex() const
+        {
+            return BitArrayIt.GetIndex();
+        }
+        FORCEINLINE bool IsElementValid() const
+        {
+            return *BitArrayIt;
+        }
+    };
 
 public:
-        /** Accessor for the element or free list data. */
-        FElementOrFreeListLink &GetData( int32 Index ) {
-                return ( (FElementOrFreeListLink *)Data.GetData() )[Index];
-        }
+    FORCEINLINE TSparseArray<ArrayType>::FBaseIterator begin()
+    {
+        return TSparseArray<ArrayType>::FBaseIterator(*this, TBitArray::FSetBitIterator(AllocationFlags, 0));
+    }
+    FORCEINLINE const TSparseArray<ArrayType>::FBaseIterator begin() const
+    {
+        return TSparseArray<ArrayType>::FBaseIterator(*this, TBitArray::FSetBitIterator(AllocationFlags, 0));
+    }
+    FORCEINLINE TSparseArray<ArrayType>::FBaseIterator end()
+    {
+        return TSparseArray<ArrayType>::FBaseIterator(*this, TBitArray::FSetBitIterator(AllocationFlags));
+    }
+    FORCEINLINE const TSparseArray<ArrayType>::FBaseIterator end() const
+    {
+        return TSparseArray<ArrayType>::FBaseIterator(*this, TBitArray::FSetBitIterator(AllocationFlags));
+    }
 
-        /** Accessor for the element or free list data. */
-        const FElementOrFreeListLink &GetData( int32 Index ) const {
-                return ( (FElementOrFreeListLink *)Data.GetData() )[Index];
-        }
+    FORCEINLINE FSparseArrayElement& operator[](uint32 Index)
+    {
+        return *(FSparseArrayElement*)&Data[(Index)].ElementData;
+    }
+    FORCEINLINE const FSparseArrayElement& operator[](uint32 Index) const
+    {
+        return *(const FSparseArrayElement*)&Data.at(Index).ElementData;
+    }
+    FORCEINLINE int32 GetNumFreeIndices() const
+    {
+        return NumFreeIndices;
+    }
+    FORCEINLINE int32 GetFirstFreeIndex() const
+    {
+        return FirstFreeIndex;
+    }
+    FORCEINLINE const TArray<FSparseArrayElement>& GetData() const
+    {
+        return Data;
+    }
+    FSparseArrayElement& GetData(int32 Index)
+    {
+        return *(FSparseArrayElement*)&Data.at(Index).ElementData;
+        // return ((FSparseArrayElement*)Data.Data)[Index];
+    }
 
-        int32 Num() const {
-                return Data.Num() - NumFreeIndices;
-        }
+    /** Accessor for the element or free list data. */
+    const FSparseArrayElement& GetData(int32 Index) const
+    {
+        return *(const FSparseArrayElement*)&Data.at(Index).ElementData;
+        // return ((FSparseArrayElement*)Data.Data)[Index];
+    }
+    FORCEINLINE const TBitArray& GetAllocationFlags() const
+    {
+        return AllocationFlags;
+    }
+    FORCEINLINE bool IsIndexValid(int32 IndexToCheck) const
+    {
+        return AllocationFlags.IsSet(IndexToCheck);
+    }
 
-        bool IsValidIndex(int32 Index) const {
-                return Index >= 0 && Index < Data.Num() && AllocationFlags[Index];
-        }
-
-        int32 GetMaxIndex() const {
-                return Data.Num();
-        }
-
-        bool IsAllocated(int32 Index) const {
-                return IsValidIndex(Index);
-        }
-
-        InElementType& operator[](int32 Index)
+    void RemoveAt(int32 Index, int32 Count = 1)
+    {
+        /* if (!TIsTriviallyDestructible<ElementType>::Value)
         {
-                check(IsValidIndex(Index));
-                return *reinterpret_cast<InElementType*>(&GetData(Index).ElementData);
-        }
+            for (int32 It = Index, ItCount = Count; ItCount; ++It, --ItCount)
+            {
+                ((ElementType&)GetData(It).ElementData).~ElementType();
+            }
+        } */
 
-        const InElementType& operator[](int32 Index) const {
-                check(IsValidIndex(Index));
-                return *reinterpret_cast<InElementType*>(&GetData(Index).ElementData);
-        }
+        RemoveAtUninitialized(Index, Count);
+    }
 
-private:
-        typedef TArray<FElementOrFreeListLink> DataType;
-        DataType Data;
-        typedef TBitArray AllocationBitArrayType;
-        TBitArray AllocationFlags;
-        int32 FirstFreeIndex;
-        int32 NumFreeIndices;
+    /** Removes Count elements from the array, starting from Index, without destructing them. */
+    void RemoveAtUninitialized(int32 Index, int32 Count = 1)
+    {
+        for (; Count; --Count)
+        {
+            // check(AllocationFlags[Index]);
+
+            // Mark the element as free and add it to the free element list.
+            if (NumFreeIndices)
+            {
+                GetData(FirstFreeIndex).PrevFreeIndex = Index;
+            }
+            auto& IndexData = GetData(Index);
+            IndexData.PrevFreeIndex = -1;
+            IndexData.NextFreeIndex = NumFreeIndices > 0 ? FirstFreeIndex : INDEX_NONE;
+            FirstFreeIndex = Index;
+            ++NumFreeIndices;
+            AllocationFlags.Set(Index, false);
+            // AllocationFlags[Index] = false;
+
+            ++Index;
+        }
+    }
+
+    /*
+    FORCEINLINE bool RemoveAt(const int32 IndexToRemove)
+    {
+        LOG_INFO(LogDev, "IndexToRemove: {}", IndexToRemove);
+        LOG_INFO(LogDev, "AllocationFlags.IsSet(IndexToRemove): {}", AllocationFlags.IsSet(IndexToRemove));
+        LOG_INFO(LogDev, "Data.Num(): {}", Data.Num());
+
+        if (IndexToRemove >= 0 && IndexToRemove < Data.Num() && AllocationFlags.IsSet(IndexToRemove))
+        {
+            int32 PreviousFreeIndex = -1;
+            int32 NextFreeIndex = -1;
+
+            LOG_INFO(LogDev, "NumFreeIndices: {}", NumFreeIndices);
+
+            if (NumFreeIndices == 0)
+            {
+                FirstFreeIndex = IndexToRemove;
+                Data.at(IndexToRemove) = { -1, -1 };
+            }
+            else
+            {
+                for (auto It = AllocationFlags.begin(); It != AllocationFlags.end(); ++It)
+                {
+                    if (!It)
+                    {
+                        if (It.GetIndex() < IndexToRemove)
+                        {
+                            Data.at(IndexToRemove).PrevFreeIndex = It.GetIndex();
+                        }
+                        else if (It.GetIndex() > IndexToRemove)
+                        {
+                            Data.at(IndexToRemove).NextFreeIndex = It.GetIndex();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            AllocationFlags.Set(IndexToRemove, false);
+            NumFreeIndices++;
+
+            return true;
+        }
+        return false;
+    }
+    */
 };
-
+    
 template <typename InElementType> class TSetElement {
       private:
         template <typename SetDataType> friend class TSet;
@@ -996,7 +1456,7 @@ public:
         Iterator(ElementArrayType* InElements, int32 InIndex) 
             : ElementsPtr(InElements), CurrentIndex(InIndex)
         {
-            while (CurrentIndex < ElementsPtr->GetMaxIndex() && !ElementsPtr->IsAllocated(CurrentIndex))
+            while (CurrentIndex < ElementsPtr->Num() && !ElementsPtr->IsIndexValid(CurrentIndex))
             {
                 ++CurrentIndex;
             }
@@ -1004,28 +1464,28 @@ public:
 
         InElementType& operator*()
         {
-            return (*ElementsPtr)[CurrentIndex].Value;
+            return (*ElementsPtr)[CurrentIndex].ElementData.Value;
         }
 
         const InElementType& operator*() const
         {
-            return (*ElementsPtr)[CurrentIndex].Value;
+            return (*ElementsPtr)[CurrentIndex].ElementData.Value;
         }
 
         InElementType* operator->()
         {
-            return &((*ElementsPtr)[CurrentIndex].Value);
+            return &((*ElementsPtr)[CurrentIndex].ElementData.Value);
         }
 
         const InElementType* operator->() const
         {
-            return &((*ElementsPtr)[CurrentIndex].Value);
+            return &((*ElementsPtr)[CurrentIndex].ElementData.Value);
         }
 
             Iterator& operator++()
         {
                 ++CurrentIndex;
-                while (CurrentIndex < ElementsPtr->Num() && !ElementsPtr->IsValidIndex(CurrentIndex))
+                while (CurrentIndex < ElementsPtr->Num() && !ElementsPtr->IsIndexValid(CurrentIndex))
                 {
                         ++CurrentIndex;
                 }
@@ -1069,12 +1529,12 @@ public:
 
         const InElementType& operator*() const
         {
-            return (*ElementsPtr)[CurrentIndex].Value;
+            return (*ElementsPtr)[CurrentIndex].ElementData.Value;
         }
 
         const InElementType* operator->() const
         {
-            return &((*ElementsPtr)[CurrentIndex].Value);
+            return &((*ElementsPtr)[CurrentIndex].ElementData.Value);
         }
 
             ConstIterator& operator++()
@@ -1112,7 +1572,7 @@ public:
 
     Iterator end()
     {
-        return Iterator(&Elements, Elements.GetMaxIndex());
+        return Iterator(&Elements, Elements.Data.Num());
     }
 
     ConstIterator begin() const

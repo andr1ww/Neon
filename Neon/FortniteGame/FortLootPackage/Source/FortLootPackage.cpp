@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "../Header/FortLootPackage.h"
 
+#include "Engine/GameplayStatics/Header/GameplayStatics.h"
+
 TArray<FFortLootTierData*> FortLootPackage::TierDataAllGroups;
 TArray<FFortLootPackageData*> FortLootPackage::LPGroupsAll;
 
@@ -67,7 +69,7 @@ bool FortLootPackage::IsValidPointer(void* ptr) {
 }
 
 void FortLootPackage::SetupLDSForPackage(TArray<FNeonLootImproper>& LootDrops, FName Package, int i, FName TierGroup, int WorldLevel, int RecursionDepth) {
-    if (RecursionDepth > 10) {
+    if (RecursionDepth > 3 || LootDrops.Num() > 20) {
         return;
     }
     
@@ -104,10 +106,7 @@ void FortLootPackage::SetupLDSForPackage(TArray<FNeonLootImproper>& LootDrops, F
     auto LootPackageCall = LootPackage->GetLootPackageCall();
     if (LootPackageCall.GetData().Num() > 0)
     {
-        for (int j = 0; j < LootPackage->GetCount(); j++)
-        {
-            SetupLDSForPackage(LootDrops, UKismetStringLibrary::Conv_StringToName(LootPackageCall), 0, TierGroup, WorldLevel, RecursionDepth + 1);
-        }
+        SetupLDSForPackage(LootDrops, UKismetStringLibrary::Conv_StringToName(LootPackageCall), -1, TierGroup, WorldLevel, RecursionDepth + 1);
         return;
     }
 
@@ -117,6 +116,20 @@ void FortLootPackage::SetupLDSForPackage(TArray<FNeonLootImproper>& LootDrops, F
         return;
     }
 
+    bool found = false;
+    for (auto& LootDrop : LootDrops) {
+        if (LootDrop.ItemDefinition == ItemDefinition) {
+            LootDrop.Count += LootPackage->GetCount();
+            found = true;
+            break;
+        }
+    }
+
+    if (!found && LootPackage->GetCount() > 0) {
+        LootDrops.Add(FNeonLootImproper(ItemDefinition, LootPackage->GetCount()));
+    }
+
+    
     auto WeaponItemDefinition = Cast<UFortWeaponItemDefinition>(ItemDefinition);
     bool IsWeapon = LootPackage->GetLootPackageID().ToString().ToString().contains(".Weapon.") && WeaponItemDefinition;
     if (IsWeapon)
@@ -135,31 +148,6 @@ void FortLootPackage::SetupLDSForPackage(TArray<FNeonLootImproper>& LootDrops, F
             }
         }
     }
-
-    bool found = false;
-    for (auto& LootDrop : LootDrops) {
-        if (LootDrop.ItemDefinition == ItemDefinition) {
-            LootDrop.Count = (int32)LootDrop.Count + LootPackage->GetCount();
-            
-            if (LootDrop.Count > ItemDefinition->GetMaxStackSize().Value) {
-                auto OGCount = LootDrop.Count;
-                LootDrop.Count = ItemDefinition->GetMaxStackSize().Value;
-
-                if (GetQuickbar(ItemDefinition) == EFortQuickBars::Secondary) {
-                    int32 RemainingCount = OGCount - ItemDefinition->GetMaxStackSize().Value;
-                    LootDrops.Add(FNeonLootImproper(ItemDefinition, RemainingCount));
-                }
-            }
-            if (GetQuickbar(ItemDefinition) == EFortQuickBars::Secondary) {
-                found = true;
-            }
-            break;
-        }
-    }
-
-    if (!found && LootPackage->GetCount() > 0) {
-        LootDrops.Add(FNeonLootImproper(ItemDefinition, LootPackage->GetCount()));
-    }
 }
 
 void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
@@ -168,15 +156,20 @@ void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
     {
         return;
     }
-
+    
     if (LPGroupsAll.Num() > 0 && TierDataAllGroups.Num() > 0) {
         return;
     }
 
     static UDataTable* LootPackages = nullptr;
     static UDataTable* LootTierData = nullptr;
+    std::vector<UDataTable*> LPTables;
+    std::vector<UDataTable*> LTDTables;
+    
+    bool bFoundOverrides = false;
 
-    if (!LootPackages || !LootTierData) {
+    if (!LootPackages || !LootTierData)
+    {
         static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameState, "CurrentPlaylistInfo");
             
         FPlaylistPropertyArray& CurrentPlaylistInfoPtr = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
@@ -190,75 +183,121 @@ void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
         LootTierData = ErmOk2.Get(UCompositeDataTable::StaticClass(), true);
         
         if (!LootPackages) {
-            UE_LOG(LogNeon, Log, "LootPackages null");
             LootPackages = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootPackages().Get(UDataTable::StaticClass(), true);
-            if (!LootPackages)
-            {
-                UE_LOG(LogNeon, Log, "LootPackages still null");
-                LootPackages = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootPackages_Client.AthenaLootPackages_Client");
-            }
         }
 
-        if (!LootTierData)
-        {
-            UE_LOG(LogNeon, Log, "LootTierData null");
+        if (!LootTierData) {
             LootTierData = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootTierData().Get(UDataTable::StaticClass(), true);
-            if (!LootTierData)
-            {
-                UE_LOG(LogNeon, Log, "LootTierData still null");
-                LootTierData = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootTierData_Client.AthenaLootTierData_Client");
+        }
+
+        auto GameFeatureDataObjects = Runtime::GetObjectsOfClass<UFortGameFeatureData>(UFortGameFeatureData::StaticClass());
+        for (auto GameFeatureData : GameFeatureDataObjects) {
+            auto& PlaylistOverrideLootTableData = GameFeatureData->GetPlaylistOverrideLootTableData();
+    
+            auto GameplayTagContainer = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetGameplayTagContainer();
+    
+            for (auto& Value : PlaylistOverrideLootTableData) {
+                auto OverrideTag = Value.Key;
+        
+                if (OverrideTag.TagName.ToString() == "None" || !OverrideTag.TagName.IsValid()) {
+                    continue;
+                }
+                
+                bool bFoundMatch = false;
+                if (GameplayTagContainer.HasTag(OverrideTag)) {
+                    bFoundMatch = true;
+                }
+                
+                if (bFoundMatch) {
+                    bFoundOverrides = true;
+            
+                    auto OverrideLootPackagesStr = Value.Value.GetLootPackageData().SoftObjectPtr.ObjectID.AssetPathName.ToString();
+                    auto bOverrideLPIsComposite = OverrideLootPackagesStr.ToString().contains("Composite");
+                    auto lpPtr = Value.Value.GetLootPackageData().Get(bOverrideLPIsComposite ? UCompositeDataTable::StaticClass() : UDataTable::StaticClass(), true);
+                    if (lpPtr) {
+                        LPTables.push_back(lpPtr);
+                    }
+            
+                    auto OverrideLootTierDataStr = Value.Value.GetLootTierData().SoftObjectPtr.ObjectID.AssetPathName.ToString();
+                    auto bOverrideLTDIsComposite = OverrideLootTierDataStr.ToString().contains("Composite");
+                    auto ltdPtr = Value.Value.GetLootTierData().Get(bOverrideLTDIsComposite ? UCompositeDataTable::StaticClass() : UDataTable::StaticClass(), true);
+                    if (ltdPtr) {
+                        LTDTables.push_back(ltdPtr);
+                    }
+                }
             }
         }
     }
 
-    if (LootPackages)
-    {
+    if (!bFoundOverrides) {
+        if (LootPackages) LPTables.push_back(LootPackages);
+        if (LootTierData) LTDTables.push_back(LootTierData);
+    }
+
+    std::map<FName, FFortLootPackageData*> PackageGroupMap;
+    for (auto LPTable : LPTables) {
+        if (!LPTable) continue;
         
-        UCompositeDataTable* CompTable = Cast<UCompositeDataTable>(LootPackages);
-        if (CompTable) {
-            for (auto& PT : CompTable->GetParentTables()) {
-                if (PT) {
-                    for (const auto& RowPair : PT->GetRowMap()) {
+        if (auto CompTable = Cast<UCompositeDataTable>(LPTable)) {
+            auto& ParentTables = CompTable->GetParentTables();
+            for (int32 i = 0; i < ParentTables.Num(); i++) {
+                auto ParentTable = ParentTables[i];
+                if (ParentTable) {
+                    auto& RowMap = ParentTable->GetRowMap();
+                    for (const auto& RowPair : RowMap) {
                         FFortLootPackageData* Val = reinterpret_cast<FFortLootPackageData*>(RowPair.Value);
                         if (IsValidPointer(Val)) {
-                            LPGroupsAll.Add(Val);
+                            PackageGroupMap[RowPair.Key] = Val;
                         }
                     }
                 }
             }
-        } else
-        {
-            for (TPair<FName, uint8_t*>& RowPair : LootPackages->GetRowMap())
-            {
-                FFortLootPackageData* Val = reinterpret_cast<FFortLootPackageData*>(RowPair.Value);
-                if (IsValidPointer(Val)) {
-                    LPGroupsAll.Add(Val);
-                }
+        }
+        
+        auto& MainRowMap = LPTable->GetRowMap();
+        for (const auto& RowPair : MainRowMap) {
+            FFortLootPackageData* Val = reinterpret_cast<FFortLootPackageData*>(RowPair.Value);
+            if (IsValidPointer(Val)) {
+                PackageGroupMap[RowPair.Key] = Val;
             }
         }
     }
     
-    if (LootTierData) {
-        if (auto CompositeTable = Cast<UCompositeDataTable>(LootTierData)) {
-            for (auto& ParentTable : CompositeTable->GetParentTables()) {
+    for (auto& [Key, Value] : PackageGroupMap) {
+        LPGroupsAll.Add(Value);
+    }
+    
+    std::map<FName, FFortLootTierData*> TierDataGroupMap;
+    for (auto LTDTable : LTDTables) {
+        if (!LTDTable) continue;
+        
+        if (auto CompTable = Cast<UCompositeDataTable>(LTDTable)) {
+            auto& ParentTables = CompTable->GetParentTables();
+            for (int32 i = 0; i < ParentTables.Num(); i++) {
+                auto ParentTable = ParentTables[i];
                 if (ParentTable) {
-                    for (const auto& RowPair : ParentTable->GetRowMap()) {
+                    auto& RowMap = ParentTable->GetRowMap();
+                    for (const auto& RowPair : RowMap) {
                         FFortLootTierData* Val = reinterpret_cast<FFortLootTierData*>(RowPair.Value);
                         if (IsValidPointer(Val)) {
-                            TierDataAllGroups.Add(Val);
+                            TierDataGroupMap[RowPair.Key] = Val;
                         }
                     }
                 }
             }
-        } else
-        {
-            for (const auto& RowPair : LootTierData->GetRowMap()) {
-                FFortLootTierData* Val = reinterpret_cast<FFortLootTierData*>(RowPair.Value);
-                if (IsValidPointer(Val)) {
-                    TierDataAllGroups.Add(Val);
-                }
+        }
+        
+        auto& MainRowMap = LTDTable->GetRowMap();
+        for (const auto& RowPair : MainRowMap) {
+            FFortLootTierData* Val = reinterpret_cast<FFortLootTierData*>(RowPair.Value);
+            if (IsValidPointer(Val)) {
+                TierDataGroupMap[RowPair.Key] = Val;
             }
         }
+    }
+
+    for (auto& [Key, Value] : TierDataGroupMap) {
+        TierDataAllGroups.Add(Value);
     }
 }
 
@@ -372,8 +411,6 @@ TArray<FortLootPackage::FNeonLootImproper> FortLootPackage::PickLootDrops(FName 
         }
     }
 
-    std::map<UFortWorldItemDefinition*, int32> AmmoMap;
-
     return LootDrops;
 }
 
@@ -383,6 +420,46 @@ public:
     struct FVector                                BounceNormal;                                      // 0x0000(0x000C)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
     uint32                                        SearchAnimationCount;                              // 0x000C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 };
+
+void FortLootPackage::InternalSpawnLoot(FName& TierGroup, FVector Loc) {
+    for (auto& [SupportTierGroup, Redirect] : UWorld::GetWorld()->GetAuthorityGameMode()->GetRedirectAthenaLootTierGroups()) {
+        if (TierGroup.GetComparisonIndex() == SupportTierGroup.GetComparisonIndex()) {
+            TierGroup = Redirect;
+            break;
+        }
+    }
+    
+    for (FNeonLootImproper& Item : PickLootDrops(TierGroup)) {
+        if (!IsValidPointer(Item.ItemDefinition)) {
+            continue;
+        }
+
+        Loc.X += 65 * (rand() % 5);
+        
+        AFortInventory::SpawnPickupDirect(
+            Loc, 
+            Item.ItemDefinition, 
+            Item.Count, 
+            Item.LoadedAmmo, 
+            EFortPickupSourceTypeFlag::Container, 
+            EFortPickupSpawnSource::Unset, 
+            nullptr, 
+            false
+        );
+    }
+}
+
+void FortLootPackage::SpawnFloorLootForContainer(UBlueprintGeneratedClass* ContainerType) {
+    auto Containers = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), ContainerType);
+
+    for (auto& BuildingContainer : Containers) {
+        auto Container = Cast<ABuildingContainer>(BuildingContainer);
+        InternalSpawnLoot(Container->GetSearchLootTierGroup(), Container->K2_GetActorLocation() + Container->GetActorForwardVector() * Container->GetLootSpawnLocation_Athena().X + BuildingContainer->GetActorRightVector() * Container->GetLootSpawnLocation_Athena().Y + BuildingContainer->GetActorUpVector() * Container->GetLootSpawnLocation_Athena().Z);
+        BuildingContainer->K2_DestroyActor();
+    }
+
+    Containers.Free();
+}
 
 bool FortLootPackage::SpawnLoot(ABuildingContainer* Container) {
     auto World = UWorld::GetWorld();
@@ -405,19 +482,17 @@ bool FortLootPackage::SpawnLoot(ABuildingContainer* Container) {
             break;
         }
     }
-
-    FVector BaseLocation = Container->GetActorLocation();
-    FVector OffsetLocation = BaseLocation + 
-                           (Container->GetActorForwardVector() * Container->GetLootSpawnLocation_Athena().X) + 
-                           (Container->GetActorRightVector() * Container->GetLootSpawnLocation_Athena().Y) + 
-                           (Container->GetActorUpVector() * Container->GetLootSpawnLocation_Athena().Z);
+    
     for (FNeonLootImproper& Item : PickLootDrops(LootTierGroupToUse)) {
         if (!IsValidPointer(Item.ItemDefinition)) {
             continue;
         }
+
+        FVector Loc = Container->K2_GetActorLocation() + Container->GetActorRightVector() * 70.f + FVector{ 0, 0, 50 };
+        UE_LOG(LogNeon, Log, "Spawning loot %s at %f %f %f", Item.ItemDefinition->GetFName().ToString().ToString().c_str(), Loc.X, Loc.Y, Loc.Z);
         
         AFortInventory::SpawnPickupDirect(
-            OffsetLocation, 
+            Loc, 
             Item.ItemDefinition, 
             Item.Count, 
             Item.LoadedAmmo, 

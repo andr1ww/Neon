@@ -97,6 +97,9 @@ public:
 class UFortGameFeatureData : public UGameFeatureData
 {
 public:
+    typedef TMap<struct FGameplayTag, struct FFortGameFeatureLootTableData> AnotherMap;
+    DEFINE_MEMBER(AnotherMap, UFortGameFeatureData, PlaylistOverrideLootTableData);
+public:
     DECLARE_STATIC_CLASS(UFortGameFeatureData)
     DECLARE_DEFAULT_OBJECT(UFortGameFeatureData)
 };
@@ -104,8 +107,8 @@ public:
 struct FFortGameFeatureLootTableData final
 {
 public:
-    DEFINE_PTR(UDataTable, FFortGameFeatureLootTableData, LootTierData);
-    DEFINE_PTR(UDataTable, FFortGameFeatureLootTableData, LootPackageData);
+    DEFINE_MEMBER(TSoftObjectPtr<UDataTable>, FFortGameFeatureLootTableData, LootTierData);
+    DEFINE_MEMBER(TSoftObjectPtr<UDataTable>, FFortGameFeatureLootTableData, LootPackageData);
 };
 
 enum class EFortQuickBars : uint8
@@ -142,4 +145,6 @@ namespace FortLootPackage
     void SetupLootGroups(AFortGameStateAthena* GameState);
     TArray<FNeonLootImproper> PickLootDrops(FName TierGroup, int LootTier = -1, int WorldLevel = -1);
     bool SpawnLoot(ABuildingContainer* Container);
+    void SpawnFloorLootForContainer(UBlueprintGeneratedClass* ContainerType);
+    void InternalSpawnLoot(FName& TierGroup, FVector Loc);
 }

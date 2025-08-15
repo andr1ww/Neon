@@ -513,7 +513,7 @@ std::vector<T*> GetObjectsOfClass(UClass* Class = T::StaticClass())
 
 			if (Object)
 			{
-				if (Class == Object->GetClass())
+				if (Object->IsA(Class))
 				{
 					ArrayOfObjects.push_back(Cast<T>((UObject*)Object));
 				}

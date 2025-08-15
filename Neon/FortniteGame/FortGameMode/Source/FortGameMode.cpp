@@ -330,38 +330,20 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             t.detach();
         }
     }
+
+    static bool bSetupLoot = false;
+    if (!bSetupLoot)
+    {
+        FortLootPackage::SpawnFloorLootForContainer(Runtime::StaticLoadObject<UBlueprintGeneratedClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_Warmup.Tiered_Athena_FloorLoot_Warmup_C"));
+        FortLootPackage::SpawnFloorLootForContainer(Runtime::StaticLoadObject<UBlueprintGeneratedClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_01.Tiered_Athena_FloorLoot_01_C"));
+        
+        bSetupLoot = true;
+    }
     
     bool Res = GameMode->GetAlivePlayers().Num() >= GameMode->GetWarmupRequiredPlayerCount();
 
     if (Res)
     {
-        TArray<AActor*> WarmupActors;
-        UClass* WarmupClass = Runtime::StaticLoadObject<UClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_Warmup.Tiered_Athena_FloorLoot_Warmup_C");
-        WarmupActors = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), WarmupClass);
-            
-        for (auto& WarmupActor : WarmupActors)
-        {
-            auto Container = (ABuildingContainer*)WarmupActor;
-
-            Container->BP_SpawnLoot(nullptr);
-
-            Container->K2_DestroyActor();
-        }
-        WarmupActors.Free();
-
-        WarmupClass = Runtime::StaticLoadObject<UClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_01.Tiered_Athena_FloorLoot_01_C");
-        WarmupActors = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), WarmupClass);
-
-        for (auto& WarmupActor : WarmupActors)
-        {
-            auto Container = (ABuildingContainer*)WarmupActor;
-
-            Container->BP_SpawnLoot(nullptr);
-
-            Container->K2_DestroyActor();
-        }
-        WarmupActors.Free();
-
         TArray<AActor*> VehicleSpawners = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), AFortAthenaVehicleSpawner::StaticClass());
         for (auto& VehicleSpawner : VehicleSpawners)
         {

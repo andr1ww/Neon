@@ -238,8 +238,18 @@ AFortPickupAthena* AFortInventory::SpawnPickupDirect(FVector Loc, UFortItemDefin
         NewPickup->GetPrimaryPickupItemEntry().SetLoadedAmmo(LoadedAmmo);
         NewPickup->GetPrimaryPickupItemEntry().SetCount(Count);
         NewPickup->OnRep_PrimaryPickupItemEntry();
-        
-        NewPickup->CallFunc<void>("FortPickup", "TossPickup", Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
+
+        if (Pawn == nullptr)
+        {
+            FVector RandomOffset = FVector((rand() % 201 - 100), (rand() % 201 - 100), (rand() % 101 - 50));
+            FVector RandomLoc = Loc + RandomOffset;
+            NewPickup->TossPickup(RandomLoc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
+            NewPickup->SetbTossedFromContainer(SpawnSource == EFortPickupSpawnSource::Chest || SpawnSource == EFortPickupSpawnSource::AmmoBox);
+            if (NewPickup->GetbTossedFromContainer()) NewPickup->OnRep_TossedFromContainer();
+        } else
+        {
+            NewPickup->TossPickup(Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
+        }
     }
     
     return NewPickup;

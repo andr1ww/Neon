@@ -150,6 +150,7 @@ void InitNullsAndRetTrues() {
 		Runtime::Hook(IMAGEBASE + 0x2ebf890, ProcessEvent, (void**)&ProcessEventOG); 
 		Runtime::Hook(IMAGEBASE + 0x2E688D0, RetTrue); // server context
 		Runtime::Hook(IMAGEBASE + 0x3F88350, RetTrue); // IsThereAnywhereToBuildNavigation
+		Runtime::Hook(IMAGEBASE + 0x2092EA0, UFortQuestManager::SendStatEventWithTags, (void**)&UFortQuestManager::SendStatEventWithTagsOG);
 	}
 
 	if (Fortnite_Version != 22.4)
@@ -261,7 +262,7 @@ void Main()
 		WorldName = L"open Asteria_Terrain";
 	}
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAthenaBots VeryVerbose", nullptr);
-	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogNavigation VeryVerbose", nullptr);
+//	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogNavigation VeryVerbose", nullptr);
 
 	ExecuteConsoleCommand(UWorld::GetWorld(), WorldName, nullptr);
 	if (Fortnite_Version >= 19.10)
@@ -295,7 +296,7 @@ void Main()
 	Runtime::Hook(Finder->SendComplexCustomStatEvent(), UFortQuestManager::SendComplexCustomStatEvent, (void**)&UFortQuestManager::SendComplexCustomStatEventOG);
 	Runtime::Hook(Finder->ClientOnPawnDied(), AFortPlayerControllerAthena::ClientOnPawnDied, (void**)&AFortPlayerControllerAthena::ClientOnPawnDiedOG);
 	Runtime::VFTHook(UAthenaNavSystem::GetDefaultObj()->GetVTable(), 0x53, UFortServerBotManagerAthena::InitializeForWorld, (void**)&UFortServerBotManagerAthena::InitializeForWorldOG);
-	Runtime::Hook(Finder->SpawnLoot(), FortLootPackage::SpawnLoot);
+//	Runtime::Hook(Finder->SpawnLoot(), FortLootPackage::SpawnLoot);
 	Runtime::VFTHook(StaticClassImpl("FortPlayerPawnAthena")->GetClassDefaultObject()->GetVTable(), 0x119, AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues, (void**)&AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCuesOG);
 	Runtime::Hook(Finder->ReloadWeapon(), AFortPlayerPawn::ReloadWeapon, (void**)&AFortPlayerPawn::ReloadWeaponOG); // this is right um we can make it uni after we get it to fucking call 
 	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);

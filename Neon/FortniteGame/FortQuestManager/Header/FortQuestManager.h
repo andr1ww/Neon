@@ -434,6 +434,14 @@ public:
 	
     static void SendStatEvent(UFortQuestManager* QuestManager, UObject* TargetObj, FGameplayTagContainer& SourceTags, FGameplayTagContainer& TargetTags, bool* QuestActive, bool* QuestCompleted, int32 Count, EFortQuestObjectiveStatEvent StatEvent);
     DefHookOg(void, SendComplexCustomStatEvent, UFortQuestManager* QuestManager, UObject* TargetObj, FGameplayTagContainer& SourceTags, FGameplayTagContainer& TargetTags, bool* QuestActive, bool* QuestCompleted, int32 Count);
+	DefHookOg(void, SendStatEventWithTags, 
+		UFortQuestManager*,
+		EFortQuestObjectiveStatEvent Type,
+		UObject *TargetObject,
+	 FGameplayTagContainer& TargetTags,
+		 FGameplayTagContainer& SourceTags,
+		 FGameplayTagContainer& ContextTags,
+		int Count);
 public:
 	DEFINE_MEMBER(TArray<UFortQuestItem*>, UFortQuestManager, CurrentQuests); 
 	DECLARE_STATIC_CLASS(UFortQuestManager)
