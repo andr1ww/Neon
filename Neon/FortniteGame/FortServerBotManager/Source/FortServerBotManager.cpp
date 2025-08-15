@@ -249,9 +249,7 @@ void UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem(UAthenaNavS
     ModuleConfig->bAutoSpawnMissingNavData = true;
     ModuleConfig->bAllowAutoRebuild = true;
     ModuleConfig->bSupportRuntimeNavmeshDisabling = false; // main fixes for nav
-
     ModuleConfig->bUsesStreamedInNavLevel = true;
-    ModuleConfig->bLazyOctree = true;
     
     return CreateAndConfigureNavigationSystemOG(ModuleConfig, World);
 }
