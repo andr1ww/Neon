@@ -183,7 +183,6 @@ void AFortPlayerPawn::GiveItemToInventoryOwner(UObject* Object, FFrame& Stack) {
 }
 
 
-static void (*ReloadWeaponOG)(AFortWeapon* Weapon, int32 AmmoToRemove);
 void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
 {
     if (!Weapon || AmmoToRemove <= 0)
@@ -249,6 +248,8 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
 
     WeaponEntry->SetLoadedAmmo(WeaponEntry->GetLoadedAmmo() + AmmoToRemove);
     AFortInventory::ReplaceEntry(PC, *WeaponEntry);
+
+    return ReloadWeaponOG(Weapon, AmmoToRemove);
 }
 
 void AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues(AFortPlayerPawn* Pawn, FAthenaBatchedDamageGameplayCues_Shared SharedData, FAthenaBatchedDamageGameplayCues_NonShared NonSharedData)

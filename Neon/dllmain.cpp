@@ -261,6 +261,7 @@ void Main()
 		WorldName = L"open Asteria_Terrain";
 	}
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAthenaBots VeryVerbose", nullptr);
+	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogNavigation VeryVerbose", nullptr);
 
 	ExecuteConsoleCommand(UWorld::GetWorld(), WorldName, nullptr);
 	if (Fortnite_Version >= 19.10)

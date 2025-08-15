@@ -204,8 +204,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     UE_LOG(LogNeon, Log, "Enabling LateGame");
                     Config::bLateGame = true;
                 }
-
-   
                 
                 if (Playlist)
                 {
@@ -363,9 +361,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             Container->K2_DestroyActor();
         }
         WarmupActors.Free();
-
-        static void (*Build)(UNavigationSystemV1* System) = decltype(Build)(IMAGEBASE + 0x48C50C0);
-        Build(UWorld::GetWorld()->GetNavigationSystem());
     }
     
     if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && Res)

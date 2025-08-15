@@ -123,7 +123,6 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
         BYTE TrueByte = 1;
         BYTE FalseByte = 0;
         BotManagerSetup(__int64(BotManager), __int64(Ret), __int64(BotData->GetBehaviorTree()), 0, &CustomSquadId, 0, __int64(BotData->GetStartupInventory()), __int64(BotData->GetBotNameSettings()), 0, &FalseByte, 0, &TrueByte, RuntimeBotData);
-
         
         if (BotData->GetFName().ToString().ToString().contains("MANG"))
         {
@@ -249,11 +248,15 @@ void UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem(UAthenaNavS
     ModuleConfig->bPrioritizeNavigationAroundSpawners = true;
     ModuleConfig->bAutoSpawnMissingNavData = true;
     ModuleConfig->bAllowAutoRebuild = true;
-    ModuleConfig->bSupportRuntimeNavmeshDisabling = false;
-    ModuleConfig->bDiscardNavDataFromSublevels = false;
+    ModuleConfig->bSupportRuntimeNavmeshDisabling = false; // main fixes for nav
+    
+    ModuleConfig->bDiscardNavDataFromSublevels = false; // attempts to fix empty tile
     ModuleConfig->bSpawnNavDataInNavBoundsLevel = true;
     ModuleConfig->bUsesStreamedInNavLevel = true;
     ModuleConfig->bUseBuildingGridAsNavigableSpace = true;
+    ModuleConfig->bResetDirtyAreasOnInitialBuildingRelease = true;
+    ModuleConfig->bRebuildOnInitialUnlock = true;
+    
     
     return CreateAndConfigureNavigationSystemOG(ModuleConfig, World);
 }

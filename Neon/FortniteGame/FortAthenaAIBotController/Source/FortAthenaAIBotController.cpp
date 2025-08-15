@@ -168,18 +168,18 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
 {
     if (Controller->GetPawn() && InstigatedBy)
     {
-        AFortInventory* PCInventory = Controller->GetInventory();
+	    AFortInventory* PCInventory = Controller->GetInventory();
         
-        if (PCInventory != nullptr)
-        {
-            FFortItemList& Inventory = PCInventory->GetInventory();
-            TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
-            for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); ++i)
-            {
-				UFortWorldItemDefinition* WorldItem = (UFortWorldItemDefinition*)ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemDefinition();
-				if (WorldItem && WorldItem->GetbCanBeDropped()) {
-					AFortInventory::SpawnPickupDirect(
-						Controller->GetActorLocation(),
+    	if (PCInventory != nullptr)
+    	{
+    		FFortItemList& Inventory = PCInventory->GetInventory();
+    		TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
+    		for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); ++i)
+    		{
+    			UFortWorldItemDefinition* WorldItem = (UFortWorldItemDefinition*)ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemDefinition();
+    			if (WorldItem && WorldItem->GetbCanBeDropped()) {
+    				AFortInventory::SpawnPickupDirect(
+						Controller->K2_GetActorLocation(),
 						WorldItem,
 						ItemInstancesOffsetPtr[i]->GetItemEntry().GetCount(),
 						0,
@@ -187,32 +187,9 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
 						EFortPickupSpawnSource::Unset,
 						InstigatedBy->GetMyFortPawn()
 					);
-				}
-            }
-        }
-        else
-        {
-        	UFortAthenaAIBotInventoryItems* StartupInventory = FBotInventory::GetInventory(Controller);
-        	if (StartupInventory != nullptr)
-            {
-                for (int32 i = 0; i < StartupInventory->GetItems().Num(); i++) 
-                {
-                    UFortItemDefinition* ItemDef = StartupInventory->GetItems()[i];
-                    if (ItemDef)
-                    {
-                        AFortInventory::SpawnPickup(
-                            Controller->GetActorLocation(), 
-                            ItemDef, 
-                            1, 
-                            30, 
-                            EFortPickupSourceTypeFlag::Tossed, 
-                            EFortPickupSpawnSource::Unset,
-                            InstigatedBy->GetMyFortPawn()
-                        );
-                    }
-                }
-            }
-        }
+    			}
+    		}
+    	}
     }
 
 	FBotInventory::RemoveInventory(Controller);

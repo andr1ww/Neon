@@ -445,6 +445,7 @@ public:
 class UNavigationSystemV1 : public UObject
 {
 public:
+    DEFINE_BOOL(UNavigationSystemV1, bSpawnNavDataInNavBoundsLevel)
     DEFINE_MEMBER(FNavAgentSelector, UNavigationSystemV1, SupportedAgentsMask);
     DEFINE_MEMBER(TArray<FNavDataConfig>, UNavigationSystemV1, SupportedAgents);
     DEFINE_BOOL(UNavigationSystemV1, bAutoCreateNavigationData);
