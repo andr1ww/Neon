@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortServerBotManager/Source/FortServerBotManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortServerBotManager/Source/FortServerBotManager.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -81,7 +80,7 @@
       <workItem from="1755141986820" duration="6368000" />
       <workItem from="1755170582276" duration="13400000" />
       <workItem from="1755216575352" duration="5753000" />
-      <workItem from="1755257209217" duration="4892000" />
+      <workItem from="1755257209217" duration="5275000" />
     </task>
     <servers />
   </component>
