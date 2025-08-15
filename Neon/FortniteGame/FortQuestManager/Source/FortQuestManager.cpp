@@ -292,7 +292,7 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 						{
 						case EInlineObjectiveStatTagCheckEntryType::Target:
 							{
-								if (!ObjectiveStat->GetbHsaInclusiveTargetTags())
+								if (!ObjectiveStat->GetbHasInclusiveTargetTags())
 									break;
 
 								if (!TargetTags.HasTag(TagCondition->GetTag()))
@@ -386,20 +386,49 @@ void UFortQuestManager::SendStatEventWithTags(UFortQuestManager* QuestManager, E
 	QuestManager = Controller->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1);
 
 	static int CurrentPlaylistInfoOffset = Runtime::GetOffset(UWorld::GetWorld()->GetGameState(), "CurrentPlaylistInfo");
-            
+           
 	FPlaylistPropertyArray& CurrentPlaylistInfoPtr = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(UWorld::GetWorld()->GetGameState()) + CurrentPlaylistInfoOffset);
-	
+   
 	ContextTags.AppendTags(CurrentPlaylistInfoPtr.GetBasePlaylist()->GetGameplayTagContainer());
-	SourceTags.AppendTags(SourceTags);
 
+/*	for (auto& TargetTagGameplayTags : TargetTags.GameplayTags)
+	{
+		UE_LOG(LogNeon, Log, "TargetTagGameplayTags: %s", TargetTagGameplayTags.TagName.ToString().ToString().c_str());
+	}
+
+	for (auto& TargetTagParentTags : TargetTags.ParentTags)
+	{
+		UE_LOG(LogNeon, Log, "TargetTagParentTags: %s", TargetTagParentTags.TagName.ToString().ToString().c_str());
+	}
+
+	for (auto& SourceTagGameplayTags : SourceTags.GameplayTags)
+	{
+		UE_LOG(LogNeon, Log, "SourceTagGameplayTags: %s", SourceTagGameplayTags.TagName.ToString().ToString().c_str());
+	}
+
+	for (auto& SourceTagParentTags : SourceTags.ParentTags)
+	{
+		UE_LOG(LogNeon, Log, "SourceTagParentTags: %s", SourceTagParentTags.TagName.ToString().ToString().c_str());
+	}
+
+	for (auto& ContextTagGameplayTags : ContextTags.GameplayTags)
+	{
+		UE_LOG(LogNeon, Log, "ContextTagGameplayTags: %s", ContextTagGameplayTags.TagName.ToString().ToString().c_str());
+	}
+
+	for (auto& ContextTagParentTags : ContextTags.ParentTags)
+	{
+		UE_LOG(LogNeon, Log, "ContextTagParentTags: %s", ContextTagParentTags.TagName.ToString().ToString().c_str());
+	}
+*/
 	auto& CurrentQuests = QuestManager->GetCurrentQuests();
 	for (int i = 0; i < CurrentQuests.Num(); i++)
 	{
 		if (!CurrentQuests.IsValidIndex(i) || !CurrentQuests[i])
 			continue;
-			
+   		
 		auto CurrentQuest = CurrentQuests[i];
-		
+   	
 		if (CurrentQuest->HasCompletedQuest())
 			continue;
 
@@ -410,16 +439,16 @@ void UFortQuestManager::SendStatEventWithTags(UFortQuestManager* QuestManager, E
 
 		if (QuestManager->HasCompletedQuest(QuestDef))
 			continue;
-				
+   			
 		auto& Objectives = QuestDef->GetObjectives();
 		static int32 FFortMcpQuestObjectiveInfoSize = StaticClassImpl("FortMcpQuestObjectiveInfo")->GetSize();
 		for (int j = 0; j < Objectives.Num(); j++)
 		{
 			if (!Objectives.IsValidIndex(j))
 				continue;
-				
+   			
 			FFortMcpQuestObjectiveInfo* Objective = (FFortMcpQuestObjectiveInfo*)((uint8*)Objectives.GetData() + (j * FFortMcpQuestObjectiveInfoSize));
-			
+   		
 			if (QuestManager->HasCompletedObjectiveWithName(QuestDef, Objective->GetBackendName()) ||
 					QuestManager->HasCompletedObjective(QuestDef, Objective->GetObjectiveStatHandle()) ||
 					CurrentQuest->HasCompletedObjectiveWithName(Objective->GetBackendName()) ||
@@ -427,8 +456,7 @@ void UFortQuestManager::SendStatEventWithTags(UFortQuestManager* QuestManager, E
 			{
 				continue;
 			}
-				
-					
+   			
 			auto StatTable = Objective->GetObjectiveStatHandle().DataTable;
 			auto& StatRowName = Objective->GetObjectiveStatHandle().GetRowName();
 
@@ -440,80 +468,95 @@ void UFortQuestManager::SendStatEventWithTags(UFortQuestManager* QuestManager, E
 				{
 					if (!InlineStats.IsValidIndex(k))
 						continue;
-						
+   					
 					FFortQuestObjectiveStat* ObjectiveStat = (FFortQuestObjectiveStat*)((uint8*)InlineStats.GetData() + (k * FFortQuestObjectiveStatSize));
-					
+   				
 					if (ObjectiveStat->GetType() != Type)
 						continue;
+
 					bool bFoundQuest = true; 
+					bool bHasRequiredTargetTags = false;
+					bool bHasRequiredSourceTags = false;
+					bool bHasRequiredContextTags = false;
 
 					auto& TagConditions = ObjectiveStat->GetTagConditions();
 					static int32 FInlineObjectiveStatTagCheckEntrySize = StaticClassImpl("InlineObjectiveStatTagCheckEntry")->GetSize();
+   				
 					for (int l = 0; l < TagConditions.Num(); l++)
 					{
 						if (!TagConditions.IsValidIndex(l))
 							continue;
-							
+   						
 						FInlineObjectiveStatTagCheckEntry* TagCondition = (FInlineObjectiveStatTagCheckEntry*)((uint8*)TagConditions.GetData() + (l * FInlineObjectiveStatTagCheckEntrySize));
-						
-						if (!TagCondition->GetRequire() || !bFoundQuest)
+   					
+						if (!TagCondition->GetRequire())
 							continue;
 
 						switch (TagCondition->GetType())
 						{
 						case EInlineObjectiveStatTagCheckEntryType::Target:
 							{
-								if (!ObjectiveStat->GetbHsaInclusiveTargetTags())
-									break;
-
-								if (!TargetTags.HasTag(TagCondition->GetTag()))
+								if (ObjectiveStat->GetbHasInclusiveTargetTags()) 
 								{
-									bFoundQuest = false;
+									if (TargetTags.HasTag(TagCondition->GetTag()))
+									{
+										bHasRequiredTargetTags = true;
+									}
+									else
+									{
+										bFoundQuest = false;
+									}
 								}
-								
 								break;
 							}
 						case EInlineObjectiveStatTagCheckEntryType::Source:
 							{
-								if (!ObjectiveStat->GetbHasInclusiveSourceTags())
-									break;
-
-								if (!SourceTags.HasTag(TagCondition->GetTag()))
+								if (ObjectiveStat->GetbHasInclusiveSourceTags())
 								{
-									bFoundQuest = false;
+									if (SourceTags.HasTag(TagCondition->GetTag()))
+									{
+										bHasRequiredSourceTags = true;
+									}
+									else
+									{
+										bFoundQuest = false;
+									}
 								}
-
 								break;
 							}
 						case EInlineObjectiveStatTagCheckEntryType::Context:
 							{
-								if (!ObjectiveStat->GetbHasInclusiveContextTags())
-									break;
-
-								if (!ContextTags.HasTag(TagCondition->GetTag()))
+								if (ObjectiveStat->GetbHasInclusiveContextTags())
 								{
-									bFoundQuest = false;
+									if (ContextTags.HasTag(TagCondition->GetTag()))
+									{
+										bHasRequiredContextTags = true;
+									}
+									else
+									{
+										bFoundQuest = false;
+									}
 								}
-
-								break;
-							}
-						case EInlineObjectiveStatTagCheckEntryType::EInlineObjectiveStatTagCheckEntryType_MAX:
-							{
 								break;
 							}
 						default:
 							break;
 						}
+   					
+						if (!bFoundQuest)
+							break;
 					}
 
-					if (ObjectiveStat->GetType() != Type)
-					{
-						bFoundQuest = false;
-					}
+					if (ObjectiveStat->GetbHasInclusiveTargetTags() && !bHasRequiredTargetTags)
+						continue;
+					if (ObjectiveStat->GetbHasInclusiveSourceTags() && !bHasRequiredSourceTags)
+						continue;
+					if (ObjectiveStat->GetbHasInclusiveContextTags() && !bHasRequiredContextTags)
+						continue;
 
 					if (bFoundQuest)
 					{
-						ProgressQuest(Controller, QuestManager, CurrentQuest, QuestDef, Objective, Objective->GetCount() + 1);
+						ProgressQuest(Controller, QuestManager, CurrentQuest, QuestDef, Objective, Objective->GetCount() + Count);
 						UE_LOG(LogNeon, Log, "BackendName: %s", Objective->GetBackendName().ToString().ToString().c_str());
 					}
 				}
@@ -531,15 +574,19 @@ void UFortQuestManager::SendStatEventWithTags(UFortQuestManager* QuestManager, E
 						if (Row->GetType() != Type)
 							continue;
 
-						if (!TargetTags.HasAll(Row->GetTargetTagContainer()))
+						auto& RequiredTargetTags = Row->GetTargetTagContainer();
+						if (RequiredTargetTags.GameplayTags.Num() > 0 && !TargetTags.HasAll(RequiredTargetTags))
 							continue;
 
-						if (!SourceTags.HasAll(Row->GetSourceTagContainer()))
+						auto& RequiredSourceTags = Row->GetSourceTagContainer();
+						if (RequiredSourceTags.GameplayTags.Num() > 0 && !SourceTags.HasAll(RequiredSourceTags))
 							continue;
 
-						if (!ContextTags.HasAll(Row->GetContextTagContainer()))
+						auto& RequiredContextTags = Row->GetContextTagContainer();
+						if (RequiredContextTags.GameplayTags.Num() > 0 && !ContextTags.HasAll(RequiredContextTags))
 							continue;
-						ProgressQuest(Controller, QuestManager, CurrentQuest, QuestDef, Objective, Objective->GetCount() + 1);
+
+						ProgressQuest(Controller, QuestManager, CurrentQuest, QuestDef, Objective, Objective->GetCount() + Count);
 						UE_LOG(LogNeon, Log, "BackendName: %s", Objective->GetBackendName().ToString().ToString().c_str());
 					}
 				}

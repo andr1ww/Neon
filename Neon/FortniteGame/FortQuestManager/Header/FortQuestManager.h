@@ -124,7 +124,7 @@ struct FFortQuestObjectiveStat
 {
 	DEFINE_MEMBER(TArray<struct FInlineObjectiveStatTagCheckEntry>, FFortQuestObjectiveStat, TagConditions);
 	DEFINE_MEMBER(EFortQuestObjectiveStatEvent, FFortQuestObjectiveStat, Type);
-	DEFINE_BOOL(FFortQuestObjectiveStat, bHsaInclusiveTargetTags);
+	DEFINE_BOOL(FFortQuestObjectiveStat, bHasInclusiveTargetTags);
 	DEFINE_BOOL(FFortQuestObjectiveStat, bHasInclusiveSourceTags);
 	DEFINE_BOOL(FFortQuestObjectiveStat, bHasInclusiveContextTags);
 };
