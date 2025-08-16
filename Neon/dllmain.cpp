@@ -24,12 +24,12 @@ static void* (*ProcessEventOG)(UObject*, UFunction*, void*);
 void* ProcessEvent(UObject* Obj, UFunction* Function, void* Params)
 {
 	if (Function && Config::bLogProcessEvent) {
-		UE_LOG(LogNeon, Log, "ProcessEvent: %s", Function->GetFName().ToString().ToString().c_str());
+		static std::ofstream logFile("ProcessEvent.log", std::ios::app);
+		logFile << "ProcessEvent: " << Function->GetFName().ToString().ToString().c_str() << std::endl;
 	}
 
 	return ProcessEventOG(Obj, Function, Params);
 }
-
 
 inline bool IsInFrontend()
 {
@@ -125,6 +125,27 @@ void InitNullsAndRetTrues() {
 		Runtime::VFTHook(AFortGameModeAthena::GetDefaultObj()->GetVTable(), 0xD3, FortGameSessionDedicated::GetGameSessionClass);
 		FuncsTo85.push_back(Memcury::Scanner::FindPattern("0F 84 ? ? ? ? 48 8B CF E8 ? ? ? ? 48 8B 4E").Get());
 		RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B D9 4D 8B F1").Get());
+	}
+
+	if (Engine_Version == 421 || Engine_Version == 422)
+		RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("4C 89 4C 24 20 55 56 57 41 56 48 8D 6C 24 D1").Get());
+
+	auto Addrr = Memcury::Scanner::FindStringRef(L"CanActivateAbility %s failed, blueprint refused", true, 0, Engine_Version >= 500).Get();
+
+	if (Addrr)
+	{
+		for (int i = 0; i < 2000; i++)
+		{
+			if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(Addrr - i + 2) == 0x5C)
+			{
+				RetTrueFuncs.push_back(Addrr - i);
+			}
+
+			if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x8B && *(uint8_t*)(uint8_t*)(Addrr - i + 2) == 0xC4)
+			{
+				RetTrueFuncs.push_back(Addrr - i);
+			}
+		}
 	}
 	
 	for (auto& Func : NullFuncs) {
@@ -296,7 +317,8 @@ void Main()
 	Runtime::Hook(Finder->SendComplexCustomStatEvent(), UFortQuestManager::SendComplexCustomStatEvent, (void**)&UFortQuestManager::SendComplexCustomStatEventOG);
 	Runtime::Hook(Finder->ClientOnPawnDied(), AFortPlayerControllerAthena::ClientOnPawnDied, (void**)&AFortPlayerControllerAthena::ClientOnPawnDiedOG);
 	Runtime::VFTHook(UAthenaNavSystem::GetDefaultObj()->GetVTable(), 0x53, UFortServerBotManagerAthena::InitializeForWorld, (void**)&UFortServerBotManagerAthena::InitializeForWorldOG);
-//	Runtime::Hook(Finder->SpawnLoot(), FortLootPackage::SpawnLoot);
+	Runtime::Hook(Finder->ServerOnAttemptInteract(), FortLootPackage::ServerOnAttemptInteract);
+	//	Runtime::Hook(Finder->SpawnLoot(), FortLootPackage::SpawnLoot);
 	Runtime::VFTHook(StaticClassImpl("FortPlayerPawnAthena")->GetClassDefaultObject()->GetVTable(), 0x119, AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues, (void**)&AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCuesOG);
 	Runtime::Hook(Finder->ReloadWeapon(), AFortPlayerPawn::ReloadWeapon, (void**)&AFortPlayerPawn::ReloadWeaponOG); // this is right um we can make it uni after we get it to fucking call 
 	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);

@@ -150,6 +150,10 @@ public:
     uint64 OnRep_ZiplineState();
 
     uint64 PickTeam();
+
+    uint64 ServerOnAttemptInteract();
+
+    uint64 OnPlayImpactFX();
 };
 
 inline UFinder* Finder = new UFinder();

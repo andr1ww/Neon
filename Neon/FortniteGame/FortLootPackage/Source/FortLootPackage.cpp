@@ -461,6 +461,41 @@ void FortLootPackage::SpawnFloorLootForContainer(UBlueprintGeneratedClass* Conta
     Containers.Free();
 }
 
+bool FortLootPackage::ServerOnAttemptInteract(ABuildingContainer* Container, FInteractionType Type)
+{
+    if (!Container) return false;
+
+    auto Containers = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), Container->GetClass());
+    
+    if (Container->GetbAlreadySearched())
+        return true;
+
+    ABuildingContainer* TargetContainer = nullptr;
+    
+    for (auto* ContainerActor : Containers)
+    {
+        if (ContainerActor == Container)
+        {
+            TargetContainer = (ABuildingContainer*)ContainerActor;
+            break;
+        }
+    }
+
+    if (!TargetContainer)
+        TargetContainer = Container;
+
+    auto SpawnLocation = TargetContainer->K2_GetActorLocation() + TargetContainer->GetActorRightVector() * 70.f + FVector{ 0, 0, 50 };
+    UE_LOG(LogNeon, Log, "SpawnLocation: X=%f Y=%f Z=%f", SpawnLocation.X, SpawnLocation.Y, SpawnLocation.Z);
+    InternalSpawnLoot(TargetContainer->GetSearchLootTierGroup(), SpawnLocation);
+    
+    TargetContainer->SetbAlreadySearched(true);
+    TargetContainer->CallFunc<void>("BuildingContainer", "OnRep_bAlreadySearched");
+    TargetContainer->Get<FFortSearchBounceData>("BuildingContainer", "SearchBounceData").SearchAnimationCount++;
+    TargetContainer->CallFunc<void>("BuildingContainer", "BounceContainer");
+
+    return true;
+}
+
 bool FortLootPackage::SpawnLoot(ABuildingContainer* Container) {
     auto World = UWorld::GetWorld();
     if (!World) {

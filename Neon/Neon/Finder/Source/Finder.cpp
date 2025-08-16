@@ -1371,3 +1371,40 @@ uint64 UFinder::PickTeam()
 
     return FindBytes(Addr, Fortnite_Version <= 4.1 ? std::vector<uint8_t>{ 0x48, 0x89, 0x6C } : std::vector<uint8_t>{ 0x40, 0x55 }, 1000, 0, true);
 }
+
+uint64 UFinder::ServerOnAttemptInteract()
+{
+    if (Fortnite_Version <= 14.40 && Fortnite_Version >= 12.00)
+    {
+        return Memcury::Scanner::FindPattern("40 55 53 56 57 41 56 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8D B9 ? ? ? ? 48 8B F1").Get();
+    }
+}
+
+uint64 UFinder::OnPlayImpactFX()
+{
+    auto OnPlayImpactFXStringRef = Memcury::Scanner::FindStringRef(L"OnPlayImpactFX", true, 0);
+    __int64 OnPlayImpactFXAddr = 0;
+
+    if (OnPlayImpactFXStringRef.Get())
+    {
+        auto OnPlayImpactFXFunctionPtr = OnPlayImpactFXStringRef.ScanFor({ 0x48, 0x8D, 0x0D }).RelativeOffset(3).GetAs<void*>();
+        auto OnPlayImpactFXPtrRef = Memcury::Scanner::FindPointerRef(OnPlayImpactFXFunctionPtr).Get();
+
+        for (int i = 0; i < 2000; i++)
+        {
+            if (*(uint8_t*)(uint8_t*)(OnPlayImpactFXPtrRef - i) == 0x48 && *(uint8_t*)(uint8_t*)(OnPlayImpactFXPtrRef - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(OnPlayImpactFXPtrRef - i + 2) == 0x5C)
+            {
+                OnPlayImpactFXAddr = OnPlayImpactFXPtrRef - i;
+                break;
+            }
+
+            if (*(uint8_t*)(uint8_t*)(OnPlayImpactFXPtrRef - i) == 0x4C && *(uint8_t*)(uint8_t*)(OnPlayImpactFXPtrRef - i + 1) == 0x8B && *(uint8_t*)(uint8_t*)(OnPlayImpactFXPtrRef - i + 2) == 0xDC)
+            {
+                OnPlayImpactFXAddr = OnPlayImpactFXPtrRef - i;
+                break;
+            }
+        }
+    }
+
+    return OnPlayImpactFXAddr;
+}

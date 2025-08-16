@@ -185,7 +185,8 @@ void AFortPlayerPawn::GiveItemToInventoryOwner(UObject* Object, FFrame& Stack) {
 
 void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
 {
-    if (!Weapon || AmmoToRemove <= 0)
+    UE_LOG(LogNeon, Log, "Ok");
+    if (!Weapon)
         return;
 
     AActor* Owner = Weapon->Get<AActor*>("Actor", "Owner");
@@ -210,7 +211,7 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
     FFortItemList& InventoryList = Inventory->GetInventory();
     TArray<UFortWorldItem*>& ItemInstances = InventoryList.GetItemInstances();
 
-    FGuid WeaponGuid = Weapon->Get<FGuid>("FortWeapon", "ItemEntryGuid");
+    FGuid WeaponGuid = Weapon->GetItemEntryGuid();
 
     FFortItemEntry* WeaponEntry = nullptr;
     for (UFortWorldItem* Item : ItemInstances)
@@ -254,22 +255,22 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
 
 void AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues(AFortPlayerPawn* Pawn, FAthenaBatchedDamageGameplayCues_Shared SharedData, FAthenaBatchedDamageGameplayCues_NonShared NonSharedData)
 {
-   
+    UE_LOG(LogNeon, Log, "Ok");
     if (!Pawn)
-        return;
+        return NetMulticast_Athena_BatchedDamageCuesOG(Pawn, SharedData, NonSharedData);
     auto* Controller = Cast<AFortPlayerControllerAthena>(Pawn->GetController());
     if (!Controller)
-        return;
+        return NetMulticast_Athena_BatchedDamageCuesOG(Pawn, SharedData, NonSharedData);
     AFortWeapon* CurrentWeapon = Pawn->GetCurrentWeapon();
     if (!CurrentWeapon)
-        return;
+        return NetMulticast_Athena_BatchedDamageCuesOG(Pawn, SharedData, NonSharedData);
     AFortInventory* Inventory = nullptr;
     if (auto AI = Cast<AFortAthenaAIBotController>(Controller))
         Inventory = AI->GetInventory();
     if (!Inventory)
         Inventory = Controller->GetWorldInventory();
     if (!Inventory)
-        return;
+        return NetMulticast_Athena_BatchedDamageCuesOG(Pawn, SharedData, NonSharedData);
     FGuid WeaponGuid = CurrentWeapon->GetItemEntryGuid();
     FFortItemList& InventoryList = Inventory->GetInventory();
     TArray<UFortWorldItem*>& ItemInstances = InventoryList.GetItemInstances();
@@ -287,14 +288,8 @@ void AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues(AFortPlayerPawn* Paw
         WeaponEntry->SetLoadedAmmo(CurrentWeapon->GetAmmoCount());
         AFortInventory::ReplaceEntry(Controller, *WeaponEntry);
     }
-    if (NetMulticast_Athena_BatchedDamageCuesOG)
-    {
-        NetMulticast_Athena_BatchedDamageCuesOG(Pawn, SharedData, NonSharedData);
-    }
-    else
-    {
-        UE_LOG(LogNeon, Error, TEXT("NetMulticast_Athena_BatchedDamageCuesOG is nullptr!"));
-    }
+
+    return NetMulticast_Athena_BatchedDamageCuesOG(Pawn, SharedData, NonSharedData);
 }
 
 void AFortPlayerPawn::ServerSendZiplineState(AFortPlayerPawn* Pawn, FFrame& Stack)

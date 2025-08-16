@@ -22,6 +22,12 @@ public:
 
 struct FCreateBuildingActorData { uint32_t BuildingClassHandle; FVector BuildLoc; FRotator BuildRot; bool bMirrored; };
 
+struct FHitResult final
+{
+public:
+    uint8_t Padding[0x88]; // 0xe8 on LWC builds
+};
+
 class AFortWeapon : public AActor
 {
 public:
@@ -31,12 +37,6 @@ public:
 public:
     DECLARE_STATIC_CLASS(AFortWeapon)
     DECLARE_DEFAULT_OBJECT(AFortWeapon)
-};
-
-struct FHitResult final
-{
-public:
-	uint8_t Padding[0x88]; // 0xe8 on LWC builds
 };
 
 class ABuildingActor : public AActor
