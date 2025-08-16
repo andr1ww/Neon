@@ -123,6 +123,48 @@ public:
 		this->ProcessEvent(Func, &Params);
 	}
 
+	inline float GetHealth()
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPawn", "GetHealth");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return 0;
+
+		struct Erm final
+		{
+		public:
+			float ReturnValue;
+		} Params;
+		
+		this->ProcessEvent(Func, &Params);
+
+		return Params.ReturnValue;
+	}
+
+	inline float GetShield()
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPawn", "GetShield");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return 0;
+
+		struct Erm final
+		{
+		public:
+			float ReturnValue;
+		} Params;
+		
+		this->ProcessEvent(Func, &Params);
+
+		return Params.ReturnValue;
+	}
+
 	
 	void OnRep_IsDBNO()
 	{
@@ -328,6 +370,13 @@ public:
 	DECLARE_DEFAULT_OBJECT(UGAB_AthenaDBNO_C)
 };
 
+class UFortGameplayAbility : public UObject
+{
+public:
+	DECLARE_STATIC_CLASS(UFortGameplayAbility)
+	DECLARE_DEFAULT_OBJECT(UFortGameplayAbility)
+};
+
 class AFortPlayerPawn : public AFortPawn
 {
 public:
@@ -374,6 +423,19 @@ public:
 	DefHookOg(void, CompletePickupAnimation, AFortPickup* Pickup);
 	DefHookOg(void, GiveItemToInventoryOwner, UObject*, FFrame&);
 	DefHookOg(void, NetMulticast_Athena_BatchedDamageCues, AFortPlayerPawn*, FAthenaBatchedDamageGameplayCues_Shared, FAthenaBatchedDamageGameplayCues_NonShared);
+};
+
+class UGA_Athena_MedConsumable_Parent_C : public UFortGameplayAbility
+{
+public:
+	DEFINE_PTR(AFortPlayerPawn, UGA_Athena_MedConsumable_Parent_C, PlayerPawn);
+	DEFINE_BOOL(UGA_Athena_MedConsumable_Parent_C, HealsHealth)
+	DEFINE_BOOL(UGA_Athena_MedConsumable_Parent_C, HealsShields)
+	DEFINE_MEMBER(float, UGA_Athena_MedConsumable_Parent_C, HealthHealAmount)
+public:
+	DefHookOg(void, Athena_MedConsumable_Triggered, UGA_Athena_MedConsumable_Parent_C* Consumable);
+	DECLARE_STATIC_CLASS(UGA_Athena_MedConsumable_Parent_C)
+	DECLARE_DEFAULT_OBJECT(UGA_Athena_MedConsumable_Parent_C)
 };
 
 class AFortPlayerPawnAthena : public AFortPlayerPawn

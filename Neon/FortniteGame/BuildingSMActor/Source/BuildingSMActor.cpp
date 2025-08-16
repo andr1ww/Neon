@@ -163,5 +163,40 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         }
     }
 
+    if (BuildingActor->GetResourceType() == EFortResourceType::Wood ||
+        BuildingActor->GetResourceType() == EFortResourceType::Stone ||
+        BuildingActor->GetResourceType() == EFortResourceType::Metal)
+    {
+        FGameplayTagContainer SourceTags;
+        FGameplayTagContainer TargetTags;
+        FGameplayTagContainer ContextTags;
+        UFortQuestManager* QuestManager = Controller->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1);
+
+        if (!QuestManager) {
+            UE_LOG(LogNeon, Warning, "QuestManager is null for controller");
+        } else {
+            const WCHAR* ResourceTag = nullptr;
+            switch (BuildingActor->GetResourceType())
+            {
+            case EFortResourceType::Wood:
+                ResourceTag = L"Building.Resource.Wood";
+                break;
+            case EFortResourceType::Stone:
+                ResourceTag = L"Building.Resource.Stone";
+                break;
+            case EFortResourceType::Metal:
+                ResourceTag = L"Building.Resource.Metal";
+                break;
+            }
+        
+            TargetTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(ResourceTag)));
+            SourceTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"Homebase.Class")));
+            ContextTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"Athena.Playlist")));
+            ContextTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"Athena.GameOn")));
+            
+            UFortQuestManager::SendStatEvent(QuestManager, BuildingActor, SourceTags, TargetTags, nullptr, nullptr, ResourceAmount, EFortQuestObjectiveStatEvent::Collect, ContextTags);
+        }
+    }
+
     return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
 }

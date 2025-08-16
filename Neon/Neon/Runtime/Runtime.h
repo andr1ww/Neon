@@ -410,6 +410,28 @@ T* StaticLoadObjectOnly(std::string name) {
 		VirtualProtect(VTable + idx, 8, vpog, &vpog);
 	}
 
+	template<auto ClassFunc, typename T = void*>
+__forceinline void HookStatic(const char* FuncName, void* detour, T& og = nullptrForHook) {
+		UClass* ClassName = ClassFunc();
+		if (!ClassName) return;
+    
+		UObject* DefaultObj = ClassName->GetClassDefaultObject();
+		auto VTable = DefaultObj->GetVTable();
+    
+		UFunction* Function = StaticFindObject<UFunction>(FuncName);
+		if (!Function) return;
+    
+		int idx = GetVTableIndex(Function);
+    
+		if (!std::is_same_v<T, void*>)
+			og = (T)VTable[idx];
+
+		DWORD vpog;
+		VirtualProtect(VTable + idx, 8, PAGE_EXECUTE_READWRITE, &vpog);
+		VTable[idx] = detour;
+		VirtualProtect(VTable + idx, 8, vpog, &vpog);
+	}
+
 	static void Hook(uint64 Address, void* Detour, void** OG = nullptr)
 	{
 		MH_CreateHook(LPVOID(Address), Detour, OG);

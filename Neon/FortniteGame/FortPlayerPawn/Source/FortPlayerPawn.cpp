@@ -252,6 +252,27 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
     return ReloadWeaponOG(Weapon, AmmoToRemove);
 }
 
+void UGA_Athena_MedConsumable_Parent_C::Athena_MedConsumable_Triggered(UGA_Athena_MedConsumable_Parent_C* Consumable)
+{
+    if (!Consumable || (!Consumable->GetHealsShields() && !Consumable->GetHealsHealth()) || !Consumable->GetPlayerPawn())
+        return Athena_MedConsumable_TriggeredOG(Consumable);
+
+    auto PlayerState = Cast<AFortPlayerStateAthena>(Consumable->GetPlayerPawn()->GetPlayerState());
+    auto Handle = PlayerState->GetAbilitySystemComponent()->CallFunc<FGameplayEffectContextHandle>("AbilitySystemComponent", "MakeEffectContext");
+    FGameplayTag Tag{};
+    static auto ShieldCue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Shield.PotionConsumed");
+    static auto HealthCue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Athena.Health.HealUsed");
+    FName CueName = Consumable->GetHealsShields() ? ShieldCue : HealthCue;
+    if (Consumable->GetHealsHealth() && Consumable->GetHealsShields()) {
+        if (Consumable->GetPlayerPawn()->GetHealth() + Consumable->GetHealthHealAmount() <= 100) CueName = HealthCue;
+    }
+    Tag.TagName = CueName;
+    PlayerState->GetAbilitySystemComponent()->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueAdded", Tag, FPredictionKey(), Handle);
+    PlayerState->GetAbilitySystemComponent()->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueExecuted", Tag, FPredictionKey(), Handle);
+
+    return Athena_MedConsumable_TriggeredOG(Consumable);
+}
+
 void AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues(AFortPlayerPawn* Pawn, FAthenaBatchedDamageGameplayCues_Shared SharedData, FAthenaBatchedDamageGameplayCues_NonShared NonSharedData)
 {
     if (!Pawn)

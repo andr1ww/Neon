@@ -574,7 +574,7 @@ void AFortGameModeAthena::StartNewSafeZonePhase(AFortGameModeAthena* GameMode, i
         QuestManager->GetSourceAndContextTags(&SourceTags, &ContextTags);
         
         SourceTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"Athena.Quests.SurviveStormCircles")));
-        UFortQuestManager::SendStatEvent(QuestManager, nullptr, SourceTags, TargetTags, nullptr, nullptr, 1, EFortQuestObjectiveStatEvent::ComplexCustom);
+        UFortQuestManager::SendStatEvent(QuestManager, nullptr, SourceTags, TargetTags, nullptr, nullptr, 1, EFortQuestObjectiveStatEvent::ComplexCustom, ContextTags);
         static UFortAccoladeItemDefinition* NewStormCircle = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeID_SurviveStormCircle.AccoladeID_SurviveStormCircle");
         UFortQuestManager::GiveAccolade(Controller, NewStormCircle);
         if (Config::bLateGame && !bSetupLG)
@@ -634,86 +634,64 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
 EFortTeam AFortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t PreferredTeam, AFortPlayerControllerAthena* Controller)
 {
     static uint8_t CurrentTeam = 3;
-    static uint8_t PlayersOnCurTeam = 0;
-    
     uint8_t ret = CurrentTeam;
     std::string PlayerName = Controller->GetPlayerState()->GetPlayerName().ToString();
     static std::string TeamsJson = "";
-    bool playerHasTeam = false;
-    
+
     if (TeamsJson == "")
     {
         TeamsJson = Nexa::Curl::Get("http://147.93.1.220:2087/nxa/echo/session/list/teams/" + Config::Echo::Session);
     }
 
     static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameMode->GetGameState(), "CurrentPlaylistInfo");
-    FPlaylistPropertyArray& CurrentPlaylistInfo = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameMode->GetGameState()) + CurrentPlaylistInfoOffset);
-    
+    FPlaylistPropertyArray& CurrentPlaylistInfo = *reinterpret_cast<FPlaylistPropertyArray*>((__int64)GameMode->GetGameState() + CurrentPlaylistInfoOffset);
+
     if (!TeamsJson.empty())
     {
-        try 
+        try
         {
             auto teamsArray = nlohmann::json::parse(TeamsJson);
-            
+
+            static std::map<size_t, uint8_t> teamIndexToGameTeam;
+            static std::map<uint8_t, int> playersOnTeam;
+
             for (size_t teamIndex = 0; teamIndex < teamsArray.size(); ++teamIndex)
             {
                 const auto& team = teamsArray[teamIndex];
-                
-                bool playerInTeam = false;
+
                 for (const auto& member : team)
                 {
                     if (member.get<std::string>() == PlayerName)
                     {
-                        playerInTeam = true;
-                        playerHasTeam = true;
-                        break;
-                    }
-                }
-                
-                if (playerInTeam)
-                {
-                    static std::map<size_t, uint8_t> teamIndexToGameTeam;
-                    
-                    if (teamIndexToGameTeam.find(teamIndex) != teamIndexToGameTeam.end())
-                    {
-                        ret = teamIndexToGameTeam[teamIndex];
-                    }
-                    else
-                    {
-                        ret = CurrentTeam;
-                        teamIndexToGameTeam[teamIndex] = ret;
-                        
-                        PlayersOnCurTeam += team.size(); 
-                        if (PlayersOnCurTeam >= CurrentPlaylistInfo.GetBasePlaylist()->GetMaxSquadSize())
+                        if (teamIndexToGameTeam.find(teamIndex) != teamIndexToGameTeam.end())
+                        {
+                            ret = teamIndexToGameTeam[teamIndex];
+                        }
+                        else
+                        {
+                            ret = CurrentTeam;
+                            teamIndexToGameTeam[teamIndex] = ret;
+                            CurrentTeam++;
+                        }
+
+                        playersOnTeam[ret]++;
+
+                        if (playersOnTeam[ret] >= CurrentPlaylistInfo.GetBasePlaylist()->GetMaxSquadSize())
                         {
                             CurrentTeam++;
-                            PlayersOnCurTeam = 0;
                         }
+
+                        return EFortTeam(ret);
                     }
-                    
-                    return EFortTeam(ret);
                 }
             }
         }
         catch (const std::exception& e)
         {
+            
         }
     }
 
-    if (!playerHasTeam)
-    {
-        ret = CurrentTeam;
-        PlayersOnCurTeam = 1;
-        CurrentTeam++;
-        return EFortTeam(ret);
-    }
-
-    PlayersOnCurTeam++;
-    if (PlayersOnCurTeam >= CurrentPlaylistInfo.GetBasePlaylist()->GetMaxTeamSize())
-    {
-        CurrentTeam++;
-        PlayersOnCurTeam = 1;
-    }
-
+    ret = CurrentTeam++;
     return EFortTeam(ret);
 }

@@ -455,7 +455,7 @@ public:
 	
 	static void GiveAccolade(AFortPlayerControllerAthena *PlayerController, UFortAccoladeItemDefinition *Accolade);
 	
-    static void SendStatEvent(UFortQuestManager* QuestManager, UObject* TargetObj, FGameplayTagContainer& SourceTags, FGameplayTagContainer& TargetTags, bool* QuestActive, bool* QuestCompleted, int32 Count, EFortQuestObjectiveStatEvent StatEvent);
+    static void SendStatEvent(UFortQuestManager* QuestManager, UObject* TargetObj, FGameplayTagContainer& SourceTags, FGameplayTagContainer& TargetTags, bool* QuestActive, bool* QuestCompleted, int32 Count, EFortQuestObjectiveStatEvent StatEvent, FGameplayTagContainer& ContextTags);
     DefHookOg(void, SendComplexCustomStatEvent, UFortQuestManager* QuestManager, UObject* TargetObj, FGameplayTagContainer& SourceTags, FGameplayTagContainer& TargetTags, bool* QuestActive, bool* QuestCompleted, int32 Count);
 	DefHookOg(void, SendStatEventWithTags, 
 		UFortQuestManager*,
