@@ -185,7 +185,6 @@ void AFortPlayerPawn::GiveItemToInventoryOwner(UObject* Object, FFrame& Stack) {
 
 void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
 {
-    UE_LOG(LogNeon, Log, "Ok");
     if (!Weapon)
         return;
 
@@ -255,7 +254,6 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
 
 void AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues(AFortPlayerPawn* Pawn, FAthenaBatchedDamageGameplayCues_Shared SharedData, FAthenaBatchedDamageGameplayCues_NonShared NonSharedData)
 {
-    UE_LOG(LogNeon, Log, "Ok");
     if (!Pawn)
         return NetMulticast_Athena_BatchedDamageCuesOG(Pawn, SharedData, NonSharedData);
     auto* Controller = Cast<AFortPlayerControllerAthena>(Pawn->GetController());

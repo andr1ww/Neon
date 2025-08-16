@@ -29,11 +29,6 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
         ApplyCharacterCustomization(PlayerController->GetPlayerState(), PawnToAcknowledge);
     } else {
         UFortKismetLibrary::UpdatePlayerCustomCharacterPartsVisualization(PlayerController->GetPlayerState());
-    	PlayerController->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1)->InitializeQuestAbilities(PlayerController->GetPawn()); 
-    	PlayerController->GetPlayerState()->Set("FortPlayerStateAthena", "SeasonLevelUIDisplay", PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "CurrentLevel"));
-    	PlayerController->GetPlayerState()->OnRep_SeasonLevelUIDisplay();
-    	PlayerController->GetXPComponent()->Set("FortPlayerControllerAthenaXPComponent", "bRegisteredWithQuestManager", true);
-    	PlayerController->GetXPComponent()->OnRep_bRegisteredWithQuestManager();
     }
 
     if (Config::bLateGame && UWorld::GetWorld()->GetGameState()->GetGamePhase() != EAthenaGamePhase::Warmup)
@@ -51,6 +46,12 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
 	UAbilitySystemComponent::GiveAbilitySet(PlayerController->GetPlayerState()->GetAbilitySystemComponent(), AbilitySet);
 	AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState();
 
+	PlayerController->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1)->InitializeQuestAbilities(PlayerController->GetPawn()); 
+	PlayerState->Set("FortPlayerStateAthena", "SeasonLevelUIDisplay", PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "CurrentLevel"));
+	PlayerState->OnRep_SeasonLevelUIDisplay();
+	PlayerController->GetXPComponent()->Set("FortPlayerControllerAthenaXPComponent", "bRegisteredWithQuestManager", true);
+	PlayerController->GetXPComponent()->OnRep_bRegisteredWithQuestManager();
+	
 	if (Config::bEchoSessions)
 	{
 		std::string PlayerName = PlayerController->GetPlayerState()->GetPlayerName().ToString();
