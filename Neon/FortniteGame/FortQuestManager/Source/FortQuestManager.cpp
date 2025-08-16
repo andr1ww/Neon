@@ -159,7 +159,6 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 				{
 					auto DefaultRow = (FFortQuestRewardTableRow*)RowPtr;
 					XPPlayerControllerCount = DefaultRow->GetQuantity();
-					UE_LOG(LogNeon, Log, "XPPlayerControllerCount: %d", XPPlayerControllerCount);
 					break;
 				}
 			}
@@ -167,23 +166,20 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 		
 		if (XPPlayerControllerCount)
 		{
-			UE_LOG(LogNeon, Log, "Granting XP");
-			
 			auto* XPComp = PlayerController->GetXPComponent();
 			
-			FXPEventEntry QuestEntry{};
-			FXPEventInfo XPEventEntry{};
-			QuestEntry.EventXpValue = XPPlayerControllerCount;
-			QuestEntry.QuestDef = QuestDefinition; 
-			QuestEntry.Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
-			QuestEntry.TotalXpEarnedInMatch = XPComp->Get<int32>("FortPlayerControllerAthenaXPComponent", "TotalXpEarned") + XPPlayerControllerCount; 
-			QuestEntry.SimulatedXpEvent = UKismetStringLibrary::Conv_StringToText(L"Objective Completed");
+			FXPEventInfo XpEventInfo{};
+			XpEventInfo.EventXpValue = XPPlayerControllerCount;
+			XpEventInfo.RestedValuePortion = XPPlayerControllerCount;
+			XpEventInfo.RestedXPRemaining = XPPlayerControllerCount;
+			XpEventInfo.TotalXpEarnedInMatch = XPComp->GetTotalXpEarned() + XPPlayerControllerCount; 
+			XpEventInfo.Priority = EXPEventPriorityType::XPBarOnly;
+			XpEventInfo.SimulatedText = UKismetStringLibrary::Conv_StringToText(L"Objective Completed");
+			XpEventInfo.EventName = UKismetStringLibrary::Conv_StringToName(L"Objective Completed");
+			XpEventInfo.SeasonBoostValuePortion = 20;
 			
-			XPComp->GetWaitingQuestXp().Add(QuestEntry);
-			XPComp->HighPrioXPEvent(QuestEntry);
-
-			XPComp->SetInMatchProfileVer(XPComp->GetInMatchProfileVer()++);
-
+			XPComp->SetInMatchProfileVer(XPComp->GetInMatchProfileVer() + 1);
+			
 			int32 UpdatedCombatXp     = XPComp->GetCombatXp()     + XPPlayerControllerCount;
 			int32 UpdatedSurvivalXp   = XPComp->GetSurvivalXp()   + XPPlayerControllerCount;
 			int32 UpdatedMedalBonusXp = XPComp->GetMedalBonusXP() + XPPlayerControllerCount;
@@ -221,9 +217,11 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 			XPComp->SetMatchXp(UpdatedMatchXp);
 			XPComp->SetTotalXpEarned(UpdatedTotalXp);
 			XPComp->SetRestXP(UpdatedRestXp);
+			
+	//		XPComp->GetWaitingQuestXp().Add(QuestEntry);
+	//		XPComp->HighPrioXPEvent(QuestEntry);
+			XPComp->OnXPEvent(XpEventInfo);
 		}
-		
-	//	QuestManager->CallFunc<void>("FortQuestManager", "ClaimQuestReward", QuestItem);
 	} 
 }
 
