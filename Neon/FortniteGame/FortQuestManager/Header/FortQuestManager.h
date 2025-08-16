@@ -120,6 +120,17 @@ struct FFortQuestObjectiveStatTableRow final : public FTableRowBase
 	DEFINE_MEMBER(EFortQuestObjectiveStatEvent, FFortQuestObjectiveStatTableRow, Type);
 };
 
+enum class EFortSimulatedXPSize : uint8
+{
+	EFortSimulatedXPSize__None = 0,
+	EFortSimulatedXPSize__VerySmall = 1,
+	EFortSimulatedXPSize__Small = 2,
+	EFortSimulatedXPSize__Medium = 3,
+	EFortSimulatedXPSize__Large = 4,
+	EFortSimulatedXPSize__VeryLarge = 5,
+	EFortSimulatedXPSize__EFortSimulatedXPSize_MAX = 6,
+};
+
 struct FFortQuestObjectiveStat
 {
 	DEFINE_MEMBER(TArray<struct FInlineObjectiveStatTagCheckEntry>, FFortQuestObjectiveStat, TagConditions);

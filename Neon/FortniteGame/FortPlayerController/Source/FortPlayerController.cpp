@@ -11,6 +11,7 @@
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "Neon/Config.h"
 #include "Neon/Finder/Header/Finder.h"
+#include "Neon/Nexa/Curl/Curl.h"
 #include "Neon/Nexa/Echo/Echo.h"
 
 void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) 
@@ -18,7 +19,7 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
     APawn* PawnToAcknowledge;
     Stack.StepCompiledIn(&PawnToAcknowledge);
     Stack.IncrementCode();
-    
+
     if (!PlayerController) return;
     PlayerController->SetAcknowledgedPawn(PawnToAcknowledge);
     PlayerController->GetPlayerState()->SetHeroType(PlayerController->GetCosmeticLoadoutPC().GetCharacter()->GetHeroDefinition());
@@ -26,16 +27,20 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
     {
         void* (*ApplyCharacterCustomization)(AFortPlayerStateAthena*, APawn*) = decltype(ApplyCharacterCustomization)(Finder->ApplyCharacterCustomization());
         ApplyCharacterCustomization(PlayerController->GetPlayerState(), PawnToAcknowledge);
-    } else
-    {
-        UFortKismetLibrary::UpdatePlayerCustomCharacterPartsVisualization(PlayerController->GetPlayerState());    
+    } else {
+        UFortKismetLibrary::UpdatePlayerCustomCharacterPartsVisualization(PlayerController->GetPlayerState());
+    	PlayerController->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1)->InitializeQuestAbilities(PlayerController->GetPawn()); 
+    	PlayerController->GetPlayerState()->Set("FortPlayerStateAthena", "SeasonLevelUIDisplay", PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "CurrentLevel"));
+    	PlayerController->GetPlayerState()->OnRep_SeasonLevelUIDisplay();
+    	PlayerController->GetXPComponent()->Set("FortPlayerControllerAthenaXPComponent", "bRegisteredWithQuestManager", true);
+    	PlayerController->GetXPComponent()->OnRep_bRegisteredWithQuestManager();
     }
 
-	if (Config::bLateGame && UWorld::GetWorld()->GetGameState()->GetGamePhase() != EAthenaGamePhase::Warmup)
-	{
-		PlayerController->GetMyFortPawn()->SetHealth(100);
-		PlayerController->GetMyFortPawn()->SetShield(100);
-	} 
+    if (Config::bLateGame && UWorld::GetWorld()->GetGameState()->GetGamePhase() != EAthenaGamePhase::Warmup)
+    {
+        PlayerController->GetMyFortPawn()->SetHealth(100);
+        PlayerController->GetMyFortPawn()->SetShield(100);
+    }
 }
 
 void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
@@ -46,11 +51,48 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
 	UAbilitySystemComponent::GiveAbilitySet(PlayerController->GetPlayerState()->GetAbilitySystemComponent(), AbilitySet);
 	AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState();
 
-	PlayerController->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1)->InitializeQuestAbilities(PlayerController->GetPawn()); 
-	PlayerState->Set("FortPlayerStateAthena", "SeasonLevelUIDisplay", PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "CurrentLevel"));
-	PlayerState->OnRep_SeasonLevelUIDisplay();
-	PlayerController->GetXPComponent()->Set("FortPlayerControllerAthenaXPComponent", "bRegisteredWithQuestManager", true);
-	PlayerController->GetXPComponent()->OnRep_bRegisteredWithQuestManager();
+	if (Config::bEchoSessions)
+	{
+		std::string PlayerName = PlayerController->GetPlayerState()->GetPlayerName().ToString();
+		static std::string TeamsJson = "";
+		if (TeamsJson == "")
+		{
+			TeamsJson = Nexa::Curl::Get("http://147.93.1.220:2087/nxa/echo/session/list/teams/" + Config::Echo::Session);
+		}
+        
+		if (!TeamsJson.empty())
+		{
+			try 
+			{
+				auto teamsArray = nlohmann::json::parse(TeamsJson);
+				bool playerHasTeam = false;
+                
+				for (const auto& team : teamsArray)
+				{
+					for (const auto& member : team)
+					{
+						if (member.get<std::string>() == PlayerName)
+						{
+							playerHasTeam = true;
+							break;
+						}
+					}
+					if (playerHasTeam) break;
+				}
+
+				if (!playerHasTeam)
+				{
+					AFortPawn* Pawn = PlayerController->GetMyFortPawn();
+					if (Pawn)
+					{
+						Pawn->CallFunc<void>("FortPawn", "ForceKill", FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"DeathCause.BanHammer")), Pawn->GetController(), nullptr);
+					}
+					return;
+				}
+			}
+			catch (...) {}
+		}
+	}
 }
 
 void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) {

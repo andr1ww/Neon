@@ -165,38 +165,62 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 			}
 		}
 		
-		if (XPPlayerControllerCount) 
+		if (XPPlayerControllerCount)
 		{
 			UE_LOG(LogNeon, Log, "Granting XP");
+			
+			auto* XPComp = PlayerController->GetXPComponent();
+			
 			FXPEventEntry QuestEntry{};
-			
+			FXPEventInfo XPEventEntry{};
 			QuestEntry.EventXpValue = XPPlayerControllerCount;
-			QuestEntry.QuestDef = QuestDefinition;
+			QuestEntry.QuestDef = QuestDefinition; 
 			QuestEntry.Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
-			QuestEntry.TotalXpEarnedInMatch = PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "TotalXpEarned") + XPPlayerControllerCount;
-			QuestEntry.SimulatedXpEvent = UKismetStringLibrary::Conv_StringToText(FString(L"Objective completed"));
+			QuestEntry.TotalXpEarnedInMatch = XPComp->Get<int32>("FortPlayerControllerAthenaXPComponent", "TotalXpEarned") + XPPlayerControllerCount; 
+			QuestEntry.SimulatedXpEvent = UKismetStringLibrary::Conv_StringToText(L"Objective Completed");
 			
-			int32 CurrentChallengeXp = PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "ChallengeXp");
-			int32 CurrentTotalXp = PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "TotalXpEarned");
-			
-			PlayerController->GetXPComponent()->Set("FortPlayerControllerAthenaXPComponent", "ChallengeXp", CurrentChallengeXp + XPPlayerControllerCount);
-			PlayerController->GetXPComponent()->Set("FortPlayerControllerAthenaXPComponent", "TotalXpEarned", CurrentTotalXp + XPPlayerControllerCount);
-			
-			PlayerController->GetXPComponent()->CallFunc<void>("FortPlayerControllerAthenaXPComponent", "OnXpUpdated", 
-				PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "CombatXp"),
-				PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "SurvivalXp"),
-				PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "MedalBonusXP"),
-				PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "ChallengeXp"),
-				PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "MatchXp"),
-				PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "TotalXpEarned"));
-				
-			int64 CurrentProfileVer = PlayerController->GetXPComponent()->Get<int64>("FortPlayerControllerAthenaXPComponent", "InMatchProfileVer");
-			PlayerController->GetXPComponent()->Set("FortPlayerControllerAthenaXPComponent", "InMatchProfileVer", CurrentProfileVer + 1);
-			
-			PlayerController->GetXPComponent()->CallFunc<void>("FortPlayerControllerAthenaXPComponent", "OnInMatchProfileUpdate", CurrentProfileVer + 1);
-			PlayerController->GetXPComponent()->CallFunc<void>("FortPlayerControllerAthenaXPComponent", "OnProfileUpdated");
-			PlayerController->GetXPComponent()->GetWaitingQuestXp().Add(QuestEntry);
-	//		PlayerController->GetXPComponent()->CallFunc<void>("FortPlayerControllerAthenaXPComponent", "HighPrioXPEvent", QuestEntry);
+			XPComp->GetWaitingQuestXp().Add(QuestEntry);
+			XPComp->HighPrioXPEvent(QuestEntry);
+
+			XPComp->SetInMatchProfileVer(XPComp->GetInMatchProfileVer()++);
+
+			int32 UpdatedCombatXp     = XPComp->GetCombatXp()     + XPPlayerControllerCount;
+			int32 UpdatedSurvivalXp   = XPComp->GetSurvivalXp()   + XPPlayerControllerCount;
+			int32 UpdatedMedalBonusXp = XPComp->GetMedalBonusXP() + XPPlayerControllerCount;
+			int32 UpdatedChallengeXp  = XPComp->GetChallengeXp()  + XPPlayerControllerCount;
+			int32 UpdatedMatchXp      = XPComp->GetMatchXp()      + XPPlayerControllerCount;
+			int32 UpdatedTotalXp      = XPComp->GetTotalXpEarned() + XPPlayerControllerCount;
+			int32 UpdatedRestXp       = XPComp->GetRestXP()       + XPPlayerControllerCount;
+
+			XPComp->CallFunc<void>(
+				"FortPlayerControllerAthenaXPComponent",
+				"OnInMatchProfileUpdate",
+				XPComp->GetInMatchProfileVer()
+			);
+
+			XPComp->CallFunc<void>(
+				"FortPlayerControllerAthenaXPComponent",
+				"OnProfileUpdated"
+			);
+
+			XPComp->CallFunc<void>(
+				"FortPlayerControllerAthenaXPComponent",
+				"OnXpUpdated",
+				UpdatedCombatXp,
+				UpdatedSurvivalXp,
+				UpdatedMedalBonusXp,
+				UpdatedChallengeXp,
+				UpdatedMatchXp,
+				UpdatedTotalXp
+			);
+
+			XPComp->SetCombatXp(UpdatedCombatXp);
+			XPComp->SetSurvivalXp(UpdatedSurvivalXp);
+			XPComp->SetMedalBonusXP(UpdatedMedalBonusXp);
+			XPComp->SetChallengeXp(UpdatedChallengeXp);
+			XPComp->SetMatchXp(UpdatedMatchXp);
+			XPComp->SetTotalXpEarned(UpdatedTotalXp);
+			XPComp->SetRestXP(UpdatedRestXp);
 		}
 		
 	//	QuestManager->CallFunc<void>("FortQuestManager", "ClaimQuestReward", QuestItem);

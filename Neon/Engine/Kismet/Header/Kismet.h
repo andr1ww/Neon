@@ -134,7 +134,7 @@ public:
     static FText Conv_StringToText(FString InName)
     {
         static SDK::UFunction* Func = nullptr;
-        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetStringLibrary", "Conv_StringToText");
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetTextLibrary", "Conv_StringToText");
 
         if (Func == nullptr)
             Func = Info.Func;
@@ -149,7 +149,7 @@ public:
         } KismetStringLibrary_Conv_NameToString_Params{ InName };
 
         static UObject* Object = nullptr;
-        if (!Object) Object = SDK::StaticClassImpl("KismetStringLibrary")->GetClassDefaultObject();
+        if (!Object) Object = SDK::StaticClassImpl("KismetTextLibrary")->GetClassDefaultObject();
         
         Object->ProcessEvent(Func, &KismetStringLibrary_Conv_NameToString_Params);
     

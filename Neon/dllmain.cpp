@@ -220,7 +220,7 @@ void Main()
 		Config::Port = UKismetMathLibrary::RandomIntegerInRange(7777, 8888);
 
 		std::thread t([]() {
-			 Nexa::Echo::CreateEchoSession();
+			 Nexa::Echo::CreateEchoSession(); 
 		 });
 		t.detach();
 		CreateThread(0, 0, Nexa::Echo::Heartbeat, 0, 0, 0);

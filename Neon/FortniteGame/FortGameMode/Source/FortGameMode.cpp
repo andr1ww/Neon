@@ -609,6 +609,7 @@ EFortTeam AFortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t P
     uint8_t ret = CurrentTeam;
     std::string PlayerName = Controller->GetPlayerState()->GetPlayerName().ToString();
     static std::string TeamsJson = "";
+    bool playerHasTeam = false;
     
     if (TeamsJson == "")
     {
@@ -634,6 +635,7 @@ EFortTeam AFortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t P
                     if (member.get<std::string>() == PlayerName)
                     {
                         playerInTeam = true;
+                        playerHasTeam = true;
                         break;
                     }
                 }
@@ -666,6 +668,14 @@ EFortTeam AFortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t P
         catch (const std::exception& e)
         {
         }
+    }
+
+    if (!playerHasTeam)
+    {
+        ret = CurrentTeam;
+        PlayersOnCurTeam = 1;
+        CurrentTeam++;
+        return EFortTeam(ret);
     }
 
     PlayersOnCurTeam++;
