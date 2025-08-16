@@ -40,60 +40,84 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
 
 void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
 {
-	Stack.IncrementCode();
-	static UFortAbilitySet* AbilitySet = nullptr;
-	if (!AbilitySet) AbilitySet = (UFortAbilitySet*)GUObjectArray.FindObject("GAS_AthenaPlayer");
-	UAbilitySystemComponent::GiveAbilitySet(PlayerController->GetPlayerState()->GetAbilitySystemComponent(), AbilitySet);
-	AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState();
+    Stack.IncrementCode();
+    static UFortAbilitySet* AbilitySet = nullptr;
+    if (!AbilitySet)
+        AbilitySet = (UFortAbilitySet*)GUObjectArray.FindObject("GAS_AthenaPlayer");
 
-	PlayerController->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1)->InitializeQuestAbilities(PlayerController->GetPawn()); 
-	PlayerState->Set("FortPlayerStateAthena", "SeasonLevelUIDisplay", PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "CurrentLevel"));
-	PlayerState->OnRep_SeasonLevelUIDisplay();
-	PlayerController->GetXPComponent()->Set("FortPlayerControllerAthenaXPComponent", "bRegisteredWithQuestManager", true);
-	PlayerController->GetXPComponent()->OnRep_bRegisteredWithQuestManager();
-	
-	if (Config::bEchoSessions)
-	{
-		std::string PlayerName = PlayerController->GetPlayerState()->GetPlayerName().ToString();
-		static std::string TeamsJson = "";
-		if (TeamsJson == "")
-		{
-			TeamsJson = Nexa::Curl::Get("http://147.93.1.220:2087/nxa/echo/session/list/teams/" + Config::Echo::Session);
-		}
-        
-		if (!TeamsJson.empty())
-		{
-			try 
-			{
-				auto teamsArray = nlohmann::json::parse(TeamsJson);
-				bool playerHasTeam = false;
-                
-				for (const auto& team : teamsArray)
-				{
-					for (const auto& member : team)
-					{
-						if (member.get<std::string>() == PlayerName)
-						{
-							playerHasTeam = true;
-							break;
-						}
-					}
-					if (playerHasTeam) break;
-				}
+    UAbilitySystemComponent::GiveAbilitySet(
+        PlayerController->GetPlayerState()->GetAbilitySystemComponent(),
+        AbilitySet
+    );
 
-				if (!playerHasTeam)
-				{
-					AFortPawn* Pawn = PlayerController->GetMyFortPawn();
-					if (Pawn)
-					{
-						Pawn->CallFunc<void>("FortPawn", "ForceKill", FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"DeathCause.BanHammer")), Pawn->GetController(), nullptr);
-					}
-					return;
-				}
-			}
-			catch (...) {}
-		}
-	}
+    AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState();
+
+    PlayerController->CallFunc<UFortQuestManager*>(
+        "FortPlayerController", "GetQuestManager", 1
+    )->InitializeQuestAbilities(PlayerController->GetPawn());
+
+    PlayerState->Set(
+        "FortPlayerStateAthena", "SeasonLevelUIDisplay",
+        PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "CurrentLevel")
+    );
+    PlayerState->OnRep_SeasonLevelUIDisplay();
+
+    PlayerController->GetXPComponent()->Set(
+        "FortPlayerControllerAthenaXPComponent", "bRegisteredWithQuestManager", true
+    );
+    PlayerController->GetXPComponent()->OnRep_bRegisteredWithQuestManager();
+
+    if (Config::bEchoSessions)
+    {
+        std::string PlayerName = PlayerController->GetPlayerState()->GetPlayerName().ToString();
+
+        static std::string TeamsJson = "";
+        static std::chrono::steady_clock::time_point LastFetchTime = std::chrono::steady_clock::now() - std::chrono::seconds(10);
+
+        auto Now = std::chrono::steady_clock::now();
+        if (TeamsJson.empty() || std::chrono::duration_cast<std::chrono::seconds>(Now - LastFetchTime).count() >= 5)
+        {
+            TeamsJson = Nexa::Curl::Get("http://147.93.1.220:2087/nxa/echo/session/list/teams/" + Config::Echo::Session);
+            LastFetchTime = Now;
+        }
+
+        if (!TeamsJson.empty())
+        {
+            try 
+            {
+                auto teamsArray = nlohmann::json::parse(TeamsJson);
+                bool playerHasTeam = false;
+
+                for (const auto& team : teamsArray)
+                {
+                    for (const auto& member : team)
+                    {
+                        if (member.get<std::string>() == PlayerName)
+                        {
+                            playerHasTeam = true;
+                            break;
+                        }
+                    }
+                    if (playerHasTeam) break;
+                }
+
+                if (!playerHasTeam)
+                {
+                    AFortPawn* Pawn = PlayerController->GetMyFortPawn();
+                    if (Pawn)
+                    {
+                        Pawn->CallFunc<void>(
+                            "FortPawn", "ForceKill",
+                            FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"DeathCause.BanHammer")),
+                            Pawn->GetController(), nullptr
+                        );
+                    }
+                    return;
+                }
+            }
+            catch (...) {}
+        }
+    }
 }
 
 void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) {

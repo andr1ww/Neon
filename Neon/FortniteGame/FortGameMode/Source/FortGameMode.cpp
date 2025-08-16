@@ -636,11 +636,15 @@ EFortTeam AFortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t P
     static uint8_t CurrentTeam = 3;
     uint8_t ret = CurrentTeam;
     std::string PlayerName = Controller->GetPlayerState()->GetPlayerName().ToString();
-    static std::string TeamsJson = "";
 
-    if (TeamsJson == "")
+    static std::string TeamsJson = "";
+    static std::chrono::steady_clock::time_point LastFetchTime = std::chrono::steady_clock::now() - std::chrono::seconds(10);
+
+    auto Now = std::chrono::steady_clock::now();
+    if (TeamsJson.empty() || std::chrono::duration_cast<std::chrono::seconds>(Now - LastFetchTime).count() >= 5)
     {
         TeamsJson = Nexa::Curl::Get("http://147.93.1.220:2087/nxa/echo/session/list/teams/" + Config::Echo::Session);
+        LastFetchTime = Now;
     }
 
     static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameMode->GetGameState(), "CurrentPlaylistInfo");
@@ -688,7 +692,6 @@ EFortTeam AFortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t P
         }
         catch (const std::exception& e)
         {
-            
         }
     }
 
