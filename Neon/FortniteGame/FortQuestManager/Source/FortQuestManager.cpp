@@ -364,7 +364,7 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 
 					if (bFoundQuest)
 					{
-						ProgressQuest(Controller, QuestManager, CurrentQuest, QuestDef, Objective, Objective->GetCount() + 1);
+						ProgressQuest(Controller, QuestManager, CurrentQuest, QuestDef, Objective, Objective->GetCount() + Count);
 						UE_LOG(LogNeon, Log, "BackendName: %s", Objective->GetBackendName().ToString().ToString().c_str());
 					}
 				}
@@ -390,13 +390,85 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 
 						if (!ContextTags.HasAll(Row->GetContextTagContainer()))
 							continue;
-						ProgressQuest(Controller, QuestManager, CurrentQuest, QuestDef, Objective, Objective->GetCount() + 1);
+						ProgressQuest(Controller, QuestManager, CurrentQuest, QuestDef, Objective, Objective->GetCount() + Count);
 						UE_LOG(LogNeon, Log, "BackendName: %s", Objective->GetBackendName().ToString().ToString().c_str());
 					}
 				}
 			}
 		}
 	}
+}
+
+void UFortQuestManager::GiveAccolade(AFortPlayerControllerAthena* PlayerController, UFortAccoladeItemDefinition* Accolade)
+{
+	if (!PlayerController || !Accolade) 
+	{
+		return;
+	}
+
+	float XpValue = 0;
+	TMap<FName, uint8*>& RowMap = *reinterpret_cast<TMap<FName, uint8*>*>(__int64(Accolade->GetXpRewardAmount().Curve.CurveTable) + 0x30);
+
+	for (auto& Pair : RowMap)
+	{
+		if (Pair.Key.ToString().ToString() == Accolade->GetXpRewardAmount().Curve.RowName.ToString().ToString())
+		{
+			FSimpleCurve* Curve = (FSimpleCurve*)Pair.Value;
+			XpValue = Curve->GetKeys()[0].Value;
+		}
+	}
+	
+	FAthenaAccolades NewAccolade{};
+    NewAccolade.AccoladeDef = Accolade;
+    NewAccolade.Count = 1;
+    NewAccolade.TemplateId = Accolade->GetFName().ToString();
+
+	static SDK::UFunction* Func = nullptr;
+	SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetSystemLibrary", "GetPrimaryAssetIdFromObject");
+
+	if (Func == nullptr)
+		Func = Info.Func;
+	if (!Func)
+		return;
+
+	struct
+	{
+		UObject* Object;
+		FPrimaryAssetId ReturnValue;
+	}UKismetSystemLibrary_GetPrimaryAssetIdFromObject_Params{ Accolade };
+
+	static UObject* DefaultObject = nullptr;
+	if (!DefaultObject) DefaultObject = SDK::StaticClassImpl("KismetSystemLibrary")->GetClassDefaultObject();
+	DefaultObject->ProcessEvent(Func, &UKismetSystemLibrary_GetPrimaryAssetIdFromObject_Params);
+	
+    FXPEventInfo XpEventInfo{};
+    XpEventInfo.Accolade = UKismetSystemLibrary_GetPrimaryAssetIdFromObject_Params.ReturnValue;
+    XpEventInfo.EventXpValue = XpValue;
+    XpEventInfo.RestedValuePortion = XpValue;
+    XpEventInfo.RestedXPRemaining = XpValue;
+    XpEventInfo.TotalXpEarnedInMatch = PlayerController->GetXPComponent()->GetTotalXpEarned() + XpValue;
+    XpEventInfo.Priority = Accolade->GetPriority();
+    XpEventInfo.SimulatedText = Accolade->CallFunc<FText>("FortItemDefinition", "GetShortDescription");
+    XpEventInfo.EventName = Accolade->GetFName();
+    XpEventInfo.SeasonBoostValuePortion = 20;
+
+    PlayerController->GetXPComponent()->SetMatchXp(PlayerController->GetXPComponent()->GetMatchXp() + XpValue);
+    PlayerController->GetXPComponent()->SetTotalXpEarned(PlayerController->GetXPComponent()->GetTotalXpEarned() + XpValue);
+
+	PlayerController->GetXPComponent()->GetMedalsEarned().Add(Accolade);
+	PlayerController->GetXPComponent()->GetPlayerAccolades().Add(NewAccolade);
+
+    PlayerController->GetXPComponent()->OnXPEvent(XpEventInfo);
+	PlayerController->GetXPComponent()->CallFunc<void>(
+		"FortPlayerControllerAthenaXPComponent",
+		"OnXpUpdated",
+		PlayerController->GetXPComponent()->GetCombatXp(),
+		PlayerController->GetXPComponent()->GetSurvivalXp(),
+		PlayerController->GetXPComponent()->GetMedalBonusXP(),
+		PlayerController->GetXPComponent()->GetChallengeXp(),
+		PlayerController->GetXPComponent()->GetMatchXp(),
+		PlayerController->GetXPComponent()->GetTotalXpEarned()
+	);
 }
 
 void UFortQuestManager::SendStatEventWithTags(UFortQuestManager* QuestManager, EFortQuestObjectiveStatEvent Type, UObject* TargetObject, FGameplayTagContainer& TargetTags, FGameplayTagContainer& SourceTags, FGameplayTagContainer& ContextTags, int Count)

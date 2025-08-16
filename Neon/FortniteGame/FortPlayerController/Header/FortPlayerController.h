@@ -426,6 +426,15 @@ public:
 	int32 RestedXPRemaining;				  // 0x004C(0x0004)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 };
 
+struct FAthenaAccolades final
+{
+public:
+	class UFortAccoladeItemDefinition*            AccoladeDef;                                       // 0x0000(0x0008)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	class FString                                 TemplateId;                                        // 0x0008(0x0010)(ZeroConstructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	int32                                         Count;                                             // 0x0018(0x0004)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	uint8                                         Pad_1C[0x4];                                       // 0x001C(0x0004)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
 class UFortPlayerControllerAthenaXPComponent : public UObject
 {
 public:
@@ -482,6 +491,8 @@ public:
 	}
 
 public:
+	DEFINE_MEMBER(TArray<struct FAthenaAccolades> , UFortPlayerControllerAthenaXPComponent, PlayerAccolades);
+	DEFINE_MEMBER(TArray<class UFortAccoladeItemDefinition*>, UFortPlayerControllerAthenaXPComponent, MedalsEarned);
 	DEFINE_MEMBER(int32, UFortPlayerControllerAthenaXPComponent, CombatXp);
 	DEFINE_MEMBER(int32, UFortPlayerControllerAthenaXPComponent, SurvivalXp);
 	DEFINE_MEMBER(int32, UFortPlayerControllerAthenaXPComponent, MedalBonusXP);

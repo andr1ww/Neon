@@ -171,6 +171,16 @@ public:
 	DECLARE_STATIC_CLASS(UFortQuestItemDefinition)
 };
 
+class UFortAccoladeItemDefinition : public UFortItemDefinition
+{
+public:
+	DEFINE_MEMBER(FScalableFloat, UFortAccoladeItemDefinition, XpRewardAmount);
+	DEFINE_MEMBER(TArray<TSoftObjectPtr<class UFortAccoladeItemDefinition>>, UFortAccoladeItemDefinition, AccoladeToReplace);
+	DEFINE_MEMBER(EXPEventPriorityType, UFortAccoladeItemDefinition, Priority);
+	DECLARE_STATIC_CLASS(UFortAccoladeItemDefinition)
+	DECLARE_DEFAULT_OBJECT(UFortAccoladeItemDefinition)
+};
+
 class UFortQuestItem : public UObject
 {
 public:
@@ -442,6 +452,8 @@ public:
 		*OutContextTags = Params.OutContextTags;
 		*OutSourceTags = Params.OutSourceTags;
 	}
+	
+	static void GiveAccolade(AFortPlayerControllerAthena *PlayerController, UFortAccoladeItemDefinition *Accolade);
 	
     static void SendStatEvent(UFortQuestManager* QuestManager, UObject* TargetObj, FGameplayTagContainer& SourceTags, FGameplayTagContainer& TargetTags, bool* QuestActive, bool* QuestCompleted, int32 Count, EFortQuestObjectiveStatEvent StatEvent);
     DefHookOg(void, SendComplexCustomStatEvent, UFortQuestManager* QuestManager, UObject* TargetObj, FGameplayTagContainer& SourceTags, FGameplayTagContainer& TargetTags, bool* QuestActive, bool* QuestCompleted, int32 Count);

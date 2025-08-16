@@ -5,6 +5,7 @@
 #include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/FortGameState/Header/FortGameState.h"
+#include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 
 void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
                                       float Damage,
@@ -154,6 +155,13 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     }
 
     Controller->ClientReportDamagedResourceBuilding(BuildingActor, BuildingActor->GetResourceType(), ResourceAmount, false, Damage == 100.f);
+    if (Damage == 100.f) {
+        static auto AccoladeDef = Runtime::StaticFindObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_066_WeakSpotsInARow.AccoladeId_066_WeakSpotsInARow");
+        if (AccoladeDef)
+        {
+            UFortQuestManager::GiveAccolade(Controller, AccoladeDef);
+        }
+    }
 
     return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
 }

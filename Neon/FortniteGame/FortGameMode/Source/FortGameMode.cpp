@@ -10,6 +10,7 @@
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
+#include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "Neon/Config.h"
 #include "Neon/Finder/Header/Finder.h"
 #include "Neon/Nexa/NexaHelpers.h"
@@ -555,9 +556,38 @@ void AFortGameModeAthena::StartNewSafeZonePhase(AFortGameModeAthena* GameMode, i
     AFortGameStateAthena* GameState = GameMode->GetGameState();
 
     int Index = GameMode->GetAlivePlayers().Num() >= 25 ? 3 : 4;
-    
-    if (Config::bLateGame)
+
+    static bool bSetupLG = false;
+
+    for (auto& Controller : GameMode->GetAlivePlayers())
     {
+        FGameplayTagContainer SourceTags;
+        FGameplayTagContainer TargetTags; 
+        FGameplayTagContainer ContextTags;
+        UFortQuestManager* QuestManager = Controller->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1);
+
+        if (!QuestManager) {
+            UE_LOG(LogNeon, Warning, "QuestManager is null for controller");
+            continue;
+        }
+
+        QuestManager->GetSourceAndContextTags(&SourceTags, &ContextTags);
+        
+        SourceTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"Athena.Quests.SurviveStormCircles")));
+        UFortQuestManager::SendStatEvent(QuestManager, nullptr, SourceTags, TargetTags, nullptr, nullptr, 1, EFortQuestObjectiveStatEvent::ComplexCustom);
+        static UFortAccoladeItemDefinition* NewStormCircle = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeID_SurviveStormCircle.AccoladeID_SurviveStormCircle");
+        UFortQuestManager::GiveAccolade(Controller, NewStormCircle);
+        if (Config::bLateGame && !bSetupLG)
+        {
+            for (int i = 0; i < 3; i++) {
+                UFortQuestManager::GiveAccolade(Controller, NewStormCircle);
+            }
+        }
+    }
+
+    if (Config::bLateGame && !bSetupLG)
+    {
+        bSetupLG = true;
         GameState->SetSafeZonePhase(GameState->GetSafeZonePhase() <= Index ? Index : GameState->GetSafeZonePhase());
         GameMode->SetSafeZonePhase(GameState->GetSafeZonePhase());
         GameState->SetSafeZonesStartTime(0.0001f);

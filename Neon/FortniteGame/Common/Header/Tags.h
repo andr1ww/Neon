@@ -45,7 +45,7 @@ public:
         return true;
     }
 
-    void AppendTags(const FGameplayTagContainer& Other)
+    void AppendTags( FGameplayTagContainer& Other)
     {
         for (const auto& GameplayTag : Other.GameplayTags)
         {
