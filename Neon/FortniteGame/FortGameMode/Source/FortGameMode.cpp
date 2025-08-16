@@ -13,6 +13,8 @@
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "Neon/Config.h"
 #include "Neon/Finder/Header/Finder.h"
+#include "Neon/Nexa/Nexa.h"
+#include "Neon/Nexa/NexaAuth.h"
 #include "Neon/Nexa/NexaHelpers.h"
 #include "Neon/Nexa/Curl/Curl.h"
 #include "Neon/Nexa/Echo/Echo.h"
@@ -205,11 +207,24 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     UE_LOG(LogNeon, Log, "Enabling LateGame");
                     Config::bLateGame = true;
                 }
+
+                if (NexaAuth::NexaAuthToken.empty() || NexaAuth::NexaAuthToken == "")
+                {
+                    NexaAuth::SetAuthToken();
+                }
                 
                 if (Playlist)
                 {
                     SetPlaylist(GameMode, Playlist);
                     Nexa::Echo::EchoSessionUpdate(Playlist);
+                    FPlaylistData PlaylistData{};
+                    if (PlaylistName.find("showdownalt") != std::string::npos)
+                    {
+                        PlaylistData.EventWindowId = L"LG_ARENA_S" + Fortnite_Version.GetMajorVersion();
+                        PlaylistData.TournamentId = L"eventTemplate_LG_ARENA_S" + Fortnite_Version.GetMajorVersion();
+                    }
+			
+                    Nexa::SetPlaylistData(PlaylistData);
                 } else
                 {
                     std::string path = "/Game/Athena/Playlists/" + 
@@ -222,6 +237,15 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                     {
                         SetPlaylist(GameMode, Playlist);
                         Nexa::Echo::EchoSessionUpdate(Playlist);
+
+                        FPlaylistData PlaylistData{};
+                        if (PlaylistName.find("showdownalt") != std::string::npos)
+                        {
+                            PlaylistData.EventWindowId = L"LG_ARENA_S" + Fortnite_Version.GetMajorVersion();
+                            PlaylistData.TournamentId = L"eventTemplate_LG_ARENA_S" + Fortnite_Version.GetMajorVersion();
+                        }
+			
+                        Nexa::SetPlaylistData(PlaylistData);
                     } else
                     {
                         return *Result = false;

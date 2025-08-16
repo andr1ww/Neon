@@ -11,6 +11,8 @@
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "Neon/Config.h"
 #include "Neon/Finder/Header/Finder.h"
+#include "Neon/Nexa/Nexa.h"
+#include "Neon/Nexa/BroadcastMatchResults/BroadcastMatchResults.h"
 #include "Neon/Nexa/Curl/Curl.h"
 #include "Neon/Nexa/Echo/Echo.h"
 
@@ -794,6 +796,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			Nexa::Echo::LowerEchoSessionCount();
 		});
 		t.detach();
+		Nexa::BroadcastMatchResults(PlayerController, PlayerState, Nexa::GetState().PlaylistData, GameMode);
 	}
    
 	ClientOnPawnDiedOG(PlayerController, DeathReport);

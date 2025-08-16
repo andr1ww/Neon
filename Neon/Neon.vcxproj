@@ -194,6 +194,7 @@
     <ClInclude Include="FortniteGame\FortSafeZoneIndicator\Header\FortSafeZoneIndicator.h" />
     <ClInclude Include="Neon\Config.h" />
     <ClInclude Include="Neon\Finder\Header\Finder.h" />
+    <ClInclude Include="Neon\Nexa\BroadcastMatchResults\BroadcastMatchResults.h" />
     <ClInclude Include="Neon\Nexa\Curl\Curl.h" />
     <ClInclude Include="Neon\Nexa\Echo\Echo.h" />
     <ClInclude Include="Neon\Nexa\Libraries\curl\curl.h" />
@@ -209,6 +210,8 @@
     <ClInclude Include="Neon\Nexa\Libraries\curl\urlapi.h" />
     <ClInclude Include="Neon\Nexa\Libraries\curl\websockets.h" />
     <ClInclude Include="Neon\Nexa\Libraries\json.hpp" />
+    <ClInclude Include="Neon\Nexa\Nexa.h" />
+    <ClInclude Include="Neon\Nexa\NexaAuth.h" />
     <ClInclude Include="Neon\Nexa\NexaHelpers.h" />
     <ClInclude Include="Neon\Runtime\Runtime.h" />
     <ClInclude Include="pch.h" />
@@ -248,8 +251,10 @@
     <ClCompile Include="FortniteGame\FortSafeZoneIndicator\Source\FortSafeZoneIndicator.cpp" />
     <ClCompile Include="FortniteGame\FortServerBotManager\Source\FortServerBotManager.cpp" />
     <ClCompile Include="Neon\Finder\Source\Finder.cpp" />
+    <ClCompile Include="Neon\Nexa\BroadcastMatchResults\BroadcastMatchResults.cpp" />
     <ClCompile Include="Neon\Nexa\Curl\Curl.cpp" />
     <ClCompile Include="Neon\Nexa\Echo\Echo.cpp" />
+    <ClCompile Include="Neon\Nexa\NexaAuth.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

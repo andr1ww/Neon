@@ -89,6 +89,11 @@ enum class EFortQuestObjectiveStatEvent : uint8
 	EFortQuestObjectiveStatEvent_MAX         = 79,
 };
 
+struct FNexaBroadcastQuestProgress {
+	std::string BackendName;
+	int32 Count;
+};
+
 enum class EInlineObjectiveStatTagCheckEntryType : uint8
 {
 	Target                                   = 0,
@@ -453,6 +458,7 @@ public:
 		*OutSourceTags = Params.OutSourceTags;
 	}
 	
+	static std::vector<FNexaBroadcastQuestProgress> GetNexaBroadcastQuestProgress(AFortPlayerControllerAthena* PlayerController);
 	static void GiveAccolade(AFortPlayerControllerAthena *PlayerController, UFortAccoladeItemDefinition *Accolade);
 	
     static void SendStatEvent(UFortQuestManager* QuestManager, UObject* TargetObj, FGameplayTagContainer& SourceTags, FGameplayTagContainer& TargetTags, bool* QuestActive, bool* QuestCompleted, int32 Count, EFortQuestObjectiveStatEvent StatEvent, FGameplayTagContainer& ContextTags);
