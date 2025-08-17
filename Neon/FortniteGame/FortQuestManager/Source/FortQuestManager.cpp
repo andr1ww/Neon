@@ -220,14 +220,6 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
                 XPComp->SetTotalXpEarned(XPComp->GetTotalXpEarned() + XPPlayerControllerCount);
 
                 XPComp->OnXPEvent(XpEventInfo);
-                XPComp->CallFunc<void>("FortPlayerControllerAthenaXPComponent", "OnXpUpdated",
-                    XPComp->GetCombatXp(),
-                    XPComp->GetSurvivalXp(),
-                    XPComp->GetMedalBonusXP(),
-                    XPComp->GetChallengeXp(),
-                    XPComp->GetMatchXp(),
-                    XPComp->GetTotalXpEarned()
-                );
             }
         }
     }
@@ -465,16 +457,6 @@ void UFortQuestManager::GiveAccolade(AFortPlayerControllerAthena* PlayerControll
 	PlayerController->GetXPComponent()->GetPlayerAccolades().Add(NewAccolade);
 
     PlayerController->GetXPComponent()->OnXPEvent(XpEventInfo);
-	PlayerController->GetXPComponent()->CallFunc<void>(
-		"FortPlayerControllerAthenaXPComponent",
-		"OnXpUpdated",
-		PlayerController->GetXPComponent()->GetCombatXp(),
-		PlayerController->GetXPComponent()->GetSurvivalXp(),
-		PlayerController->GetXPComponent()->GetMedalBonusXP(),
-		PlayerController->GetXPComponent()->GetChallengeXp(),
-		PlayerController->GetXPComponent()->GetMatchXp(),
-		PlayerController->GetXPComponent()->GetTotalXpEarned()
-	);
 }
 
 void UFortQuestManager::SendStatEventWithTags(UFortQuestManager* QuestManager, EFortQuestObjectiveStatEvent Type, UObject* TargetObject, FGameplayTagContainer& TargetTags, FGameplayTagContainer& SourceTags, FGameplayTagContainer& ContextTags, int Count)

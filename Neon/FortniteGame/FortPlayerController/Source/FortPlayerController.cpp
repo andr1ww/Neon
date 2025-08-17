@@ -713,7 +713,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		  (GameMode, PlayerController, KillerPlayerState, KillerPawn, ItemDef, DeathCause, 0, false);
 
 		if (MatchReport && RewardResult) {
-			int32 TotalXP = PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "TotalXpEarned");
+			int32 TotalXP = PlayerController->GetXPComponent()->GetTotalXpEarned();
 			RewardResult->SetTotalBookXpGained(TotalXP);
 			RewardResult->SetTotalSeasonXpGained(TotalXP);
 			MatchReport->SetEndOfMatchResults(*RewardResult);
@@ -759,7 +759,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 				
 				auto WinnerMatchReport = LastAliveController->GetMatchReport();
 				if (WinnerMatchReport && RewardResult) {
-					int32 WinnerXP = LastAliveController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "TotalXpEarned");
+					int32 WinnerXP = LastAliveController->GetXPComponent()->GetTotalXpEarned();
 					auto WinnerRewardResult = &WinnerMatchReport->GetEndOfMatchResults();
 					WinnerRewardResult->SetTotalBookXpGained(WinnerXP);
 					WinnerRewardResult->SetTotalSeasonXpGained(WinnerXP);
