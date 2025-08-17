@@ -168,7 +168,22 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     GameState->SetbDBNODeathEnabled(true);
  //   GameMode->SetbAlwaysDBNO(true);
     
+    static bool bInitializedTeams = false;
+    if (!bInitializedTeams)
+    {
+        GameState->GetTeamArray().Free();
+       // GameState->GetSquadArray().Free();
 
+        for (int i = 0; i < 103; ++i)
+        {
+            TArray<TWeakObjectPtr<AFortPlayerStateAthena>> TeamArray(2);
+            GameState->GetTeamArray().Add(TeamArray);
+       //     GameState->GetSquadArray().Add(TeamArray);
+        }
+
+        bInitializedTeams = true;
+    }
+    
     if (GameMode->GetCurrentPlaylistId() == -1)
     {
         UFortPlaylistAthena* Playlist = (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_DefaultSolo");
@@ -459,6 +474,15 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
 
     GameState->GetGameMemberInfoArray().GetMembers().Add(Member);
     GameState->GetGameMemberInfoArray().MarkItemDirty(Member);
+
+    TWeakObjectPtr<AFortPlayerStateAthena> WeakObjectPtr;
+    WeakObjectPtr.ObjectIndex = PlayerState->GetUniqueID();
+    WeakObjectPtr.ObjectSerialNumber = GUObjectArray.GetSerialNumber(PlayerState->GetUniqueID());
+  //  auto& ElementData1 = GameState->GetSquadArray()[PlayerState->GetSquadId()];
+    auto& ElementData2 = GameState->GetTeamArray()[PlayerState->GetTeamIndex()];
+    cout << "SerialNumber: " << WeakObjectPtr.ObjectSerialNumber << std::endl;
+    //ElementData1.Add(WeakObjectPtr);
+   // ElementData2.Add(WeakObjectPtr);
     
     return HandleStartingNewPlayerOG(GameMode, NewPlayer);
 }
@@ -517,6 +541,15 @@ EFortTeam AFortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t P
                             CurrentTeam++;
                         }
 
+                        TWeakObjectPtr<AFortPlayerStateAthena> WeakObjectPtr;
+                        WeakObjectPtr.ObjectIndex = Controller->GetPlayerState()->GetUniqueID();
+                        WeakObjectPtr.ObjectSerialNumber = GUObjectArray.GetSerialNumber(Controller->GetPlayerState()->GetUniqueID());
+                        //  auto& ElementData1 = GameState->GetSquadArray()[PlayerState->GetSquadId()];
+                        auto& ElementData2 = UWorld::GetWorld()->GetGameState()->GetTeamArray()[ret];
+                        cout << "SerialNumber: " << WeakObjectPtr.ObjectSerialNumber << std::endl;
+                        //ElementData1.Add(WeakObjectPtr);
+                        ElementData2.Add(WeakObjectPtr);
+                        
                         return EFortTeam(ret);
                     }
                 }

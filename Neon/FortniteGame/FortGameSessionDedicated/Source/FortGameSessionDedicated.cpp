@@ -23,6 +23,25 @@ void FortGameSessionDedicated::Restart(void*)
     TerminateProcess(GetCurrentProcess(), 1);
 }
 
+char FortGameSessionDedicated::GetSquadIdForCurrentPlayer(AFortGameSessionDedicatedAthena* GameSession, FUniqueNetIdRepl UniqueId)
+{
+    auto GameMode = (AFortGameModeAthena*)UWorld::GetWorld()->GetAuthorityGameMode();
+
+    for (auto& AlivePlayer : GameMode->GetAlivePlayers())
+    {
+        if(AlivePlayer && AlivePlayer->GetPlayerState())
+        {
+            if (((AFortPlayerState*)AlivePlayer->GetPlayerState())->CallFunc<bool>("FortPlayerState", "AreUniqueIDsIdentical", AlivePlayer->GetPlayerState()->GetUniqueId(), UniqueId))
+            {
+                return ((AFortPlayerStateAthena*)AlivePlayer->GetPlayerState())->GetTeamIndex() - 3;
+            }
+        }
+    }
+    
+    return 0;
+}
+
+
 void FortGameSessionDedicated::UWorld_Listen()
 {
     UNetDriver* NetDriver = UWorld::GetWorld()->GetNetDriver();

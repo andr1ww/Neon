@@ -23,5 +23,6 @@ namespace FortGameSessionDedicated
     const wchar_t* Get();
     void UWorld_Listen();
     FServicePermissionsMcp* MatchmakingServicePerms(int64, int64);
+    char GetSquadIdForCurrentPlayer(AFortGameSessionDedicatedAthena* GameSession, FUniqueNetIdRepl UniqueId);
     void Restart(void*);
 }

@@ -150,14 +150,14 @@ public:
         this->ProcessEvent(Func, nullptr);
     }
 
-    inline TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>& GetSquadArray(AFortGameStateAthena* GameState)
+    inline TArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>& GetSquadArray()
     {
-        return *reinterpret_cast<TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>*>(__int64(GameState) + 0x14e0);
+        return *reinterpret_cast<TArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>*>(__int64(this) + 0x14e0);
     }
 
-    inline TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>& GetTeamArray(AFortGameStateAthena* GameState)
+    inline TArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>& GetTeamArray()
     {
-        return *reinterpret_cast<TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>*>(__int64(GameState) + 0x14a8);
+        return *reinterpret_cast<TArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>*>(__int64(this) + 0x14a8);
     }
 
 public:

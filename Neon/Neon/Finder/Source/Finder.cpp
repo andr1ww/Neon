@@ -1183,6 +1183,24 @@ uint64 UFinder::ReloadWeapon()
     return CachedResult = 0;
 }
 
+uint64 UFinder::GetSquadIdForCurrentPlayer()
+{
+    auto Addrr = Memcury::Scanner::FindStringRef(L"GetSquadIdForCurrentPlayer failed to find a squad id for player %s", true, 0, Fortnite_Version >= 19).Get();
+
+    if (!Addrr)
+        return 0;
+
+    for (int i = 0; i < 2000; i++)
+    {
+        if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(Addrr - i + 2) == 0x5C)
+        {
+            return Addrr - i;
+        }
+    }
+
+    return 0;
+}
+
 uint64 UFinder::OnSafeZoneStateChange()
 {
     auto OnSafeZoneStateChangeAddr = Memcury::FindFunction(L"OnSafeZoneStateChange", Fortnite_Version <= 2.4 ? std::vector<uint8_t>{ 0x48, 0x89, 0x54 } : std::vector<uint8_t>{ 0x48, 0x89, 0x5C });

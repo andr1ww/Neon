@@ -221,6 +221,32 @@ void InitNullsAndRetTrues() {
 			VirtualProtect((PVOID)before, 1, dwProtection, &dwTemp);
 		}
 	}
+
+	auto GameSessionDedicatedAthenaPatch = Memcury::Scanner::FindPattern("3B 41 38 7F ? 48 8B D0 48 8B 41 30 4C 39 04 D0 75 ? 48 8D 96", false).Get(); // todo check this sig more
+	Runtime::PatchBytes(IMAGEBASE + 0x19481B8, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
+
+	if (GameSessionDedicatedAthenaPatch)
+	{
+	//	Runtime::PatchBytes(IMAGEBASE + 0x19481B8, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
+	}
+	else
+	{
+		auto S19Patch = Memcury::Scanner::FindPattern("74 1A 48 8D 97 ? ? ? ? 49 8B CF E8 ? ? ? ? 88 87 ? ? ? ? E9", false).Get();
+					
+		if (S19Patch)
+		{
+			Runtime::Patch(S19Patch, 0x75);
+		}
+		else
+		{
+			auto S18Patch = Memcury::Scanner::FindPattern("75 02 33 F6 41 BE ? ? ? ? 48 85 F6 74 17 48 8D 93").Get();
+
+			if (S18Patch)
+			{
+				Runtime::Patch(S18Patch, 0x74);
+			}
+		}
+	}
 }
 
 void Main()
@@ -329,6 +355,7 @@ void Main()
 	//Runtime::Hook(Finder->EnterAircraft(), AFortPlayerControllerAthena::EnterAircraft, (void**)&AFortPlayerControllerAthena::EnterAircraftOG);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.ServerReviveFromDBNO", AFortPlayerPawn::ServerReviveFromDBNO);
 	if (Config::bEchoSessions) Runtime::Hook(Finder->PickTeam(), AFortGameModeAthena::PickTeam, (void**)&AFortGameModeAthena::PickTeamOG);
+	Runtime::Hook(Finder->GetSquadIdForCurrentPlayer(), FortGameSessionDedicated::GetSquadIdForCurrentPlayer);
 	
 	if (Finder->CompletePickupAnimation())
 	{

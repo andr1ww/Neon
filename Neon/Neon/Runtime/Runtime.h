@@ -457,6 +457,17 @@ __forceinline void HookStatic(const char* FuncName, void* detour, T& og = nullpt
 		VirtualProtect(LPVOID(ptr), sizeof(byte), og, &og);
 	}
 
+	inline void PatchBytes(uint64 addr, const std::vector<uint8_t>& Bytes)
+	{
+		if (!addr)
+			return;
+
+		for (int i = 0; i < Bytes.size(); i++)
+		{
+			Patch(addr + i, Bytes.at(i));
+		}
+	}
+
 	static void Unpatch(uintptr_t ptr)
 	{
 		for (int i = patches.size() - 1; i >= 0; i--) {

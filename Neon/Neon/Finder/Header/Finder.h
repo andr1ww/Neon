@@ -136,6 +136,8 @@ public:
     uint64 ReloadWeapon();
 
     uint64 GetCommandLet();
+
+    uint64 GetSquadIdForCurrentPlayer();
     
     uint64 OnSafeZoneStateChange();
 
