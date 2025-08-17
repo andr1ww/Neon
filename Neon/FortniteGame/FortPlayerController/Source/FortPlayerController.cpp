@@ -701,7 +701,23 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		KillerPlayerState->ClientReportKill(PlayerState);
 		if (auto CPlayerController = (AFortPlayerControllerAthena*)KillerPawn->GetController()) {
 			if (CPlayerController->GetMyFortPawn() && MatchStats) {
-				MatchStats->Stats[3] = KillerScore;
+				int32 CurrentKills = KillerScore;
+
+				static UFortAccoladeItemDefinition* Bronze = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_014_Elimination_Bronze.AccoladeId_014_Elimination_Bronze");
+				static UFortAccoladeItemDefinition* Silver = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_015_Elimination_Silver.AccoladeId_015_Elimination_Silver");
+				static UFortAccoladeItemDefinition* Gold = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_016_Elimination_Gold.AccoladeId_016_Elimination_Gold");
+
+				if (CurrentKills == 1) {
+					UFortQuestManager::GiveAccolade(CPlayerController, Bronze);
+				}
+				else if (CurrentKills == 4) {
+					UFortQuestManager::GiveAccolade(CPlayerController, Silver);
+				}
+				else if (CurrentKills == 8) {
+					UFortQuestManager::GiveAccolade(CPlayerController, Gold);
+				}
+
+				MatchStats->Stats[3] = CurrentKills;
 				MatchReport->SetMatchStats(*MatchStats);
 			}
 		}
