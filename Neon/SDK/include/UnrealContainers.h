@@ -333,6 +333,12 @@ template <typename InElementType> class TArray {
          */
         FORCEINLINE TArray() : Data( nullptr ), ArrayNum( 0 ), ArrayMax( 0 ) {}
 
+    TArray(int32 Size)
+    :ArrayNum(0), ArrayMax(Size), Data(reinterpret_cast<ElementType*>(FMemory::Realloc(0, sizeof(ElementType) *  Size, 0)))
+        {
+            std::cout << __FUNCTION__ << std::endl;
+        }
+    
       protected:
         ElementType *Data;
         int32 ArrayNum;

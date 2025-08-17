@@ -150,40 +150,16 @@ public:
         this->ProcessEvent(Func, nullptr);
     }
 
-    inline TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>& GetSquadArray(AFortGameStateAthena* GameState) {
-        if (Fortnite_Version == 14.40)
-        {
-            return *reinterpret_cast<TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>*>(__int64(GameState) + 0x1500);
-        }
-    }
-
-    inline TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>& GetTeamArray(AFortGameStateAthena* GameState) {
-        if (Fortnite_Version == 14.40)
-        {
-            return *reinterpret_cast<TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>*>(__int64(GameState) + 0x1498);
-        }
-    }
-
-    
-    TeamsArrayContainer* GetTeamsArrayContainer()
+    inline TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>& GetSquadArray(AFortGameStateAthena* GameState)
     {
-        if (true)
-            return nullptr;
-
-        if (Fortnite_Version < 8.0) // I'm pretty sure it got added on 7.40 but idk if it is structured differently.
-            return nullptr;
-
-        static auto FriendlyFireTypeOffset = Runtime::GetOffset(this, "FriendlyFireType");
-        static int Offset = -1;
-
-        if (Offset == -1)
-        {
-            static int IncreaseBy = Engine_Version >= 424 ? 0x25 : 0x5;
-            Offset = FriendlyFireTypeOffset + IncreaseBy;
-        }
-
-        return Offset != -1 ? (TeamsArrayContainer*)(__int64(this) + Offset) : nullptr;
+        return *reinterpret_cast<TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>*>(__int64(GameState) + 0x14e0);
     }
+
+    inline TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>& GetTeamArray(AFortGameStateAthena* GameState)
+    {
+        return *reinterpret_cast<TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>*>(__int64(GameState) + 0x14a8);
+    }
+
 public:
     DEFINE_MEMBER(TArray<AFortAthenaAircraft*>, AFortGameStateAthena, Aircrafts);
     DEFINE_MEMBER(Map, AFortGameStateAthena, AllPlayerBuildableClassesIndexLookup);

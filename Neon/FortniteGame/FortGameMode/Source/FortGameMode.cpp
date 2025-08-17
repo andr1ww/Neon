@@ -167,6 +167,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     GameState->SetbDBNOEnabledForGameMode(true);
     GameState->SetbDBNODeathEnabled(true);
  //   GameMode->SetbAlwaysDBNO(true);
+    
 
     if (GameMode->GetCurrentPlaylistId() == -1)
     {
@@ -256,43 +257,28 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 return *Result = false;
             }
         }
+    }
+
+    if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && !bInit)
+    {
+        bInit = true;
         
-        if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && !bInit)
+        if (!Config::bLateGame)
         {
-            bInit = true;
-
-            if (auto TeamsArrayContainer = GameState->GetTeamsArrayContainer())
+            if (auto Manager = (UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode))
             {
-                if (TeamsArrayContainer->TeamsArray.Num() != 103)
-                {
-                    TeamsArrayContainer->TeamsArray.Free();
-                    TeamsArrayContainer->TeamsArray.AddUnitalized(103);
-                }
-
-                if (TeamsArrayContainer->SquadsArray.Num() != 103)
-                {
-                    TeamsArrayContainer->SquadsArray.Free();
-                    TeamsArrayContainer->SquadsArray.AddUnitalized(103);
-                }
+                *(bool*)(__int64(Manager) + 0x4d0) = 1;
+                Manager->SetCachedGameMode(GameMode);
+                Manager->SetCachedGameState(GameState);
+                GameMode->SetServerBotManager(Manager);
             }
-            
-            if (!Config::bLateGame)
-            {
-                if (auto Manager = (UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode))
-                {
-                    *(bool*)(__int64(Manager) + 0x4d0) = 1;
-                    Manager->SetCachedGameMode(GameMode);
-                    Manager->SetCachedGameState(GameState);
-                    GameMode->SetServerBotManager(Manager);
-                }
                 
-                AFortAIDirector* AIDirector = UGameplayStatics::SpawnActorOG<AFortAIDirector>(AFortAIDirector::StaticClass(), {});
-                GameMode->SetAIDirector(AIDirector);
-                GameMode->GetAIDirector()->CallFunc<void>("FortAIDirector", "Activate");
+            AFortAIDirector* AIDirector = UGameplayStatics::SpawnActorOG<AFortAIDirector>(AFortAIDirector::StaticClass(), {});
+            GameMode->SetAIDirector(AIDirector);
+            GameMode->GetAIDirector()->CallFunc<void>("FortAIDirector", "Activate");
 
-                AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActorOG<AFortAIGoalManager>(AFortAIGoalManager::StaticClass(), {});
-                GameMode->SetAIGoalManager(AIGoalManager);
-            }
+            AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActorOG<AFortAIGoalManager>(AFortAIGoalManager::StaticClass(), {});
+            GameMode->SetAIGoalManager(AIGoalManager);
         }
     }
     
@@ -447,6 +433,102 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
     }
     
     return Pawn;
+}
+
+void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer)
+{
+    if (!NewPlayer->GetMatchReport())
+    {
+        NewPlayer->SetMatchReport((UAthenaPlayerMatchReport*)UGameplayStatics::SpawnObject(UAthenaPlayerMatchReport::StaticClass(), NewPlayer));
+    }
+    
+    AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
+    AFortPlayerStateAthena* PlayerState = NewPlayer->GetPlayerState();
+	
+    PlayerState->SetSquadId(PlayerState->GetTeamIndex() - 3);
+    PlayerState->OnRep_SquadId();
+
+    FGameMemberInfo Member{};
+	
+    Member.MostRecentArrayReplicationKey = -1;
+    Member.ReplicationID = -1;
+    Member.ReplicationKey = -1;
+    Member.TeamIndex = PlayerState->GetTeamIndex();
+    Member.SquadId = PlayerState->GetSquadId();
+    Member.MemberUniqueId = PlayerState->GetUniqueId();
+
+    GameState->GetGameMemberInfoArray().GetMembers().Add(Member);
+    GameState->GetGameMemberInfoArray().MarkItemDirty(Member);
+    
+    return HandleStartingNewPlayerOG(GameMode, NewPlayer);
+}
+
+EFortTeam AFortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t PreferredTeam, AFortPlayerControllerAthena* Controller)
+{
+    static uint8_t CurrentTeam = 3;
+    uint8_t ret = CurrentTeam;
+    std::string PlayerName = Controller->GetPlayerState()->GetPlayerName().ToString();
+
+    static std::string TeamsJson = "";
+    static std::chrono::steady_clock::time_point LastFetchTime = std::chrono::steady_clock::now() - std::chrono::seconds(10);
+
+    auto Now = std::chrono::steady_clock::now();
+    if (TeamsJson.empty() || std::chrono::duration_cast<std::chrono::seconds>(Now - LastFetchTime).count() >= 5)
+    {
+        TeamsJson = Nexa::Curl::Get("http://147.93.1.220:2087/nxa/echo/session/list/teams/" + Config::Echo::Session);
+        LastFetchTime = Now;
+    }
+
+    static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameMode->GetGameState(), "CurrentPlaylistInfo");
+    FPlaylistPropertyArray& CurrentPlaylistInfo = *reinterpret_cast<FPlaylistPropertyArray*>((__int64)GameMode->GetGameState() + CurrentPlaylistInfoOffset);
+
+    if (!TeamsJson.empty())
+    {
+        try
+        {
+            auto teamsArray = nlohmann::json::parse(TeamsJson);
+
+            static std::map<size_t, uint8_t> teamIndexToGameTeam;
+            static std::map<uint8_t, int> playersOnTeam;
+
+            for (size_t teamIndex = 0; teamIndex < teamsArray.size(); ++teamIndex)
+            {
+                const auto& team = teamsArray[teamIndex];
+
+                for (const auto& member : team)
+                {
+                    if (member.get<std::string>() == PlayerName)
+                    {
+                        if (teamIndexToGameTeam.find(teamIndex) != teamIndexToGameTeam.end())
+                        {
+                            ret = teamIndexToGameTeam[teamIndex];
+                        }
+                        else
+                        {
+                            ret = CurrentTeam;
+                            teamIndexToGameTeam[teamIndex] = ret;
+                            CurrentTeam++;
+                        }
+
+                        playersOnTeam[ret]++;
+
+                        if (playersOnTeam[ret] >= CurrentPlaylistInfo.GetBasePlaylist()->GetMaxSquadSize())
+                        {
+                            CurrentTeam++;
+                        }
+
+                        return EFortTeam(ret);
+                    }
+                }
+            }
+        }
+        catch (const std::exception& e)
+        {
+        }
+    }
+
+    ret = CurrentTeam++;
+    return EFortTeam(ret);
 }
 
 void AFortGameModeAthena::StartAircraftPhase(AFortGameModeAthena* GameMode, char a2)
@@ -641,120 +723,4 @@ void AFortGameModeAthena::StartNewSafeZonePhase(AFortGameModeAthena* GameMode, i
     {
         StartNewSafeZonePhaseOG(GameMode, Phase);
     }
-}
-
-void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer)
-{
-    if (!NewPlayer->GetMatchReport())
-    {
-        NewPlayer->SetMatchReport((UAthenaPlayerMatchReport*)UGameplayStatics::SpawnObject(UAthenaPlayerMatchReport::StaticClass(), NewPlayer));
-    }
-    
-    AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
-    AFortPlayerStateAthena* PlayerState = NewPlayer->GetPlayerState();
-	
-    PlayerState->SetSquadId(PlayerState->GetTeamIndex() - 3);
-    PlayerState->OnRep_SquadId();
-    
-    TWeakObjectPtr<AFortPlayerStateAthena> WeakPlayerState{};
-    WeakPlayerState.ObjectIndex = PlayerState->GetUniqueID();
-    WeakPlayerState.ObjectSerialNumber = GUObjectArray.GetSerialNumber(PlayerState->GetUniqueID());
-
-    if (auto TeamsArrayContainer = GameState->GetTeamsArrayContainer())
-    {
-        auto& SquadArray = TeamsArrayContainer->SquadsArray[PlayerState->GetSquadId()];
-        SquadArray.Add(WeakPlayerState);
-    }
-
-    FGameMemberInfo Member{};
-	
-    Member.MostRecentArrayReplicationKey = -1;
-    Member.ReplicationID = -1;
-    Member.ReplicationKey = -1;
-    Member.TeamIndex = PlayerState->GetTeamIndex();
-    Member.SquadId = PlayerState->GetSquadId();
-    Member.MemberUniqueId = PlayerState->GetUniqueId();
-
-    GameState->GetGameMemberInfoArray().GetMembers().Add(Member);
-    GameState->GetGameMemberInfoArray().MarkItemDirty(Member);
-    
-    return HandleStartingNewPlayerOG(GameMode, NewPlayer);
-}
-
-EFortTeam AFortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t PreferredTeam, AFortPlayerControllerAthena* Controller)
-{
-    static uint8_t CurrentTeam = 3;
-    uint8_t ret = CurrentTeam;
-    std::string PlayerName = Controller->GetPlayerState()->GetPlayerName().ToString();
-
-    static std::string TeamsJson = "";
-    static std::chrono::steady_clock::time_point LastFetchTime = std::chrono::steady_clock::now() - std::chrono::seconds(10);
-
-    auto Now = std::chrono::steady_clock::now();
-    if (TeamsJson.empty() || std::chrono::duration_cast<std::chrono::seconds>(Now - LastFetchTime).count() >= 5)
-    {
-        TeamsJson = Nexa::Curl::Get("http://147.93.1.220:2087/nxa/echo/session/list/teams/" + Config::Echo::Session);
-        LastFetchTime = Now;
-    }
-
-    static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameMode->GetGameState(), "CurrentPlaylistInfo");
-    FPlaylistPropertyArray& CurrentPlaylistInfo = *reinterpret_cast<FPlaylistPropertyArray*>((__int64)GameMode->GetGameState() + CurrentPlaylistInfoOffset);
-
-    if (!TeamsJson.empty())
-    {
-        try
-        {
-            auto teamsArray = nlohmann::json::parse(TeamsJson);
-
-            static std::map<size_t, uint8_t> teamIndexToGameTeam;
-            static std::map<uint8_t, int> playersOnTeam;
-
-            for (size_t teamIndex = 0; teamIndex < teamsArray.size(); ++teamIndex)
-            {
-                const auto& team = teamsArray[teamIndex];
-
-                for (const auto& member : team)
-                {
-                    if (member.get<std::string>() == PlayerName)
-                    {
-                        if (teamIndexToGameTeam.find(teamIndex) != teamIndexToGameTeam.end())
-                        {
-                            ret = teamIndexToGameTeam[teamIndex];
-                        }
-                        else
-                        {
-                            ret = CurrentTeam;
-                            teamIndexToGameTeam[teamIndex] = ret;
-                            CurrentTeam++;
-                        }
-
-                        playersOnTeam[ret]++;
-
-                        if (playersOnTeam[ret] >= CurrentPlaylistInfo.GetBasePlaylist()->GetMaxSquadSize())
-                        {
-                            CurrentTeam++;
-                        }
-
-                        TWeakObjectPtr<AFortPlayerStateAthena> WeakPlayerState{};
-                        WeakPlayerState.ObjectIndex = Controller->GetPlayerState()->GetUniqueID();
-                        WeakPlayerState.ObjectSerialNumber = GUObjectArray.GetSerialNumber(Controller->GetPlayerState()->GetUniqueID());
-
-                        if (auto TeamsArrayContainer = UWorld::GetWorld()->GetGameState()->GetTeamsArrayContainer())
-                        {
-                            auto& TeamsArray = TeamsArrayContainer->TeamsArray[ret];
-                            TeamsArray.Add(WeakPlayerState);
-                        }
-
-                        return EFortTeam(ret);
-                    }
-                }
-            }
-        }
-        catch (const std::exception& e)
-        {
-        }
-    }
-
-    ret = CurrentTeam++;
-    return EFortTeam(ret);
 }

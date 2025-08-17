@@ -120,6 +120,34 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
             catch (...) {}
         }
     }
+
+	auto GameState = UWorld::GetWorld()->GetGameState();
+	/*static bool bInit = false;
+	if (!bInit)
+	{
+		GameState->GetTeamArray(GameState).Reset();
+		GameState->GetSquadArray(GameState).Reset();
+
+		for (int i = 0; i < 103; ++i)
+		{
+			TArray<TWeakObjectPtr<AFortPlayerStateAthena>> EmptyArray(4);
+			std::cout << " Max: " << EmptyArray.Max() << std::endl;
+			std::cout << " Num: " << EmptyArray.Num() << std::endl;
+			std::cout << "Index: " << i << std::endl;
+            
+			GameState->GetTeamArray(GameState).Add(EmptyArray);
+			GameState->GetSquadArray(GameState).Add(EmptyArray);
+		}
+        
+		std::cout << "Num: " << GameState->GetTeamArray(GameState).Num() << std::endl;
+		std::cout << "num2: " << GameState->GetSquadArray(GameState).Num() << std::endl;
+	}
+	TWeakObjectPtr<AFortPlayerStateAthena> WeakPlayerState{};
+	WeakPlayerState.ObjectIndex = PlayerState->GetUniqueID();
+	WeakPlayerState.ObjectSerialNumber = GUObjectArray.GetSerialNumber(PlayerState->GetUniqueID());
+
+	GameState->GetSquadArray(GameState)[PlayerState->GetSquadId()].ElementData.Add(WeakPlayerState);
+	GameState->GetTeamArray(GameState)[PlayerState->GetTeamIndex()].ElementData.Add(WeakPlayerState); */
 }
 
 void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) {
