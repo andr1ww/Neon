@@ -15,12 +15,7 @@ void AFortPlayerPawn::ServerHandlePickupInfo(AFortPlayerPawn* Pawn, FFrame& Stac
         return;
 
     Pawn->GetIncomingPickups().Add(Pickup);
-
-    Pickup->GetPickupLocationData().SetbPlayPickupSound(Params.bPlayPickupSound);
-    Pickup->GetPickupLocationData().SetFlyTime(0.4f);
-    Pickup->GetPickupLocationData().SetItemOwner(Pawn);
-    Pickup->GetPickupLocationData().SetPickupGuid(Pickup->GetPrimaryPickupItemEntry().GetItemGuid());
-    Pickup->GetPickupLocationData().SetPickupTarget(Pawn);
+    
     Pickup->CallFunc<void>("FortPickup", "OnRep_PickupLocationData");
 
     Pickup->SetbPickedUp(true);
@@ -29,37 +24,13 @@ void AFortPlayerPawn::ServerHandlePickupInfo(AFortPlayerPawn* Pawn, FFrame& Stac
 
 void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
 {
-    AFortPlayerPawn* Pawn = (AFortPlayerPawn*)Pickup->GetPickupLocationData().GetPickupTarget().Get();
+    AFortPlayerPawn* Pawn = (AFortPlayerPawn*)Pickup->GetPickupLocationData().PickupTarget;
     if (!Pawn) return CompletePickupAnimationOG(Pickup);
 
     AFortPlayerControllerAthena* PlayerController = (AFortPlayerControllerAthena*)Pawn->GetController();
     if (!PlayerController) return CompletePickupAnimationOG(Pickup);
 
-    AFortInventory::GiveItem(PlayerController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), 30, 0);
-    return CompletePickupAnimationOG(Pickup);
-}
-
-void AFortPlayerPawn::ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack)
-{
-    AFortPickup* Pickup;
-    float InFlyTime;
-    FVector InStartDirection;
-    bool bPlayPickupSound;
-    Stack.StepCompiledIn(&Pickup);
-    Stack.StepCompiledIn(&InFlyTime);
-    Stack.StepCompiledIn(&InStartDirection);
-    Stack.StepCompiledIn(&bPlayPickupSound);
-    Stack.IncrementCode();
-    
-    if (!Pawn || !Pickup || Pickup->GetbPickedUp())
-        return;
-
-    auto PlayerController = (AFortPlayerControllerAthena*)Pawn->GetController();
-    
-    if (!PlayerController || !Pickup->GetPrimaryPickupItemEntry().GetItemDefinition())
-        return;
-
-    auto WorldInventory = PlayerController->GetWorldInventory();
+        auto WorldInventory = PlayerController->GetWorldInventory();
     if (!WorldInventory)
         return;
 
@@ -141,23 +112,42 @@ void AFortPlayerPawn::ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack)
         AFortInventory::GiveItem(PlayerController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount, Pickup->GetPrimaryPickupItemEntry().GetLevel());
     }
     
-    Pawn->GetIncomingPickups().Add(Pickup);
+    return CompletePickupAnimationOG(Pickup);
+}
 
-    int32 FortPickupLocationDataSize = StaticClassImpl("FortPickupLocationData")->GetSize();
-    FFortPickupLocationData* FortPickupLocationData = (FFortPickupLocationData*)VirtualAlloc(0, FortPickupLocationDataSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+void AFortPlayerPawn::ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack)
+{
+    AFortPickup* Pickup;
+    float InFlyTime;
+    FVector InStartDirection;
+    bool bPlayPickupSound;
+    Stack.StepCompiledIn(&Pickup);
+    Stack.StepCompiledIn(&InFlyTime);
+    Stack.StepCompiledIn(&InStartDirection);
+    Stack.StepCompiledIn(&bPlayPickupSound);
+    Stack.IncrementCode();
     
-    FortPickupLocationData->SetbPlayPickupSound(bPlayPickupSound);
-    FortPickupLocationData->SetFlyTime(0.40f);
-    FortPickupLocationData->SetItemOwner(Pawn);
-    FortPickupLocationData->SetPickupGuid(Pickup->GetPrimaryPickupItemEntry().GetItemGuid());
-    FortPickupLocationData->SetPickupTarget(Pawn);
-    FortPickupLocationData->SetStartDirection((FVector_NetQuantizeNormal)InStartDirection);
-    Pickup->SetPickupLocationData(*FortPickupLocationData);
+    if (!Pawn || !Pickup || Pickup->GetbPickedUp())
+        return;
+
+    auto PlayerController = (AFortPlayerControllerAthena*)Pawn->GetController();
+    
+    if (!PlayerController || !Pickup->GetPrimaryPickupItemEntry().GetItemDefinition())
+        return;
+    
+    Pawn->GetIncomingPickups().Add(Pickup);
+    
+    Pickup->GetPickupLocationData().bPlayPickupSound = bPlayPickupSound;
+    Pickup->GetPickupLocationData().FlyTime = 0.40f;
+    Pickup->GetPickupLocationData().ItemOwner = Pawn;
+    Pickup->GetPickupLocationData().PickupGuid = Pickup->GetPrimaryPickupItemEntry().GetItemGuid();
+    Pickup->GetPickupLocationData().PickupTarget = Pawn;
+    Pickup->GetPickupLocationData().StartDirection = (FVector_NetQuantizeNormal)InStartDirection;
     Pickup->OnRep_PickupLocationData();
 
     Pickup->SetbPickedUp(true);
     Pickup->CallFunc<void>("FortPickup", "OnRep_bPickedUp");
-    Pickup->CallFunc<void>("Actor", "K2_DestroyActor");
+//    Pickup->CallFunc<void>("Actor", "K2_DestroyActor");
 }
 
 void AFortPlayerPawn::GiveItemToInventoryOwner(UObject* Object, FFrame& Stack) {

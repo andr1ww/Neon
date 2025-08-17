@@ -260,6 +260,22 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && !bInit)
         {
             bInit = true;
+
+            if (auto TeamsArrayContainer = GameState->GetTeamsArrayContainer())
+            {
+                if (TeamsArrayContainer->TeamsArray.Num() != 103)
+                {
+                    TeamsArrayContainer->TeamsArray.Free();
+                    TeamsArrayContainer->TeamsArray.AddUnitalized(103);
+                }
+
+                if (TeamsArrayContainer->SquadsArray.Num() != 103)
+                {
+                    TeamsArrayContainer->SquadsArray.Free();
+                    TeamsArrayContainer->SquadsArray.AddUnitalized(103);
+                }
+            }
+            
             if (!Config::bLateGame)
             {
                 if (auto Manager = (UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode))
@@ -639,6 +655,16 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
 	
     PlayerState->SetSquadId(PlayerState->GetTeamIndex() - 3);
     PlayerState->OnRep_SquadId();
+    
+    TWeakObjectPtr<AFortPlayerStateAthena> WeakPlayerState{};
+    WeakPlayerState.ObjectIndex = PlayerState->GetUniqueID();
+    WeakPlayerState.ObjectSerialNumber = GUObjectArray.GetSerialNumber(PlayerState->GetUniqueID());
+
+    if (auto TeamsArrayContainer = GameState->GetTeamsArrayContainer())
+    {
+        auto& SquadArray = TeamsArrayContainer->SquadsArray[PlayerState->GetSquadId()];
+        SquadArray.Add(WeakPlayerState);
+    }
 
     FGameMemberInfo Member{};
 	
@@ -651,7 +677,7 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
 
     GameState->GetGameMemberInfoArray().GetMembers().Add(Member);
     GameState->GetGameMemberInfoArray().MarkItemDirty(Member);
-
+    
     return HandleStartingNewPlayerOG(GameMode, NewPlayer);
 }
 
@@ -707,6 +733,16 @@ EFortTeam AFortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t P
                         if (playersOnTeam[ret] >= CurrentPlaylistInfo.GetBasePlaylist()->GetMaxSquadSize())
                         {
                             CurrentTeam++;
+                        }
+
+                        TWeakObjectPtr<AFortPlayerStateAthena> WeakPlayerState{};
+                        WeakPlayerState.ObjectIndex = Controller->GetPlayerState()->GetUniqueID();
+                        WeakPlayerState.ObjectSerialNumber = GUObjectArray.GetSerialNumber(Controller->GetPlayerState()->GetUniqueID());
+
+                        if (auto TeamsArrayContainer = UWorld::GetWorld()->GetGameState()->GetTeamsArrayContainer())
+                        {
+                            auto& TeamsArray = TeamsArrayContainer->TeamsArray[ret];
+                            TeamsArray.Add(WeakPlayerState);
                         }
 
                         return EFortTeam(ret);

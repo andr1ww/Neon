@@ -62,18 +62,30 @@ struct FFortItemEntry : public FFastArraySerializerItem
     DEFINE_MEMBER(FGameplayAbilitySpecHandle, FFortItemEntry, GameplayAbilitySpecHandle);
 };
 
+// NumValues: 0x0004
+enum class EFortPickupTossState : uint8
+{
+    NotTossed                                = 0,
+    InProgress                               = 1,
+    AtRest                                   = 2,
+    EFortPickupTossState_MAX                 = 3,
+};
+
 struct FFortPickupLocationData final
 {
 public:
-    DEFINE_MEMBER(FVector, FFortPickupLocationData, LootInitialPosition);
-    DEFINE_MEMBER(FVector, FFortPickupLocationData, LootFinalPosition);
-    DEFINE_MEMBER(FVector, FFortPickupLocationData, FinalTossRestLocation);
-    DEFINE_BOOL(FFortPickupLocationData, bPlayPickupSound);
-    DEFINE_MEMBER(float, FFortPickupLocationData, FlyTime);
-    DEFINE_MEMBER(TWeakObjectPtr<AFortPawn>, FFortPickupLocationData, ItemOwner);
-    DEFINE_MEMBER(TWeakObjectPtr<AFortPawn>, FFortPickupLocationData, PickupTarget);
-    DEFINE_MEMBER(FGuid, FFortPickupLocationData, PickupGuid);
-    DEFINE_MEMBER(FVector_NetQuantizeNormal, FFortPickupLocationData, StartDirection);
+	class AFortPawn*                              PickupTarget;                                      // 0x0000(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	class AFortPickup*                            CombineTarget;                                     // 0x0008(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	class AFortPawn*                              ItemOwner;                                         // 0x0010(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	struct FVector_NetQuantize10                  LootInitialPosition;                               // 0x0018(0x000C)(NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	struct FVector_NetQuantize10                  LootFinalPosition;                                 // 0x0024(0x000C)(NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	float                                         FlyTime;                                           // 0x0030(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	struct FVector_NetQuantizeNormal              StartDirection;                                    // 0x0034(0x000C)(NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	struct FVector_NetQuantize10                  FinalTossRestLocation;                             // 0x0040(0x000C)(NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	EFortPickupTossState                          TossState;                                         // 0x004C(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          bPlayPickupSound;                                  // 0x004D(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	uint8                                         Pad_4E[0x2];                                       // 0x004E(0x0002)(Fixing Size After Last Property [ Dumper-7 ])
+	struct FGuid                                  PickupGuid;                                        // 0x0050(0x0010)(ZeroConstructor, IsPlainOldData, RepSkip, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
 };
 
 class AFortPickup : public AActor

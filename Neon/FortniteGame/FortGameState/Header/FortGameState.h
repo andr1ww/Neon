@@ -106,6 +106,20 @@ public:
     DEFINE_BOOL(AFortGameStateZone, bDBNODeathEnabled)
 };
 
+struct TeamsArrayContainer // totally not stolen from rebooot
+{
+    TArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>> TeamsArray; // 13D0
+    TArray<int> TeamIdk1; // 13E0
+    TArray<int> TeamIndexesArray; // 13F0
+
+    uintptr_t idfk; //(or 2 ints) // 1400
+
+    TArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>> SquadsArray; // Index = SquadId // 1408
+    TArray<int> SquadIdk1; // 1418
+    TArray<int> SquadIdsArray; // 0x1428
+};
+
+
 class AFortGameStateAthena : public AFortGameStateZone
 {
 public:
@@ -134,6 +148,41 @@ public:
             return;
 		
         this->ProcessEvent(Func, nullptr);
+    }
+
+    inline TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>& GetSquadArray(AFortGameStateAthena* GameState) {
+        if (Fortnite_Version == 14.40)
+        {
+            return *reinterpret_cast<TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>*>(__int64(GameState) + 0x1500);
+        }
+    }
+
+    inline TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>& GetTeamArray(AFortGameStateAthena* GameState) {
+        if (Fortnite_Version == 14.40)
+        {
+            return *reinterpret_cast<TSparseArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>*>(__int64(GameState) + 0x1498);
+        }
+    }
+
+    
+    TeamsArrayContainer* GetTeamsArrayContainer()
+    {
+        if (true)
+            return nullptr;
+
+        if (Fortnite_Version < 8.0) // I'm pretty sure it got added on 7.40 but idk if it is structured differently.
+            return nullptr;
+
+        static auto FriendlyFireTypeOffset = Runtime::GetOffset(this, "FriendlyFireType");
+        static int Offset = -1;
+
+        if (Offset == -1)
+        {
+            static int IncreaseBy = Engine_Version >= 424 ? 0x25 : 0x5;
+            Offset = FriendlyFireTypeOffset + IncreaseBy;
+        }
+
+        return Offset != -1 ? (TeamsArrayContainer*)(__int64(this) + Offset) : nullptr;
     }
 public:
     DEFINE_MEMBER(TArray<AFortAthenaAircraft*>, AFortGameStateAthena, Aircrafts);

@@ -424,7 +424,7 @@ void AFortPlayerControllerAthena::ServerBeginEditingBuildingActor(AFortPlayerCon
     Stack.StepCompiledIn(&BuildingSMActor);
     Stack.IncrementCode();
 
-    if (!PlayerController || !PlayerController->GetMyFortPawn() || !BuildingSMActor || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex"))
+    if (!PlayerController || !PlayerController->GetMyFortPawn() || !BuildingSMActor || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->GetTeamIndex())
         return;
 
     FFortItemEntry* ItemEntry = nullptr;
@@ -454,6 +454,8 @@ void AFortPlayerControllerAthena::ServerBeginEditingBuildingActor(AFortPlayerCon
 	
     PlayerController->ProcessEvent(Func, &ItemEntry->GetItemGuid());
 
+	BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", PlayerController->GetPlayerState());
+
     AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->GetMyFortPawn()->GetCurrentWeapon());
     if (EditingTool)
     {
@@ -474,7 +476,7 @@ void AFortPlayerControllerAthena::ServerEditBuildingActor(AFortPlayerControllerA
     Stack.StepCompiledIn(&bMirrored);
     Stack.IncrementCode();
 
-    if (!PlayerController || !BuildingSMActor || !BuildingSMActor || !BuildingSMActor->IsA<ABuildingSMActor>() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
+    if (!PlayerController || !BuildingSMActor  || !BuildingSMActor->IsA<ABuildingSMActor>() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
 
     BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", nullptr);
 
@@ -491,8 +493,10 @@ void AFortPlayerControllerAthena::ServerEndEditingBuildingActor(AFortPlayerContr
     Stack.StepCompiledIn(&BuildingSMActor);
     Stack.IncrementCode();
 
-    if (!PlayerController || !BuildingSMActor || !BuildingSMActor || !BuildingSMActor->IsA<ABuildingSMActor>() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
-    
+    if (!PlayerController || !BuildingSMActor || !BuildingSMActor || !BuildingSMActor->IsA<ABuildingSMActor>() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->GetTeamIndex()) return;
+
+	BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", nullptr);
+	
     PlayerController->Set("FortPlayerControllerAthena", "BuildingsEdited", 
     PlayerController->Get<int32>("FortPlayerControllerAthena", "BuildingsEdited") + 1);
 }

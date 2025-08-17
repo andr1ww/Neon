@@ -814,6 +814,14 @@ class TBitArray {
         FORCEINLINE explicit TBitArray( bool bValue, int32 InNumBits )
             : MaxBits( AllocatorInstance.GetInitialCapacity() *
                        NumBitsPerDWORD ) {}
+
+        FORCEINLINE void ZeroAll()
+        {
+            for (int i = 0; i < MaxBits; i++)
+            {
+                Set(i, false, true);
+            }
+        }
         
     struct FRelativeBitReference
         {
@@ -1367,52 +1375,47 @@ public:
         }
     }
 
-    /*
-    FORCEINLINE bool RemoveAt(const int32 IndexToRemove)
+    FORCEINLINE int32_t Add(ArrayType InElement)
     {
-        LOG_INFO(LogDev, "IndexToRemove: {}", IndexToRemove);
-        LOG_INFO(LogDev, "AllocationFlags.IsSet(IndexToRemove): {}", AllocationFlags.IsSet(IndexToRemove));
-        LOG_INFO(LogDev, "Data.Num(): {}", Data.Num());
+        FSparseArrayElement Element(InElement);
 
-        if (IndexToRemove >= 0 && IndexToRemove < Data.Num() && AllocationFlags.IsSet(IndexToRemove))
+        int32_t NextFree;
+        int32_t OutIndex;
+        if (FirstFreeIndex >= 1)
         {
-            int32 PreviousFreeIndex = -1;
-            int32 NextFreeIndex = -1;
+            NextFree = Data[FirstFreeIndex].NextFreeIndex;
+            Data[FirstFreeIndex] = Element;
+            --NumFreeIndices;
 
-            LOG_INFO(LogDev, "NumFreeIndices: {}", NumFreeIndices);
+            AllocationFlags.Set(FirstFreeIndex, true);
 
-            if (NumFreeIndices == 0)
+            if (NumFreeIndices >= 1)
             {
-                FirstFreeIndex = IndexToRemove;
-                Data.at(IndexToRemove) = { -1, -1 };
-            }
-            else
-            {
-                for (auto It = AllocationFlags.begin(); It != AllocationFlags.end(); ++It)
-                {
-                    if (!It)
-                    {
-                        if (It.GetIndex() < IndexToRemove)
-                        {
-                            Data.at(IndexToRemove).PrevFreeIndex = It.GetIndex();
-                        }
-                        else if (It.GetIndex() > IndexToRemove)
-                        {
-                            Data.at(IndexToRemove).NextFreeIndex = It.GetIndex();
-                            break;
-                        }
-                    }
-                }
-            }
+                OutIndex = NextFree;
+                FirstFreeIndex = NextFree;
+                Data[NextFree].PrevFreeIndex = -1;
 
-            AllocationFlags.Set(IndexToRemove, false);
-            NumFreeIndices++;
-
-            return true;
+                return OutIndex;
+            }
         }
-        return false;
+        else
+        {
+            Data.Add(Element);
+            AllocationFlags.Set(Data.Num() - 1, true);
+
+            return Data.Num() - 1;
+        }
     }
-    */
+
+    FORCEINLINE void Reset()
+    {
+        Data.Free();
+
+        AllocationFlags.ZeroAll();
+
+        NumFreeIndices = 0;
+        FirstFreeIndex = -1;
+    }
 };
     
 template <typename InElementType> class TSetElement {
