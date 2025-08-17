@@ -548,6 +548,12 @@ std::vector<T*> GetObjectsOfClass(UClass* Class = T::StaticClass())
 			{
 				if (Object->IsA(Class))
 				{
+					if (Object->GetFName().ToString().ToString().contains("Default"))
+						continue;
+
+					if (Object->GetFName().ToString().ToString().contains("Test"))
+						continue;
+					
 					ArrayOfObjects.push_back(Cast<T>((UObject*)Object));
 				}
 			}

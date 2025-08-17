@@ -176,7 +176,7 @@ public:
     DEFINE_MEMBER(int, AFortGameModeAthena, SafeZonePhase);
     DEFINE_PTR(AFortAthenaMapInfo, AFortGameStateAthena, MapInfo);
     DEFINE_MEMBER(FGameMemberInfoArray, AFortGameStateAthena, GameMemberInfoArray);
-
+    DEFINE_MEMBER(EAthenaGamePhaseStep, AFortGameStateAthena, GamePhaseStep);
     DEFINE_MEMBER(EAthenaGamePhase, AFortGameStateAthena, GamePhase);
 public:
     DECLARE_STATIC_CLASS(AFortGameStateAthena);

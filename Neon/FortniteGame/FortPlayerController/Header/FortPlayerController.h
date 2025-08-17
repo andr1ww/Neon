@@ -164,6 +164,16 @@ public:
 	DEFINE_BOOL(UAthenaDanceItemDefinition, bMoveFollowingOnly);
 	DEFINE_MEMBER(float, UAthenaDanceItemDefinition, WalkForwardSpeed);
 	DEFINE_PTR(UClass, UAthenaDanceItemDefinition, CustomDanceAbility);
+public:
+	DECLARE_STATIC_CLASS(UAthenaDanceItemDefinition)
+	DECLARE_DEFAULT_OBJECT(UAthenaDanceItemDefinition)
+};
+
+class UAthenaEmojiItemDefinition : public UAthenaDanceItemDefinition
+{
+public:
+	DECLARE_STATIC_CLASS(UAthenaEmojiItemDefinition)
+	DECLARE_DEFAULT_OBJECT(UAthenaEmojiItemDefinition)
 };
 
 class UAthenaSprayItemDefinition : public UAthenaDanceItemDefinition

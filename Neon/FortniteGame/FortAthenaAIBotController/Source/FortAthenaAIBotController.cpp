@@ -6,6 +6,7 @@
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 #include "FortniteGame/FortServerBotManager/Header/FortServerBotManager.h"
+#include "Neon/TickService/FortAthenaAI/Header/FortAthenaAI.h"
 
 void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 	static std::vector<UAthenaCharacterItemDefinition*> Characters = std::vector<UAthenaCharacterItemDefinition*>();
@@ -26,7 +27,7 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 
 	auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
 	
-	static TArray<AActor*> PlayerStarts = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), AFortAthenaVehicleSpawner::StaticClass());
+	static TArray<AActor*> PlayerStarts = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), AFortPlayerStartWarmup::StaticClass());
 	if (PlayerStarts.Num() == 0) {
 		return;
 	}
@@ -40,33 +41,41 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		FVector Loc = BotSpawn->GetActorLocation();
 		Loc.Z += 250;
 		
-		AFortPlayerPawn* Pawn = GameMode->GetServerBotManager()->GetCachedBotMutator()->SpawnBot(BotBP, BotSpawn, Loc, {}, false);
+		AFortPlayerPawn* Pawn = UGameplayStatics::SpawnActorOG<AFortPlayerPawnAthena>(BotBP, Loc, {});
 		AFortAthenaAIBotController* PC = (AFortAthenaAIBotController*)Pawn->GetController();
 
 		if (Characters.size() != 0)
 		{
-			UAthenaCharacterItemDefinition* CID = Characters[rand() % (Characters.size() - 1)];
-			if (CID && FortLootPackage::IsValidPointer(CID)) {
-				if (!FortLootPackage::IsValidPointer(CID->GetHeroDefinition())) continue;
-				TArray<TSoftObjectPtr<UFortHeroSpecialization>> Specializations = CID->GetHeroDefinition()->GetSpecializations();
-				if (Specializations.Num() == 0) continue;
-				for (TSoftObjectPtr<UFortHeroSpecialization> Spec : Specializations)
-				{
-					if (Spec.IsValid())
+			UAthenaCharacterItemDefinition* CID = nullptr;
+			bool Found = false;
+    
+			while (!Found && Characters.size() > 0) {
+				int randomIndex = rand() % Characters.size();
+				CID = Characters[randomIndex];
+        
+				if (CID && FortLootPackage::IsValidPointer(CID) && FortLootPackage::IsValidPointer(CID->GetHeroDefinition())) {
+					Found = true;
+					TArray<TSoftObjectPtr<UFortHeroSpecialization>> Specializations = CID->GetHeroDefinition()->GetSpecializations();
+					for (TSoftObjectPtr<UFortHeroSpecialization> Spec : Specializations)
 					{
-						auto SpecDef = Spec.Get(UFortHeroSpecialization::StaticClass(), true);
-						for (int32 j = 0; j < SpecDef->GetCharacterParts().Num(); j++)
+						if (Spec.IsValid())
 						{
-							UCustomCharacterPart* Part = SpecDef->GetCharacterParts()[j].Get(UCustomCharacterPart::StaticClass(), true); 
-							if (Part) {
-								Pawn->CallFunc<void>("FortPlayerPawn", "ServerChoosePart", Part->GetCharacterPartType(), Part);
+							auto SpecDef = Spec.Get(UFortHeroSpecialization::StaticClass(), true);
+							for (int32 j = 0; j < SpecDef->GetCharacterParts().Num(); j++)
+							{
+								UCustomCharacterPart* Part = SpecDef->GetCharacterParts()[j].Get(UCustomCharacterPart::StaticClass(), true); 
+								if (Part) {
+									Pawn->CallFunc<void>("FortPlayerPawn", "ServerChoosePart", Part->GetCharacterPartType(), Part);
+								}
 							}
 						}
 					}
+				} else {
+					Characters.erase(Characters.begin() + randomIndex);
 				}
 			}
 		}
-
+		
 		if (!PC->GetInventory()) {
 			PC->SetInventory(UGameplayStatics::SpawnActorOG<AFortInventory>(AFortInventory::StaticClass(), {}, {}, PC));
 		}
@@ -86,13 +95,17 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		}
 
 		static UFortWeaponMeleeItemDefinition* PickDef = Runtime::StaticLoadObject<UFortWeaponMeleeItemDefinition>("/Game/Athena/Items/Weapons/WID_Harvest_Pickaxe_Athena_C_T01.WID_Harvest_Pickaxe_Athena_C_T01");
-		/*if (Pickaxes.size() != 0) {
-			auto Pickaxe = (UFortWeaponMeleeItemDefinition*)Pickaxes[rand() % (Pickaxes.size() - 1)];
-			if (FortLootPackage::IsValidPointer(Pickaxe))
-			{
-				PickDef = Pickaxe;
+		bool Valid = false;
+		if (Pickaxes.size() > 0) {
+			while (!Valid) {
+				auto Pickaxe = Pickaxes[rand() % Pickaxes.size()];
+				if (FortLootPackage::IsValidPointer(Pickaxe))
+				{
+					PickDef = Pickaxe->GetWeaponDefinition();
+					Valid = true;
+				}
 			}
-		}*/
+		}
 		
 		if (PickDef) {
 			UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(PC, PickDef, 1, 1, 0);
@@ -161,6 +174,7 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 				}
 			}
 		}
+		TickService::FortAthenaAIService::AddToService(PC, Pawn);
 	}
 }
 

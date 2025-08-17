@@ -181,23 +181,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
             Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhase"), (uint8)EAthenaGamePhase::SafeZones);
         }
 
-        if (!bRanBehaviorTree) {
-            BehaviorTreeService::BotBehavior NewBehavior;
-            NewBehavior.Context.Controller = Controller;
-            NewBehavior.Context.Pawn = Ret;
-            NewBehavior.Context.PlayerState = PlayerState;
-            
-            BehaviorTree* BehaviorTree = BT_MANG2::ConstructTree(NewBehavior.Context, true);
-            if (BehaviorTree)
-            {
-                NewBehavior.BehaviorTree = BehaviorTree;
-                BehaviorTreeService::AIToTick.Add(NewBehavior);
-            } else
-            {
-                UE_LOG(LogNeon, Warning, "Could not construct behaviortree!");
-            }
-        }
-        
+
         return Ret;
     }
 }

@@ -171,13 +171,13 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     static bool bInitializedTeams = false;
     if (!bInitializedTeams)
     {
-        GameState->GetTeamArray().Free();
+      //  GameState->GetTeamArray().Free();
        // GameState->GetSquadArray().Free();
 
         for (int i = 0; i < 103; ++i)
         {
-            TArray<TWeakObjectPtr<AFortPlayerStateAthena>> TeamArray(2);
-            GameState->GetTeamArray().Add(TeamArray);
+        //    TArray<TWeakObjectPtr<AFortPlayerStateAthena>> TeamArray(2);
+          //  GameState->GetTeamArray().Add(TeamArray);
        //     GameState->GetSquadArray().Add(TeamArray);
         }
 
@@ -479,7 +479,7 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
     WeakObjectPtr.ObjectIndex = PlayerState->GetUniqueID();
     WeakObjectPtr.ObjectSerialNumber = GUObjectArray.GetSerialNumber(PlayerState->GetUniqueID());
   //  auto& ElementData1 = GameState->GetSquadArray()[PlayerState->GetSquadId()];
-    auto& ElementData2 = GameState->GetTeamArray()[PlayerState->GetTeamIndex()];
+  //  auto& ElementData2 = GameState->GetTeamArray()[PlayerState->GetTeamIndex()];
     cout << "SerialNumber: " << WeakObjectPtr.ObjectSerialNumber << std::endl;
     //ElementData1.Add(WeakObjectPtr);
    // ElementData2.Add(WeakObjectPtr);

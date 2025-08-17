@@ -214,6 +214,7 @@
     <ClInclude Include="Neon\Nexa\NexaAuth.h" />
     <ClInclude Include="Neon\Nexa\NexaHelpers.h" />
     <ClInclude Include="Neon\Runtime\Runtime.h" />
+    <ClInclude Include="Neon\TickService\FortAthenaAI\Header\FortAthenaAI.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SDK\include\SDK.h" />
     <ClInclude Include="SDK\include\sdk\CoreObject_classes.h" />
@@ -255,6 +256,7 @@
     <ClCompile Include="Neon\Nexa\Curl\Curl.cpp" />
     <ClCompile Include="Neon\Nexa\Echo\Echo.cpp" />
     <ClCompile Include="Neon\Nexa\NexaAuth.cpp" />
+    <ClCompile Include="Neon\TickService\FortAthenaAI\Source\FortAthenaAI.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

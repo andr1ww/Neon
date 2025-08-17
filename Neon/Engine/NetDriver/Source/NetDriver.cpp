@@ -8,6 +8,7 @@
 #include "Neon/Finder/Header/Finder.h"
 #include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
 #include "FortniteGame/BehaviorTree/Header/BehaviorTreeService.h"
+#include "Neon/TickService/FortAthenaAI/Header/FortAthenaAI.h"
 
 UWorld* UWorld::GetWorld()
 {
@@ -392,6 +393,8 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
                 }
             }
         }
+
+        TickService::FortAthenaAIService::Tick();
         
         if (!bStartedBus)
         {
@@ -403,7 +406,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             {
                 if (UKismetMathLibrary::RandomBoolWithWeight(0.05f))
                 {
-          //          AFortAthenaAIBotController::SpawnPlayerBot(1);
+                    AFortAthenaAIBotController::SpawnPlayerBot(1);
                 }
             }
             
