@@ -1,6 +1,9 @@
 #pragma once
 #include "pch.h"
+
+#include "Engine/Rotator/Header/Rotator.h"
 #include "Engine/Text/Header/Text.h"
+#include "Engine/Vector/Header/Vector.h"
 
 class UKismetMathLibrary final : public UObject {
 private:
@@ -34,6 +37,35 @@ public:
         return KismetMathLibrary_RandomBoolWithWeight.ReturnValue;
     }
 
+    static FRotator FindLookAtRotation(const struct FVector& Start, const struct FVector& Target) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetMathLibrary", "FindLookAtRotation");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return 0;
+
+        struct KismetMathLibrary_RandomIntegerInRange final
+        {
+        public:
+            struct FVector  Start;
+             struct FVector Target;
+            FRotator                                         ReturnValue;
+        };
+        KismetMathLibrary_RandomIntegerInRange Params;
+        Params.Start = std::move(Start);
+        Params.Target = std::move(Target);
+
+        static UObject* Object = nullptr;
+        if (!Object) Object = SDK::StaticClassImpl("KismetMathLibrary")->GetClassDefaultObject();
+
+        Object->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+
+
     static int32 RandomIntegerInRange(int32 min_0, int32 max_0) {
         static class UFunction* Func = nullptr;
         SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetMathLibrary", "RandomIntegerInRange");
@@ -62,6 +94,60 @@ public:
         return Params.ReturnValue;
     }
 
+    static FVector GetDirectionUnitVector(const struct FVector& From, const struct FVector& To) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetMathLibrary", "GetDirectionUnitVector");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return FVector();
+
+        struct KismetMathLibrary_GetDirectionUnitVector final
+        {
+        public:
+            struct FVector                                From;                                              // 0x0000(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            struct FVector                                To;                                                // 0x000C(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            struct FVector                                ReturnValue;                                       // 0x0018(0x000C)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        };
+        KismetMathLibrary_GetDirectionUnitVector Params;
+        Params.From = std::move(From);
+        Params.To = std::move(To);
+
+        static UObject* Object = nullptr;
+        if (!Object) Object = SDK::StaticClassImpl("KismetMathLibrary")->GetClassDefaultObject();
+
+        Object->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+
+    static FVector NegateVector(const struct FVector& A) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetMathLibrary", "NegateVector");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return FVector();
+
+        struct KismetMathLibrary_NegateVector final
+        {
+        public:
+            struct FVector                                A;                                                 // 0x0000(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            struct FVector                                ReturnValue;                                       // 0x000C(0x000C)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        };
+        KismetMathLibrary_NegateVector Params;
+        Params.A = std::move(A);
+
+        static UObject* Object = nullptr;
+        if (!Object) Object = SDK::StaticClassImpl("KismetMathLibrary")->GetClassDefaultObject();
+
+        Object->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+    
     static float RandomFloatInRange(int32 min_0, int32 max_0) {
         static class UFunction* Func = nullptr;
         SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetMathLibrary", "RandomFloatInRange");

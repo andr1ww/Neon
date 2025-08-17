@@ -6,6 +6,7 @@
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 #include "FortniteGame/FortServerBotManager/Header/FortServerBotManager.h"
+#include "Neon/TickService/FortAthenaAI/Names.h"
 #include "Neon/TickService/FortAthenaAI/Header/FortAthenaAI.h"
 
 void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
@@ -26,7 +27,8 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 	}
 
 	auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
-	
+	auto GameState = UWorld::GetWorld()->GetGameState();
+
 	static TArray<AActor*> PlayerStarts = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), AFortPlayerStartWarmup::StaticClass());
 	if (PlayerStarts.Num() == 0) {
 		return;
@@ -42,8 +44,12 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		Loc.Z += 250;
 		
 		AFortPlayerPawn* Pawn = UGameplayStatics::SpawnActorOG<AFortPlayerPawnAthena>(BotBP, Loc, {});
-		AFortAthenaAIBotController* PC = (AFortAthenaAIBotController*)Pawn->GetController();
+		AFortAthenaAIBotController* Controller = (AFortAthenaAIBotController*)Pawn->GetController();
 
+		GameMode->GetAlivePlayers().Add(Cast<AFortPlayerControllerAthena>(Controller));
+		++GameState->GetPlayersLeft();
+		GameState->OnRep_PlayersLeft();
+		
 		if (Characters.size() != 0)
 		{
 			UAthenaCharacterItemDefinition* CID = nullptr;
@@ -76,8 +82,8 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 			}
 		}
 		
-		if (!PC->GetInventory()) {
-			PC->SetInventory(UGameplayStatics::SpawnActorOG<AFortInventory>(AFortInventory::StaticClass(), {}, {}, PC));
+		if (!Controller->GetInventory()) {
+			Controller->SetInventory(UGameplayStatics::SpawnActorOG<AFortInventory>(AFortInventory::StaticClass(), {}, {}, Controller));
 		}
 
 		auto& StartingItemsArray = GameMode->GetStartingItems();
@@ -91,7 +97,7 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 				break;
 			}
     
-	//		AFortInventory::GiveItem(PC, Item->GetItem(), Item->GetCount(), 1, 1);
+	//		AFortInventory::GiveItem(Controller, Item->GetItem(), Item->GetCount(), 1, 1);
 		}
 
 		static UFortWeaponMeleeItemDefinition* PickDef = Runtime::StaticLoadObject<UFortWeaponMeleeItemDefinition>("/Game/Athena/Items/Weapons/WID_Harvest_Pickaxe_Athena_C_T01.WID_Harvest_Pickaxe_Athena_C_T01");
@@ -108,73 +114,85 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		}
 		
 		if (PickDef) {
-			UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(PC, PickDef, 1, 1, 0);
+			UFortWorldItem* Item = (UFortWorldItem*)AFortInventory::GiveItem(Controller, PickDef, 1, 1, 0);
 			if (Item) {
 				Pawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry().GetItemGuid(), Item->GetItemEntry().GetTrackerGuid(), false);
 				//Pawn->CallFunc<void>("FortPawn", "EquipWeaponDefinition", Item->GetItemEntry().GetItemDefinition(), Item->GetItemEntry(), false);
 			}
 		}
 
-		for (size_t i = 0; i < PC->GetDigestedBotSkillSets().Num(); i++)
+		for (size_t i = 0; i < Controller->GetDigestedBotSkillSets().Num(); i++)
 		{
-			if (PC->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotAimingDigestedSkillSet::StaticClass()))
+			if (Controller->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotAimingDigestedSkillSet::StaticClass()))
 			{
-				PC->Set("FortAthenaAIBotController", "CacheAimingDigestedSkillSet", (UFortAthenaAIBotAimingDigestedSkillSet*)PC->GetDigestedBotSkillSets()[i]);
+				Controller->Set("FortAthenaAIBotController", "CacheAimingDigestedSkillSet", (UFortAthenaAIBotAimingDigestedSkillSet*)Controller->GetDigestedBotSkillSets()[i]);
 			}
 
-			if (PC->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotHarvestDigestedSkillSet::StaticClass()))
+			if (Controller->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotHarvestDigestedSkillSet::StaticClass()))
 			{
-				PC->Set("FortAthenaAIBotController", "CacheHarvestDigestedSkillSet", (UFortAthenaAIBotHarvestDigestedSkillSet*)PC->GetDigestedBotSkillSets()[i]);
+				Controller->Set("FortAthenaAIBotController", "CacheHarvestDigestedSkillSet", (UFortAthenaAIBotHarvestDigestedSkillSet*)Controller->GetDigestedBotSkillSets()[i]);
 			}
 	
-			if (PC->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotInventoryDigestedSkillSet::StaticClass()))
+			if (Controller->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotInventoryDigestedSkillSet::StaticClass()))
 			{
-				PC->Set("FortAthenaAIBotController", "CacheInventoryDigestedSkillSet", (UFortAthenaAIBotInventoryDigestedSkillSet*)PC->GetDigestedBotSkillSets()[i]);
+				Controller->Set("FortAthenaAIBotController", "CacheInventoryDigestedSkillSet", (UFortAthenaAIBotInventoryDigestedSkillSet*)Controller->GetDigestedBotSkillSets()[i]);
 			}
 
-			if (PC->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotLootingDigestedSkillSet::StaticClass()))
+			if (Controller->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotLootingDigestedSkillSet::StaticClass()))
 			{
-				PC->Set("FortAthenaAIBotController", "CacheLootingSkillSet", (UFortAthenaAIBotLootingDigestedSkillSet*)PC->GetDigestedBotSkillSets()[i]);
+				Controller->Set("FortAthenaAIBotController", "CacheLootingSkillSet", (UFortAthenaAIBotLootingDigestedSkillSet*)Controller->GetDigestedBotSkillSets()[i]);
 			}
 
-			if (PC->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotMovementDigestedSkillSet::StaticClass()))
+			if (Controller->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotMovementDigestedSkillSet::StaticClass()))
 			{
-				PC->Set("FortAthenaAIBotController", "CacheMovementSkillSet", (UFortAthenaAIBotMovementDigestedSkillSet*)PC->GetDigestedBotSkillSets()[i]);
+				Controller->Set("FortAthenaAIBotController", "CacheMovementSkillSet", (UFortAthenaAIBotMovementDigestedSkillSet*)Controller->GetDigestedBotSkillSets()[i]);
 			}
 
-			if (PC->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotPerceptionDigestedSkillSet::StaticClass()))
+			if (Controller->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotPerceptionDigestedSkillSet::StaticClass()))
 			{
-				PC->Set("FortAthenaAIBotController", "CachePerceptionDigestedSkillSet", (UFortAthenaAIBotPerceptionDigestedSkillSet*)PC->GetDigestedBotSkillSets()[i]);
+				Controller->Set("FortAthenaAIBotController", "CachePerceptionDigestedSkillSet", (UFortAthenaAIBotPerceptionDigestedSkillSet*)Controller->GetDigestedBotSkillSets()[i]);
 			}
 
-			if (PC->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotPlayStyleDigestedSkillSet::StaticClass()))
+			if (Controller->GetDigestedBotSkillSets()[i]->IsA(UFortAthenaAIBotPlayStyleDigestedSkillSet::StaticClass()))
 			{
-				PC->Set("FortAthenaAIBotController", "CachePlayStyleSkillSet", (UFortAthenaAIBotPlayStyleDigestedSkillSet*)PC->GetDigestedBotSkillSets()[i]);
+				Controller->Set("FortAthenaAIBotController", "CachePlayStyleSkillSet", (UFortAthenaAIBotPlayStyleDigestedSkillSet*)Controller->GetDigestedBotSkillSets()[i]);
 			}
 		}
 
 		if (BehaviorTree)
 		{
-			UBlackboardComponent* Blackboard = PC->GetBlackboard();
+			UBlackboardComponent* Blackboard = Controller->GetBlackboard();
 			
-			PC->UseBlackboard(PC->GetBehaviorTree()->GetBlackboardAsset(), &Blackboard);
-			PC->OnUsingBlackBoard(Blackboard, PC->GetBehaviorTree()->GetBlackboardAsset());
+			Controller->UseBlackboard(Controller->GetBehaviorTree()->GetBlackboardAsset(), &Blackboard);
+			Controller->OnUsingBlackBoard(Blackboard, Controller->GetBehaviorTree()->GetBlackboardAsset());
 
-			UFortServerBotManagerAthena::RunBehaviorTree(PC, BehaviorTree);
+			UFortServerBotManagerAthena::RunBehaviorTree(Controller, BehaviorTree);
 
 			if (auto System = UWorld::GetWorld()->GetNavigationSystem())
 			{
 				if (auto Nav = System->GetMainNavData())
 				{
-					PC->GetPathFollowingComponent()->SetMyNavData(Nav);
-					PC->GetPathFollowingComponent()->CallFunc<void>("PathFollowingComponent", "OnNavDataRegistered", Nav);
-					PC->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "Activate", true);
-					PC->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "SetActivate", true, true);
-					PC->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "OnRep_IsActive");
+					Controller->GetPathFollowingComponent()->SetMyNavData(Nav);
+					Controller->GetPathFollowingComponent()->CallFunc<void>("PathFollowingComponent", "OnNavDataRegistered", Nav);
+					Controller->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "Activate", true);
+					Controller->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "SetActivate", true, true);
+					Controller->GetPathFollowingComponent()->CallFunc<void>("ActorComponent", "OnRep_IsActive");
 				}
 			}
 		}
-		TickService::FortAthenaAIService::AddToService(PC, Pawn);
+		
+		if (Names.size() != 0) {
+			std::string Name = Names[rand() % Names.size()];
+			Names.erase(std::find(Names.begin(), Names.end(), Name));
+
+			std::wstring wideString(MultiByteToWideChar(CP_UTF8, 0, Name.c_str(), Name.length(), nullptr, 0), 0);
+			MultiByteToWideChar(CP_UTF8, 0, Name.c_str(), Name.length(), &wideString[0], wideString.length());
+
+			GameMode->CallFunc<void>("GameModeBase", "ChangeName", Controller, FString(wideString.c_str()), true);
+			Controller->GetPlayerState()->CallFunc<void>("PlayerState", "OnRep_PlayerName");
+		}
+		
+		TickService::FortAthenaAIService::AddToService(Controller, Pawn);
 	}
 }
 
@@ -182,11 +200,11 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
 {
     if (Controller->GetPawn() && InstigatedBy)
     {
-	    AFortInventory* PCInventory = Controller->GetInventory();
+	    AFortInventory* ControllerInventory = Controller->GetInventory();
         
-    	if (PCInventory != nullptr)
+    	if (ControllerInventory != nullptr)
     	{
-    		FFortItemList& Inventory = PCInventory->GetInventory();
+    		FFortItemList& Inventory = ControllerInventory->GetInventory();
     		TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
     		for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); ++i)
     		{

@@ -8,12 +8,46 @@ FVector AActor::GetActorLocation()
 
 FVector AActor::GetActorForwardVector()
 {
-    return this->CallFunc<FVector>("Actor","GetActorForwardVector");
+    static SDK::UFunction* Func = nullptr;
+    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Actor", "GetActorForwardVector");
+
+    if (Func == nullptr)
+        Func = Info.Func;
+    if (!Func)
+        return FVector();
+
+    struct Actor_K2_GetActorLocation final
+    {
+    public:
+        FVector ReturnValue;
+    };
+    Actor_K2_GetActorLocation Params;
+
+    this->ProcessEvent(Func, &Params);
+
+    return Params.ReturnValue;
 }
 
 FVector AActor::GetActorUpVector()
 {
-    return this->CallFunc<FVector>("Actor","GetActorUpVector");
+    static SDK::UFunction* Func = nullptr;
+    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Actor", "GetActorUpVector");
+
+    if (Func == nullptr)
+        Func = Info.Func;
+    if (!Func)
+        return FVector();
+
+    struct Actor_K2_GetActorLocation final
+    {
+    public:
+        FVector ReturnValue;
+    };
+    Actor_K2_GetActorLocation Params;
+
+    this->ProcessEvent(Func, &Params);
+
+    return Params.ReturnValue;
 }
 
 FVector AActor::GetActorRightVector()
@@ -94,6 +128,31 @@ FTransform AActor::GetTransform()
         FTransform ReturnValue;
     };
     Actor_GetTransform Params;
+
+    this->ProcessEvent(Func, &Params);
+
+    return Params.ReturnValue;
+}
+
+float AActor::GetDistanceTo(AActor* Actor)
+{
+    static SDK::UFunction* Func = nullptr;
+    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Actor", "GetDistanceTo");
+
+    if (Func == nullptr)
+        Func = Info.Func;
+    if (!Func)
+        return false;
+
+    struct Actor_GetDistanceTo final
+    {
+    public:
+        const class AActor*                           OtherActor;                                        // 0x0000(0x0008)(ConstParm, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        float                                         ReturnValue;                                       // 0x0008(0x0004)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        uint8                                         Pad_C[0x4];                                        // 0x000C(0x0004)(Fixing Struct Size After Last Property [ Dumper-7 ])
+    };
+    Actor_GetDistanceTo Params;
+    Params.OtherActor = std::move(Actor);
 
     this->ProcessEvent(Func, &Params);
 

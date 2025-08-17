@@ -288,6 +288,13 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 GameMode->SetServerBotManager(Manager);
             }
                 
+            auto BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
+            GameMode->GetServerBotManager()->SetCachedBotMutator(BotMutator);
+            BotMutator->Set("FortAthenaMutator", "CachedGameMode", GameMode);
+            BotMutator->Set("FortAthenaMutator", "CachedGameState", GameState);
+            FBotMutator::Set(BotMutator);
+            GameMode->SetServerBotManagerClass(UFortServerBotManagerAthena::StaticClass());
+            
             AFortAIDirector* AIDirector = UGameplayStatics::SpawnActorOG<AFortAIDirector>(AFortAIDirector::StaticClass(), {});
             GameMode->SetAIDirector(AIDirector);
             GameMode->GetAIDirector()->CallFunc<void>("FortAIDirector", "Activate");

@@ -150,6 +150,19 @@ public:
         this->ProcessEvent(Func, nullptr);
     }
 
+    void OnRep_PlayersLeft()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortGameStateAthena", "OnRep_PlayersLeft");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+		
+        this->ProcessEvent(Func, nullptr);
+    }
+
     inline TArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>& GetSquadArray()
     {
         return *reinterpret_cast<TArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>>*>(__int64(this) + 0x14e0);
@@ -161,6 +174,7 @@ public:
     }
 
 public:
+    DEFINE_MEMBER(int, AFortGameStateAthena, PlayersLeft)
     DEFINE_MEMBER(TArray<AFortAthenaAircraft*>, AFortGameStateAthena, Aircrafts);
     DEFINE_MEMBER(Map, AFortGameStateAthena, AllPlayerBuildableClassesIndexLookup);
     DEFINE_MEMBER(TArray<TSubclassOf<ABuildingActor>>, UWorld, BuildingActorClasses);

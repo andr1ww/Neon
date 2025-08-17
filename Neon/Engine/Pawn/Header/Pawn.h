@@ -6,7 +6,16 @@
 class AController;
 class APlayerState;
 
-class UNavMovementComponent : public UObject
+class UMovementComponent : public UObject
+{
+public:
+    DEFINE_MEMBER(FVector, UMovementComponent, Velocity);
+public:
+    DECLARE_STATIC_CLASS(UMovementComponent)
+    DECLARE_DEFAULT_OBJECT(UMovementComponent)
+};
+
+class UNavMovementComponent : public UMovementComponent
 {
 public:
     bool IsFlying()
@@ -90,5 +99,31 @@ public:
         this->ProcessEvent(Func, &Params);
 
         return Params.ReturnValue;
+    }
+
+    void AddMovementInput(const struct FVector& WorldDirection, float ScaleValue, bool bForce)
+    {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Pawn", "AddMovementInput");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct Pawn_AddMovementInput final
+        {
+        public:
+            struct FVector                                WorldDirection;                                    // 0x0000(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            float                                         ScaleValue;                                        // 0x000C(0x0004)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            bool                                          bForce;                                            // 0x0010(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            uint8                                         Pad_11[0x3];                                       // 0x0011(0x0003)(Fixing Struct Size After Last Property [ Dumper-7 ])
+        } Parms;
+        
+        Parms.WorldDirection = std::move(WorldDirection);
+        Parms.ScaleValue = ScaleValue;
+        Parms.bForce = bForce;
+
+        this->ProcessEvent(Func, &Parms);
     }
 };

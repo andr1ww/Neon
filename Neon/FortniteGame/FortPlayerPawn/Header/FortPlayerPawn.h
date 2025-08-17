@@ -380,6 +380,7 @@ public:
 class AFortPlayerPawn : public AFortPawn
 {
 public:
+	DEFINE_BOOL(AFortPlayerPawn, bIsSkydiving);
 	DEFINE_MEMBER(FGameplayTag, AFortPlayerPawn, EventReviveTag)
 	DEFINE_MEMBER(TArray<class AFortPickup*>, AFortPlayerPawn, IncomingPickups); 
     DEFINE_PTR(FFortAthenaLoadout, AFortPlayerPawn, CosmeticLoadout);

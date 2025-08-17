@@ -130,6 +130,25 @@ public:
         this->ProcessEvent(Func, &Params);
     }
 
+    void K2_SetFocalPoint(struct FVector& FP) {
+            static class UFunction* Func = nullptr;
+            SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("AIController", "K2_SetFocalPoint");
+    
+            if (Func == nullptr)
+                Func = Info.Func;
+            if (!Func)
+                return;
+    
+            struct
+            {
+                struct FVector FP;
+            } Params;
+    		Params.FP = FP;
+    
+            this->ProcessEvent(Func, &Params);
+        }
+    
+
     EPathFollowingRequestResult MoveToActor(class AActor* Goal, float AcceptanceRadius, bool bStopOnOverlap, bool bUsePathfinding, bool bCanStrafe, TSubclassOf<class UNavigationQueryFilter> FilterClass, bool bAllowPartialPath) {
         static class UFunction* Func = nullptr;
         SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("AIController", "MoveToActor");
@@ -311,6 +330,18 @@ public:
     void BlueprintOnBehaviorTreeStarted() {
         static class SDK::UFunction* Func = nullptr;
         SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortAthenaAIBotController", "BlueprintOnBehaviorTreeStarted");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        this->ProcessEvent(Func, nullptr);
+    }
+
+    void ThankBusDriver() {
+        static class SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortAthenaAIBotController", "ThankBusDriver");
 
         if (Func == nullptr)
             Func = Info.Func;

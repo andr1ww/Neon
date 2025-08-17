@@ -215,6 +215,7 @@
     <ClInclude Include="Neon\Nexa\NexaHelpers.h" />
     <ClInclude Include="Neon\Runtime\Runtime.h" />
     <ClInclude Include="Neon\TickService\FortAthenaAI\Header\FortAthenaAI.h" />
+    <ClInclude Include="Neon\TickService\FortAthenaAI\Names.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SDK\include\SDK.h" />
     <ClInclude Include="SDK\include\sdk\CoreObject_classes.h" />

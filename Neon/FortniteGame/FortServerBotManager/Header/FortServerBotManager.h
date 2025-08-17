@@ -353,6 +353,10 @@ public:
     
         return FortAthenaMutator_Bots_SpawnBot_Params.ReturnValue;
     }
+
+public:
+    DECLARE_STATIC_CLASS(AFortAthenaMutator_Bots)
+    DECLARE_DEFAULT_OBJECT(AFortAthenaMutator_Bots)
 };
 
 struct FFortAthenaAIBotRunTimeCustomizationData final
