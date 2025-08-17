@@ -99,14 +99,13 @@ void TickService::FortAthenaAIService::Tick()
             AI.Pawn->K2_TeleportTo(AI.Target, {});
             AI.bSkydiving = false;
         }
-
+        
         if (AI.bSkydiving)
         {
             const FVector BotPos = AI.Pawn->K2_GetActorLocation();
             FVector DirectionXY = AI.Target - BotPos;
             DirectionXY.Z = 0;
-            float DistanceXY = DirectionXY.Size();
-            DirectionXY.Normalize();
+            DirectionXY.Normalize(); 
 
             if (auto* MoveComp = AI.Pawn->GetMovementComponent())
             {
@@ -119,20 +118,20 @@ void TickService::FortAthenaAIService::Tick()
 
                 if (AI.Pawn->GetbIsSkydiving())
                 {
-                    float MaxSpeedXY = 2000.f;
+                    float SpeedXY = 2000.f;
+
+                    float DistZ = std::abs(BotPos.Z - AI.Target.Z);
+
                     float MaxSpeedZ = 5000.f;
+                    float MinSpeedZ = 500.f;
+                    float SpeedZ = clamp(DistZ * 5.f, MinSpeedZ, MaxSpeedZ); 
 
-                    float SpeedXY = min(MaxSpeedXY, DistanceXY * 2.f);
-
-                    float DistanceZ = AI.Target.Z - BotPos.Z;
-                    float SpeedZ = min(MaxSpeedZ, std::abs(DistanceZ) * 2.f);
-
-                    DesiredVelocity = DirectionXY * SpeedXY;
-                    DesiredVelocity.Z = std::copysign(SpeedZ, DistanceZ); 
+                    DesiredVelocity = DirectionXY * SpeedXY; 
+                    DesiredVelocity.Z = -SpeedZ;             
                 }
                 else
                 {
-                    DesiredVelocity = AI.OldVelocity;
+                    DesiredVelocity = AI.OldVelocity; 
                 }
 
                 MoveComp->SetVelocity(DesiredVelocity);
