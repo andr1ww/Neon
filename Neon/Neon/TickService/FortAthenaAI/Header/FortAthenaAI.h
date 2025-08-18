@@ -30,6 +30,7 @@ struct FortAthenaAI
     float LastEmoteTime = 0.0f;
     FVector OldVelocity = FVector(0,0,0);
     AActor* TargetLoot = nullptr;
+    AActor* CurrentFocus = nullptr;
     int32 LastFrame = 0;
 };
 

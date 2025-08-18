@@ -84,23 +84,20 @@ void TickService::FortAthenaAIService::Tick()
 
         if (GamePhase == EAthenaGamePhase::Warmup)
         {
-            if (AI.LastFrame % 200 == 0)
+            if (AI.LastFrame % 10 == 0)
             {
                 WarmupPhase(AI, CurrentTime);
             }
         }
         else if (GamePhase == EAthenaGamePhase::Aircraft)
         {
-            if (AI.LastFrame % 50 == 0)
+            if (AI.LastFrame % 5 == 0)
             {
                 AircraftPhase(AI, CurrentTime);
             }
         } else if (GamePhase == EAthenaGamePhase::SafeZones)
         {
-            if (AI.LastFrame % 10 == 0)
-            {
-                SafeZonesPhase(AI, CurrentTime);
-            }
+            SafeZonesPhase(AI, CurrentTime);
         }
         
         if (AI.bSkydiving && GameState->GetGamePhase() > EAthenaGamePhase::Aircraft || !AI.bThankedBusDriver && GameState->GetGamePhase() > EAthenaGamePhase::Aircraft)
@@ -119,13 +116,29 @@ void TickService::FortAthenaAIService::Tick()
         
         if (AI.bSkydiving)
         {
-            AI.Controller->GetBlackboard()->SetValueAsBool(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_HasEverJumpedFromBusKey"), true);
-            AI.Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Loot_ExecutionStatus"), (uint8)EExecutionStatus::ExecutionDenied);
-            AI.Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Glide_ExecutionStatus"), (uint8)EExecutionStatus::ExecutionDenied);
-            AI.Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Dive_ExecutionStatus"), (uint8)EExecutionStatus::ExecutionAllowed);
-            AI.Controller->GetBlackboard()->SetValueAsVector(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_JumpOffBus_Destination"), AI.Target);
-            AI.Controller->GetBlackboard()->SetValueAsVector(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Glide_Destination"), AI.Target);
-            AI.Controller->GetBlackboard()->SetValueAsVector(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Dive_Destination"), AI.Target);
+            static const FName BB_HasEverJumpedFromBusKey   = UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_Global_HasEverJumpedFromBusKey"));
+            static const FName BB_LootExecutionStatus      = UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_Loot_ExecutionStatus"));
+            static const FName BB_GlideExecutionStatus     = UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_Glide_ExecutionStatus"));
+            static const FName BB_DiveExecutionStatus      = UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_Dive_ExecutionStatus"));
+            static const FName BB_JumpOffBusDestination    = UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_JumpOffBus_Destination"));
+            static const FName BB_GlideDestination         = UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_Glide_Destination"));
+            static const FName BB_DiveDestination          = UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_Dive_Destination"));
+            
+            auto* BB = AI.Controller->GetBlackboard();
+
+            if (!BB->GetValueAsBool(BB_HasEverJumpedFromBusKey))
+                BB->SetValueAsBool(BB_HasEverJumpedFromBusKey, true);
+
+            BB->SetValueAsEnum(BB_LootExecutionStatus, (uint8)EExecutionStatus::ExecutionDenied);
+            BB->SetValueAsEnum(BB_GlideExecutionStatus, (uint8)EExecutionStatus::ExecutionDenied);
+            BB->SetValueAsEnum(BB_DiveExecutionStatus, (uint8)EExecutionStatus::ExecutionAllowed);
+
+            if (BB->GetValueAsVector(BB_JumpOffBusDestination) != AI.Target)
+            {
+                BB->SetValueAsVector(BB_JumpOffBusDestination, AI.Target);
+                BB->SetValueAsVector(BB_GlideDestination, AI.Target);
+                BB->SetValueAsVector(BB_DiveDestination, AI.Target);
+            }
         }
     }
 }
@@ -313,9 +326,13 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
             }
             else
             {
-                AI.Controller->K2_SetFocus(TargetLoot);
-                AI.Controller->MoveToActor(TargetLoot, 100.0f, true, false, true, nullptr, true);
-
+                if (AI.CurrentFocus != TargetLoot) {
+                    AI.Controller->K2_SetFocus(TargetLoot);
+                    AI.CurrentFocus = TargetLoot;
+                }
+                
+                AI.Controller->MoveToActor(TargetLoot, 0.0f, true, false, true, nullptr, true);
+                    
                 static int32 StuckCheckCounter = 0;
                 StuckCheckCounter++;
                 if (StuckCheckCounter % 30 == 0)
@@ -340,7 +357,7 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
     int32 PickupsPerFrame = 200;
     int32 ChestsPerFrame = 10;
 
-    if (AI.LastFrame % 50 == 0)
+    if (AI.LastFrame % 20 == 0)
     {
         for (int32 i = 0; i < PickupsPerFrame && PickupIndex < PickupArray.Num(); i++, PickupIndex++)
         {

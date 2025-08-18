@@ -6,11 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortAthenaAIBotController/Source/FortAthenaAIBotController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortAthenaAIBotController/Source/FortAthenaAIBotController.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortInventory/Source/FortInventory.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortInventory/Source/FortInventory.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortLootPackage/Header/FortLootPackage.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortLootPackage/Header/FortLootPackage.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortLootPackage/Source/FortLootPackage.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortLootPackage/Source/FortLootPackage.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerPawn/Source/FortPlayerPawn.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerPawn/Source/FortPlayerPawn.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/Neon/TickService/FortAthenaAI/Header/FortAthenaAI.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/TickService/FortAthenaAI/Header/FortAthenaAI.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/Neon/TickService/FortAthenaAI/Source/FortAthenaAI.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/TickService/FortAthenaAI/Source/FortAthenaAI.cpp" afterDir="false" />
     </list>
@@ -36,6 +31,7 @@
 }</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/../../../../Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um/WinBase.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um/winnt.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.43.34808/include/limits.h" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
@@ -93,7 +89,7 @@
       <workItem from="1755343715828" duration="34721000" />
       <workItem from="1755405429831" duration="1446000" />
       <workItem from="1755431149189" duration="10751000" />
-      <workItem from="1755475025486" duration="23237000" />
+      <workItem from="1755475025486" duration="24811000" />
     </task>
     <servers />
   </component>
