@@ -10,16 +10,56 @@ struct FVector {
     FVector operator+(const FVector& Other) const {
         return FVector(X + Other.X, Y + Other.Y, Z + Other.Z);
     }
+
+    FVector& operator/=(float Scalar)
+    {
+        *this = *this / Scalar;
+        return *this;
+    }
+
+    FVector operator*(const FVector& Other) const
+    {
+        return { X * Other.X, Y * Other.Y, Z * Other.Z };
+    }
+    FVector operator*(float Scalar) const
+    {
+        return { X * Scalar, Y * Scalar, Z * Scalar };
+    }
+    
+    FVector operator-(const FVector& Other) const
+    {
+        return { X - Other.X, Y - Other.Y, Z - Other.Z };
+    }
+    FVector operator/(const FVector& Other) const
+    {
+        if (Other.X == 0.0f || Other.Y == 0.0f ||Other.Z == 0.0f)
+            return *this;
+
+        return { X / Other.X, Y / Other.Y, Z / Other.Z };
+    }
+    FVector operator/(float Scalar) const
+    {
+        if (Scalar == 0.0f)
+            return *this;
+
+        return { X / Scalar, Y / Scalar, Z / Scalar };
+    }
+
+    bool operator!=(const FVector& Other) const
+    {
+        return X != Other.X || Y != Other.Y || Z != Other.Z;
+    }
+    
+    bool operator==(const FVector& Other) const
+    {
+        return X == Other.X && Y == Other.Y && Z == Other.Z;
+    }
     
     FVector& operator+=(const FVector& Other) {
         X += Other.X;
         Y += Other.Y;
         Z += Other.Z;
         return *this;
-    }
-    
-    FVector operator-(const FVector& Other) const {
-        return FVector(X - Other.X, Y - Other.Y, Z - Other.Z);
     }
     
     FVector& operator-=(const FVector& Other) {
@@ -29,30 +69,11 @@ struct FVector {
         return *this;
     }
     
-    FVector operator*(float Scalar) const {
-        return FVector(X * Scalar, Y * Scalar, Z * Scalar);
-    }
-    
-    FVector& operator*=(float Scalar) {
+    FVector& operator*=(float Scalar)
+    {
         X *= Scalar;
         Y *= Scalar;
         Z *= Scalar;
-        return *this;
-    }
-    
-    FVector operator/(float Scalar) const {
-        if (Scalar != 0.0f) {
-            return FVector(X / Scalar, Y / Scalar, Z / Scalar);
-        }
-        return FVector(0, 0, 0); 
-    }
-    
-    FVector& operator/=(float Scalar) {
-        if (Scalar != 0.0f) {
-            X /= Scalar;
-            Y /= Scalar;
-            Z /= Scalar;
-        }
         return *this;
     }
     
@@ -67,15 +88,7 @@ struct FVector {
             X * Other.Y - Y * Other.X
         );
     }
-    
-    bool operator==(const FVector& Other) const {
-        return X == Other.X && Y == Other.Y && Z == Other.Z;
-    }
-    
-    bool operator!=(const FVector& Other) const {
-        return !(*this == Other);
-    }
-    
+
     FVector operator-() const {
         return FVector(-X, -Y, -Z);
     }

@@ -350,7 +350,7 @@ void Main()
 	Runtime::VFTHook(StaticClassImpl("FortPlayerPawnAthena")->GetClassDefaultObject()->GetVTable(), 0x119, AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues, (void**)&AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCuesOG);
 	Runtime::Hook(Finder->ReloadWeapon(), AFortPlayerPawn::ReloadWeapon, (void**)&AFortPlayerPawn::ReloadWeaponOG); // this is right um we can make it uni after we get it to fucking call 
 	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);
-	Runtime::Hook(Finder->OnSafeZoneStateChange(), AFortSafeZoneIndicator::OnSafeZoneStateChange, (void**)&AFortSafeZoneIndicator::OnSafeZoneStateChangeOG);
+//	Runtime::Hook(Finder->OnSafeZoneStateChange(), AFortSafeZoneIndicator::OnSafeZoneStateChange, (void**)&AFortSafeZoneIndicator::OnSafeZoneStateChangeOG);
 	Runtime::Hook(Finder->StartNewSafeZonePhase(), AFortGameModeAthena::StartNewSafeZonePhase, (void**)&AFortGameModeAthena::StartNewSafeZonePhaseOG);
 	Runtime::Hook<&AFortGameModeAthena::StaticClass>("HandleStartingNewPlayer", AFortGameModeAthena::HandleStartingNewPlayer, AFortGameModeAthena::HandleStartingNewPlayerOG);
 	//Runtime::Hook(Finder->EnterAircraft(), AFortPlayerControllerAthena::EnterAircraft, (void**)&AFortPlayerControllerAthena::EnterAircraftOG);

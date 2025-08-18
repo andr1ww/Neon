@@ -12,12 +12,3 @@ enum class EFortSafeZoneState : uint8
     Shrinking                                = 3,
     EFortSafeZoneState_MAX                   = 4,
 };
-
-class AFortSafeZoneIndicator : public AActor
-{
-public:
-    DefHookOg(void, OnSafeZoneStateChange, AFortSafeZoneIndicator*, EFortSafeZoneState, bool);
-public:
-    DECLARE_DEFAULT_OBJECT(AFortSafeZoneIndicator)
-    DECLARE_STATIC_CLASS(AFortSafeZoneIndicator)
-};

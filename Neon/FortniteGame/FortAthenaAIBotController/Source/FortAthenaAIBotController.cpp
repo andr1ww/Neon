@@ -15,6 +15,10 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 	static std::vector<UAthenaPickaxeItemDefinition*> Pickaxes = std::vector<UAthenaPickaxeItemDefinition*>();
 
 	static UBehaviorTree* BehaviorTree = Runtime::StaticLoadObject<UBehaviorTree>("/Game/Athena/AI/Phoebe/BehaviorTrees/BT_Phoebe.BT_Phoebe");
+	static UBehaviorTree* BehaviorTreeGamePlay = Runtime::StaticLoadObject<UBehaviorTree>("/Game/Athena/AI/Phoebe/BehaviorTrees/BT_Phoebe_Gameplay.BT_Phoebe_Gameplay");
+	static UBehaviorTree* BehaviorTreeLoot = Runtime::StaticLoadObject<UBehaviorTree>("/Game/Athena/AI/Phoebe/BehaviorTrees/BT_Phoebe_Loot.BT_Phoebe_Loot");
+	static UBehaviorTree* BehaviorTreeStorm = Runtime::StaticLoadObject<UBehaviorTree>("/Game/Athena/AI/Phoebe/BehaviorTrees/BT_Phoebe_Storm.BT_Phoebe_Storm");
+	static UBehaviorTree* BehaviorTreeUnStuck = Runtime::StaticLoadObject<UBehaviorTree>("/Game/Athena/AI/Phoebe/BehaviorTrees/BT_Phoebe_UnstuckNew.BT_Phoebe_UnstuckNew");
 
 	if (Characters.size() == 0)
 	{
@@ -28,14 +32,13 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 	}
 
 	auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
-	auto GameState = UWorld::GetWorld()->GetGameState();
 
 	static TArray<AActor*> PlayerStarts = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), AFortPlayerStartWarmup::StaticClass());
 	if (PlayerStarts.Num() == 0) {
 		return;
 	}
 
-	TArray<AActor*> Spawns = PlayerStarts;
+	static TArray<AActor*> Spawns = PlayerStarts;
 	
 	for (int i = 0; i < Count; i++) {
 		int RandomIndex = rand() % Spawns.Num();
@@ -169,6 +172,10 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 			Controller->OnUsingBlackBoard(Blackboard, Controller->GetBehaviorTree()->GetBlackboardAsset());
 
 			UFortServerBotManagerAthena::RunBehaviorTree(Controller, BehaviorTree);
+			UFortServerBotManagerAthena::RunBehaviorTree(Controller, BehaviorTreeGamePlay);
+			UFortServerBotManagerAthena::RunBehaviorTree(Controller, BehaviorTreeLoot);
+			UFortServerBotManagerAthena::RunBehaviorTree(Controller, BehaviorTreeStorm);
+			UFortServerBotManagerAthena::RunBehaviorTree(Controller, BehaviorTreeUnStuck);
 
 			if (auto System = UWorld::GetWorld()->GetNavigationSystem())
 			{
@@ -200,7 +207,7 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 
 void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController* Controller, AActor* DamagedActor, float Damage, AFortPlayerControllerAthena* InstigatedBy, AActor* DamageCauser, FVector HitLocation, UPrimitiveComponent* HitComp, FName Bone, FVector Momentum)
 {
-	if (Controller->GetPawn() && InstigatedBy && InstigatedBy->IsA<AFortPlayerControllerAthena>())
+	if (Controller->GetPawn() && InstigatedBy)
 	{
 		AFortPlayerPawn* Pawn = (AFortPlayerPawn*)Controller->GetPawn();
 		TickService::FortAthenaAIService::RemoveFromService(Controller);
@@ -224,10 +231,16 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
 			DeathInfo->SetDowner( nullptr);
 			DeathInfo->SetFinisherOrDowner(InstigatedBy->GetPlayerState());
 
-			if (Pawn) {
+			if (Pawn && InstigatedBy->IsA<AFortPlayerControllerAthena>()) {
 				DeathInfo->GetDistance() = (DeathCause != EDeathCause::FallDamage) 
 					? (InstigatedBy->GetMyFortPawn() && InstigatedBy->GetMyFortPawn()->GetClass()->GetFunction("GetDistanceTo") ? InstigatedBy->GetMyFortPawn()->GetDistanceTo(Pawn) : 0.0f)
 					: Pawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
+			} else if (Pawn && InstigatedBy->IsA<AFortAthenaAIBotController>())
+			{
+				AFortAthenaAIBotController* Controller = (AFortAthenaAIBotController*)InstigatedBy;
+				DeathInfo->GetDistance() = (DeathCause != EDeathCause::FallDamage) 
+	? (Controller->GetPawn() && Controller->GetPawn()->GetClass()->GetFunction("GetDistanceTo") ? Controller->GetPawn()->GetDistanceTo(Pawn) : 0.0f)
+	: Pawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
 			}
 
 			DeathInfo->SetbInitialized(true);
@@ -261,7 +274,7 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
 		}
    	
 		KillerPlayerState->ClientReportKill(PlayerState);
-		if (InstigatedBy->GetMyFortPawn())
+		if (InstigatedBy->IsA<AFortPlayerControllerAthena>() && InstigatedBy->GetMyFortPawn())
 		{
 			int32 CurrentKills = KillerScore;
 
@@ -297,7 +310,7 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
 						0,
 						EFortPickupSourceTypeFlag::Tossed,
 						EFortPickupSpawnSource::Unset,
-						InstigatedBy->GetMyFortPawn()
+						InstigatedBy->IsA<AFortAthenaAIBotController>() ? (AFortPlayerPawnAthena*)((AFortAthenaAIBotController*)InstigatedBy)->GetPawn() : InstigatedBy->GetMyFortPawn()
 					);
 				}
 			}

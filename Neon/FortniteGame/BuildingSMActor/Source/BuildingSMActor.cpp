@@ -87,13 +87,21 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     const FVector PlayerLocation = Controller->GetPawn()->K2_GetActorLocation();
     
     AFortInventory* Inventory = nullptr;
-
-    if (!Inventory) Inventory = Controller->GetWorldInventory();
-
-    if (!Inventory)
+    AFortAthenaAIBotController* AIController = nullptr;
+    
+    bool bIsAI = false;
+    
+    if (auto AI = Cast<AFortAthenaAIBotController>(Controller))
     {
-        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
+        Inventory = AI->GetInventory();
+        AIController = AI;
+        bIsAI = true;
     }
+    
+    if (!Inventory)
+        Inventory = Controller->GetWorldInventory();
+    if (!Inventory)
+        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
 
     FFortItemList& IInventory = Inventory->GetInventory();
     TArray<UFortWorldItem*>& ItemInstances = IInventory.GetItemInstances();
@@ -125,16 +133,24 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
                 0,
                 EFortPickupSourceTypeFlag::Tossed, 
                 EFortPickupSpawnSource::Unset,
-                Controller->GetMyFortPawn()
+                bIsAI ? (AFortPlayerPawn*)AIController->GetPawn() : Controller->GetMyFortPawn()
             );
         }
         
         WorldItem->SetItemEntry(*InventoryEntry);
-        AFortInventory::ReplaceEntry(Controller, *InventoryEntry);
+        if (bIsAI) {
+            AFortInventory::ReplaceEntry(AIController, *InventoryEntry);
+        } else {
+            AFortInventory::ReplaceEntry(Controller, *InventoryEntry);
+        }
 
         if (InventoryEntry->GetCount() <= 0)
         {
-            AFortInventory::Remove(Controller, InventoryEntry->GetItemGuid());
+            if (bIsAI) {
+                AFortInventory::Remove(AIController, InventoryEntry->GetItemGuid(), 0);
+            } else {
+                AFortInventory::Remove(Controller, InventoryEntry->GetItemGuid());
+            }
         }
     } else if (ResourceAmount > 0) {
         if (ResourceAmount > MaxStackSize) {
@@ -145,21 +161,27 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
                 0,
                 EFortPickupSourceTypeFlag::Tossed, 
                 EFortPickupSpawnSource::Unset,
-                Controller->GetMyFortPawn()
+                bIsAI ? (AFortPlayerPawn*)AIController->GetPawn() : Controller->GetMyFortPawn()
             );
         
             ResourceAmount = MaxStackSize;
         }
-
-        AFortInventory::GiveItem(Controller, ResourceDefinition, ResourceAmount, 0, 0);
+        if (bIsAI) {
+            AFortInventory::GiveItem(AIController, ResourceDefinition, ResourceAmount, 0, 0);
+        } else {
+            AFortInventory::GiveItem(Controller, ResourceDefinition, ResourceAmount, 0, 0);
+        }
     }
 
-    Controller->ClientReportDamagedResourceBuilding(BuildingActor, BuildingActor->GetResourceType(), ResourceAmount, false, Damage == 100.f);
-    if (Damage == 100.f) {
-        static auto AccoladeDef = Runtime::StaticFindObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_066_WeakSpotsInARow.AccoladeId_066_WeakSpotsInARow");
-        if (AccoladeDef)
-        {
-            UFortQuestManager::GiveAccolade(Controller, AccoladeDef);
+    if (!bIsAI)
+    {
+        Controller->ClientReportDamagedResourceBuilding(BuildingActor, BuildingActor->GetResourceType(), ResourceAmount, false, Damage == 100.f);
+        if (Damage == 100.f) {
+            static auto AccoladeDef = Runtime::StaticFindObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_066_WeakSpotsInARow.AccoladeId_066_WeakSpotsInARow");
+            if (AccoladeDef)
+            {
+                UFortQuestManager::GiveAccolade(Controller, AccoladeDef);
+            }
         }
     }
 
@@ -167,34 +189,37 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         BuildingActor->GetResourceType() == EFortResourceType::Stone ||
         BuildingActor->GetResourceType() == EFortResourceType::Metal)
     {
-        FGameplayTagContainer SourceTags;
-        FGameplayTagContainer TargetTags;
-        FGameplayTagContainer ContextTags;
-        UFortQuestManager* QuestManager = Controller->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1);
+        if (!bIsAI)
+        {
+            FGameplayTagContainer SourceTags;
+            FGameplayTagContainer TargetTags;
+            FGameplayTagContainer ContextTags;
+            UFortQuestManager* QuestManager = Controller->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1);
 
-        if (!QuestManager) {
-            UE_LOG(LogNeon, Warning, "QuestManager is null for controller");
-        } else {
-            const WCHAR* ResourceTag = nullptr;
-            switch (BuildingActor->GetResourceType())
-            {
-            case EFortResourceType::Wood:
-                ResourceTag = L"Building.Resource.Wood";
-                break;
-            case EFortResourceType::Stone:
-                ResourceTag = L"Building.Resource.Stone";
-                break;
-            case EFortResourceType::Metal:
-                ResourceTag = L"Building.Resource.Metal";
-                break;
-            }
+            if (!QuestManager) {
+                UE_LOG(LogNeon, Warning, "QuestManager is null for controller");
+            } else {
+                const WCHAR* ResourceTag = nullptr;
+                switch (BuildingActor->GetResourceType())
+                {
+                case EFortResourceType::Wood:
+                    ResourceTag = L"Building.Resource.Wood";
+                    break;
+                case EFortResourceType::Stone:
+                    ResourceTag = L"Building.Resource.Stone";
+                    break;
+                case EFortResourceType::Metal:
+                    ResourceTag = L"Building.Resource.Metal";
+                    break;
+                }
         
-            TargetTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(ResourceTag)));
-            SourceTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"Homebase.Class")));
-            ContextTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"Athena.Playlist")));
-            ContextTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"Athena.GameOn")));
+                TargetTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(ResourceTag)));
+                SourceTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"Homebase.Class")));
+                ContextTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"Athena.Playlist")));
+                ContextTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"Athena.GameOn")));
             
-            UFortQuestManager::SendStatEvent(QuestManager, BuildingActor, SourceTags, TargetTags, nullptr, nullptr, ResourceAmount, EFortQuestObjectiveStatEvent::Collect, ContextTags);
+                UFortQuestManager::SendStatEvent(QuestManager, BuildingActor, SourceTags, TargetTags, nullptr, nullptr, ResourceAmount, EFortQuestObjectiveStatEvent::Collect, ContextTags);
+            }
         }
     }
 

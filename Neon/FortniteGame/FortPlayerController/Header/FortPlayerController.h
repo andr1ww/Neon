@@ -22,7 +22,7 @@ public:
 	DECLARE_DEFAULT_OBJECT(UAthenaCharacterItemDefinition)
 };
 
-class UFortWeaponMeleeItemDefinition : public UFortItemDefinition
+class UFortWeaponMeleeItemDefinition : public UFortWeaponItemDefinition
 {
 public:
 	DECLARE_STATIC_CLASS(UFortWeaponMeleeItemDefinition)

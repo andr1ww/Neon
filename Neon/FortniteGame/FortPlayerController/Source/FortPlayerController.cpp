@@ -673,7 +673,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	if (!KillerPlayerState) KillerPlayerState = PlayerState;
 	if (!KillerPawn) KillerPawn = VictimPawn;
 
-	if (KillerPlayerState && KillerPawn && KillerPawn->GetController() && KillerPawn->GetController() != PlayerController)
+	if (KillerPlayerState && KillerPawn && KillerPawn->GetController() && KillerPawn->GetController() != PlayerController && !KillerPawn->GetController()->IsA<AFortAthenaAIBotController>())
 	{
 		int32 KillerScore = KillerPlayerState->GetKillScore() + 1;
 		int32 TeamScore = KillerPlayerState->GetTeamKillScore() + 1;

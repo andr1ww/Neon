@@ -7,6 +7,53 @@ class AFortWeapon;
 
 class ACharacter : public APawn
 {
+public:
+	DEFINE_BOOL(ACharacter, bIsCrouched)
+	void Jump()
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Character", "Jump");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+		
+		this->ProcessEvent(Func, nullptr);
+	}
+
+	void Crouch(bool NewValue)
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Character", "Crouch");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+    
+		struct { bool bStartSkydiving; } BeginSkydivingParams{ NewValue };
+	
+		this->ProcessEvent(Func, &BeginSkydivingParams);
+	}
+
+	void UnCrouch(bool NewValue)
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Character", "UnCrouch");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+    
+		struct { bool bStartSkydiving; } BeginSkydivingParams{ NewValue };
+	
+		this->ProcessEvent(Func, &BeginSkydivingParams);
+	}
+public:
+	DECLARE_STATIC_CLASS(ACharacter)
+	DECLARE_DEFAULT_OBJECT(ACharacter)
 };
 
 class AFGF_Character : public ACharacter

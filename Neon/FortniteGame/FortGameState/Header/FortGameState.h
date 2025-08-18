@@ -119,11 +119,20 @@ struct TeamsArrayContainer // totally not stolen from rebooot
     TArray<int> SquadIdsArray; // 0x1428
 };
 
+class AFortSafeZoneIndicator : public UObject
+{
+public:
+    DEFINE_MEMBER(FVector_NetQuantize100, AFortSafeZoneIndicator, NextRadius);
+    DEFINE_MEMBER(FVector_NetQuantize100, AFortSafeZoneIndicator, NextCenter);
+public:
+    DECLARE_STATIC_CLASS(AFortSafeZoneIndicator)
+    DECLARE_DEFAULT_OBJECT(AFortSafeZoneIndicator)
+};
 
 class AFortGameStateAthena : public AFortGameStateZone
 {
 public:
-    
+    DEFINE_PTR(AFortSafeZoneIndicator, AFortGameStateAthena, SafeZoneIndicator);
     void OnRep_WinningPlayerState()
     {
         static SDK::UFunction* Func = nullptr;

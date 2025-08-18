@@ -76,11 +76,26 @@ public:
     DEFINE_MEMBER(TArray<FSimpleCurveKey>, FSimpleCurve, Keys); 
 };
 
+enum class EFortRarity : uint8
+{
+    Common                                   = 0,
+    Uncommon                                 = 1,
+    Rare                                     = 2,
+    Epic                                     = 3,
+    Legendary                                = 4,
+    Mythic                                   = 5,
+    Transcendent                             = 6,
+    Unattainable                             = 7,
+    NumRarityValues                          = 8,
+    EFortRarity_MAX                          = 9,
+};
+
 class UFortWorldItemDefinition;
 
 class UFortItemDefinition : public UObject
 {
 public:
+    DEFINE_MEMBER(EFortRarity, UFortItemDefinition, Rarity);
     class UFortWorldItem* CreateTemporaryItemInstanceBP(int32 Count, int32 Level)
     {
         static UFunction* Func = Runtime::StaticFindObject<UFunction>("/Script/FortniteGame.FortItemDefinition.CreateTemporaryItemInstanceBP");

@@ -122,6 +122,114 @@ public:
         return Params.ReturnValue;
     }
 
+    static FVector Normal(const struct FVector& A, float Tolerance) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetMathLibrary", "Normal");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return FVector();
+
+        struct KismetMathLibrary_GetDirectionUnitVector final
+        {
+        public:
+            struct FVector                                A;                                              // 0x0000(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            float                                Tolerance;                                                // 0x000C(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            struct FVector                                ReturnValue;                                       // 0x0018(0x000C)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        };
+        KismetMathLibrary_GetDirectionUnitVector Params;
+        Params.A = std::move(A);
+        Params.Tolerance = std::move(Tolerance);
+
+        static UObject* Object = nullptr;
+        if (!Object) Object = SDK::StaticClassImpl("KismetMathLibrary")->GetClassDefaultObject();
+
+        Object->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+
+    static float Vector_Distance(const struct FVector& From, const struct FVector& To) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetMathLibrary", "Vector_Distance");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return 0;
+
+        struct KismetMathLibrary_GetDirectionUnitVector final
+        {
+        public:
+            struct FVector                                From;                                              // 0x0000(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            struct FVector                                To;                                                // 0x000C(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            float                                ReturnValue;                                       // 0x0018(0x000C)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        };
+        KismetMathLibrary_GetDirectionUnitVector Params;
+        Params.From = std::move(From);
+        Params.To = std::move(To);
+
+        static UObject* Object = nullptr;
+        if (!Object) Object = SDK::StaticClassImpl("KismetMathLibrary")->GetClassDefaultObject();
+
+        Object->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+
+    static float RandomFloat() {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetMathLibrary", "RandomFloat");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return 0;
+
+        struct KismetMathLibrary_GetDirectionUnitVector final
+        {
+        public:
+            float                                ReturnValue;                                       // 0x0018(0x000C)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        };
+        KismetMathLibrary_GetDirectionUnitVector Params;
+
+        static UObject* Object = nullptr;
+        if (!Object) Object = SDK::StaticClassImpl("KismetMathLibrary")->GetClassDefaultObject();
+
+        Object->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+    
+    static float Vector_DistanceSquared(const struct FVector& From, const struct FVector& To) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetMathLibrary", "Vector_DistanceSquared");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return 0;
+
+        struct KismetMathLibrary_GetDirectionUnitVector final
+        {
+        public:
+            struct FVector                                From;                                              // 0x0000(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            struct FVector                                To;                                                // 0x000C(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            float                                ReturnValue;                                       // 0x0018(0x000C)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        };
+        KismetMathLibrary_GetDirectionUnitVector Params;
+        Params.From = std::move(From);
+        Params.To = std::move(To);
+
+        static UObject* Object = nullptr;
+        if (!Object) Object = SDK::StaticClassImpl("KismetMathLibrary")->GetClassDefaultObject();
+
+        Object->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+
     static FVector NegateVector(const struct FVector& A) {
         static class UFunction* Func = nullptr;
         SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetMathLibrary", "NegateVector");
