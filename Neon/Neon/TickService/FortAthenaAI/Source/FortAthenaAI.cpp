@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
+
 static std::vector<FortAthenaAI> AIs;
 static std::vector<UAthenaDanceItemDefinition*> Emotes;
 static AFortGameModeAthena* GameMode = nullptr;
@@ -24,13 +26,15 @@ static inline float FRand()
     return d(RNG);
 }
 
-static inline float ToDeg(float r) { return r * (180.0f / 3.14159265358979323846f); }
-static inline float Clamp(float v, float a, float b) { return max(a, min(v, b)); }
-
 static inline int RandIndex(int max)
 {
     std::uniform_int_distribution<int> d(0, max - 1);
     return d(RNG);
+}
+
+vector<FortAthenaAI> TickService::FortAthenaAIService::Get()
+{
+    return AIs;
 }
 
 void TickService::FortAthenaAIService::AddToService(AFortAthenaAIBotController* Controller, AFortPlayerPawn* Pawn)
@@ -49,6 +53,21 @@ void TickService::FortAthenaAIService::AddToService(AFortAthenaAIBotController* 
     AIs.back().Target = FVector(0,0,0);
 }
 
+void TickService::FortAthenaAIService::RemoveFromService(AFortAthenaAIBotController* Controller)
+{
+    for (auto it = AIs.begin(); it != AIs.end();)
+    {
+        if (it->Controller == Controller)
+        {
+            it = AIs.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
+
 void TickService::FortAthenaAIService::Tick()
 {
     const float CurrentTime = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
@@ -61,7 +80,6 @@ void TickService::FortAthenaAIService::Tick()
     if (!GameState || AIs.empty()) return;
 
     const EAthenaGamePhase GamePhase = GameState->GetGamePhase();
-    static AActor* Aircraft = nullptr;
 
     const size_t n = AIs.size();
     const size_t batch = std::max<size_t>(1, (n + TickStride - 1) / TickStride);
@@ -76,18 +94,11 @@ void TickService::FortAthenaAIService::Tick()
         }
         else if (GamePhase == EAthenaGamePhase::Aircraft)
         {
-            static bool bFirst = false;
-            if (!bFirst) 
-            { 
-                bFirst = true; 
-                auto Aircrafts = UWorld::GetWorld()->GetGameState()->GetAircrafts();
-                if (Aircrafts.IsValidIndex(0)) Aircraft = Aircrafts[0];
-                return; 
-            }
-
             AircraftPhase(AI, CurrentTime);
+        } else if (GamePhase == EAthenaGamePhase::SafeZones)
+        {
+            SafeZonesPhase(AI, CurrentTime);
         }
-
         if (AI.bSkydiving && GameState->GetGamePhase() > EAthenaGamePhase::Aircraft || !AI.bThankedBusDriver && GameState->GetGamePhase() > EAthenaGamePhase::Aircraft)
         {
             if (!AI.bThankedBusDriver && GameState->GetGamePhase() > EAthenaGamePhase::Aircraft)
@@ -96,13 +107,22 @@ void TickService::FortAthenaAIService::Tick()
                 AI.Controller->ThankBusDriver();
                 AI.Pawn->BeginSkydiving(true);
             }
-            AI.Pawn->K2_TeleportTo(AI.Target, {});
+            FVector SafeTarget = AI.Target;
+            SafeTarget.Z = max(SafeTarget.Z, 5000.0f); 
+            AI.Pawn->K2_TeleportTo(SafeTarget, {});
             AI.bSkydiving = false;
         }
         
         if (AI.bSkydiving)
         {
-            const FVector BotPos = AI.Pawn->K2_GetActorLocation();
+            AI.Controller->GetBlackboard()->SetValueAsBool(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_HasEverJumpedFromBusKey"), true);
+            AI.Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Loot_ExecutionStatus"), (uint8)EExecutionStatus::ExecutionDenied);
+            AI.Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Glide_ExecutionStatus"), (uint8)EExecutionStatus::ExecutionDenied);
+            AI.Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Dive_ExecutionStatus"), (uint8)EExecutionStatus::ExecutionAllowed);
+            AI.Controller->GetBlackboard()->SetValueAsVector(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_JumpOffBus_Destination"), AI.Target);
+            AI.Controller->GetBlackboard()->SetValueAsVector(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Glide_Destination"), AI.Target);
+            AI.Controller->GetBlackboard()->SetValueAsVector(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Dive_Destination"), AI.Target);
+        /*    const FVector BotPos = AI.Pawn->K2_GetActorLocation();
             FVector DirectionXY = AI.Target - BotPos;
             DirectionXY.Z = 0;
             DirectionXY.Normalize(); 
@@ -147,7 +167,7 @@ void TickService::FortAthenaAIService::Tick()
             if (BotPos.Z <= AI.Target.Z + 100.0f)
             {
                 AI.bSkydiving = false;
-            }
+            }*/
         }
     }
     
@@ -177,7 +197,7 @@ void TickService::FortAthenaAIService::WarmupPhase(FortAthenaAI& AI, float Curre
     if (!Spec) return;
 
     using GiveAbilityFunc = FGameplayAbilitySpecHandle(__fastcall*)(UAbilitySystemComponent*, FGameplayAbilitySpecHandle*, const FGameplayAbilitySpec&, FGameplayEventData*);
-    static auto EmoteAbility = Cast<UGameplayAbility>(UGAB_Emote_Generic_C::GetDefaultObj());
+    static auto EmoteAbility = Runtime::StaticFindObject<UGameplayAbility>("/Game/Abilities/Emotes/GAB_Emote_Generic.Default__GAB_Emote_Generic_C");
 
     Spec->MostRecentArrayReplicationKey = -1;
     Spec->ReplicationID = -1;
@@ -194,21 +214,6 @@ void TickService::FortAthenaAIService::WarmupPhase(FortAthenaAI& AI, float Curre
         ((GiveAbilityFunc)Finder->GiveAbilityAndActivateOnce())(Cast<AFortPlayerStateAthena>(AI.Controller->GetPlayerState())->GetAbilitySystemComponent(), &Handle, *Spec, nullptr);
     }
 }
-
-static const std::vector<FVector> DropZoneLocations = {
-    { 106902, -84901, -1834 }, { 107834, -78584, -783 }, { 120009, -84032, -3370 }, { 112255, -91220, -3011 },
-    { 99820, -82200, -3370 }, { 96764, 29166, -2226 }, { 104078, 26670, -1834 }, { 94032, 51513, 4693 },
-    { 76334, 90345, -1450 }, { 81669, 90762, 469 }, { 80258, 95433, 69 }, { 86691, 102076, 69 },
-    { 113312, 113547, -1837 }, { 116567, 113665, -2602 }, { 109895, 113636, -2986 }, { 106233, 108428, -3762 },
-    { 64240, -16323, 69 }, { 60290, -16240, 69 }, { 31257, -77599, 69 }, { 13637, -24219, 69 },
-    { 30808, 10669, 69 }, { 30536, 42295, 69 }, { 30437, 69691, 69 }, { 17963, 112955, 69 },
-    { 6364, 4866, 69 }, { 6426, 7100, 69 }, { 6245, 1741, 69 }, { 11188, 4863, 69 },
-    { 657, 4334, 69 }, { 4084, 7167, 69 }, { -13311, -81033, 69 }, { -28997, -31787, 69 },
-    { -64881, -46495, 69 }, { -77143, -80634, 69 }, { -73305, -90910, 69 }, { -88282, 23038, 69 },
-    { -88329, 31859, 69 }, { -68041, 29906, 69 }, { -43937, 52030, 69 }, { -54818, 57400, 69 },
-    { -68550, 80804, 69 }, { -92971, 78709, 69 }, { -39867, 91323, 69 }, { -38750, 102176, 69 },
-    { -19544, 105594, 69 }, { -17383, 112993, 69 }, { -22500, 112479, 69 },
-};
 
 void TickService::FortAthenaAIService::AircraftPhase(FortAthenaAI& AI, float CurrentTime)
 {
@@ -246,6 +251,193 @@ void TickService::FortAthenaAIService::AircraftPhase(FortAthenaAI& AI, float Cur
             Target.Y += UKismetMathLibrary::RandomFloatInRange(-800.f, 800.f);
             
             AI.Target = Target;
+        }
+    }
+}
+
+void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float CurrentTime)
+{
+    static auto ChestClass = Runtime::StaticLoadObject<UClass>("/Game/Building/ActorBlueprints/Containers/Tiered_Chest_Athena.Tiered_Chest_Athena_C");
+    static auto PickupClass = AFortPickupAthena::StaticClass();
+    
+    static TArray<AActor*> ChestArray;
+    static TArray<AActor*> PickupArray;
+    static int32 ChestSearchIndex = 0;
+    static int32 PickupSearchIndex = 0;
+    static int32 FrameCounter = 0;
+    
+    AActor* NearestChest = nullptr;
+    AActor* NearestPickup = nullptr;
+    float ChestDist = 999999.0f;
+    float PickupDist = 999999.0f;
+    
+    if (FrameCounter % 300 == 0) 
+    {
+        PickupArray = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), PickupClass);
+        ChestArray = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), ChestClass);
+        ChestSearchIndex = 0;
+        PickupSearchIndex = 0;
+    }
+
+    FrameCounter++;
+    FVector BotPos = AI.Pawn->K2_GetActorLocation();
+
+    int32 ChestBatch = 10;
+    int32 PickupBatchSize = 15;
+    int32 ChestCount = ChestArray.Num();
+    int32 PickupCount = PickupArray.Num();
+
+    if (FrameCounter % 10 == 0 && ChestCount > 0) 
+    {
+        for (int32 i = 0; i < ChestBatch; i++)
+        {
+            if (ChestSearchIndex >= ChestCount)
+            {
+                ChestSearchIndex = 0; 
+                break;
+            }
+
+            AActor* Chest = ChestArray[ChestSearchIndex++];
+            if (!Chest) continue;
+
+            FVector ChestPos = Chest->K2_GetActorLocation();
+            float dx = BotPos.X - ChestPos.X;
+            float dy = BotPos.Y - ChestPos.Y;
+            float Dist = sqrtf(dx * dx + dy * dy);
+
+            if (Dist < 2500.0f && Dist < ChestDist)
+            {
+                ChestDist = Dist;
+                NearestChest = Chest;
+            }
+        }
+    }
+
+    if (FrameCounter % 10 == 0 && PickupCount > 0) 
+    {
+        for (int32 i = 0; i < PickupBatchSize; i++)
+        {
+            if (PickupSearchIndex >= PickupCount)
+            {
+                PickupSearchIndex = 0;
+                break;
+            }
+
+            AActor* PickupActor = PickupArray[PickupSearchIndex++];
+            if (!PickupActor) continue;
+
+            AFortPickupAthena* Pickup = (AFortPickupAthena*)PickupActor;
+            if (!Pickup->GetPrimaryPickupItemEntry().GetItemDefinition() ||
+                Pickup->GetPrimaryPickupItemEntry().GetItemDefinition()->IsA<UFortAmmoItemDefinition>())
+                continue;
+
+            if (Pickup->GetbPickedUp()) continue;
+
+            FVector PickupPos = PickupActor->K2_GetActorLocation();
+            float dx = BotPos.X - PickupPos.X;
+            float dy = BotPos.Y - PickupPos.Y;
+            float Dist = sqrtf(dx * dx + dy * dy);
+
+            if (Dist < 2500.0f && Dist < PickupDist)
+            {
+                PickupDist = Dist;
+                NearestPickup = PickupActor;
+            }
+        }
+    }
+
+    AActor* TargetLoot = nullptr;
+
+    if (NearestPickup && NearestChest)
+    {
+        if (PickupDist < ChestDist)
+        {
+            TargetLoot = NearestPickup;
+        }
+        else
+        {
+            TargetLoot = NearestChest;
+        }
+    }
+    else if (NearestPickup)
+    {
+        TargetLoot = NearestPickup;
+    }
+    else if (NearestChest)
+    {
+        TargetLoot = NearestChest;
+    }
+
+    if (AI.TargetLoot != TargetLoot)
+    {
+        AI.TargetLoot = TargetLoot;
+        if (AI.Pawn->GetbStartedInteractSearch())
+        {
+            AI.Pawn->SetbStartedInteractSearch(false);
+            AI.Pawn->OnRep_StartedInteractSearch();
+        }
+    }
+
+    if (AI.TargetLoot)
+    {
+        FVector LootPos = AI.TargetLoot->K2_GetActorLocation();
+        float dx = BotPos.X - LootPos.X;
+        float dy = BotPos.Y - LootPos.Y;
+        float Distance = sqrtf(dx * dx + dy * dy);
+
+        FRotator LookRot = UKismetMathLibrary::FindLookAtRotation(BotPos, LootPos);
+        AI.Controller->SetControlRotation(LookRot);
+        AI.Pawn->K2_SetActorRotation(LookRot, true);
+
+        if (Distance < 300.0f)
+        {
+            AI.Controller->StopMovement();
+
+            if (AI.TargetLoot->IsA(AFortPickupAthena::StaticClass()))
+            {
+                AFortPickupAthena* Pickup = (AFortPickupAthena*)AI.TargetLoot;
+                if (Pickup && !Pickup->GetbPickedUp())
+                {
+                    Pickup->GetPickupLocationData().bPlayPickupSound = true;
+                    Pickup->GetPickupLocationData().FlyTime = 0.3f;
+                    Pickup->GetPickupLocationData().ItemOwner = AI.Pawn;
+                    Pickup->GetPickupLocationData().PickupGuid = Pickup->GetPrimaryPickupItemEntry().GetItemGuid();
+                    Pickup->GetPickupLocationData().PickupTarget = AI.Pawn;
+                    Pickup->OnRep_PickupLocationData();
+                    Pickup->SetbPickedUp(true);
+                    Pickup->OnRep_bPickedUp();
+                    AI.TargetLoot = nullptr;
+                }
+            }
+            else
+            {
+                if (!AI.Pawn->GetbStartedInteractSearch())
+                {
+                    AI.Pawn->SetbStartedInteractSearch(true);
+                    AI.Pawn->OnRep_StartedInteractSearch();
+                    AI.LastEmoteTime = CurrentTime;
+                }
+                else if ((CurrentTime - AI.LastEmoteTime) >= 1.5f)
+                {
+                    AI.TargetLoot = nullptr;
+                    AI.Pawn->SetbStartedInteractSearch(false);
+                    AI.Pawn->OnRep_StartedInteractSearch();
+                }
+            }
+        }
+        else
+        {
+            AI.Controller->K2_SetFocus(AI.TargetLoot);
+            AI.Controller->MoveToActor(AI.TargetLoot, 50, true, false, true, nullptr, true);
+            FVector Velocity = AI.Pawn->GetMovementComponent()->GetVelocity();
+            float SpeedSquared = Velocity.X * Velocity.X + Velocity.Y * Velocity.Y + Velocity.Z * Velocity.Z;
+            if (SpeedSquared < 25.0f) 
+            {
+                FVector ForwardDirection = AI.Pawn->GetActorForwardVector();
+                ForwardDirection.Z = 0.0f;
+                ForwardDirection = ForwardDirection.GetNormalized();
+                AI.Pawn->AddMovementInput(ForwardDirection, 1.0f, true);
+            }
         }
     }
 }

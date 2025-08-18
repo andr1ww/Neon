@@ -842,10 +842,17 @@ uint64 UFinder::StaticLoadObject()
 
 uint64 UFinder::SpawnBot()
 {
-    if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00)
+    auto String = Memcury::Scanner::FindStringRef(L"UFortServerBotManagerAthena::SpawnBot invalid spawn location", true, 0, false).Get();
+
+    for (int i = 0; i < 1000; i++)
     {
-        return Memcury::Scanner::FindPattern("48 8B C4 55 53 56 57 41 54 41 55 41 56 41 57 48 8D A8 ? ? ? ? 48 81 EC ? ? ? ? 0F 29 70 ? 0F 29 78 ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 4C 8B AD ? ? ? ? 49 8B F9").Get();
+        if (*(uint8_t*)(String - i) == 0x48 && *(uint8_t*)(String - i + 1) == 0x8b && *(uint8_t*)(String - i + 2) == 0xc4)
+        {
+            return String - i;
+        }
     }
+
+    return 0;
 }
 
 uint64 UFinder::SpawnActor()

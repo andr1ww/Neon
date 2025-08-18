@@ -147,7 +147,24 @@ public:
     
             this->ProcessEvent(Func, &Params);
         }
+
+    void K2_SetFocus(class AActor* FP) {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("AIController", "K2_SetFocus");
     
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+    
+        struct
+        {
+            class AActor* FP;
+        } Params;
+        Params.FP = FP;
+    
+        this->ProcessEvent(Func, &Params);
+    }
 
     EPathFollowingRequestResult MoveToActor(class AActor* Goal, float AcceptanceRadius, bool bStopOnOverlap, bool bUsePathfinding, bool bCanStrafe, TSubclassOf<class UNavigationQueryFilter> FilterClass, bool bAllowPartialPath) {
         static class UFunction* Func = nullptr;

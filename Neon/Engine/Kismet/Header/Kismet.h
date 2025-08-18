@@ -265,10 +265,84 @@ public:
     DECLARE_DEFAULT_OBJECT(UKismetStringLibrary);
 };
 
+enum class EObjectTypeQuery : uint8
+{
+    ObjectTypeQuery1                         = 0,
+    ObjectTypeQuery2                         = 1,
+    ObjectTypeQuery3                         = 2,
+    ObjectTypeQuery4                         = 3,
+    ObjectTypeQuery5                         = 4,
+    ObjectTypeQuery6                         = 5,
+    ObjectTypeQuery7                         = 6,
+    ObjectTypeQuery8                         = 7,
+    ObjectTypeQuery9                         = 8,
+    ObjectTypeQuery10                        = 9,
+    ObjectTypeQuery11                        = 10,
+    ObjectTypeQuery12                        = 11,
+    ObjectTypeQuery13                        = 12,
+    ObjectTypeQuery14                        = 13,
+    ObjectTypeQuery15                        = 14,
+    ObjectTypeQuery16                        = 15,
+    ObjectTypeQuery17                        = 16,
+    ObjectTypeQuery18                        = 17,
+    ObjectTypeQuery19                        = 18,
+    ObjectTypeQuery20                        = 19,
+    ObjectTypeQuery21                        = 20,
+    ObjectTypeQuery22                        = 21,
+    ObjectTypeQuery23                        = 22,
+    ObjectTypeQuery24                        = 23,
+    ObjectTypeQuery25                        = 24,
+    ObjectTypeQuery26                        = 25,
+    ObjectTypeQuery27                        = 26,
+    ObjectTypeQuery28                        = 27,
+    ObjectTypeQuery29                        = 28,
+    ObjectTypeQuery30                        = 29,
+    ObjectTypeQuery31                        = 30,
+    ObjectTypeQuery32                        = 31,
+    ObjectTypeQuery_MAX                      = 32,
+    EObjectTypeQuery_MAX                     = 33,
+};
+
 class UKismetSystemLibrary : public UObject
 {
 public:
+    static bool SphereOverlapActors(class UObject* WorldContextObject, const struct FVector& SpherePos, float SphereRadius, const TArray<EObjectTypeQuery>& ObjectTypes, class UClass* ActorClassFilter, const TArray<class AActor*>& ActorsToIgnore, TArray<class AActor*>* OutActors)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("KismetSystemLibrary", "SphereOverlapActors");
 
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return false;
+
+        struct KismetSystemLibrary_SphereOverlapActors final
+        {
+        public:
+            class UObject*                                WorldContextObject;                                // 0x0000(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            struct FVector                                SpherePos;                                         // 0x0008(0x000C)(ConstParm, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            float                                         SphereRadius;                                      // 0x0014(0x0004)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            TArray<EObjectTypeQuery>                      ObjectTypes;                                       // 0x0018(0x0010)(ConstParm, Parm, OutParm, ZeroConstructor, ReferenceParm, NativeAccessSpecifierPublic)
+            class UClass*                                 ActorClassFilter;                                  // 0x0028(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            TArray<class AActor*>                         ActorsToIgnore;                                    // 0x0030(0x0010)(ConstParm, Parm, OutParm, ZeroConstructor, ReferenceParm, NativeAccessSpecifierPublic)
+            TArray<class AActor*>                         OutActors;                                         // 0x0040(0x0010)(Parm, OutParm, ZeroConstructor, NativeAccessSpecifierPublic)
+            bool                                          ReturnValue;                                       // 0x0050(0x0001)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            uint8                                         Pad_51[0x7];                                       // 0x0051(0x0007)(Fixing Struct Size After Last Property [ Dumper-7 ])
+        } Params;
+        
+        Params.WorldContextObject = WorldContextObject;
+        Params.SpherePos = std::move(SpherePos);
+        Params.SphereRadius = SphereRadius;
+        Params.ObjectTypes = std::move(ObjectTypes);
+        Params.ActorClassFilter = ActorClassFilter;
+        Params.ActorsToIgnore = std::move(ActorsToIgnore);
+
+        static UObject* DefaultObject = nullptr;
+        if (!DefaultObject) DefaultObject = SDK::StaticClassImpl("KismetSystemLibrary")->GetClassDefaultObject();
+        DefaultObject->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
 public:
     DECLARE_STATIC_CLASS(UKismetSystemLibrary);
     DECLARE_DEFAULT_OBJECT(UKismetSystemLibrary);

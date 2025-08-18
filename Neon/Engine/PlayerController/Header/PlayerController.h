@@ -32,6 +32,19 @@ public:
 
         this->ProcessEvent(Func, &Params);
     }
+
+    void StopMovement()
+    {
+        static class SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Controller", "StopMovement");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        this->ProcessEvent(Func, nullptr);
+    }
 };
 
 class APlayerController : public AController

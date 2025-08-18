@@ -376,20 +376,20 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
         }
 
             
-        if (GetAsyncKeyState(VK_F6) & 0x1) {
+        if (GetAsyncKeyState(VK_F6)) {
             for (auto& ClientConnection : NetDriver->GetClientConnections())
             {
                 if (ClientConnection->GetPlayerController() && ClientConnection->GetPlayerController()->GetPawn())
                 {
-                    static TArray<AActor*> PlayerStarts = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), AFortAthenaVehicleSpawner::StaticClass());
-                    if (PlayerStarts.Num() == 0) {
+                    static vector<FortAthenaAI> AIS = TickService::FortAthenaAIService::Get();
+                    if (AIS.size() == 0) {
                         return;
                     }
                     
                     FRotator Rot = FRotator();
-                    int RandomIndex = rand() % PlayerStarts.Num();
+                    int RandomIndex = rand() % AIS.size();
                     ClientConnection->GetPlayerController()->GetPawn()->K2_SetActorRotation(Rot, true);
-                    ClientConnection->GetPlayerController()->GetPawn()->K2_TeleportTo(PlayerStarts[RandomIndex]->GetActorLocation(), Rot);
+                    ClientConnection->GetPlayerController()->GetPawn()->K2_TeleportTo(AIS[RandomIndex].Pawn->GetActorLocation(), Rot);
                 }
             }
         }

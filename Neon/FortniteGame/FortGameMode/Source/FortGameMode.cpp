@@ -287,12 +287,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 Manager->SetCachedGameState(GameState);
                 GameMode->SetServerBotManager(Manager);
             }
-                
-            auto BotMutator = UGameplayStatics::SpawnActor<AFortAthenaMutator_Bots>({});
-            GameMode->GetServerBotManager()->SetCachedBotMutator(BotMutator);
-            BotMutator->Set("FortAthenaMutator", "CachedGameMode", GameMode);
-            BotMutator->Set("FortAthenaMutator", "CachedGameState", GameState);
-            FBotMutator::Set(BotMutator);
+            
             GameMode->SetServerBotManagerClass(UFortServerBotManagerAthena::StaticClass());
             
             AFortAIDirector* AIDirector = UGameplayStatics::SpawnActorOG<AFortAIDirector>(AFortAIDirector::StaticClass(), {});
@@ -463,6 +458,11 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
     {
         NewPlayer->SetMatchReport((UAthenaPlayerMatchReport*)UGameplayStatics::SpawnObject(UAthenaPlayerMatchReport::StaticClass(), NewPlayer));
     }
+
+    if (NewPlayer->IsA<AFortAthenaAIBotController>())
+    {
+        return HandleStartingNewPlayerOG(GameMode, NewPlayer);
+    }
     
     AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
     AFortPlayerStateAthena* PlayerState = NewPlayer->GetPlayerState();
@@ -496,6 +496,11 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
 
 EFortTeam AFortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t PreferredTeam, AFortPlayerControllerAthena* Controller)
 {
+    if (Controller->IsA<AFortAthenaAIBotController>())
+    {
+        return PickTeamOG(GameMode, PreferredTeam, Controller);
+    }
+    
     static uint8_t CurrentTeam = 3;
     uint8_t ret = CurrentTeam;
     std::string PlayerName = Controller->GetPlayerState()->GetPlayerName().ToString();

@@ -107,6 +107,22 @@ public:
         this->ProcessEvent(Func, nullptr);
     }
 
+    void OnRep_bPickedUp()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPickup", "OnRep_bPickedUp");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        if (!this) 
+            return;
+
+        this->ProcessEvent(Func, nullptr);
+    }
+
     void OnRep_PickupLocationData()
     {
         static SDK::UFunction* Func = nullptr;
@@ -120,14 +136,9 @@ public:
         if (!this) 
             return;
 
-        auto Flgs = Func->FunctionFlags();
-        Func->FunctionFlags() |= 0x400;
-    
         this->ProcessEvent(Func, nullptr);
-
-        Func->FunctionFlags() = Flgs;
     }
-
+    
     void OnRep_TossedFromContainer()
     {
         static SDK::UFunction* Func = nullptr;
@@ -246,10 +257,13 @@ public:
     DEFINE_BOOL(AFortInventory, bRequiresLocalUpdate);
 public:
     void HandleInventoryLocalUpdate();
+    void Update(AFortAthenaAIBotController* PlayerController, FFortItemEntry* Entry);
     void Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry* Entry);
     static UObject* GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level);
     static UObject* GiveItem(AFortAthenaAIBotController* Controller, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level);
     static void ReplaceEntry(AFortPlayerController*, FFortItemEntry&);
+    static void ReplaceEntry(AFortAthenaAIBotController* AIController, FFortItemEntry& Entry);
+    static void Remove(AFortAthenaAIBotController* AIController, FGuid Guid, int AmountToRemove);
     static void Remove(AFortPlayerController* PlayerController, FGuid Guid, int AmountToRemove = -1);
     static FGuid FindGuidByDefinition(AFortPlayerControllerAthena* PC, UFortItemDefinition* ItemDef);
     static AFortPickupAthena* SpawnPickup(FVector, FFortItemEntry*, EFortPickupSourceTypeFlag SourceTypeFlag = EFortPickupSourceTypeFlag::Tossed, EFortPickupSpawnSource SpawnSource = EFortPickupSpawnSource::Unset, AFortPlayerPawn* Pawn = nullptr, int OverrideCount = -1, bool Toss = true, bool RandomRotation = true, bool bCombine = true);

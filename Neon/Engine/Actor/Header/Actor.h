@@ -6,7 +6,7 @@
 class AActor : public UObject
 {
 public:
-
+    DEFINE_BOOL(AActor, bHidden);
 public:
     FVector GetActorLocation();
     FVector GetActorForwardVector();

@@ -53,10 +53,9 @@ bool UFortServerBotManagerAthena::RunBehaviorTree(AFortAthenaAIBotController* PC
 
 AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthena* BotManager, FVector SpawnLoc, FRotator SpawnRot, UFortAthenaAIBotCustomizationData* BotData, FFortAthenaAIBotRunTimeCustomizationData& RuntimeBotData)
 {
-    if (Fortnite_Version == 13.40 || Fortnite_Version == 12.41)
+    if (__int64(_ReturnAddress()) == Finder->SpawnBotRet())
     {
-        if (__int64(_ReturnAddress()) == Finder->SpawnBotRet())
-            return SpawnBotOG(BotManager, SpawnLoc, SpawnRot, BotData, RuntimeBotData);
+        return SpawnBotOG(BotManager, SpawnLoc, SpawnRot, BotData, RuntimeBotData);
     } else if (__int64(_ReturnAddress()) - IMAGEBASE == 0x1aaa8df)
     {
         return SpawnBotOG(BotManager, SpawnLoc, SpawnRot, BotData, RuntimeBotData);
@@ -118,15 +117,14 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                 Ret->CallFunc<void>("FortPlayerPawn", "OnRep_CosmeticLoadout");
             }
         }
-
-        DWORD CustomSquadId = RuntimeBotData.CustomSquadId;
-        BYTE TrueByte = 1;
-        BYTE FalseByte = 0;
-        BotManagerSetup(__int64(BotManager), __int64(Ret), __int64(BotData->GetBehaviorTree()), 0, &CustomSquadId, 0, __int64(BotData->GetStartupInventory()), __int64(BotData->GetBotNameSettings()), 0, &FalseByte, 0, &TrueByte, RuntimeBotData);
         
         if (BotData->GetFName().ToString().ToString().contains("MANG"))
         {
-
+            DWORD CustomSquadId = RuntimeBotData.CustomSquadId;
+            BYTE TrueByte = 1;
+            BYTE FalseByte = 0;
+            BotManagerSetup(__int64(BotManager), __int64(Ret), __int64(BotData->GetBehaviorTree()), 0, &CustomSquadId, 0, __int64(BotData->GetStartupInventory()), __int64(BotData->GetBotNameSettings()), 0, &FalseByte, 0, &TrueByte, RuntimeBotData);
+        
             if (!Controller->GetInventory()) {
                 Controller->SetInventory(UGameplayStatics::SpawnActorOG<AFortInventory>(AFortInventory::StaticClass(), {}, {}, Ret));
             }
@@ -164,23 +162,22 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
 
         bool bRanBehaviorTree = false;
         if (BotData->GetBehaviorTree()) {
-			Controller->SetBehaviorTree(BotData->GetBehaviorTree());
+            Controller->SetBehaviorTree(BotData->GetBehaviorTree());
             if (RunBehaviorTree(Controller, BotData->GetBehaviorTree())) {
                 Controller->BlueprintOnBehaviorTreeStarted();
-				bRanBehaviorTree = true;
+                bRanBehaviorTree = true;
                 
                 Controller->GetBrainComponent()->RestartLogic();
             }
             else {
-				UE_LOG(LogNeon, Warning, "Bot %s Failed to RunBehaviorTree %s!", Ret->GetFName().ToString().ToString().c_str(), BotData->GetBehaviorTree()->GetFName().ToString().ToString().c_str());
-				//RunBehaviorTree(Controller, BotData->GetBehaviorTree());
-				bRanBehaviorTree = false;
+                UE_LOG(LogNeon, Warning, "Bot %s Failed to RunBehaviorTree %s!", Ret->GetFName().ToString().ToString().c_str(), BotData->GetBehaviorTree()->GetFName().ToString().ToString().c_str());
+                //RunBehaviorTree(Controller, BotData->GetBehaviorTree());
+                bRanBehaviorTree = false;
             }
             
             Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhaseStep"), 6);
             Controller->GetBlackboard()->SetValueAsEnum(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Global_GamePhase"), (uint8)EAthenaGamePhase::SafeZones);
         }
-
 
         return Ret;
     }

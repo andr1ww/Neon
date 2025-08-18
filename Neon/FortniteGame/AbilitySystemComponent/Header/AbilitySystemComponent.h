@@ -131,6 +131,34 @@ public:
     
         this->ProcessEvent(Func, &Params);
     }
+    
+    void ServerTryActivateAbility(const struct FGameplayAbilitySpecHandle& AbilityToActivate, bool InputPressed, void* PredictionKey)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("AbilitySystemComponent", "ServerTryActivateAbility");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct AbilitySystemComponent_ServerTryActivateAbility final
+        {
+        public:
+            struct FGameplayAbilitySpecHandle             AbilityToActivate;                                 // 0x0000(0x0004)(Parm, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            bool                                          InputPressed;                                      // 0x0004(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            uint8                                         Pad_5[0x3];                                        // 0x0005(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+            void*                         PredictionKey;                                     // 0x0008(0x0018)(Parm, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        };
+        
+        AbilitySystemComponent_ServerTryActivateAbility Params{};
+
+        Params.AbilityToActivate = std::move(AbilityToActivate);
+        Params.InputPressed = InputPressed;
+        Params.PredictionKey = PredictionKey;
+    
+        this->ProcessEvent(Func, &Params);
+    }
 public:
     DEFINE_MEMBER(FGameplayAbilitySpecContainer, UAbilitySystemComponent, ActivatableAbilities);
 public:

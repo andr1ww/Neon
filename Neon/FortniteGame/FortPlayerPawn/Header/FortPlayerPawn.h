@@ -17,6 +17,7 @@ class AFGF_Character : public ACharacter
 class AFortPawn : public AFGF_Character
 {
 public:
+	DEFINE_MEMBER(FGameplayTagContainer, AFortPawn, DeathTags);
 	DEFINE_BOOL(AFortPawn, bIsDBNO)
 	DEFINE_MEMBER(FGameplayTagContainer, AFortPawn, GameplayTags);
 	struct FortPawn_PawnStartFire final
@@ -380,6 +381,7 @@ public:
 class AFortPlayerPawn : public AFortPawn
 {
 public:
+	DEFINE_BOOL(AFortPlayerPawn, bStartedInteractSearch)
 	DEFINE_BOOL(AFortPlayerPawn, bIsSkydiving);
 	DEFINE_MEMBER(FGameplayTag, AFortPlayerPawn, EventReviveTag)
 	DEFINE_MEMBER(TArray<class AFortPickup*>, AFortPlayerPawn, IncomingPickups); 
@@ -405,6 +407,19 @@ public:
 	{
 		static SDK::UFunction* Func = nullptr;
 		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerPawn", "OnRep_CosmeticLoadout");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+		
+		this->ProcessEvent(Func, nullptr);
+	}
+
+	void OnRep_StartedInteractSearch()
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerPawn", "OnRep_StartedInteractSearch");
 
 		if (Func == nullptr)
 			Func = Info.Func;

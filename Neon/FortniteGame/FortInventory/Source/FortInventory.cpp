@@ -21,6 +21,17 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
 
     Entry ? this->GetInventory().MarkItemDirty(*Entry) : this->GetInventory().MarkArrayDirty();
 }
+
+
+void AFortInventory::Update(AFortAthenaAIBotController* PlayerController, FFortItemEntry* Entry)
+{
+    if (!PlayerController) return;
+    this->SetbRequiresLocalUpdate(true);
+    this->HandleInventoryLocalUpdate();
+
+    Entry ? this->GetInventory().MarkItemDirty(*Entry) : this->GetInventory().MarkArrayDirty();
+}
+
 void AFortInventory::Remove(AFortPlayerController* PlayerController, FGuid Guid, int AmountToRemove)
 {
     if (!PlayerController) return;
@@ -81,6 +92,69 @@ void AFortInventory::Remove(AFortPlayerController* PlayerController, FGuid Guid,
         }
         
         WorldInventory->Update((AFortPlayerControllerAthena*)PlayerController, nullptr);
+    }
+}
+
+void AFortInventory::Remove(AFortAthenaAIBotController* AIController, FGuid Guid, int AmountToRemove)
+{
+    if (!AIController) return;
+    
+    AFortInventory* WorldInventory = AIController->GetInventory();
+    if (!WorldInventory) return;
+    
+    FFortItemList& Inventory = WorldInventory->GetInventory();
+    TArray<UFortWorldItem*>& ItemInstances = Inventory.GetItemInstances();
+    TArray<FFortItemEntry>& ReplicatedEntries = Inventory.GetReplicatedEntries();
+    
+    bool bItemRemoved = false;
+    
+    for (int32 i = ItemInstances.Num() - 1; i >= 0; i--) {
+        if (ItemInstances[i] && ItemInstances[i]->GetItemEntry().GetItemGuid() == Guid) {
+            UFortWorldItem** DataPtr = ItemInstances.GetData();
+            for (int32 j = i; j < ItemInstances.Num() - 1; j++) {
+                DataPtr[j] = DataPtr[j + 1];
+            }
+            *((int32*)((uint8*)&ItemInstances + 8)) -= 1;
+
+            bItemRemoved = true;
+            break;
+        }
+    }
+    
+    static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
+    for (int32 i = ReplicatedEntries.Num() - 1; i >= 0; i--) {
+        auto ReplicatedEntry = (FFortItemEntry*)((uint8*)ReplicatedEntries.GetData() + (i * StructSize));
+        
+        if (ReplicatedEntry->GetItemGuid() == Guid) {
+            uint8* CurrentPtr = (uint8*)ReplicatedEntry;
+            uint8* NextPtr = CurrentPtr + StructSize;
+            int32 ElementsToMove = ReplicatedEntries.Num() - 1 - i;
+
+            if (ElementsToMove > 0) {
+                memmove(CurrentPtr, NextPtr, ElementsToMove * StructSize);
+            }
+
+            *((int32*)((uint8*)&ReplicatedEntries + 8)) -= 1;
+
+            bItemRemoved = true;
+            break;
+        }
+    }
+    
+    if (bItemRemoved) {
+        if (ItemInstances.Num() > 0) {
+            ItemInstances.ResizeGrow(sizeof(UFortWorldItem*));
+        } else {
+            ItemInstances.Free();
+        }
+        
+        if (ReplicatedEntries.Num() > 0) {
+            ReplicatedEntries.ResizeGrow(StructSize);
+        } else {
+            ReplicatedEntries.Free();
+        }
+        
+        WorldInventory->Update(AIController, nullptr);
     }
 }
 
@@ -259,6 +333,79 @@ AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, UFortItemDefinition*
 {
     FFortItemEntry* ItemEntry = MakeItemEntry(ItemDefinition, Count, 0);
     return SpawnPickup(Loc, ItemEntry, SourceTypeFlag, SpawnSource, Pawn, -1, Toss, true, true);
+}
+
+void AFortInventory::ReplaceEntry(AFortAthenaAIBotController* AIController, FFortItemEntry& Entry) {
+    if (!AIController) return;
+    
+    AFortInventory* WorldInventory = AIController->GetInventory();
+    if (!WorldInventory) return;
+    
+    FFortItemList& Inventory = WorldInventory->GetInventory();
+    TArray<UFortWorldItem*>& ItemInstances = Inventory.GetItemInstances();
+    TArray<FFortItemEntry>& ReplicatedEntries = Inventory.GetReplicatedEntries();
+    
+    FGuid TargetGuid = Entry.GetItemGuid();
+    
+    int32 ItemIndex = -1;
+    int32 ReplicatedIndex = -1;
+    
+    for (int32 i = 0; i < ItemInstances.Num(); i++) {
+        if (ItemInstances[i] && ItemInstances[i]->GetItemEntry().GetItemGuid() == TargetGuid) {
+            ItemIndex = i;
+            break;
+        }
+    }
+    
+    static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
+    for (int32 i = 0; i < ReplicatedEntries.Num(); i++) {
+        auto ReplicatedEntry = (FFortItemEntry*)((uint8*)ReplicatedEntries.GetData() + (i * StructSize));
+        
+        if (ReplicatedEntry->GetItemGuid() == TargetGuid) {
+            ReplicatedIndex = i;
+            break;
+        }
+    }
+    
+    if (ReplicatedIndex != -1 && ItemIndex != -1 && Entry.GetItemDefinition()) {
+        UFortWorldItem* NewBP = Entry.GetItemDefinition()->CreateTemporaryItemInstanceBP(Entry.GetCount(), Entry.GetLevel());
+        
+        if (NewBP) {
+            auto& NewItemEntry = NewBP->GetItemEntry();
+            NewItemEntry.SetItemGuid(TargetGuid);
+            NewItemEntry.SetCount(Entry.GetCount());
+            NewItemEntry.SetLoadedAmmo(Entry.GetLoadedAmmo());
+            NewItemEntry.SetLevel(Entry.GetLevel());
+            NewItemEntry.SetItemDefinition(Entry.GetItemDefinition());
+            NewItemEntry.SetDurability(Entry.GetDurability());
+            
+            ItemInstances[ItemIndex] = NewBP;
+            
+            auto ReplicatedEntry = (FFortItemEntry*)((uint8*)ReplicatedEntries.GetData() + (ReplicatedIndex * StructSize));
+            memcpy(ReplicatedEntry, &NewItemEntry, StructSize);
+            
+            WorldInventory->Update(AIController, &NewItemEntry);
+        }
+    }
+    else if (Entry.GetItemDefinition()) {
+        if (ReplicatedIndex != -1) {
+            ReplicatedEntries.Remove(ReplicatedIndex);
+        }
+        
+        if (ItemIndex != -1) {
+            ItemInstances.Remove(ItemIndex);
+        }
+        
+        WorldInventory->Update(AIController, nullptr);
+        
+        WorldInventory->GiveItem(
+            AIController,
+            Entry.GetItemDefinition(),
+            Entry.GetCount(),
+            Entry.GetLoadedAmmo(),
+            Entry.GetLevel()
+        );
+    }
 }
 
 void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFortItemEntry& Entry) {

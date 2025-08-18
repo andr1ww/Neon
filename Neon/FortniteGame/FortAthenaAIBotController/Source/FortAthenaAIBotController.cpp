@@ -43,12 +43,13 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		FVector Loc = BotSpawn->GetActorLocation();
 		Loc.Z += 250;
 		
-		AFortPlayerPawn* Pawn = UGameplayStatics::SpawnActorOG<AFortPlayerPawnAthena>(BotBP, Loc, {});
+	//	AFortPlayerPawn* Pawn = UGameplayStatics::SpawnActorOG<AFortPlayerPawnAthena>(BotBP, Loc, {});
+		AFortPlayerPawn* Pawn = GameMode->GetServerBotManager()->GetCachedBotMutator()->SpawnBot(BotBP, BotSpawn, Loc, {}, false);
 		AFortAthenaAIBotController* Controller = (AFortAthenaAIBotController*)Pawn->GetController();
 
-		GameMode->GetAlivePlayers().Add(Cast<AFortPlayerControllerAthena>(Controller));
-		++GameState->GetPlayersLeft();
-		GameState->OnRep_PlayersLeft();
+	//	GameMode->GetAlivePlayers().Add(Cast<AFortPlayerControllerAthena>(Controller));
+	//	++GameState->GetPlayersLeft();
+	//	GameState->OnRep_PlayersLeft();
 		
 		if (Characters.size() != 0)
 		{
@@ -198,8 +199,68 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 
 void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController* Controller, AActor* DamagedActor, float Damage, AFortPlayerControllerAthena* InstigatedBy, AActor* DamageCauser, FVector HitLocation, UPrimitiveComponent* HitComp, FName Bone, FVector Momentum)
 {
-    if (Controller->GetPawn() && InstigatedBy)
+    if (Controller->GetPawn() && InstigatedBy && InstigatedBy->IsA<AFortPlayerControllerAthena>())
     {
+    	AFortPlayerPawn* Pawn = (AFortPlayerPawn*)Controller->GetPawn();
+    	TickService::FortAthenaAIService::RemoveFromService(Controller);
+
+    	AFortPlayerStateAthena* PlayerState = (AFortPlayerStateAthena*)Controller->GetPlayerState();
+    	
+    	FDeathInfo* DeathInfo = &PlayerState->GetDeathInfo(); 
+    	EDeathCause DeathCause = PlayerState->CallFunc<EDeathCause>("FortPlayerStateAthena", "ToDeathCause", Pawn->GetDeathTags(), false);
+    	
+    	if (DeathInfo) {
+    		static int Size = 0;
+    		if (Size == 0) {
+    			Size = StaticClassImpl("DeathInfo")->GetSize();
+    		}
+		
+    		RtlSecureZeroMemory(DeathInfo, Size);
+    		DeathInfo->SetbDBNO(false);
+    		DeathInfo->SetDeathLocation(Pawn->K2_GetActorLocation());
+    		DeathInfo->SetDeathTags(Pawn->GetDeathTags());
+    		DeathInfo->SetDeathCause(DeathCause);
+    		DeathInfo->SetDowner( nullptr);
+    		DeathInfo->SetFinisherOrDowner(InstigatedBy->GetPlayerState());
+
+    		if (Pawn) {
+    			DeathInfo->GetDistance() = (DeathCause != EDeathCause::FallDamage) 
+					? (InstigatedBy->GetMyFortPawn() && InstigatedBy->GetMyFortPawn()->GetClass()->GetFunction("GetDistanceTo") ? InstigatedBy->GetMyFortPawn()->GetDistanceTo(Pawn) : 0.0f)
+					: Pawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
+    		}
+
+    		DeathInfo->SetbInitialized(true);
+    		PlayerState->SetDeathInfo(*DeathInfo);
+    		PlayerState->OnRep_DeathInfo();
+    	}
+
+    	AFortPlayerStateAthena* KillerPlayerState = InstigatedBy->GetPlayerState();
+
+    	int32 KillerScore = KillerPlayerState->GetKillScore() + 1;
+    	int32 TeamScore = KillerPlayerState->GetTeamKillScore() + 1;
+		
+    	KillerPlayerState->SetKillScore(KillerScore);
+    	KillerPlayerState->OnRep_KillScore();
+    	KillerPlayerState->SetTeamKillScore(TeamScore);
+    	KillerPlayerState->OnRep_TeamKillScore();
+    	KillerPlayerState->ClientReportTeamKill(TeamScore);
+
+    	auto Team = KillerPlayerState->GetPlayerTeam();
+    	if (Team) {
+    		const auto& TeamMembers = Team->GetTeamMembers();
+    		for (int32 i = 0; i < TeamMembers.Num(); ++i) {
+    			auto MemberPlayerState = TeamMembers[i]->GetPlayerState();
+    			if (MemberPlayerState != KillerPlayerState) {
+    				int32 MemberTeamScore = MemberPlayerState->GetTeamKillScore() + 1;
+    				MemberPlayerState->SetTeamKillScore(MemberTeamScore);
+    				MemberPlayerState->OnRep_TeamKillScore();
+    				MemberPlayerState->ClientReportTeamKill(MemberTeamScore);
+    			}
+    		}
+    	}
+   	
+    	KillerPlayerState->ClientReportKill(PlayerState);
+    	
 	    AFortInventory* ControllerInventory = Controller->GetInventory();
         
     	if (ControllerInventory != nullptr)

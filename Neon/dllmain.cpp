@@ -15,6 +15,7 @@
 #include "Neon/Finder/Header/Finder.h"
 #include "Neon/Nexa/Echo/Echo.h"
 #include "Neon/Runtime/Runtime.h"
+#include "Neon/TickService/FortAthenaAI/Header/FortAthenaAI.h"
 
 static inline std::vector<uint64_t> NullFuncs = {};
 static inline std::vector<uint64_t> RetTrueFuncs = {};
@@ -223,7 +224,7 @@ void InitNullsAndRetTrues() {
 	}
 
 	auto GameSessionDedicatedAthenaPatch = Memcury::Scanner::FindPattern("3B 41 38 7F ? 48 8B D0 48 8B 41 30 4C 39 04 D0 75 ? 48 8D 96", false).Get(); // todo check this sig more
-	Runtime::PatchBytes(IMAGEBASE + 0x19481B8, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
+//	Runtime::PatchBytes(IMAGEBASE + 0x19481B8, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
 
 	if (GameSessionDedicatedAthenaPatch)
 	{
