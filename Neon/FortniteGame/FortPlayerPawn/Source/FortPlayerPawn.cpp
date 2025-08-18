@@ -24,7 +24,6 @@ void AFortPlayerPawn::ServerHandlePickupInfo(AFortPlayerPawn* Pawn, FFrame& Stac
 
 void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
 {
-    UE_LOG(LogNeon, Log, __FUNCTION__);
     AFortPlayerPawn* Pawn = (AFortPlayerPawn*)Pickup->GetPickupLocationData().PickupTarget;
     if (!Pawn) return CompletePickupAnimationOG(Pickup);
 

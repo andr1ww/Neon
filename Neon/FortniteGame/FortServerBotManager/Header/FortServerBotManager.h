@@ -325,9 +325,50 @@ public:
     DECLARE_DEFAULT_OBJECT(AAthenaNavMesh)
 };
 
+struct alignas(0x04) FMMRSpawningBaseRuntimeInfo
+{
+    public:
+    uint8                                         Pad_0[0x8];                                        // 0x0000(0x0008)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
+class UFortAthenaMutator_SpawningPolicyData : public UDataAsset
+{
+public:
+    DEFINE_MEMBER(FScalableFloat, UFortAthenaMutator_SpawningPolicyData, NumItemsToSpawn); // 0x0000(0x0020)(Edit, DisableEditOnInstance, NativeAccessSpecifierPrivate)
+public:
+    DECLARE_STATIC_CLASS(UFortAthenaMutator_SpawningPolicyData)
+    DECLARE_DEFAULT_OBJECT(UFortAthenaMutator_SpawningPolicyData)
+};
+
+class UFortAthenaMutator_PlayerBotSpawningPolicyData : public UFortAthenaMutator_SpawningPolicyData
+{
+public:
+    DECLARE_STATIC_CLASS(UFortAthenaMutator_PlayerBotSpawningPolicyData)
+    DECLARE_DEFAULT_OBJECT(UFortAthenaMutator_PlayerBotSpawningPolicyData)
+};
+
+class UBotELOSpawningInfo final : public UFortAthenaMutator_SpawningPolicyData
+{
+public:
+    DEFINE_PTR(UFortAthenaMutator_SpawningPolicyData, UBotELOSpawningInfo, BotSpawningDataInfo);
+    DEFINE_PTR(AFortGameModeAthena, UBotELOSpawningInfo, CachedGameMode);
+public:
+    DECLARE_STATIC_CLASS(UBotELOSpawningInfo)
+    DECLARE_DEFAULT_OBJECT(UBotELOSpawningInfo)
+};
+
+struct FMMRSpawningBotsRuntimeInfo final : public FMMRSpawningBaseRuntimeInfo
+{
+public:
+    uint8                                         Pad_8[0x10];                                       // 0x0008(0x0010)(Fixing Size After Last Property [ Dumper-7 ])
+    TArray<class UBotELOSpawningInfo*>            ELOSpawningInfos;                                  // 0x0018(0x0010)(ZeroConstructor, Transient, NativeAccessSpecifierPublic)
+    uint8                                         Pad_28[0x8];                                       // 0x0028(0x0008)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
 class AFortAthenaMutator_Bots : public AFortAthenaMutator_SpawningPolicyEQS
 {
 public:
+    DEFINE_MEMBER(FMMRSpawningBotsRuntimeInfo, AFortAthenaMutator_Bots, CachedMMRSpawningInfo);
     AFortPlayerPawn* SpawnBot(TSubclassOf<class AFortPlayerPawn> BotPawnClass, const class AActor* InSpawnLocator, const struct FVector& InSpawnLocation, const struct FRotator& InSpawnRotation, const bool bSnapToGround)
     {
         static SDK::UFunction* Func = nullptr;

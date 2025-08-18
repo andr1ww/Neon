@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "Engine/HTTP/Header/HTTP.h"
 #include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
@@ -250,6 +251,74 @@ void InitNullsAndRetTrues() {
 	}
 }
 
+DefHookOg(void, AFortAthenaMutatorOnSafeZoneUpdated, AFortAthenaMutator_Bots* Bots);
+void AFortAthenaMutatorOnSafeZoneUpdated(AFortAthenaMutator_Bots* a1)
+{
+	AFortAthenaMutatorOnSafeZoneUpdatedOG(a1);
+	((void(*)(AFortAthenaMutator_Bots*))(IMAGEBASE + 0x1A9FF90))(a1);
+}
+
+DefHookOg(void, InitializeMMRInfos, AFortAthenaMutator_Bots* a1);
+void InitializeMMRInfos(AFortAthenaMutator_Bots* a1)
+{
+	UBotELOSpawningInfo* PhoebeMMRInfo = (UBotELOSpawningInfo*)UBotELOSpawningInfo::GetDefaultObj();
+	PhoebeMMRInfo->SetCachedGameMode(UWorld::GetWorld()->GetAuthorityGameMode());
+	PhoebeMMRInfo->SetNumItemsToSpawn(FScalableFloat(10.0f));
+	PhoebeMMRInfo->SetBotSpawningDataInfo(Runtime::StaticLoadObject<UFortAthenaMutator_PlayerBotSpawningPolicyData>("/Game/Athena/AI/Phoebe/BP_PhoebeSpawningItemData.BP_PhoebeSpawningItemData_C"));
+	a1->GetCachedMMRSpawningInfo().ELOSpawningInfos.Add(PhoebeMMRInfo);
+
+	*(int32*)(IMAGEBASE + 0x78B2F68) = 6700;
+	*(int32*)(IMAGEBASE + 0x78B2F64) = 70;
+	*(int32*)(IMAGEBASE + 0x78B2F6C) = 70;
+
+    return InitializeMMRInfosOG(a1);
+}
+
+class UBrushComponent : public UObject
+{
+public:
+	DECLARE_STATIC_CLASS(UBrushComponent)
+	DECLARE_DEFAULT_OBJECT(UBrushComponent)
+};
+
+class ABrush : public UObject
+{
+public:
+	DEFINE_PTR(UBrushComponent, ABrush, BrushComponent)
+public:
+	DECLARE_STATIC_CLASS(ABrush)
+	DECLARE_DEFAULT_OBJECT(ABrush)
+};
+
+class AVolume : public ABrush
+{
+public:
+	DECLARE_STATIC_CLASS(AVolume)
+	DECLARE_DEFAULT_OBJECT(AVolume)
+};
+
+class AFortPoiVolume : public AVolume
+{
+public:
+	DECLARE_STATIC_CLASS(AFortPoiVolume)
+	DECLARE_DEFAULT_OBJECT(AFortPoiVolume)
+};
+
+DefHookOg(void, PostInitializeComponentsVolume, AFortPoiVolume* This);
+void PostInitializeComponentsVolume(AFortPoiVolume* This)
+{
+	UBrushComponent* Comp = This->GetBrushComponent();
+	if (!Comp)
+	{
+		Comp = (UBrushComponent*)UGameplayStatics::SpawnObject(UBrushComponent::StaticClass(), This);
+		((void (*)(UObject * Component, UObject * World))(Finder->RegisterComponentWithWorld()))(Comp, UWorld::GetWorld());
+	}
+
+	This->SetBrushComponent(Comp);
+	
+	return PostInitializeComponentsVolumeOG(This);
+}
+
 void Main()
 {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
@@ -263,6 +332,7 @@ void Main()
 	Offsets::FMemory__Realloc = Memcury::Scanner::FindPattern("48 89 5C 24 08 48 89 74 24 10 57 48 83 EC ? 48 8B F1 41 8B D8 48 8B 0D ? ? ? ?").Get();
 	
 	MH_Initialize();
+
 	if (Config::bEchoSessions)
 	{
 		//Config::Port = UKismetMathLibrary::RandomIntegerInRange(7777, 8888);
@@ -285,7 +355,20 @@ void Main()
 		*(bool*)(Finder->GIsClient()) = false; 
 		*(bool*)(Finder->GIsClient() + 1) = true;
 	}
-
+	
+	Runtime::Patch(IMAGEBASE + 0x1A45182, 0x90);
+	Runtime::Patch(IMAGEBASE + 0x1A45183, 0x90);
+	Runtime::Patch(IMAGEBASE + 0x1A45184, 0x90);
+	Runtime::Patch(IMAGEBASE + 0x1A45185, 0x90);
+	Runtime::Patch(IMAGEBASE + 0x1A45186, 0x90);
+	Runtime::Patch(IMAGEBASE + 0x1A45187, 0x90);
+	
+	Runtime::Hook(IMAGEBASE + 0x1A45060, PostInitializeComponentsVolume, (void**)&PostInitializeComponentsVolumeOG);
+	Runtime::Hook(IMAGEBASE + 0x1A3A640, RetTrue);
+	Runtime::Patch(IMAGEBASE + 0x1A9FFB6, 0xEB);
+	Runtime::Hook(IMAGEBASE + 0x1A8ED30, AFortAthenaMutatorOnSafeZoneUpdated, (void**)&AFortAthenaMutatorOnSafeZoneUpdatedOG);
+	Runtime::Hook(IMAGEBASE + 0x1A9FF90, InitializeMMRInfos, (void**)&InitializeMMRInfosOG);
+	
 	InitNullsAndRetTrues();
 
 	auto ListenInstruction = Memcury::Scanner::FindPattern("E8 ? ? ? ? 84 C0 75 ? 80 3D ? ? ? ? ? 72 ? 45 33 C0 48 8D 55").Get();
@@ -309,6 +392,11 @@ void Main()
 	{
 		WorldName = L"open Asteria_Terrain";
 	}
+
+	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortQuest VeryVerbose", nullptr);
+	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortAI VeryVerbose", nullptr);
+	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAISpawnerData VeryVerbose", nullptr);
+	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogMutatorAI VeryVerbose", nullptr);
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAthenaBots VeryVerbose", nullptr);
 //	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogNavigation VeryVerbose", nullptr);
 
