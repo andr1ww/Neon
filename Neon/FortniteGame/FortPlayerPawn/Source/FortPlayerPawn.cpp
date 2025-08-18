@@ -24,6 +24,7 @@ void AFortPlayerPawn::ServerHandlePickupInfo(AFortPlayerPawn* Pawn, FFrame& Stac
 
 void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
 {
+    UE_LOG(LogNeon, Log, __FUNCTION__);
     AFortPlayerPawn* Pawn = (AFortPlayerPawn*)Pickup->GetPickupLocationData().PickupTarget;
     if (!Pawn) return CompletePickupAnimationOG(Pickup);
 
@@ -46,8 +47,12 @@ void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
         return;
 
     auto MyFortPawn = PlayerController->GetMyFortPawn();
-    if (!MyFortPawn)
-        return;
+    if (auto AI = Cast<AFortAthenaAIBotController>(PlayerController))
+    {
+        MyFortPawn = (AFortPlayerPawn*)AI->GetPawn();
+    }
+
+    if (!MyFortPawn) return;
     
     FFortItemList& Inventory = WorldInventory->GetInventory();
     TArray<UFortWorldItem*>& ItemInstances = Inventory.GetItemInstances();
@@ -83,7 +88,7 @@ void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
         
             if (foundItemEntry)
             {
-                AFortInventory::SpawnPickup(PlayerController->GetPawn()->GetActorLocation() + PlayerController->GetPawn()->GetActorForwardVector() * 70.f + FVector(0, 0, 50), foundItemEntry->GetItemDefinition(), foundItemEntry->GetCount(), foundItemEntry->GetLoadedAmmo(), EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, PlayerController->GetMyFortPawn(), true);
+                AFortInventory::SpawnPickup(MyFortPawn->GetActorLocation() + MyFortPawn->GetActorForwardVector() * 70.f + FVector(0, 0, 50), foundItemEntry->GetItemDefinition(), foundItemEntry->GetCount(), foundItemEntry->GetLoadedAmmo(), EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, MyFortPawn, true);
                 
                 if (bIsAI) {
                     AFortInventory::Remove(AIController, CurrentWeaponGuid, 1);

@@ -183,6 +183,6 @@ namespace FortLootPackage
     TArray<FNeonLootImproper> PickLootDrops(FName TierGroup, int LootTier = -1, int WorldLevel = -1);
     bool SpawnLoot(ABuildingContainer* Container);
     void SpawnFloorLootForContainer(UBlueprintGeneratedClass* ContainerType);
-    void InternalSpawnLoot(FName& TierGroup, FVector Loc);
+    void InternalSpawnLoot(FName& TierGroup, FVector Loc, const TArray<FNeonLootImproper>& PrecomputedLoot);
     bool ServerOnAttemptInteract(ABuildingContainer* BuildingContainer, FInteractionType TYPE);
 }

@@ -4,10 +4,7 @@
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
 #include "FortniteGame/FortGameMode/Header/FortGameMode.h"
-
 #include <random>
-#include <algorithm>
-#include <cmath>
 
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 
@@ -17,8 +14,6 @@ static AFortGameModeAthena* GameMode = nullptr;
 static AFortGameStateAthena* GameState = nullptr;
 static float LastUpdate = 0.0f;
 static std::mt19937 RNG{5489u};
-static size_t TickCursor = 0;
-static const size_t TickStride = 4;
 
 static inline float FRand()
 {
@@ -81,24 +76,33 @@ void TickService::FortAthenaAIService::Tick()
 
     const EAthenaGamePhase GamePhase = GameState->GetGamePhase();
 
-    const size_t n = AIs.size();
-    const size_t batch = std::max<size_t>(1, (n + TickStride - 1) / TickStride);
-    for (size_t j = 0; j < batch; ++j)
+    for (auto& AI : AIs)
     {
-        FortAthenaAI& AI = AIs[(TickCursor + j) % n];
         if (!AI.Controller || !AI.Pawn) continue;
+
+        AI.LastFrame++;
 
         if (GamePhase == EAthenaGamePhase::Warmup)
         {
-            WarmupPhase(AI, CurrentTime);
+            if (AI.LastFrame % 200 == 0)
+            {
+                WarmupPhase(AI, CurrentTime);
+            }
         }
         else if (GamePhase == EAthenaGamePhase::Aircraft)
         {
-            AircraftPhase(AI, CurrentTime);
+            if (AI.LastFrame % 50 == 0)
+            {
+                AircraftPhase(AI, CurrentTime);
+            }
         } else if (GamePhase == EAthenaGamePhase::SafeZones)
         {
-            SafeZonesPhase(AI, CurrentTime);
+            if (AI.LastFrame % 10 == 0)
+            {
+                SafeZonesPhase(AI, CurrentTime);
+            }
         }
+        
         if (AI.bSkydiving && GameState->GetGamePhase() > EAthenaGamePhase::Aircraft || !AI.bThankedBusDriver && GameState->GetGamePhase() > EAthenaGamePhase::Aircraft)
         {
             if (!AI.bThankedBusDriver && GameState->GetGamePhase() > EAthenaGamePhase::Aircraft)
@@ -122,56 +126,8 @@ void TickService::FortAthenaAIService::Tick()
             AI.Controller->GetBlackboard()->SetValueAsVector(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_JumpOffBus_Destination"), AI.Target);
             AI.Controller->GetBlackboard()->SetValueAsVector(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Glide_Destination"), AI.Target);
             AI.Controller->GetBlackboard()->SetValueAsVector(UKismetStringLibrary::Conv_StringToName(L"AIEvaluator_Dive_Destination"), AI.Target);
-        /*    const FVector BotPos = AI.Pawn->K2_GetActorLocation();
-            FVector DirectionXY = AI.Target - BotPos;
-            DirectionXY.Z = 0;
-            DirectionXY.Normalize(); 
-
-            if (auto* MoveComp = AI.Pawn->GetMovementComponent())
-            {
-                if (AI.OldVelocity.IsZero())
-                {
-                    AI.OldVelocity = MoveComp->GetVelocity();
-                }
-
-                FVector DesiredVelocity;
-
-                if (AI.Pawn->GetbIsSkydiving())
-                {
-                    float SpeedXY = 2000.f;
-
-                    float DistZ = std::abs(BotPos.Z - AI.Target.Z);
-
-                    float MaxSpeedZ = 5000.f;
-                    float MinSpeedZ = 500.f;
-                    float SpeedZ = clamp(DistZ * 5.f, MinSpeedZ, MaxSpeedZ); 
-
-                    DesiredVelocity = DirectionXY * SpeedXY; 
-                    DesiredVelocity.Z = -SpeedZ;             
-                }
-                else
-                {
-                    DesiredVelocity = AI.OldVelocity; 
-                }
-
-                MoveComp->SetVelocity(DesiredVelocity);
-            }
-
-            FRotator LookRot = UKismetMathLibrary::FindLookAtRotation(BotPos, AI.Target);
-            LookRot.Pitch -= 20.0f;
-            AI.Controller->SetControlRotation(LookRot);
-            AI.Pawn->K2_SetActorRotation(LookRot, true);
-
-            AI.Controller->MoveToLocation(AI.Target, 3500.f, true, false, false, true, nullptr, true);
-
-            if (BotPos.Z <= AI.Target.Z + 100.0f)
-            {
-                AI.bSkydiving = false;
-            }*/
         }
     }
-    
-    TickCursor = (TickCursor + batch) % n;
 }
 
 void TickService::FortAthenaAIService::WarmupPhase(FortAthenaAI& AI, float CurrentTime)
@@ -240,7 +196,7 @@ void TickService::FortAthenaAIService::AircraftPhase(FortAthenaAI& AI, float Cur
 
     if (!AI.bSkydiving)
     {
-        if (FRand() < 0.003f || (CurrentTime - CalledAt) > 15.0f)
+        if (FRand() < 0.0003f || (CurrentTime - CalledAt) > 15.0f)
         {
             if (!Aircraft) return;
             AI.bSkydiving = true;
@@ -259,185 +215,179 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
 {
     static auto ChestClass = Runtime::StaticLoadObject<UClass>("/Game/Building/ActorBlueprints/Containers/Tiered_Chest_Athena.Tiered_Chest_Athena_C");
     static auto PickupClass = AFortPickupAthena::StaticClass();
-    
+
     static TArray<AActor*> ChestArray;
     static TArray<AActor*> PickupArray;
-    static int32 ChestSearchIndex = 0;
-    static int32 PickupSearchIndex = 0;
-    static int32 FrameCounter = 0;
-    
-    AActor* NearestChest = nullptr;
-    AActor* NearestPickup = nullptr;
-    float ChestDist = 999999.0f;
-    float PickupDist = 999999.0f;
-    
-    if (FrameCounter % 300 == 0) 
+    static bool bArraysPopulated = false;
+    static int32 PickupIndex = 0;
+    static int32 ChestIndex = 0;
+
+    if (!bArraysPopulated)
     {
+        bArraysPopulated = true;
         PickupArray = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), PickupClass);
         ChestArray = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), ChestClass);
-        ChestSearchIndex = 0;
-        PickupSearchIndex = 0;
     }
 
-    FrameCounter++;
+    AActor* TargetLoot = AI.TargetLoot;
     FVector BotPos = AI.Pawn->K2_GetActorLocation();
 
-    int32 ChestBatch = 10;
-    int32 PickupBatchSize = 15;
-    int32 ChestCount = ChestArray.Num();
-    int32 PickupCount = PickupArray.Num();
-
-    if (FrameCounter % 10 == 0 && ChestCount > 0) 
+    if (TargetLoot && TargetLoot->IsValidLowLevel())
     {
-        for (int32 i = 0; i < ChestBatch; i++)
+        FVector TargetPos = TargetLoot->K2_GetActorLocation();
+        float dx = BotPos.X - TargetPos.X;
+        float dy = BotPos.Y - TargetPos.Y;
+        float DistanceSq = dx * dx + dy * dy;
+
+        if (DistanceSq > 9000000.0f)
         {
-            if (ChestSearchIndex >= ChestCount)
-            {
-                ChestSearchIndex = 0; 
-                break;
-            }
-
-            AActor* Chest = ChestArray[ChestSearchIndex++];
-            if (!Chest) continue;
-
-            FVector ChestPos = Chest->K2_GetActorLocation();
-            float dx = BotPos.X - ChestPos.X;
-            float dy = BotPos.Y - ChestPos.Y;
-            float Dist = sqrtf(dx * dx + dy * dy);
-
-            if (Dist < 2500.0f && Dist < ChestDist)
-            {
-                ChestDist = Dist;
-                NearestChest = Chest;
-            }
-        }
-    }
-
-    if (FrameCounter % 10 == 0 && PickupCount > 0) 
-    {
-        for (int32 i = 0; i < PickupBatchSize; i++)
-        {
-            if (PickupSearchIndex >= PickupCount)
-            {
-                PickupSearchIndex = 0;
-                break;
-            }
-
-            AActor* PickupActor = PickupArray[PickupSearchIndex++];
-            if (!PickupActor) continue;
-
-            AFortPickupAthena* Pickup = (AFortPickupAthena*)PickupActor;
-            if (!Pickup->GetPrimaryPickupItemEntry().GetItemDefinition() ||
-                Pickup->GetPrimaryPickupItemEntry().GetItemDefinition()->IsA<UFortAmmoItemDefinition>())
-                continue;
-
-            if (Pickup->GetbPickedUp()) continue;
-
-            FVector PickupPos = PickupActor->K2_GetActorLocation();
-            float dx = BotPos.X - PickupPos.X;
-            float dy = BotPos.Y - PickupPos.Y;
-            float Dist = sqrtf(dx * dx + dy * dy);
-
-            if (Dist < 2500.0f && Dist < PickupDist)
-            {
-                PickupDist = Dist;
-                NearestPickup = PickupActor;
-            }
-        }
-    }
-
-    AActor* TargetLoot = nullptr;
-
-    if (NearestPickup && NearestChest)
-    {
-        if (PickupDist < ChestDist)
-        {
-            TargetLoot = NearestPickup;
+            AI.TargetLoot = nullptr;
         }
         else
         {
-            TargetLoot = NearestChest;
-        }
-    }
-    else if (NearestPickup)
-    {
-        TargetLoot = NearestPickup;
-    }
-    else if (NearestChest)
-    {
-        TargetLoot = NearestChest;
-    }
+            FRotator LookRot = UKismetMathLibrary::FindLookAtRotation(BotPos, TargetPos);
+            LookRot.Pitch = 0.0f;
+            AI.Controller->SetControlRotation(LookRot);
 
-    if (AI.TargetLoot != TargetLoot)
-    {
-        AI.TargetLoot = TargetLoot;
-        if (AI.Pawn->GetbStartedInteractSearch())
-        {
-            AI.Pawn->SetbStartedInteractSearch(false);
-            AI.Pawn->OnRep_StartedInteractSearch();
-        }
-    }
-
-    if (AI.TargetLoot)
-    {
-        FVector LootPos = AI.TargetLoot->K2_GetActorLocation();
-        float dx = BotPos.X - LootPos.X;
-        float dy = BotPos.Y - LootPos.Y;
-        float Distance = sqrtf(dx * dx + dy * dy);
-
-        FRotator LookRot = UKismetMathLibrary::FindLookAtRotation(BotPos, LootPos);
-        AI.Controller->SetControlRotation(LookRot);
-        AI.Pawn->K2_SetActorRotation(LookRot, true);
-
-        if (Distance < 300.0f)
-        {
-            AI.Controller->StopMovement();
-
-            if (AI.TargetLoot->IsA(AFortPickupAthena::StaticClass()))
+            if (DistanceSq < 90000.0f)
             {
-                AFortPickupAthena* Pickup = (AFortPickupAthena*)AI.TargetLoot;
-                if (Pickup && !Pickup->GetbPickedUp())
+                if (TargetLoot->IsA(AFortPickupAthena::StaticClass()))
                 {
-                    Pickup->GetPickupLocationData().bPlayPickupSound = true;
-                    Pickup->GetPickupLocationData().FlyTime = 0.3f;
-                    Pickup->GetPickupLocationData().ItemOwner = AI.Pawn;
-                    Pickup->GetPickupLocationData().PickupGuid = Pickup->GetPrimaryPickupItemEntry().GetItemGuid();
-                    Pickup->GetPickupLocationData().PickupTarget = AI.Pawn;
+                    AFortPickupAthena* Pickup = static_cast<AFortPickupAthena*>(TargetLoot);
+                    auto& PickupData = Pickup->GetPickupLocationData();
+                    PickupData.bPlayPickupSound = true;
+                    PickupData.FlyTime = 0.3f;
+                    PickupData.ItemOwner = AI.Pawn;
+                    PickupData.PickupGuid = Pickup->GetPrimaryPickupItemEntry().GetItemGuid();
+                    PickupData.PickupTarget = AI.Pawn;
                     Pickup->OnRep_PickupLocationData();
                     Pickup->SetbPickedUp(true);
                     Pickup->OnRep_bPickedUp();
                     AI.TargetLoot = nullptr;
+
+                    auto* CurrentWeapon = AI.Pawn->GetCurrentWeapon();
+                    if (!CurrentWeapon || !CurrentWeapon->GetWeaponData() ||
+                        !CurrentWeapon->GetWeaponData()->IsA(UFortWeaponMeleeItemDefinition::StaticClass()))
+                        return;
+
+                    auto* Inventory = AI.Controller->GetInventory();
+                    if (!Inventory)
+                        return;
+
+                    const auto& Items = Inventory->GetInventory().GetItemInstances();
+                    for (const auto& Entry : Items)
+                    {
+                        if (!Entry || !Entry->GetItemEntry().GetItemDefinition())
+                            continue;
+
+                        std::string ItemName = Entry->GetItemEntry().GetItemDefinition()->GetFName().ToString().ToString();
+                        if (ItemName.contains(("Shotgun")) || ItemName.contains(("SMG")) || 
+                            ItemName.contains(("Assault")) || ItemName.contains(("Sniper")) || 
+                            ItemName.contains(("Rocket")) || ItemName.contains(("Pistol")) ||
+                            ItemName.contains(("Grenade")))
+                        {
+                            auto* WeaponDef = Cast<UFortWeaponItemDefinition>(Entry->GetItemEntry().GetItemDefinition());
+                            if (WeaponDef)
+                            {
+                                AI.Pawn->EquipWeaponDefinition(WeaponDef, Entry->GetItemEntry().GetItemGuid());
+                                break;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (!AI.Pawn->GetbStartedInteractSearch())
+                    {
+                        AI.Pawn->SetbStartedInteractSearch(true);
+                        AI.Pawn->OnRep_StartedInteractSearch();
+                        AI.LastEmoteTime = CurrentTime;
+                    }
+                    else if ((CurrentTime - AI.LastEmoteTime) >= 1.5f)
+                    {
+                        AI.TargetLoot = nullptr;
+                        AI.Pawn->SetbStartedInteractSearch(false);
+                        AI.Pawn->OnRep_StartedInteractSearch();
+                    }
                 }
             }
             else
             {
-                if (!AI.Pawn->GetbStartedInteractSearch())
+                AI.Controller->K2_SetFocus(TargetLoot);
+                AI.Controller->MoveToActor(TargetLoot, 100.0f, true, false, true, nullptr, true);
+
+                static int32 StuckCheckCounter = 0;
+                StuckCheckCounter++;
+                if (StuckCheckCounter % 30 == 0)
                 {
-                    AI.Pawn->SetbStartedInteractSearch(true);
-                    AI.Pawn->OnRep_StartedInteractSearch();
-                    AI.LastEmoteTime = CurrentTime;
-                }
-                else if ((CurrentTime - AI.LastEmoteTime) >= 1.5f)
-                {
-                    AI.TargetLoot = nullptr;
-                    AI.Pawn->SetbStartedInteractSearch(false);
-                    AI.Pawn->OnRep_StartedInteractSearch();
+                    FVector Velocity = AI.Pawn->GetMovementComponent()->GetVelocity();
+                    if ((Velocity.X * Velocity.X + Velocity.Y * Velocity.Y) < 625.0f)
+                    {
+                        FVector Forward = TargetPos - BotPos;
+                        Forward.Z = 0;
+                        Forward.Normalize();
+                        AI.Pawn->AddMovementInput(Forward, 1.0f, false);
+                    }
                 }
             }
+            return;
         }
-        else
+    }
+
+    AActor* BestTarget = nullptr;
+    float BestDistanceSq = 6250000.0f;
+
+    int32 PickupsPerFrame = 200;
+    int32 ChestsPerFrame = 10;
+
+    if (AI.LastFrame % 50 == 0)
+    {
+        for (int32 i = 0; i < PickupsPerFrame && PickupIndex < PickupArray.Num(); i++, PickupIndex++)
         {
-            AI.Controller->K2_SetFocus(AI.TargetLoot);
-            AI.Controller->MoveToActor(AI.TargetLoot, 50, true, false, true, nullptr, true);
-            FVector Velocity = AI.Pawn->GetMovementComponent()->GetVelocity();
-            float SpeedSquared = Velocity.X * Velocity.X + Velocity.Y * Velocity.Y + Velocity.Z * Velocity.Z;
-            if (SpeedSquared < 25.0f) 
+            AActor* PickupActor = PickupArray[PickupIndex];
+            if (!PickupActor || !PickupActor->IsValidLowLevel())
+                continue;
+
+            AFortPickupAthena* Pickup = static_cast<AFortPickupAthena*>(PickupActor);
+            auto* ItemDef = Pickup->GetPrimaryPickupItemEntry().GetItemDefinition();
+            if (!ItemDef || ItemDef->IsA<UFortAmmoItemDefinition>())
+                continue;
+
+            FVector PickupPos = PickupActor->K2_GetActorLocation();
+            float dx = BotPos.X - PickupPos.X;
+            float dy = BotPos.Y - PickupPos.Y;
+            float distSq = dx * dx + dy * dy;
+            if (distSq < BestDistanceSq)
             {
-                FVector ForwardDirection = AI.Pawn->GetActorForwardVector();
-                ForwardDirection.Z = 0.0f;
-                ForwardDirection = ForwardDirection.GetNormalized();
-                AI.Pawn->AddMovementInput(ForwardDirection, 1.0f, true);
+                BestDistanceSq = distSq;
+                BestTarget = PickupActor;
             }
         }
+        if (PickupIndex >= PickupArray.Num())
+            PickupIndex = 0;
+
+        if (!BestTarget)
+        {
+            for (int32 i = 0; i < ChestsPerFrame && ChestIndex < ChestArray.Num(); i++, ChestIndex++)
+            {
+                AActor* Chest = ChestArray[ChestIndex];
+                if (!Chest || !Chest->IsValidLowLevel())
+                    continue;
+
+                FVector ChestPos = Chest->K2_GetActorLocation();
+                float dx = BotPos.X - ChestPos.X;
+                float dy = BotPos.Y - ChestPos.Y;
+                float distSq = dx * dx + dy * dy;
+                if (distSq < BestDistanceSq)
+                {
+                    BestDistanceSq = distSq;
+                    BestTarget = Chest;
+                }
+            }
+            if (ChestIndex >= ChestArray.Num())
+                ChestIndex = 0;
+        }
+
+        AI.TargetLoot = BestTarget;
     }
 }

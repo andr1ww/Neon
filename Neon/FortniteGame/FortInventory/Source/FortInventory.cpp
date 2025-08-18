@@ -322,7 +322,10 @@ AFortPickupAthena* AFortInventory::SpawnPickupDirect(FVector Loc, UFortItemDefin
             if (NewPickup->GetbTossedFromContainer()) NewPickup->OnRep_TossedFromContainer();
         } else
         {
-            NewPickup->TossPickup(Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
+            if (FortLootPackage::IsValidPointer(Pawn))
+            {
+                NewPickup->TossPickup(Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
+            }
         }
     }
     

@@ -116,6 +116,10 @@ void FortLootPackage::SetupLDSForPackage(TArray<FNeonLootImproper>& LootDrops, F
         return;
     }
 
+    if (LootPackage->GetCount() <= 0) {
+        return;
+    }
+
     bool found = false;
     for (auto& LootDrop : LootDrops) {
         if (LootDrop.ItemDefinition == ItemDefinition) {
@@ -125,11 +129,10 @@ void FortLootPackage::SetupLDSForPackage(TArray<FNeonLootImproper>& LootDrops, F
         }
     }
 
-    if (!found && LootPackage->GetCount() > 0) {
+    if (!found) {
         LootDrops.Add(FNeonLootImproper(ItemDefinition, LootPackage->GetCount()));
     }
 
-    
     auto WeaponItemDefinition = Cast<UFortWeaponItemDefinition>(ItemDefinition);
     bool IsWeapon = LootPackage->GetLootPackageID().ToString().ToString().contains(".Weapon.") && WeaponItemDefinition;
     if (IsWeapon)
@@ -143,7 +146,17 @@ void FortLootPackage::SetupLDSForPackage(TArray<FNeonLootImproper>& LootDrops, F
                 int AmmoCount = AmmoData->GetDropCount();
                 if (AmmoCount > 0)
                 {
-                    LootDrops.Add(FNeonLootImproper(AmmoItemDefinition, AmmoCount));
+                    bool ammoFound = false;
+                    for (auto& LootDrop : LootDrops) {
+                        if (LootDrop.ItemDefinition == AmmoItemDefinition) {
+                            LootDrop.Count += AmmoCount;
+                            ammoFound = true;
+                            break;
+                        }
+                    }
+                    if (!ammoFound) {
+                        LootDrops.Add(FNeonLootImproper(AmmoItemDefinition, AmmoCount));
+                    }
                 }
             }
         }
@@ -421,7 +434,7 @@ public:
     uint32                                        SearchAnimationCount;                              // 0x000C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 };
 
-void FortLootPackage::InternalSpawnLoot(FName& TierGroup, FVector Loc) {
+void FortLootPackage::InternalSpawnLoot(FName& TierGroup, FVector Loc, const TArray<FNeonLootImproper>& PrecomputedLoot) {
     for (auto& [SupportTierGroup, Redirect] : UWorld::GetWorld()->GetAuthorityGameMode()->GetRedirectAthenaLootTierGroups()) {
         if (TierGroup.GetComparisonIndex() == SupportTierGroup.GetComparisonIndex()) {
             TierGroup = Redirect;
@@ -429,15 +442,19 @@ void FortLootPackage::InternalSpawnLoot(FName& TierGroup, FVector Loc) {
         }
     }
     
-    for (FNeonLootImproper& Item : PickLootDrops(TierGroup)) {
+    int32 SpawnedCount = 0;
+    
+    for (const FNeonLootImproper& Item : PrecomputedLoot) {
         if (!IsValidPointer(Item.ItemDefinition)) {
             continue;
         }
 
-        Loc.X += 65 * (rand() % 5);
+        FVector SpawnLoc = Loc;
+        SpawnLoc.X += (rand() % 130 - 65);
+        SpawnLoc.Y += (rand() % 130 - 65);
         
         AFortInventory::SpawnPickupDirect(
-            Loc, 
+            SpawnLoc, 
             Item.ItemDefinition, 
             Item.Count, 
             Item.LoadedAmmo, 
@@ -446,18 +463,37 @@ void FortLootPackage::InternalSpawnLoot(FName& TierGroup, FVector Loc) {
             nullptr, 
             false
         );
+        
+        SpawnedCount++;
     }
 }
 
 void FortLootPackage::SpawnFloorLootForContainer(UBlueprintGeneratedClass* ContainerType) {
     auto Containers = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), ContainerType);
+    UE_LOG(LogNeon, Log, "Container Count: %d", Containers.Num());
+
+    int32 TotalItemsSpawned = 0;
 
     for (auto& BuildingContainer : Containers) {
         auto Container = Cast<ABuildingContainer>(BuildingContainer);
-        InternalSpawnLoot(Container->GetSearchLootTierGroup(), Container->K2_GetActorLocation() + Container->GetActorForwardVector() * Container->GetLootSpawnLocation_Athena().X + BuildingContainer->GetActorRightVector() * Container->GetLootSpawnLocation_Athena().Y + BuildingContainer->GetActorUpVector() * Container->GetLootSpawnLocation_Athena().Z);
+        if (!Container) {
+            continue;
+        }
+        
+        FVector SpawnLocation = Container->K2_GetActorLocation() + 
+                               Container->GetActorForwardVector() * Container->GetLootSpawnLocation_Athena().X + 
+                               Container->GetActorRightVector() * Container->GetLootSpawnLocation_Athena().Y + 
+                               Container->GetActorUpVector() * Container->GetLootSpawnLocation_Athena().Z;
+        
+        FName TierGroup = Container->GetSearchLootTierGroup();
+        TArray<FNeonLootImproper> LootItems = PickLootDrops(TierGroup);
+        int32 ItemsForThisContainer = LootItems.Num();
+        TotalItemsSpawned += ItemsForThisContainer;
+        
+        InternalSpawnLoot(TierGroup, SpawnLocation, LootItems);
         BuildingContainer->K2_DestroyActor();
     }
-
+    
     Containers.Free();
 }
 
@@ -486,7 +522,10 @@ bool FortLootPackage::ServerOnAttemptInteract(ABuildingContainer* Container, FIn
 
     auto SpawnLocation = TargetContainer->K2_GetActorLocation() + TargetContainer->GetActorRightVector() * 70.f + FVector{ 0, 0, 50 };
     UE_LOG(LogNeon, Log, "SpawnLocation: X=%f Y=%f Z=%f", SpawnLocation.X, SpawnLocation.Y, SpawnLocation.Z);
-    InternalSpawnLoot(TargetContainer->GetSearchLootTierGroup(), SpawnLocation);
+    
+    FName TierGroup = TargetContainer->GetSearchLootTierGroup();
+    TArray<FNeonLootImproper> LootItems = PickLootDrops(TierGroup);
+    InternalSpawnLoot(TierGroup, SpawnLocation, LootItems);
     
     TargetContainer->SetbAlreadySearched(true);
     TargetContainer->CallFunc<void>("BuildingContainer", "OnRep_bAlreadySearched");
@@ -518,13 +557,15 @@ bool FortLootPackage::SpawnLoot(ABuildingContainer* Container) {
         }
     }
     
-    for (FNeonLootImproper& Item : PickLootDrops(LootTierGroupToUse)) {
+    TArray<FNeonLootImproper> LootItems = PickLootDrops(LootTierGroupToUse);
+    int32 SpawnedCount = 0;
+    
+    for (const FNeonLootImproper& Item : LootItems) {
         if (!IsValidPointer(Item.ItemDefinition)) {
             continue;
         }
 
         FVector Loc = Container->K2_GetActorLocation() + Container->GetActorRightVector() * 70.f + FVector{ 0, 0, 50 };
-        UE_LOG(LogNeon, Log, "Spawning loot %s at %f %f %f", Item.ItemDefinition->GetFName().ToString().ToString().c_str(), Loc.X, Loc.Y, Loc.Z);
         
         AFortInventory::SpawnPickupDirect(
             Loc, 
@@ -536,8 +577,10 @@ bool FortLootPackage::SpawnLoot(ABuildingContainer* Container) {
             nullptr, 
             false
         );
+        
+        SpawnedCount++;
     }
-
+    
     Container->SetbAlreadySearched(true);
     Container->CallFunc<void>("BuildingContainer", "OnRep_bAlreadySearched");
     Container->Get<FFortSearchBounceData>("BuildingContainer", "SearchBounceData").SearchAnimationCount++;
