@@ -193,6 +193,7 @@ public:
     }
 
 public:
+    DEFINE_MEMBER(float, AFortGameStateAthena, DefaultRebootMachineHotfix)
     DEFINE_MEMBER(int, AFortGameStateAthena, PlayersLeft)
     DEFINE_MEMBER(TArray<AFortAthenaAircraft*>, AFortGameStateAthena, Aircrafts);
     DEFINE_MEMBER(Map, AFortGameStateAthena, AllPlayerBuildableClassesIndexLookup);

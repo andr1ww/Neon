@@ -169,6 +169,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     GameState->SetbDBNODeathEnabled(true);
     GameMode->Set("FortGameModeZone", "bAllowSpectateAfterDeath", true);
 //    GameMode->SetbAlwaysDBNO(true);
+    GameState->SetDefaultRebootMachineHotfix(1);
     
     static bool bInitializedTeams = false;
     if (!bInitializedTeams)
