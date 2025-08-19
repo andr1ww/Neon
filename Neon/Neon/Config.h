@@ -4,6 +4,7 @@
 namespace Config
 {
     inline bool bLateGame = false;
+    inline bool bCreative = true;
     inline bool bGameSessions = false;
     inline bool bEchoSessions = false;
     inline int Port = 7777;

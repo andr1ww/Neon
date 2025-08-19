@@ -123,7 +123,7 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
     }
 
 	auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
-//	if (GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Playlist_Respawn_Op")
+	if (GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Respawn_Op"))
 	{
 		AFortAthenaMutator_PerkSystemMutator* Mutator = GameMode->GetGameState()->CallFunc<AFortAthenaMutator_PerkSystemMutator*>("FortGameModeAthena", "GetMutatorByClass", GameMode, AFortAthenaMutator_PerkSystemMutator::StaticClass());
 		UFortControllerComponent_PerkSystem* Comp = PlayerController->CallFunc<UFortControllerComponent_PerkSystem*>("Actor", "GetComponentByClass", UFortControllerComponent_PerkSystem::StaticClass());

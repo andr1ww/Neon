@@ -449,6 +449,11 @@ void Main()
 		WorldName = L"open Asteria_Terrain";
 	}
 
+	if (Config::bCreative && Fortnite_Version >= 11.00)
+	{
+		WorldName = L"open Creative_NoApollo_Terrain";
+	}
+
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortQuest VeryVerbose", nullptr);
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortAI VeryVerbose", nullptr);
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAISpawnerData VeryVerbose", nullptr);

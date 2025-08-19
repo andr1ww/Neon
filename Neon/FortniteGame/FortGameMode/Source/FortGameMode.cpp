@@ -187,7 +187,8 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     
     if (GameMode->GetCurrentPlaylistId() == -1)
     {
-        UFortPlaylistAthena* Playlist = (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_Respawn_Op");
+        UFortPlaylistAthena* Playlist = Config::bCreative ? (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_PlaygroundV2") : 
+            (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_DefaultSolo");
         
         if (!Config::bEchoSessions)
         {
@@ -383,6 +384,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         FortLootPackage::SpawnFloorLootForContainer(Runtime::StaticLoadObject<UBlueprintGeneratedClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_01.Tiered_Athena_FloorLoot_01_C"));
         
         bSetupLoot = true;
+        UE_LOG(LogNeon, Log, "Waiting for players...");
     }
     
     bool Res = GameMode->GetAlivePlayers().Num() >= GameMode->GetWarmupRequiredPlayerCount();
