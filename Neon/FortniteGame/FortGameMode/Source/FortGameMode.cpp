@@ -386,14 +386,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     {
         FortLootPackage::SpawnFloorLootForContainer(Runtime::StaticLoadObject<UBlueprintGeneratedClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_Warmup.Tiered_Athena_FloorLoot_Warmup_C"));
         FortLootPackage::SpawnFloorLootForContainer(Runtime::StaticLoadObject<UBlueprintGeneratedClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_01.Tiered_Athena_FloorLoot_01_C"));
-        
-        bSetupLoot = true;
-    }
-    
-    bool Res = GameMode->GetAlivePlayers().Num() >= GameMode->GetWarmupRequiredPlayerCount();
 
-    if (Res)
-    {
         TArray<AActor*> VehicleSpawners = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), AFortAthenaVehicleSpawner::StaticClass());
         for (auto& VehicleSpawner : VehicleSpawners)
         {
@@ -401,7 +394,11 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             FTransform Transform = Spawner->GetTransform();
             UGameplayStatics::SpawnActorOG<AFortAthenaVehicle>(Spawner->CallFunc<UClass*>("FortAthenaVehicleSpawner", "GetVehicleClass"), Transform.Translation, Spawner->K2_GetActorRotation());
         }
+        
+        bSetupLoot = true;
     }
+    
+    bool Res = GameMode->GetAlivePlayers().Num() >= GameMode->GetWarmupRequiredPlayerCount();
     
     if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && Res && !Config::bCreative)
     {
