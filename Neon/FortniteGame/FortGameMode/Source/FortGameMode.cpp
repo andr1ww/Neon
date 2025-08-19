@@ -63,6 +63,7 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
         CurrentPlaylistInfo.MarkArrayDirty();
 
         GameState->SetCurrentPlaylistId(Playlist->GetPlaylistId());
+        GameState->SetAirCraftBehavior(Playlist->GetAirCraftBehavior());
         GameMode->SetCurrentPlaylistId(Playlist->GetPlaylistId());
         GameMode->SetCurrentPlaylistName(Playlist->GetPlaylistName());
         
@@ -186,7 +187,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     
     if (GameMode->GetCurrentPlaylistId() == -1)
     {
-        UFortPlaylistAthena* Playlist = (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_DefaultSolo");
+        UFortPlaylistAthena* Playlist = (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_Uranium_P");
         
         if (!Config::bEchoSessions)
         {

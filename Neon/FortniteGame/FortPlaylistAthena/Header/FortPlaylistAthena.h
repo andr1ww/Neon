@@ -46,6 +46,7 @@ public:
     DEFINE_BOOL(UFortPlaylistAthena, bIsTournament)
     DEFINE_BOOL(UFortPlaylistAthena, bLimitedTimeMode)
     DEFINE_PTR(UAthenaAISettings, UFortPlaylistAthena, AISettings);
+    DEFINE_MEMBER(uint8, UFortPlaylistAthena, AirCraftBehavior);
 public:
     DECLARE_STATIC_CLASS(UFortPlaylistAthena);
     DECLARE_DEFAULT_OBJECT(UFortPlaylistAthena)

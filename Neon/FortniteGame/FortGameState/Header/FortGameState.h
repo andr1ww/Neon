@@ -19,6 +19,16 @@ enum class EAthenaGamePhase : uint8
     EAthenaGamePhase_MAX = 7,
 };
 
+// NumValues: 0x0005
+enum class EAirCraftBehavior : uint8
+{
+    Default = 0,
+    OpposingAirCraftForEachTeam = 1,
+    FlyTowardFirstCircleCenter = 2,
+    NoAircraft = 3,
+    EAirCraftBehavior_MAX = 4,
+};
+
 enum class EAthenaGamePhaseStep : uint8
 {
     None                                     = 0,
@@ -201,6 +211,7 @@ public:
     DEFINE_MEMBER(FGameMemberInfoArray, AFortGameStateAthena, GameMemberInfoArray);
     DEFINE_MEMBER(EAthenaGamePhaseStep, AFortGameStateAthena, GamePhaseStep);
     DEFINE_MEMBER(EAthenaGamePhase, AFortGameStateAthena, GamePhase);
+    DEFINE_MEMBER(EAirCraftBehavior, AFortGameStateAthena, AirCraftBehavior);
 public:
     DECLARE_STATIC_CLASS(AFortGameStateAthena);
     DECLARE_DEFAULT_OBJECT(AFortGameStateAthena)
