@@ -22,7 +22,7 @@ DEFINE_LOG_CATEGORY(LogNeon);
 
 namespace Config
 {
-    inline bool bLogProcessEvent = true;
+    inline bool bLogProcessEvent = false;
 }
 
 static int RetTrue()

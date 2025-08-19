@@ -178,7 +178,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
 
         for (int i = 0; i < 103; ++i)
         {
-            TArray<TWeakObjectPtr<AFortPlayerStateAthena>> TeamArray(2);
+            TArray<TWeakObjectPtr<AFortPlayerStateAthena>> TeamArray(4);
             GameState->GetTeamArray().Add(TeamArray);
             GameState->GetSquadArray().Add(TeamArray);
         }
