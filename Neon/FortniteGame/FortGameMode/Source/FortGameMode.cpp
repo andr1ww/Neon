@@ -63,7 +63,7 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
         CurrentPlaylistInfo.MarkArrayDirty();
 
         GameState->SetCurrentPlaylistId(Playlist->GetPlaylistId());
-        GameState->SetAirCraftBehavior(Playlist->GetAirCraftBehavior());
+        GameState->SetAirCraftBehavior((EAirCraftBehavior)(Playlist->GetAirCraftBehavior()));
         GameMode->SetCurrentPlaylistId(Playlist->GetPlaylistId());
         GameMode->SetCurrentPlaylistName(Playlist->GetPlaylistName());
         
