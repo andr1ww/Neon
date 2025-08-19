@@ -164,10 +164,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     GameMode->SetbWorldIsReady(true);
 
     static bool bInit = false;
-    GameMode->SetbDBNOEnabled(true);
-    GameState->SetbDBNOEnabledForGameMode(true);
-    GameState->SetbDBNODeathEnabled(true);
-    GameMode->Set("FortGameModeZone", "bAllowSpectateAfterDeath", true);
+
 //    GameMode->SetbAlwaysDBNO(true);
     GameState->SetDefaultRebootMachineHotfix(1);
     
