@@ -25,7 +25,7 @@ void SendObjectiveStat(AFortPlayerControllerAthena* PlayerController, const FNam
 			UpdatedObjectiveStat.CurrentStage++;
 			UpdatedObjectiveStat.StatDelta = Count;
 			UpdatedObjectiveStat.StatValue = QuestDefinition->GetObjectiveCompletionCount();
-			PlayerController->CallFunc<void>("FortPlayerController","OnRep_UpdatedObjectiveStats" );
+			PlayerController->OnRep_UpdatedObjectiveStats();
 			return;
 		}
 	}
@@ -50,7 +50,7 @@ void SendObjectiveStat(AFortPlayerControllerAthena* PlayerController, const FNam
 		PlayerController->GetUpdatedObjectiveStats().Add(*NewUpdatedObjectiveStat, FFortUpdatedObjectiveStatSize);
 	}
 
-	PlayerController->CallFunc<void>("FortPlayerController","OnRep_UpdatedObjectiveStats" );
+	PlayerController->OnRep_UpdatedObjectiveStats();
 }
 
 static std::unordered_map<AFortPlayerControllerAthena*, std::vector<FNexaBroadcastQuestProgress>> PlayerNexaBroadcastQuestProgress;
@@ -463,7 +463,7 @@ void UFortQuestManager::SendStatEventWithTags(UFortQuestManager* QuestManager, E
 {
 	auto Controller = (AFortPlayerControllerAthena*)QuestManager->GetPlayerControllerBP();
 	if (!Controller) return;
-	QuestManager = Controller->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1);
+	QuestManager = Controller->GetQuestManager(ESubGame::Athena);
 	SendStatEvent(QuestManager, TargetObject, SourceTags, TargetTags, nullptr, nullptr, Count, Type, ContextTags);
 	return SendStatEventWithTagsOG(QuestManager, Type, TargetObject, TargetTags, SourceTags, ContextTags, Count);
 }

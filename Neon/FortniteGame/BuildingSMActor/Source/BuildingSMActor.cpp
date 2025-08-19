@@ -194,7 +194,7 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
             FGameplayTagContainer SourceTags;
             FGameplayTagContainer TargetTags;
             FGameplayTagContainer ContextTags;
-            UFortQuestManager* QuestManager = Controller->CallFunc<UFortQuestManager*>("FortPlayerController", "GetQuestManager", 1);
+            UFortQuestManager* QuestManager = Controller->GetQuestManager(ESubGame::Athena);
 
             if (!QuestManager) {
                 UE_LOG(LogNeon, Warning, "QuestManager is null for controller");

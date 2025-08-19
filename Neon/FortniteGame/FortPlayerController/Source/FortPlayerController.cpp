@@ -55,9 +55,7 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
 
     AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState();
 
-    PlayerController->CallFunc<UFortQuestManager*>(
-        "FortPlayerController", "GetQuestManager", 1
-    )->InitializeQuestAbilities(PlayerController->GetPawn());
+    PlayerController->GetQuestManager(ESubGame::Athena)->InitializeQuestAbilities(PlayerController->GetPawn());
 
     PlayerState->Set(
         "FortPlayerStateAthena", "SeasonLevelUIDisplay",

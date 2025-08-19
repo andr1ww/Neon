@@ -3,11 +3,11 @@
 
 namespace Config
 {
-    inline bool bLateGame = false;
+    inline bool bLateGame = true;
     inline bool bCreative = false;
     inline bool bGameSessions = false;
     inline bool bEchoSessions = false;
-    inline std::string Playlist = "Playlist_Barrier_12";
+    inline std::string Playlist = "Playlist_DefaultSolo";
     inline int Port = 7777;
 
     namespace Echo

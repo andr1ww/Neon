@@ -57,6 +57,15 @@ public:
 	int32 CurrentStage;					   // 0x001C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 };
 
+enum class ESubGame : uint8
+{
+	Campaign                                 = 0,
+	Athena                                   = 1,
+	Invalid                                  = 2,
+	Count                                    = 2,
+	ESubGame_MAX                             = 3,
+};
+
 class AFortPlayerController : public APlayerController
 {
 public:
@@ -95,6 +104,19 @@ public:
 		this->ProcessEvent(Func, &Params);
 	}
 
+	void OnRep_UpdatedObjectiveStats()
+	{
+		static class UFunction *Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerController", "OnRep_UpdatedObjectiveStats");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return
+
+		this->ProcessEvent(Func, nullptr);
+	}
+
 	bool IsInAircraft()
 	{
 		static class UFunction *Func = nullptr;
@@ -116,7 +138,7 @@ public:
 		return Params.ReturnValue;
 	}
 
-	class UFortQuestManager *GetQuestManager(int32 SubGame)
+	class UFortQuestManager* GetQuestManager(ESubGame SubGame)
 	{
 		static class UFunction *Func = nullptr;
 		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerController", "GetQuestManager");
@@ -129,7 +151,7 @@ public:
 		struct FortPlayerController_GetQuestManager final
 		{
 		public:
-			int32 SubGame;						  // 0x0000(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+			ESubGame SubGame;						  // 0x0000(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 			uint8 Pad_1[0x7];					  // 0x0001(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
 			class UFortQuestManager *ReturnValue; // 0x0008(0x0008)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 		} Params{};
