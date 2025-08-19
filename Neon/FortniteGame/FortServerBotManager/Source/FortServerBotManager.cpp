@@ -2,8 +2,6 @@
 #include "../Header/FortServerBotManager.h"
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "Engine/Kismet/Header/Kismet.h"
-#include "FortniteGame/BehaviorTree/Header/BehaviorTreeService.h"
-#include "FortniteGame/BehaviorTree/Header/BehaviorTree/BT_MANG2/BT_MANG2.h"
 
 void UFortServerBotManagerAthena::StartTree(UBehaviorTreeComponent* BTComp, UBehaviorTree* BTAsset, EBTExecutionMode::Type Mode)
 {

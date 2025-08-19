@@ -7,7 +7,6 @@
 #include "Engine/UEngine/Header/UEngine.h"
 #include "Neon/Finder/Header/Finder.h"
 #include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
-#include "FortniteGame/BehaviorTree/Header/BehaviorTreeService.h"
 #include "Neon/Config.h"
 #include "Neon/TickService/FortAthenaAI/Header/FortAthenaAI.h"
 
@@ -369,11 +368,6 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
         } else
         {
             ServerReplicateActors(NetDriver, DeltaSeconds);
-        }
-
-        if (GameState->GetGamePhase() >= EAthenaGamePhase::Warmup)
-        {
-      //      BehaviorTreeService::TickAI();
         }
 
             
