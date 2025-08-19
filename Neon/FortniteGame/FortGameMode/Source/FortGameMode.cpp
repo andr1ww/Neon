@@ -190,7 +190,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     if (GameMode->GetCurrentPlaylistId() == -1)
     {
         UFortPlaylistAthena* Playlist = Config::bCreative ? (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_PlaygroundV2") : 
-            (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_DefaultSolo");
+            (UFortPlaylistAthena*)GUObjectArray.FindObject(Config::Playlist);
         
         if (!Config::bEchoSessions)
         {
@@ -490,11 +490,26 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
     GameState->GetGameMemberInfoArray().GetMembers().Add(Member);
     GameState->GetGameMemberInfoArray().MarkItemDirty(Member);
 
+    if (UWorld::GetWorld()->GetAuthorityGameMode()->GetCurrentPlaylistName().ToString().ToString().contains("Barrier"))
+    {
+        static bool bSpawnedWall = false;
+        if (!bSpawnedWall)
+        {
+            bSpawnedWall = true;
+            UGameplayStatics::SpawnActorOG<AActor>(Runtime::StaticFindObject<UClass>("/Game/Athena/Playlists/Barrier/Barrier.Barrier_C"), FVector{ 0, 0, -2000 }, FRotator{});
+        }
+    }
+
     TWeakObjectPtr<AFortPlayerStateAthena> WeakObjectPtr;
     WeakObjectPtr.ObjectIndex = PlayerState->GetUniqueID();
     WeakObjectPtr.ObjectSerialNumber = GUObjectArray.GetSerialNumber(PlayerState->GetUniqueID());
     auto& ElementData2 = UWorld::GetWorld()->GetGameState()->GetTeamArray()[PlayerState->GetTeamIndex()];
     auto& ElementData1 = GameState->GetSquadArray()[PlayerState->GetSquadId()];
+    if (!ElementData2.ElementData.GetData() || !ElementData1.ElementData.GetData())
+    {
+        return HandleStartingNewPlayerOG(GameMode, NewPlayer);
+    }
+    
     ElementData2.ElementData.Add(WeakObjectPtr);
     ElementData1.ElementData.Add(WeakObjectPtr);
     

@@ -507,7 +507,8 @@ void Main()
 	if (Config::bEchoSessions) Runtime::Hook(Finder->PickTeam(), AFortGameModeAthena::PickTeam, (void**)&AFortGameModeAthena::PickTeamOG);
 	Runtime::Hook(Finder->GetSquadIdForCurrentPlayer(), FortGameSessionDedicated::GetSquadIdForCurrentPlayer);
 	Runtime::Exec("/Script/FortniteGame.FortAthenaMutator_GiveItemsAtGamePhaseStep.OnGamePhaseStepChanged", AFortAthenaMutator_GiveItemsAtGamePhaseStep::OnGamePhaseStepChanged);
-	
+	Runtime::Exec("/Script/FortniteGame.FortAthenaMutator_Barrier.OnGamePhaseStepChanged", AFortAthenaMutator_Barrier::OnGamePhaseStepChanged);
+
 	if (Finder->CompletePickupAnimation())
 	{
 		Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.ServerHandlePickup", AFortPlayerPawn::ServerHandlePickup);

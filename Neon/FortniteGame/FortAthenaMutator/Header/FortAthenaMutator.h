@@ -14,6 +14,15 @@ public:
     struct FScalableFloat                         NumberToGive;                                      // 0x0008(0x0020)(Edit, NativeAccessSpecifierPublic)
 };
 
+class AFortAthenaMutator_Barrier : public AFortAthenaMutator
+{
+public:
+	static void OnGamePhaseStepChanged(AFortAthenaMutator_Barrier* Mutator, FFrame& Stack);
+public:
+	DECLARE_STATIC_CLASS(AFortAthenaMutator_Barrier)
+	DECLARE_DEFAULT_OBJECT(AFortAthenaMutator_Barrier)
+};
+
 class AFortAthenaMutator_GiveItemsAtGamePhaseStep : public AFortAthenaMutator
 {
 public:
