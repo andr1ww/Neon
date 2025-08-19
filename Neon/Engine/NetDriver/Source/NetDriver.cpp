@@ -8,6 +8,7 @@
 #include "Neon/Finder/Header/Finder.h"
 #include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
 #include "FortniteGame/BehaviorTree/Header/BehaviorTreeService.h"
+#include "Neon/Config.h"
 #include "Neon/TickService/FortAthenaAI/Header/FortAthenaAI.h"
 
 UWorld* UWorld::GetWorld()
@@ -402,7 +403,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             
             if (GameState->GetGamePhase() == EAthenaGamePhase::Warmup && GameMode->GetAlivePlayers().Num() > 0
                 && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) < 100
-                && GameMode->GetAliveBots().Num() < 100 && GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Default"))
+                && GameMode->GetAliveBots().Num() < 100 && GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Default") && !Config::bLateGame)
             {
                 if (UKismetMathLibrary::RandomBoolWithWeight(0.05f))
                 {

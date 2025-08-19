@@ -3,10 +3,10 @@
 
 namespace Config
 {
-    inline bool bLateGame = false;
-    inline bool bCreative = true;
+    inline bool bLateGame = true;
+    inline bool bCreative = false;
     inline bool bGameSessions = false;
-    inline bool bEchoSessions = false;
+    inline bool bEchoSessions = true;
     inline int Port = 7777;
 
     namespace Echo

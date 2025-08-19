@@ -167,19 +167,19 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     GameMode->SetbDBNOEnabled(true);
     GameState->SetbDBNOEnabledForGameMode(true);
     GameState->SetbDBNODeathEnabled(true);
- //   GameMode->SetbAlwaysDBNO(true);
+//    GameMode->SetbAlwaysDBNO(true);
     
     static bool bInitializedTeams = false;
     if (!bInitializedTeams)
     {
-      //  GameState->GetTeamArray().Free();
-       // GameState->GetSquadArray().Free();
+        GameState->GetTeamArray().Reset();
+        GameState->GetSquadArray().Reset();
 
         for (int i = 0; i < 103; ++i)
         {
-        //    TArray<TWeakObjectPtr<AFortPlayerStateAthena>> TeamArray(2);
-          //  GameState->GetTeamArray().Add(TeamArray);
-       //     GameState->GetSquadArray().Add(TeamArray);
+            TArray<TWeakObjectPtr<AFortPlayerStateAthena>> TeamArray(2);
+            GameState->GetTeamArray().Add(TeamArray);
+            GameState->GetSquadArray().Add(TeamArray);
         }
 
         bInitializedTeams = true;
@@ -299,6 +299,8 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             AFortAIGoalManager* AIGoalManager = UGameplayStatics::SpawnActorOG<AFortAIGoalManager>(AFortAIGoalManager::StaticClass(), {});
             GameMode->SetAIGoalManager(AIGoalManager);
         }
+
+        UE_LOG(LogNeon, Log, "Waiting for players...");
     }
     
     if (Config::bGameSessions)
@@ -378,13 +380,12 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     }
 
     static bool bSetupLoot = false;
-    if (!bSetupLoot)
+    if (!bSetupLoot && !Config::bCreative)
     {
         FortLootPackage::SpawnFloorLootForContainer(Runtime::StaticLoadObject<UBlueprintGeneratedClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_Warmup.Tiered_Athena_FloorLoot_Warmup_C"));
         FortLootPackage::SpawnFloorLootForContainer(Runtime::StaticLoadObject<UBlueprintGeneratedClass>("/Game/Athena/Environments/Blueprints/Tiered_Athena_FloorLoot_01.Tiered_Athena_FloorLoot_01_C"));
         
         bSetupLoot = true;
-        UE_LOG(LogNeon, Log, "Waiting for players...");
     }
     
     bool Res = GameMode->GetAlivePlayers().Num() >= GameMode->GetWarmupRequiredPlayerCount();
@@ -400,7 +401,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         }
     }
     
-    if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && Res)
+    if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && Res && !Config::bCreative)
     {
         auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
         auto WarmupDuration = 60.f;
@@ -469,7 +470,9 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
     
     AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
     AFortPlayerStateAthena* PlayerState = NewPlayer->GetPlayerState();
-	
+    
+    // ElementData2.Add(WeakObjectPtr);
+    
     PlayerState->SetSquadId(PlayerState->GetTeamIndex() - 3);
     PlayerState->OnRep_SquadId();
 
@@ -488,11 +491,8 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
     TWeakObjectPtr<AFortPlayerStateAthena> WeakObjectPtr;
     WeakObjectPtr.ObjectIndex = PlayerState->GetUniqueID();
     WeakObjectPtr.ObjectSerialNumber = GUObjectArray.GetSerialNumber(PlayerState->GetUniqueID());
-  //  auto& ElementData1 = GameState->GetSquadArray()[PlayerState->GetSquadId()];
-  //  auto& ElementData2 = GameState->GetTeamArray()[PlayerState->GetTeamIndex()];
-    cout << "SerialNumber: " << WeakObjectPtr.ObjectSerialNumber << std::endl;
-    //ElementData1.Add(WeakObjectPtr);
-   // ElementData2.Add(WeakObjectPtr);
+    auto& ElementData1 = GameState->GetSquadArray()[PlayerState->GetSquadId()];
+    ElementData1.ElementData.Add(WeakObjectPtr);
     
     return HandleStartingNewPlayerOG(GameMode, NewPlayer);
 }
@@ -563,7 +563,7 @@ EFortTeam AFortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t P
                         auto& ElementData2 = UWorld::GetWorld()->GetGameState()->GetTeamArray()[ret];
                         cout << "SerialNumber: " << WeakObjectPtr.ObjectSerialNumber << std::endl;
                         //ElementData1.Add(WeakObjectPtr);
-                        ElementData2.Add(WeakObjectPtr);
+                        ElementData2.ElementData.Add(WeakObjectPtr);
                         
                         return EFortTeam(ret);
                     }
