@@ -225,6 +225,11 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
     TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
     TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
     
+    FFortItemEntryStateValue Value{};
+    Value.IntValue = 1;
+    Value.StateType = EFortItemEntryState::ShouldShowItemToast;
+    BP->GetItemEntry().GetStateValues().Add(Value);
+    
     static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
     ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry(), StructSize);
     ItemInstancesOffsetPtr.Add(BP);

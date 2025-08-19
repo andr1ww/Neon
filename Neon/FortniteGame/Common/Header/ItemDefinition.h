@@ -49,11 +49,13 @@ enum class EFortItemEntryState : uint8_t
     EFortItemEntryState_MAX = 15
 };
 
-struct FFortItemEntryStateValue
+struct FFortItemEntryStateValue final
 {
 public:
-    DEFINE_MEMBER(EFortItemEntryState, FFortItemEntryStateValue, StateType);
-    DEFINE_MEMBER(int, FFortItemEntryStateValue, IntValue); 
+    int32                                         IntValue;                                          // 0x0000(0x0004)(ZeroConstructor, Transient, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+    class FName                                   NameValue;                                         // 0x0004(0x0008)(ZeroConstructor, Transient, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+    EFortItemEntryState                           StateType;                                         // 0x000C(0x0001)(ZeroConstructor, Transient, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+    uint8                                         Pad_D[0x3];                                        // 0x000D(0x0003)(Fixing Struct Size After Last Property [ Dumper-7 ])
 };
 
 struct FFortBaseWeaponStats 

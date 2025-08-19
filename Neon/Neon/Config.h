@@ -6,7 +6,7 @@ namespace Config
     inline bool bLateGame = true;
     inline bool bCreative = false;
     inline bool bGameSessions = false;
-    inline bool bEchoSessions = true;
+    inline bool bEchoSessions = false;
     inline int Port = 7777;
 
     namespace Echo
