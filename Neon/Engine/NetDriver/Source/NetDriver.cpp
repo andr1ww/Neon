@@ -389,7 +389,10 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             }
         }
 
-        TickService::FortAthenaAIService::Tick();
+        if (GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Default") && !Config::bLateGame)
+        {
+            TickService::FortAthenaAIService::Tick();
+        }
         
         if (!bStartedBus)
         {
