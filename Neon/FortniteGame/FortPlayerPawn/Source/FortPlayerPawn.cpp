@@ -355,14 +355,9 @@ void AFortPlayerPawn::ServerSendZiplineState(AFortPlayerPawn* Pawn, FFrame& Stac
     }
 }
 
-void AFortPlayerPawn::ServerReviveFromDBNO(AFortPlayerPawn* Pawn, FFrame& Stack)
+void AFortPlayerPawn::ServerReviveFromDBNO(AFortPlayerPawn* Pawn, AFortPlayerControllerAthena* EventInstigator)
 {
-    AFortPlayerControllerAthena* EventInstigator;
-    Stack.StepCompiledIn(&EventInstigator);
-    Stack.IncrementCode();
-
     UE_LOG(LogNeon, Log, __FUNCTION__);
-    
     if (!Pawn || !EventInstigator) return;
 
 	auto PlayerState = reinterpret_cast<AFortPlayerStateAthena*>(Pawn->GetPlayerState());

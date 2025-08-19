@@ -476,12 +476,12 @@ public:
 		this->ProcessEvent(Func, nullptr);
 	}
 	
-public:
+public: 
     static void ServerHandlePickupInfo(AFortPlayerPawn* Pawn, FFrame& Stack);
 	static void ServerHandlePickup(AFortPlayerPawn* Pawn, FFrame& Stack);
 	static void ServerSendZiplineState(AFortPlayerPawn* Pawn, FFrame& Stack);
 	
-	DefHookOg(void, ServerReviveFromDBNO, AFortPlayerPawn* Pawn, FFrame& Stack);
+	DefHookOg(void, ServerReviveFromDBNO, AFortPlayerPawn* Pawn, class AFortPlayerControllerAthena* EventInstigator);
 	DefHookOg(void, ReloadWeapon, AFortWeapon* Weapon, int AmmoToRemove);
 	DefHookOg(void, CompletePickupAnimation, AFortPickup* Pickup);
 	DefHookOg(void, GiveItemToInventoryOwner, UObject*, FFrame&);

@@ -167,6 +167,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     GameMode->SetbDBNOEnabled(true);
     GameState->SetbDBNOEnabledForGameMode(true);
     GameState->SetbDBNODeathEnabled(true);
+    GameMode->Set("FortGameModeZone", "bAllowSpectateAfterDeath", true);
 //    GameMode->SetbAlwaysDBNO(true);
     
     static bool bInitializedTeams = false;
@@ -491,7 +492,9 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
     TWeakObjectPtr<AFortPlayerStateAthena> WeakObjectPtr;
     WeakObjectPtr.ObjectIndex = PlayerState->GetUniqueID();
     WeakObjectPtr.ObjectSerialNumber = GUObjectArray.GetSerialNumber(PlayerState->GetUniqueID());
+    auto& ElementData2 = UWorld::GetWorld()->GetGameState()->GetTeamArray()[PlayerState->GetTeamIndex()];
     auto& ElementData1 = GameState->GetSquadArray()[PlayerState->GetSquadId()];
+    ElementData2.ElementData.Add(WeakObjectPtr);
     ElementData1.ElementData.Add(WeakObjectPtr);
     
     return HandleStartingNewPlayerOG(GameMode, NewPlayer);
@@ -555,15 +558,6 @@ EFortTeam AFortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t P
                         {
                             CurrentTeam++;
                         }
-
-                        TWeakObjectPtr<AFortPlayerStateAthena> WeakObjectPtr;
-                        WeakObjectPtr.ObjectIndex = Controller->GetPlayerState()->GetUniqueID();
-                        WeakObjectPtr.ObjectSerialNumber = GUObjectArray.GetSerialNumber(Controller->GetPlayerState()->GetUniqueID());
-                        //  auto& ElementData1 = GameState->GetSquadArray()[PlayerState->GetSquadId()];
-                        auto& ElementData2 = UWorld::GetWorld()->GetGameState()->GetTeamArray()[ret];
-                        cout << "SerialNumber: " << WeakObjectPtr.ObjectSerialNumber << std::endl;
-                        //ElementData1.Add(WeakObjectPtr);
-                        ElementData2.ElementData.Add(WeakObjectPtr);
                         
                         return EFortTeam(ret);
                     }
