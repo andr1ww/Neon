@@ -6,6 +6,7 @@
 #include "Engine/ItemAndCount/Header/ItemAndCount.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
+#include "FortniteGame/FortAthenaMutator/Header/FortAthenaMutator.h"
 #include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
@@ -121,7 +122,41 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
         }
     }
 
-	auto GameState = UWorld::GetWorld()->GetGameState();
+	auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
+//	if (GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Playlist_Respawn_Op")
+	{
+		AFortAthenaMutator_PerkSystemMutator* Mutator = GameMode->GetGameState()->CallFunc<AFortAthenaMutator_PerkSystemMutator*>("FortGameModeAthena", "GetMutatorByClass", GameMode, AFortAthenaMutator_PerkSystemMutator::StaticClass());
+		UFortControllerComponent_PerkSystem* Comp = PlayerController->CallFunc<UFortControllerComponent_PerkSystem*>("Actor", "GetComponentByClass", UFortControllerComponent_PerkSystem::StaticClass());
+
+    	UFortPlayerPerksItemDefinition* FactionAlter = Runtime::StaticFindObject<UFortPlayerPerksItemDefinition>("/Game/Athena/Items/PlayerPerks/PTID_SpyTeam_01.PTID_SpyTeam_01");
+    	UFortPlayerPerksItemDefinition* FactionEgo = Runtime::StaticFindObject<UFortPlayerPerksItemDefinition>("/Game/Athena/Items/PlayerPerks/PTID_SpyTeam_02.PTID_SpyTeam_02");
+    	
+		for (auto& Ok : Comp->GetPerkSelection())
+		{
+			if (Comp->GetCachedFactionTag().TagName.ToString() == L"Athena.Faction.Ego")
+			{
+				Comp->GetSpyTechArray() = FactionEgo->GetPlayerPerkLevels()[0].PlayerPerks;
+				Ok.Items = FactionEgo->GetPlayerPerkLevels()[0].PlayerPerks;
+			} else
+			{
+				Comp->GetSpyTechArray() = FactionAlter->GetPlayerPerkLevels()[0].PlayerPerks;
+				Ok.Items = FactionAlter->GetPlayerPerkLevels()[0].PlayerPerks;
+			}
+			
+			UE_LOG(LogNeon, Log, "Ok Num: %d", Ok.Items.Num());
+		}
+    	
+		UE_LOG(LogNeon, Log, "GetSpyTechArray Num: %d", Comp->GetSpyTechArray().Num());
+		
+		Comp->SetMutatorData(Mutator->GetMutatorData());
+		Comp->SetRerollCount(1);
+    	
+		Comp->GetRoundStartCache().bDataReady = true;
+		Comp->CallFunc<void>("FortControllerComponent_PerkSystem", "OnRep_PerkSelection");
+		Comp->CallFunc<void>("FortControllerComponent_PerkSystem", "OnRep_SpyTechArray");
+		Comp->CallFunc<void>("FortControllerComponent_PerkSystem", "OnRep_RerollCount");
+	}
+	
 	/*static bool bInit = false;
 	if (!bInit)
 	{
