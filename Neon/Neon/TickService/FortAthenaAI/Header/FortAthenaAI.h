@@ -37,6 +37,8 @@ struct FortAthenaAI
     float StrafeTime = 0.f;
     float LastFireTime = 0.f;
     FVector OldVelocity = FVector(0,0,0);
+    FVector LastPosition = FVector(0,0,0);
+    int32 StuckCounter = 0;
     AActor* TargetLoot = nullptr;
     AActor* NearestEnemy = nullptr;
     AActor* CurrentFocus = nullptr;

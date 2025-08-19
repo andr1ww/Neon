@@ -3,9 +3,18 @@
 
 #include "Engine/Transform/Header/Transform.h"
 
+class USceneComponent : public UObject
+{
+public:
+    DEFINE_PTR(USceneComponent, USceneComponent, RootComponent);
+    DECLARE_DEFAULT_OBJECT(USceneComponent)
+    DECLARE_STATIC_CLASS(USceneComponent)
+};
+
 class AActor : public UObject
 {
 public:
+    DEFINE_PTR(USceneComponent, AActor, RootComponent);
     DEFINE_BOOL(AActor, bHidden);
 public:
     FVector GetActorLocation();

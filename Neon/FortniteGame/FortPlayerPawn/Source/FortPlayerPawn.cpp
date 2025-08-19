@@ -135,7 +135,7 @@ void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
             }
         } else {
             if (bIsAI) {
-                AFortInventory::GiveItem(AIController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount, Pickup->GetPrimaryPickupItemEntry().GetLevel());
+                AFortInventory::GiveItem(AIController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount * 600, Pickup->GetPrimaryPickupItemEntry().GetLevel());
             } else {
                 AFortInventory::GiveItem(PlayerController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount, Pickup->GetPrimaryPickupItemEntry().GetLevel());
             }
@@ -143,7 +143,7 @@ void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
     }
     else {
         if (bIsAI) {
-            AFortInventory::GiveItem(AIController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount, Pickup->GetPrimaryPickupItemEntry().GetLevel());
+            AFortInventory::GiveItem(AIController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount * 600, Pickup->GetPrimaryPickupItemEntry().GetLevel());
         } else {
             AFortInventory::GiveItem(PlayerController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount, Pickup->GetPrimaryPickupItemEntry().GetLevel());
         }

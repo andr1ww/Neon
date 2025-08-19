@@ -26,7 +26,11 @@ static void* (*ProcessEventOG)(UObject*, UFunction*, void*);
 void* ProcessEvent(UObject* Obj, UFunction* Function, void* Params)
 {
 	if (Function && Config::bLogProcessEvent) {
-		static std::ofstream logFile("ProcessEvent.log", std::ios::app);
+		static bool firstCall = true;
+		static std::ofstream logFile("ProcessEvent.log", firstCall ? std::ios::trunc : std::ios::app);
+		if (firstCall) {
+			firstCall = false;
+		}
 		logFile << "ProcessEvent: " << Function->GetFName().ToString().ToString().c_str() << std::endl;
 	}
 
@@ -42,6 +46,98 @@ inline bool IsInFrontend()
 			return true;
 		}
 	}
+}
+
+DefHookOg(void, AFortAthenaMutatorOnSafeZoneUpdated, AFortAthenaMutator_Bots* Bots);
+void AFortAthenaMutatorOnSafeZoneUpdated(AFortAthenaMutator_Bots* a1)
+{
+	AFortAthenaMutatorOnSafeZoneUpdatedOG(a1);
+	((void(*)(AFortAthenaMutator_Bots*))(IMAGEBASE + 0x1A9FF90))(a1);
+}
+
+DefHookOg(void, InitializeMMRInfos, AFortAthenaMutator_Bots* a1);
+void InitializeMMRInfos(AFortAthenaMutator_Bots* a1)
+{
+	UBotELOSpawningInfo* PhoebeMMRInfo = (UBotELOSpawningInfo*)UBotELOSpawningInfo::GetDefaultObj();
+	PhoebeMMRInfo->SetCachedGameMode(UWorld::GetWorld()->GetAuthorityGameMode());
+	PhoebeMMRInfo->SetNumItemsToSpawn(FScalableFloat(10.0f));
+	PhoebeMMRInfo->SetBotSpawningDataInfo(Runtime::StaticLoadObject<UFortAthenaMutator_PlayerBotSpawningPolicyData>("/Game/Athena/AI/Phoebe/BP_PhoebeSpawningItemData.BP_PhoebeSpawningItemData_C"));
+	a1->GetCachedMMRSpawningInfo().ELOSpawningInfos.Add(PhoebeMMRInfo);
+
+	*(int32*)(IMAGEBASE + 0x78B2F68) = 6700;
+	*(int32*)(IMAGEBASE + 0x78B2F64) = 70;
+	*(int32*)(IMAGEBASE + 0x78B2F6C) = 70;
+
+    return InitializeMMRInfosOG(a1);
+}
+
+class UModel final : public UObject
+{
+public:
+	uint8                                         Pad_28[0x2A8];                                     // 0x0028(0x02A8)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
+class UBrushComponent : public AActor
+{
+public:
+	DEFINE_PTR(UModel, UBrushComponent, Brush)
+public:
+	DECLARE_STATIC_CLASS(UBrushComponent)
+	DECLARE_DEFAULT_OBJECT(UBrushComponent)
+};
+
+class ABrush : public AActor
+{
+public:
+	DEFINE_PTR(UModel, UBrushComponent, Brush)
+	DEFINE_PTR(UBrushComponent, ABrush, BrushComponent)
+public:
+	DECLARE_STATIC_CLASS(ABrush)
+	DECLARE_DEFAULT_OBJECT(ABrush)
+};
+
+class AVolume : public ABrush
+{
+public:
+	DECLARE_STATIC_CLASS(AVolume)
+	DECLARE_DEFAULT_OBJECT(AVolume)
+};
+
+class AFortPoiVolume : public AVolume
+{
+public:
+	DECLARE_STATIC_CLASS(AFortPoiVolume)
+	DECLARE_DEFAULT_OBJECT(AFortPoiVolume)
+};
+
+enum class EAttachmentRule : uint8
+{
+	KeepRelative                             = 0,
+	KeepWorld                                = 1,
+	SnapToTarget                             = 2,
+	EAttachmentRule_MAX                      = 3,
+};
+
+DefHookOg(void, PostInitializeComponentsVolume, AFortPoiVolume* This);
+void PostInitializeComponentsVolume(AFortPoiVolume* This)
+{
+	UBrushComponent* Comp = This->GetBrushComponent();
+	if (!Comp)
+	{
+		Comp = (UBrushComponent*)UGameplayStatics::SpawnObject(UBrushComponent::StaticClass(), This);
+        
+		USceneComponent* RootComp = This->CallFunc<USceneComponent*>("Actor", "K2_GetRootComponent");
+		if (RootComp)
+		{
+			Comp->CallFunc<void>("SceneComponent", "K2_AttachToComponent", RootComp, UKismetStringLibrary::Conv_StringToName(L""), EAttachmentRule::KeepWorld, 
+									 EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, false);
+		}
+	}
+    
+	Comp->SetBrush(This->GetBrush());
+	This->SetBrushComponent(Comp);
+    
+	return PostInitializeComponentsVolumeOG(This);
 }
 
 void InitNullsAndRetTrues() {
@@ -168,6 +264,18 @@ void InitNullsAndRetTrues() {
 	
 	if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.50)
 	{
+		Runtime::Patch(IMAGEBASE + 0x1A45182, 0x90);
+		Runtime::Patch(IMAGEBASE + 0x1A45183, 0x90);
+		Runtime::Patch(IMAGEBASE + 0x1A45184, 0x90);
+		Runtime::Patch(IMAGEBASE + 0x1A45185, 0x90);
+		Runtime::Patch(IMAGEBASE + 0x1A45186, 0x90);
+		Runtime::Patch(IMAGEBASE + 0x1A45187, 0x90);
+	
+	//	Runtime::Hook(IMAGEBASE + 0x1A45060, PostInitializeComponentsVolume, (void**)&PostInitializeComponentsVolumeOG);
+		Runtime::Hook(IMAGEBASE + 0x1A3A640, RetTrue);
+		Runtime::Patch(IMAGEBASE + 0x1A9FFB6, 0xEB);
+		Runtime::Hook(IMAGEBASE + 0x1A8ED30, AFortAthenaMutatorOnSafeZoneUpdated, (void**)&AFortAthenaMutatorOnSafeZoneUpdatedOG);
+		Runtime::Hook(IMAGEBASE + 0x1A9FF90, InitializeMMRInfos, (void**)&InitializeMMRInfosOG);
 		Runtime::Hook(IMAGEBASE + 0x6BB920, RetTrue);
 		Runtime::Hook(IMAGEBASE + 0x1EE9720, AFortPlayerControllerAthena::K2_RemoveItemFromPlayer, (void**)&AFortPlayerControllerAthena::K2_RemoveItemFromPlayerOG);
 		Runtime::Hook(IMAGEBASE + 0x2ebf890, ProcessEvent, (void**)&ProcessEventOG); 
@@ -251,74 +359,6 @@ void InitNullsAndRetTrues() {
 	}
 }
 
-DefHookOg(void, AFortAthenaMutatorOnSafeZoneUpdated, AFortAthenaMutator_Bots* Bots);
-void AFortAthenaMutatorOnSafeZoneUpdated(AFortAthenaMutator_Bots* a1)
-{
-	AFortAthenaMutatorOnSafeZoneUpdatedOG(a1);
-	((void(*)(AFortAthenaMutator_Bots*))(IMAGEBASE + 0x1A9FF90))(a1);
-}
-
-DefHookOg(void, InitializeMMRInfos, AFortAthenaMutator_Bots* a1);
-void InitializeMMRInfos(AFortAthenaMutator_Bots* a1)
-{
-	UBotELOSpawningInfo* PhoebeMMRInfo = (UBotELOSpawningInfo*)UBotELOSpawningInfo::GetDefaultObj();
-	PhoebeMMRInfo->SetCachedGameMode(UWorld::GetWorld()->GetAuthorityGameMode());
-	PhoebeMMRInfo->SetNumItemsToSpawn(FScalableFloat(10.0f));
-	PhoebeMMRInfo->SetBotSpawningDataInfo(Runtime::StaticLoadObject<UFortAthenaMutator_PlayerBotSpawningPolicyData>("/Game/Athena/AI/Phoebe/BP_PhoebeSpawningItemData.BP_PhoebeSpawningItemData_C"));
-	a1->GetCachedMMRSpawningInfo().ELOSpawningInfos.Add(PhoebeMMRInfo);
-
-	*(int32*)(IMAGEBASE + 0x78B2F68) = 6700;
-	*(int32*)(IMAGEBASE + 0x78B2F64) = 70;
-	*(int32*)(IMAGEBASE + 0x78B2F6C) = 70;
-
-    return InitializeMMRInfosOG(a1);
-}
-
-class UBrushComponent : public UObject
-{
-public:
-	DECLARE_STATIC_CLASS(UBrushComponent)
-	DECLARE_DEFAULT_OBJECT(UBrushComponent)
-};
-
-class ABrush : public UObject
-{
-public:
-	DEFINE_PTR(UBrushComponent, ABrush, BrushComponent)
-public:
-	DECLARE_STATIC_CLASS(ABrush)
-	DECLARE_DEFAULT_OBJECT(ABrush)
-};
-
-class AVolume : public ABrush
-{
-public:
-	DECLARE_STATIC_CLASS(AVolume)
-	DECLARE_DEFAULT_OBJECT(AVolume)
-};
-
-class AFortPoiVolume : public AVolume
-{
-public:
-	DECLARE_STATIC_CLASS(AFortPoiVolume)
-	DECLARE_DEFAULT_OBJECT(AFortPoiVolume)
-};
-
-DefHookOg(void, PostInitializeComponentsVolume, AFortPoiVolume* This);
-void PostInitializeComponentsVolume(AFortPoiVolume* This)
-{
-	UBrushComponent* Comp = This->GetBrushComponent();
-	if (!Comp)
-	{
-		Comp = (UBrushComponent*)UGameplayStatics::SpawnObject(UBrushComponent::StaticClass(), This);
-		((void (*)(UObject * Component, UObject * World))(Finder->RegisterComponentWithWorld()))(Comp, UWorld::GetWorld());
-	}
-
-	This->SetBrushComponent(Comp);
-	
-	return PostInitializeComponentsVolumeOG(This);
-}
-
 void Main()
 {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
@@ -355,19 +395,6 @@ void Main()
 		*(bool*)(Finder->GIsClient()) = false; 
 		*(bool*)(Finder->GIsClient() + 1) = true;
 	}
-	
-	Runtime::Patch(IMAGEBASE + 0x1A45182, 0x90);
-	Runtime::Patch(IMAGEBASE + 0x1A45183, 0x90);
-	Runtime::Patch(IMAGEBASE + 0x1A45184, 0x90);
-	Runtime::Patch(IMAGEBASE + 0x1A45185, 0x90);
-	Runtime::Patch(IMAGEBASE + 0x1A45186, 0x90);
-	Runtime::Patch(IMAGEBASE + 0x1A45187, 0x90);
-	
-	Runtime::Hook(IMAGEBASE + 0x1A45060, PostInitializeComponentsVolume, (void**)&PostInitializeComponentsVolumeOG);
-	Runtime::Hook(IMAGEBASE + 0x1A3A640, RetTrue);
-	Runtime::Patch(IMAGEBASE + 0x1A9FFB6, 0xEB);
-	Runtime::Hook(IMAGEBASE + 0x1A8ED30, AFortAthenaMutatorOnSafeZoneUpdated, (void**)&AFortAthenaMutatorOnSafeZoneUpdatedOG);
-	Runtime::Hook(IMAGEBASE + 0x1A9FF90, InitializeMMRInfos, (void**)&InitializeMMRInfosOG);
 	
 	InitNullsAndRetTrues();
 
