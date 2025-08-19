@@ -6,6 +6,7 @@
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
 #include "FortniteGame/BuildingSMActor/Header/BuildingSMActor.h"
+#include "FortniteGame/FortAthenaMutator/Header/FortAthenaMutator.h"
 #include "FortniteGame/FortGameMode/Header/FortGameMode.h"
 #include "FortniteGame/FortGameSessionDedicated/Header/FortGameSessionDedicated.h"
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
@@ -359,6 +360,32 @@ void InitNullsAndRetTrues() {
 	}
 }
 
+DefHookOg(FGameplayTag*, Ok, void*, void*, FName f);
+FGameplayTag* Ok(void* a1, void* a2, FName f)
+{
+	static FGameplayTag* Tag = nullptr;
+	static int32 Size = 0;
+	if (!Tag)
+	{
+		Size = StaticClassImpl("GameplayTag")->GetSize();
+		Tag = (FGameplayTag*)VirtualAlloc(0, Size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+		if (Tag) new(Tag) FGameplayTag();
+	}
+	if (!Tag) return OkOG(a1, a2, f);
+	
+	if (f.ToString().ToString() == "PlayerTech:ptid_spyteam_01")
+	{
+		Tag->TagName = UKismetStringLibrary::Conv_StringToName(FString(L"Athena.Faction.Alter"));
+		return Tag;
+	} else if (f.ToString().ToString() == "PlayerTech:ptid_spyteam_02")
+	{
+		Tag->TagName = UKismetStringLibrary::Conv_StringToName(FString(L"Athena.Faction.Ego"));
+		return Tag;
+	} 
+
+	return OkOG(a1, a2, f);
+}
+
 void Main()
 {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
@@ -398,6 +425,8 @@ void Main()
 	
 	InitNullsAndRetTrues();
 
+	Runtime::Hook(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 4C 89 44 24 ? 57 48 83 EC ? 48 8B FA 48 8B F1 33 D2").Get(), Ok, (void**)&OkOG);
+	
 	auto ListenInstruction = Memcury::Scanner::FindPattern("E8 ? ? ? ? 84 C0 75 ? 80 3D ? ? ? ? ? 72 ? 45 33 C0 48 8D 55").Get();
 	Runtime::ModifyInstruction(ListenInstruction, Finder->InstructionForCollision());
 	Runtime::Hook(Finder->InstructionForCollision(), FortGameSessionDedicated::UWorld_Listen);
@@ -472,6 +501,7 @@ void Main()
 	Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.ServerReviveFromDBNO", AFortPlayerPawn::ServerReviveFromDBNO);
 	if (Config::bEchoSessions) Runtime::Hook(Finder->PickTeam(), AFortGameModeAthena::PickTeam, (void**)&AFortGameModeAthena::PickTeamOG);
 	Runtime::Hook(Finder->GetSquadIdForCurrentPlayer(), FortGameSessionDedicated::GetSquadIdForCurrentPlayer);
+	Runtime::Exec("/Script/FortniteGame.FortAthenaMutator_GiveItemsAtGamePhaseStep.OnGamePhaseStepChanged", AFortAthenaMutator_GiveItemsAtGamePhaseStep::OnGamePhaseStepChanged);
 	
 	if (Finder->CompletePickupAnimation())
 	{

@@ -187,7 +187,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     
     if (GameMode->GetCurrentPlaylistId() == -1)
     {
-        UFortPlaylistAthena* Playlist = (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_Uranium_P");
+        UFortPlaylistAthena* Playlist = (UFortPlaylistAthena*)GUObjectArray.FindObject("Playlist_Respawn_Op");
         
         if (!Config::bEchoSessions)
         {

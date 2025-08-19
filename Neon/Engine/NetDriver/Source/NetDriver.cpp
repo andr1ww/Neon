@@ -402,7 +402,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             
             if (GameState->GetGamePhase() == EAthenaGamePhase::Warmup && GameMode->GetAlivePlayers().Num() > 0
                 && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) < 100
-                && GameMode->GetAliveBots().Num() < 100)
+                && GameMode->GetAliveBots().Num() < 100 && GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Default"))
             {
                 if (UKismetMathLibrary::RandomBoolWithWeight(0.05f))
                 {
