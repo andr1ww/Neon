@@ -276,6 +276,25 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
     WeaponEntry->SetLoadedAmmo(WeaponEntry->GetLoadedAmmo() + AmmoToRemove);
     AFortInventory::ReplaceEntry(PC, *WeaponEntry);
 
+    static const auto ShieldsDefinition = Runtime::StaticLoadObject<UFortItemDefinition>("/Game/Athena/Items/Consumables/Shields/Athena_Shields.Athena_Shields");
+    static const auto MedkitDefinition = Runtime::StaticLoadObject<UFortItemDefinition>("/Game/Athena/Items/Consumables/Medkit/Athena_Medkit.Athena_Medkit");
+    static const auto ShieldCue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Shield.PotionConsumed");
+    static const auto HealthCue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Athena.Health.HealUsed");
+
+    if (auto Definition = WeaponEntry->GetItemDefinition(); Definition == ShieldsDefinition || Definition == MedkitDefinition)
+    {
+        if (auto PlayerState = Cast<AFortPlayerStateAthena>(PC->GetPlayerState()))
+        {
+            auto Handle = PlayerState->GetAbilitySystemComponent()->CallFunc<FGameplayEffectContextHandle>("AbilitySystemComponent", "MakeEffectContext");
+            FGameplayTag Tag{};
+            Tag.TagName = (Definition == ShieldsDefinition) ? ShieldCue : HealthCue;
+        
+            auto* AbilitySystem = PlayerState->GetAbilitySystemComponent();
+            AbilitySystem->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueAdded", Tag, FPredictionKey(), Handle);
+            AbilitySystem->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueExecuted", Tag, FPredictionKey(), Handle);
+        }
+    }
+    
     return ReloadWeaponOG(Weapon, AmmoToRemove);
 }
 
