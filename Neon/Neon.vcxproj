@@ -305,7 +305,7 @@
       <PreprocessorDefinitions>NDEBUG;NEON_EXPORTS;_WINDOWS;_USRDLL;_WINDLL;_UNICODE;UNICODE;</PreprocessorDefinitions>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\andrew\RiderProjects\Neon\;C:\Users\andrew\RiderProjects\Neon\Neon\;;C:\Users\andrew\Documents\GitHub\vcpkg\installed\x64-windows\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
     <ClCompile Include="FortniteGame\BuildingSMActor\Source\BuildingSMActor.cpp" />
