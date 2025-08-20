@@ -530,7 +530,6 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
             UGameplayStatics::SpawnActorOG<AActor>(Runtime::StaticFindObject<UClass>("/Game/Athena/Playlists/Barrier/Barrier.Barrier_C"), FVector{ 0, 0, -2000 }, FRotator{});
         }
     }
-
     
     if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.30)
     {
