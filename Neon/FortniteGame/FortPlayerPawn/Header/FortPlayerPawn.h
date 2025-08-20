@@ -435,6 +435,8 @@ public:
     DEFINE_PTR(FFortAthenaLoadout, AFortPlayerPawn, CosmeticLoadout);
 
 public:
+	static void OnCapsuleBeginOverlap(AFortPlayerPawn* OverlappedComp,  FFrame& Stack);
+	
 	void BeginSkydiving(bool NewValue)
 	{
 		static SDK::UFunction* Func = nullptr;

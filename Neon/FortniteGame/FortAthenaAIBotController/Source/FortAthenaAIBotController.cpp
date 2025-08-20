@@ -64,7 +64,7 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 				int randomIndex = rand() % Characters.size();
 				CID = Characters[randomIndex];
         
-				if (CID && FortLootPackage::IsValidPointer(CID) && FortLootPackage::IsValidPointer(CID->GetHeroDefinition())) {
+				if (CID && IsValidPointer(CID) && IsValidPointer(CID->GetHeroDefinition())) {
 					Found = true;
 					TArray<TSoftObjectPtr<UFortHeroSpecialization>> Specializations = CID->GetHeroDefinition()->GetSpecializations();
 					for (TSoftObjectPtr<UFortHeroSpecialization> Spec : Specializations)
@@ -110,7 +110,7 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		if (Pickaxes.size() > 0) {
 			while (!Valid) {
 				auto Pickaxe = Pickaxes[rand() % Pickaxes.size()];
-				if (FortLootPackage::IsValidPointer(Pickaxe))
+				if (IsValidPointer(Pickaxe))
 				{
 					PickDef = Pickaxe->GetWeaponDefinition();
 					Valid = true;

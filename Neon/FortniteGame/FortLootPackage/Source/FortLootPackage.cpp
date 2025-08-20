@@ -60,14 +60,6 @@ T* FortLootPackage::PickWeighted(TArray<T*>& Map, float (*RandFunc)(float), bool
     return nullptr;
 }
 
-bool FortLootPackage::IsValidPointer(void* ptr) {
-    return ptr != nullptr && 
-           ptr != (void*)0xFFFFFFFFULL && 
-           ptr != (void*)0xCCCCCCCCULL && 
-           ptr != (void*)0xDDDDDDDDULL &&
-           (uintptr_t)ptr > 0x10000;
-}
-
 void FortLootPackage::SetupLDSForPackage(TArray<FNeonLootImproper>& LootDrops, FName Package, int i, FName TierGroup, int WorldLevel, int RecursionDepth) {
     if (RecursionDepth > 3 || LootDrops.Num() > 20) {
         return;

@@ -281,22 +281,34 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
 
 void UGA_Athena_MedConsumable_Parent_C::Athena_MedConsumable_Triggered(UGA_Athena_MedConsumable_Parent_C* Consumable)
 {
+    return Athena_MedConsumable_TriggeredOG(Consumable);
     if (!Consumable || (!Consumable->GetHealsShields() && !Consumable->GetHealsHealth()) || !Consumable->GetPlayerPawn())
         return Athena_MedConsumable_TriggeredOG(Consumable);
-
-    auto PlayerState = Cast<AFortPlayerStateAthena>(Consumable->GetPlayerPawn()->GetPlayerState());
-    auto Handle = PlayerState->GetAbilitySystemComponent()->CallFunc<FGameplayEffectContextHandle>("AbilitySystemComponent", "MakeEffectContext");
-    FGameplayTag Tag{};
-    static auto ShieldCue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Shield.PotionConsumed");
-    static auto HealthCue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Athena.Health.HealUsed");
-    FName CueName = Consumable->GetHealsShields() ? ShieldCue : HealthCue;
-    if (Consumable->GetHealsHealth() && Consumable->GetHealsShields()) {
-        if (Consumable->GetPlayerPawn()->GetHealth() + Consumable->GetHealthHealAmount() <= 100) CueName = HealthCue;
+    
+    auto Pawn = Consumable->GetPlayerPawn();
+    if (!Pawn || !IsValidPointer(Pawn))
+        return Athena_MedConsumable_TriggeredOG(Consumable);
+    
+    if (Pawn && IsValidPointer(Pawn))
+    {
+        auto PlayerController = (AFortPlayerControllerAthena*)Pawn->GetController();
+        if (PlayerController)
+        {
+            auto PlayerState = Cast<AFortPlayerStateAthena>(PlayerController->GetPlayerState());
+            auto Handle = PlayerState->GetAbilitySystemComponent()->CallFunc<FGameplayEffectContextHandle>("AbilitySystemComponent", "MakeEffectContext");
+            FGameplayTag Tag{};
+            static auto ShieldCue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Shield.PotionConsumed");
+            static auto HealthCue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Athena.Health.HealUsed");
+            FName CueName = Consumable->GetHealsShields() ? ShieldCue : HealthCue;
+            if (Consumable->GetHealsHealth() && Consumable->GetHealsShields()) {
+                if (Consumable->GetPlayerPawn()->GetHealth() + Consumable->GetHealthHealAmount() <= 100) CueName = HealthCue;
+            }
+            Tag.TagName = CueName;
+            PlayerState->GetAbilitySystemComponent()->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueAdded", Tag, FPredictionKey(), Handle);
+            PlayerState->GetAbilitySystemComponent()->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueExecuted", Tag, FPredictionKey(), Handle);
+        }
     }
-    Tag.TagName = CueName;
-    PlayerState->GetAbilitySystemComponent()->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueAdded", Tag, FPredictionKey(), Handle);
-    PlayerState->GetAbilitySystemComponent()->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueExecuted", Tag, FPredictionKey(), Handle);
-
+    
     return Athena_MedConsumable_TriggeredOG(Consumable);
 }
 
@@ -355,6 +367,44 @@ void AFortPlayerPawn::ServerSendZiplineState(AFortPlayerPawn* Pawn, FFrame& Stac
     }
 }
 
+void AFortPlayerPawn::OnCapsuleBeginOverlap(AFortPlayerPawn* Pawn, FFrame& Stack)
+{
+    UPrimitiveComponent* OverlappedComp;
+    AActor* OtherActor;
+    UPrimitiveComponent* OtherComp;
+    int32 OtherBodyIndex;
+    bool bFromSweep;
+    FHitResult SweepResult;
+    Stack.StepCompiledIn(&OverlappedComp);
+    Stack.StepCompiledIn(&OtherActor);
+    Stack.StepCompiledIn(&OtherComp);
+    Stack.StepCompiledIn(&OtherBodyIndex);
+    Stack.StepCompiledIn(&bFromSweep);
+    Stack.StepCompiledIn(&SweepResult);
+    Stack.IncrementCode();
+
+    if (!Pawn || !Pawn->GetController())
+        return;
+
+    if (Pawn->IsDBNO())
+        return;
+
+    auto Pickup = Cast<AFortPickup>(OtherActor);
+    if (!Pickup)
+        return;
+
+    if (Pickup->GetPawnWhoDroppedPickup() == Pawn)
+        return;
+
+    auto* ItemDef = Pickup->GetPrimaryPickupItemEntry().GetItemDefinition();
+    if (!ItemDef)
+        return;
+
+    if (FortLootPackage::GetQuickbar(ItemDef) != EFortQuickBars::Primary)
+    {
+        Pawn->CallFunc<void>("FortPlayerPawn", "ServerHandlePickup", Pickup, 0.4f, FVector(), true);
+    }
+}
 
 void AFortPlayerPawn::ServerReviveFromDBNO(AFortPlayerPawn* Pawn, AFortPlayerControllerAthena* EventInstigator)
 {

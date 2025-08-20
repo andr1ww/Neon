@@ -297,6 +297,7 @@ AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry* Entr
         NewPickup->GetPrimaryPickupItemEntry().SetLoadedAmmo(Entry->GetLoadedAmmo());
         NewPickup->GetPrimaryPickupItemEntry().SetCount(OverrideCount != -1 ? OverrideCount : Entry->GetCount());
         NewPickup->OnRep_PrimaryPickupItemEntry();
+        NewPickup->SetPawnWhoDroppedPickup(Pawn);
             
         NewPickup->TossPickup(Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
     }
@@ -327,7 +328,7 @@ AFortPickupAthena* AFortInventory::SpawnPickupDirect(FVector Loc, UFortItemDefin
             if (NewPickup->GetbTossedFromContainer()) NewPickup->OnRep_TossedFromContainer();
         } else
         {
-            if (FortLootPackage::IsValidPointer(Pawn))
+            if (IsValidPointer(Pawn))
             {
                 NewPickup->TossPickup(Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
             }

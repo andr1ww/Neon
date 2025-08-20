@@ -203,6 +203,7 @@ public:
         Func->FunctionFlags() = Flgs;
     }
 public:
+    DEFINE_PTR(AFortPlayerPawn, AFortPickup, PawnWhoDroppedPickup);
     DEFINE_BOOL(AFortPickup, bTossedFromContainer)
     DEFINE_BOOL(AFortPickup, bPickedUp);
     DEFINE_BOOL(AFortPickup, bRandomRotation);

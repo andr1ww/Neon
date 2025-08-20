@@ -261,7 +261,7 @@ public:
     }
 };
 
-class UPrimitiveComponent : public UObject
+class UPrimitiveComponent : public AActor
 {
 public:
     DECLARE_STATIC_CLASS(UPrimitiveComponent)

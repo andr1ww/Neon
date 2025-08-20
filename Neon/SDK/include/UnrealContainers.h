@@ -336,7 +336,7 @@ template <typename InElementType> class TArray {
     TArray(int32 Size)
     :ArrayNum(0), ArrayMax(Size), Data(reinterpret_cast<ElementType*>(FMemory::Realloc(0, sizeof(ElementType) *  Size, 0)))
         {
-            std::cout << __FUNCTION__ << std::endl;
+
         }
     
       protected:

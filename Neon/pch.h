@@ -18,6 +18,14 @@ using namespace SDK;
 using namespace std;
 DEFINE_LOG_CATEGORY(LogNeon);
 
+inline bool IsValidPointer(void* ptr) {
+    return ptr != nullptr && 
+           ptr != (void*)0xFFFFFFFFULL && 
+           ptr != (void*)0xCCCCCCCCULL && 
+           ptr != (void*)0xDDDDDDDDULL &&
+           (uintptr_t)ptr > 0x10000;
+}
+
 #define IMAGEBASE uint64_t(GetModuleHandle(0))
 static int RetTrue()
 {
