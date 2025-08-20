@@ -257,7 +257,11 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 std::cout << path << std::endl;
                 Playlist = Runtime::StaticFindObject<UFortPlaylistAthena>(path);
 
+                FPlaylistData PlaylistData{};
+
                 if (PlaylistName.contains("vamp")) {
+                    PlaylistData.EventWindowId = L"ARENA_S" + Fortnite_Version.GetMajorVersion();
+                    PlaylistData.TournamentId = L"eventTemplate_ARENA_S" + Fortnite_Version.GetMajorVersion();
                     UE_LOG(LogNeon, Log, "Enabling LateGame");
                     Config::bLateGame = true;
                 }
@@ -271,7 +275,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 {
                     SetPlaylist(GameMode, Playlist);
                     Nexa::Echo::EchoSessionUpdate(Playlist);
-                    FPlaylistData PlaylistData{};
                     if (PlaylistName.find("showdownalt") != std::string::npos)
                     {
                         PlaylistData.EventWindowId = L"LG_ARENA_S" + Fortnite_Version.GetMajorVersion();
@@ -538,7 +541,7 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
         WeakObjectPtr.ObjectSerialNumber = GUObjectArray.GetSerialNumber(PlayerState->GetUniqueID());
         auto& ElementData2 = UWorld::GetWorld()->GetGameState()->GetTeamArray()[PlayerState->GetTeamIndex()];
         auto& ElementData1 = GameState->GetSquadArray()[PlayerState->GetSquadId()];
-        if (!ElementData2.ElementData.GetData() || !ElementData1.ElementData.GetData())
+        if (!ElementData2.ElementData.GetData() || !ElementData1.ElementData.GetData() || !WeakObjectPtr.Get())
         {
             return HandleStartingNewPlayerOG(GameMode, NewPlayer);
         }

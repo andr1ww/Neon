@@ -183,6 +183,7 @@
     <ClInclude Include="FortniteGame\FortPlaylistAthena\Header\FortPlaylistAthena.h" />
     <ClInclude Include="FortniteGame\FortQuestManager\Header\FortQuestManager.h" />
     <ClInclude Include="FortniteGame\FortSafeZoneIndicator\Header\FortSafeZoneIndicator.h" />
+    <ClInclude Include="FortniteGame\GAB_InterrogatePlayer\Header\GAB_InterrogatePlayer.h" />
     <ClInclude Include="Neon\Config.h" />
     <ClInclude Include="Neon\Finder\Header\Finder.h" />
     <ClInclude Include="Neon\Nexa\BroadcastMatchResults\BroadcastMatchResults.h" />
@@ -321,6 +322,7 @@
     <ClCompile Include="FortniteGame\FortQuestManager\Source\FortQuestManager.cpp" />
     <ClCompile Include="FortniteGame\FortSafeZoneIndicator\Source\FortSafeZoneIndicator.cpp" />
     <ClCompile Include="FortniteGame\FortServerBotManager\Source\FortServerBotManager.cpp" />
+    <ClCompile Include="FortniteGame\GAB_InterrogatePlayer\Source\GAB_InterrogatePlayer.cpp" />
     <ClCompile Include="Neon\Finder\Source\Finder.cpp" />
     <ClCompile Include="Neon\Nexa\BroadcastMatchResults\BroadcastMatchResults.cpp" />
     <ClCompile Include="Neon\Nexa\Curl\Curl.cpp" />

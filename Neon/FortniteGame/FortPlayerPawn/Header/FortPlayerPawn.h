@@ -512,7 +512,7 @@ public:
 	DEFINE_BOOL(UGA_Athena_MedConsumable_Parent_C, HealsShields)
 	DEFINE_MEMBER(float, UGA_Athena_MedConsumable_Parent_C, HealthHealAmount)
 public:
-	DefHookOg(void, Athena_MedConsumable_Triggered, UGA_Athena_MedConsumable_Parent_C* Consumable);
+	DefHookOg(void, Athena_MedConsumable_Triggered, UGA_Athena_MedConsumable_Parent_C* Consumable, FFrame& Stack);
 	DECLARE_STATIC_CLASS(UGA_Athena_MedConsumable_Parent_C)
 	DECLARE_DEFAULT_OBJECT(UGA_Athena_MedConsumable_Parent_C)
 };

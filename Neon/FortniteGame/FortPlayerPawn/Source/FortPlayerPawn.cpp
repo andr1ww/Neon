@@ -276,7 +276,7 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
     WeaponEntry->SetLoadedAmmo(WeaponEntry->GetLoadedAmmo() + AmmoToRemove);
     AFortInventory::ReplaceEntry(PC, *WeaponEntry);
 
-    if (PC->GetMyFortPawn()) {
+  /*  if (PC->GetMyFortPawn()) {
         if (!PC->GetMyFortPawn()->GetbIsEmoteLeader()) {
             static const auto ShieldsDefinition = Runtime::StaticLoadObject<UFortItemDefinition>("/Game/Athena/Items/Consumables/Shields/Athena_Shields.Athena_Shields");
             static const auto MedkitDefinition = Runtime::StaticLoadObject<UFortItemDefinition>("/Game/Athena/Items/Consumables/Medkit/Athena_Medkit.Athena_Medkit");
@@ -302,19 +302,18 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
             PC->GetMyFortPawn()->OnRep_IsEmoteLeader();
         }
     }
-    
+    */
     return ReloadWeaponOG(Weapon, AmmoToRemove);
 }
 
-void UGA_Athena_MedConsumable_Parent_C::Athena_MedConsumable_Triggered(UGA_Athena_MedConsumable_Parent_C* Consumable)
+void UGA_Athena_MedConsumable_Parent_C::Athena_MedConsumable_Triggered(UGA_Athena_MedConsumable_Parent_C* Consumable, FFrame& Stack)
 {
-    return Athena_MedConsumable_TriggeredOG(Consumable);
     if (!Consumable || (!Consumable->GetHealsShields() && !Consumable->GetHealsHealth()) || !Consumable->GetPlayerPawn())
-        return Athena_MedConsumable_TriggeredOG(Consumable);
+        return Athena_MedConsumable_TriggeredOG(Consumable, Stack);
     
     auto Pawn = Consumable->GetPlayerPawn();
     if (!Pawn || !IsValidPointer(Pawn))
-        return Athena_MedConsumable_TriggeredOG(Consumable);
+        return Athena_MedConsumable_TriggeredOG(Consumable, Stack);
     
     if (Pawn && IsValidPointer(Pawn))
     {
@@ -336,7 +335,7 @@ void UGA_Athena_MedConsumable_Parent_C::Athena_MedConsumable_Triggered(UGA_Athen
         }
     }
     
-    return Athena_MedConsumable_TriggeredOG(Consumable);
+    return Athena_MedConsumable_TriggeredOG(Consumable, Stack);
 }
 
 void AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues(AFortPlayerPawn* Pawn, FAthenaBatchedDamageGameplayCues_Shared SharedData, FAthenaBatchedDamageGameplayCues_NonShared NonSharedData)
