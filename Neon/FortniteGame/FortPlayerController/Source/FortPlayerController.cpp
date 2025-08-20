@@ -235,12 +235,22 @@ void AFortPlayerControllerAthena::ServerPlayEmoteItem(AFortPlayerControllerAthen
     
     if (Ability)
     {
-        int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
-        FGameplayAbilitySpec* Spec = (FGameplayAbilitySpec*)VirtualAlloc(0, GameplayAbilitySpecSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-    
-        if (!Spec) return;
-    
-        new(Spec) FGameplayAbilitySpec();
+    	static FGameplayAbilitySpec* StaticSpec = nullptr;
+    	static bool bInitialized = false;
+
+    	if (!bInitialized)
+    	{
+    		int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
+    		StaticSpec = (FGameplayAbilitySpec*)malloc(GameplayAbilitySpecSize);
+    		if (!StaticSpec)
+    			return;
+    		memset(StaticSpec, 0, GameplayAbilitySpecSize);
+    		new (StaticSpec) FGameplayAbilitySpec();
+    		bInitialized = true;
+    	}
+
+    	if (!StaticSpec)
+    		return;
     
         using GiveAbilityFunc = FGameplayAbilitySpecHandle(__fastcall*)(
             UAbilitySystemComponent*,
@@ -249,20 +259,20 @@ void AFortPlayerControllerAthena::ServerPlayEmoteItem(AFortPlayerControllerAthen
             FGameplayEventData*
         );
         
-        Spec->MostRecentArrayReplicationKey = -1;
-        Spec->ReplicationID = -1;
-        Spec->ReplicationKey = -1;
-        Spec->GetHandle().Handle = rand();
-        Spec->SetAbility(Ability);
-        Spec->SetSourceObject(Asset);
-        Spec->SetInputID(-1);
-        Spec->SetLevel(1);
+        StaticSpec->MostRecentArrayReplicationKey = -1;
+        StaticSpec->ReplicationID = -1;
+        StaticSpec->ReplicationKey = -1;
+        StaticSpec->GetHandle().Handle = rand();
+        StaticSpec->SetAbility(Ability);
+        StaticSpec->SetSourceObject(Asset);
+        StaticSpec->SetInputID(-1);
+        StaticSpec->SetLevel(1);
     
-        FGameplayAbilitySpecHandle Handle = Spec->GetHandle();
+        FGameplayAbilitySpecHandle Handle = StaticSpec->GetHandle();
     
         if (Finder->GiveAbilityAndActivateOnce())
         {
-            ((GiveAbilityFunc)Finder->GiveAbilityAndActivateOnce())(AbilitySystemComponent, &Handle, *Spec, nullptr);
+            ((GiveAbilityFunc)Finder->GiveAbilityAndActivateOnce())(AbilitySystemComponent, &Handle, *StaticSpec, nullptr);
         }
     }
 }

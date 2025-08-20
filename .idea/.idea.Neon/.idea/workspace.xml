@@ -5,12 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/AbilitySystemComponent/Source/AbilitySystemComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/AbilitySystemComponent/Source/AbilitySystemComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortInventory/Header/FortInventory.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortInventory/Header/FortInventory.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Header/FortPlayerController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Header/FortPlayerController.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerState/Header/FortPlayerState.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerState/Header/FortPlayerState.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,7 +94,7 @@
       <workItem from="1755517224148" duration="20598000" />
       <workItem from="1755542212954" duration="73599000" />
       <workItem from="1755660284370" duration="2720000" />
-      <workItem from="1755688898573" duration="4697000" />
+      <workItem from="1755688898573" duration="5063000" />
     </task>
     <servers />
   </component>
@@ -199,7 +195,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp</url>
-          <line>980</line>
+          <line>990</line>
           <option name="timeStamp" value="65" />
         </line-breakpoint>
       </breakpoints>
