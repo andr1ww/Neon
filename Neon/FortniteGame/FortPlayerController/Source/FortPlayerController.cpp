@@ -851,6 +851,35 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			}
 		}
 
+		if (Config::bLateGame && KillerPawn && KillerPawn != PlayerController->GetMyFortPawn()) {
+			auto* AbilitySystem = PlayerState->GetAbilitySystemComponent();
+			auto Handle = AbilitySystem->CallFunc<FGameplayEffectContextHandle>("AbilitySystemComponent", "MakeEffectContext");
+			FGameplayTag Tag;
+			static auto Cue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Shield.PotionConsumed");
+			Tag.TagName = Cue;
+			AbilitySystem->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueAdded", Tag, FPredictionKey(), Handle);
+			AbilitySystem->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueExecuted", Tag, FPredictionKey(), Handle);
+
+			auto Pawn = Cast<AFortPlayerControllerAthena>(KillerPlayerState->GetOwner())->GetMyFortPawn();
+			if (Pawn) {
+				auto Health = Pawn->GetHealth();
+				auto Shield = Pawn->GetShield();
+
+				if (Health >= 100.0f) {
+					Shield = Shield + 50.0f;
+				} else if (Health + 50.0f > 100.0f) {
+					float HealthOverflow = (Health + 50.0f) - 100.0f;
+					Health = 100.0f;
+					Shield = Shield + HealthOverflow;
+				} else {
+					Health += 50.0f;
+				}
+    
+				Pawn->SetHealth(Health);
+				Pawn->SetShield(Shield);
+			}
+		}
+
 		int32 TotalAlive = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num();
 		if (TotalAlive == 1 && LastAliveController) {
 			AFortPlayerStateAthena* WinnerPlayerState = LastAliveController->GetPlayerState();
