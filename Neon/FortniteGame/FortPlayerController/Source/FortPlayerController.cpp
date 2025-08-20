@@ -816,6 +816,26 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		
 	int32 AliveCount = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num();
 
+		     std::vector<std::pair<int, int>> PlacementScores = {
+			{1, 30},
+			{2, 25},
+			{5, 15},
+			{25, 10},
+			{50, 5},
+		};
+	
+	for (const auto& entry : PlacementScores)
+	{
+		if (entry.first == GameState->GetPlayersLeft())
+		{
+			for (int i = 0; i < GameMode->GetAlivePlayers().Num(); i++)
+			{
+				GameMode->GetAlivePlayers()[i]->ClientReportTournamentPlacementPointsScored(GameState->GetPlayersLeft(), entry.second);
+			}
+			break;
+		}
+	}
+	
 	if (bRebooting) {
 		((void (*)(AFortGameModeAthena*, AFortPlayerController*, AFortPlayerStateAthena*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char, bool))(Finder->RemoveFromAlivePlayers()))
 		  (GameMode, PlayerController, KillerPlayerState, KillerPawn, ItemDef, DeathCause, 0, false);
@@ -827,115 +847,168 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		((void (*)(AFortGameModeAthena*, AFortPlayerController*, AFortPlayerStateAthena*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char, bool))(Finder->RemoveFromAlivePlayers()))
 		  (GameMode, PlayerController, KillerPlayerState, KillerPawn, ItemDef, DeathCause, 0, false);
 
-		if (MatchReport && RewardResult) {
-			int32 TotalXP = PlayerController->GetXPComponent()->GetTotalXpEarned();
-			RewardResult->SetTotalBookXpGained(TotalXP);
-			RewardResult->SetTotalSeasonXpGained(TotalXP);
-			MatchReport->SetEndOfMatchResults(*RewardResult);
-			PlayerController->ClientSendEndBattleRoyaleMatchForPlayer(true, *RewardResult);
-
-			int32 PlayerPlace = AliveCount;
-			PlayerState->SetPlace(PlayerPlace);
-			PlayerState->OnRep_Place();
-
-			if (PlayerState->GetKillScore() && PlayerState->GetSquadId() && MatchStats) {
-				MatchStats->Stats[3] = PlayerState->GetKillScore();
-				MatchStats->Stats[8] = PlayerState->GetSquadId();
-				MatchReport->SetMatchStats(*MatchStats);
-				PlayerController->ClientSendMatchStatsForPlayer(*MatchStats);
-			}
-
-			if (TeamStats) {
-				TeamStats->SetPlace(PlayerPlace);
-				TeamStats->SetTotalPlayers(PlayerPlace);
-				MatchReport->SetTeamStats(*TeamStats);
-				PlayerController->ClientSendTeamStatsForPlayer(*TeamStats);
+		if (!bRebooting) {
+			for (auto& Member : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
+				auto MemberController = (AFortPlayerControllerAthena*)Member;
+				if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) {
+					auto MemberPlayerState = MemberController->GetPlayerState();
+					auto MemberMatchReport = MemberController->GetMatchReport();
+					
+					if (MemberMatchReport && MemberPlayerState) {
+						MemberPlayerState->SetPlace(AliveCount);
+						MemberPlayerState->OnRep_Place();
+						
+						auto MemberMatchStats = &MemberMatchReport->GetMatchStats();
+						auto MemberTeamStats = &MemberMatchReport->GetTeamStats();
+						auto MemberRewardResult = &MemberMatchReport->GetEndOfMatchResults();
+						
+						if (MemberPlayerState->GetKillScore() && MemberPlayerState->GetSquadId() && MemberMatchStats) {
+							MemberMatchStats->Stats[3] = MemberPlayerState->GetKillScore();
+							MemberMatchStats->Stats[8] = MemberPlayerState->GetSquadId();
+							MemberMatchReport->SetMatchStats(*MemberMatchStats);
+							MemberController->ClientSendMatchStatsForPlayer(*MemberMatchStats);
+						}
+						
+						if (MemberTeamStats) {
+							MemberTeamStats->SetPlace(AliveCount);
+							MemberTeamStats->SetTotalPlayers(AliveCount);
+							MemberMatchReport->SetTeamStats(*MemberTeamStats);
+							MemberController->ClientSendTeamStatsForPlayer(*MemberTeamStats);
+						}
+						
+						int32 MemberXP = MemberController->GetXPComponent()->GetTotalXpEarned();
+						MemberRewardResult->SetTotalBookXpGained(MemberXP);
+						MemberRewardResult->SetTotalSeasonXpGained(MemberXP);
+						MemberMatchReport->SetEndOfMatchResults(*MemberRewardResult);
+						MemberController->ClientSendEndBattleRoyaleMatchForPlayer(true, *MemberRewardResult);
+					}
+				}
 			}
 		}
+	}
+
+	if (MatchReport && RewardResult) {
+		int32 TotalXP = PlayerController->GetXPComponent()->GetTotalXpEarned();
+		RewardResult->SetTotalBookXpGained(TotalXP);
+		RewardResult->SetTotalSeasonXpGained(TotalXP);
+		MatchReport->SetEndOfMatchResults(*RewardResult);
+		PlayerController->ClientSendEndBattleRoyaleMatchForPlayer(true, *RewardResult);
+
+		int32 PlayerPlace = AliveCount;
+		PlayerState->SetPlace(PlayerPlace);
+		PlayerState->OnRep_Place();
+
+		if (PlayerState->GetKillScore() && PlayerState->GetSquadId() && MatchStats) {
+			MatchStats->Stats[3] = PlayerState->GetKillScore();
+			MatchStats->Stats[8] = PlayerState->GetSquadId();
+			MatchReport->SetMatchStats(*MatchStats);
+			PlayerController->ClientSendMatchStatsForPlayer(*MatchStats);
+		}
+
+		if (TeamStats) {
+			TeamStats->SetPlace(PlayerPlace);
+			TeamStats->SetTotalPlayers(PlayerPlace);
+			MatchReport->SetTeamStats(*TeamStats);
+			PlayerController->ClientSendTeamStatsForPlayer(*TeamStats);
+		}
+	}
    	
-		AFortPlayerControllerAthena* LastAliveController = nullptr;
-		const auto& AlivePlayers = GameMode->GetAlivePlayers();
+	AFortPlayerControllerAthena* LastAliveController = nullptr;
+	const auto& AlivePlayers = GameMode->GetAlivePlayers();
 		
-		for (int32 i = 0; i < AlivePlayers.Num(); ++i) {
-			const auto& AlivePC = AlivePlayers[i];
-			if (AlivePC && AlivePC != PlayerController && AlivePC->GetMyFortPawn() && !AlivePC->GetMyFortPawn()->IsDBNO()) {
-				LastAliveController = AlivePC;
-			}
+	for (int32 i = 0; i < AlivePlayers.Num(); ++i) {
+		const auto& AlivePC = AlivePlayers[i];
+		if (AlivePC && AlivePC != PlayerController && AlivePC->GetMyFortPawn() && !AlivePC->GetMyFortPawn()->IsDBNO()) {
+			LastAliveController = AlivePC;
 		}
+	}
 
-		if (Config::bLateGame && KillerPawn && KillerPawn != PlayerController->GetMyFortPawn()) {
-			auto* AbilitySystem = PlayerState->GetAbilitySystemComponent();
-			auto Handle = AbilitySystem->CallFunc<FGameplayEffectContextHandle>("AbilitySystemComponent", "MakeEffectContext");
-			FGameplayTag Tag;
-			static auto Cue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Shield.PotionConsumed");
-			Tag.TagName = Cue;
-			AbilitySystem->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueAdded", Tag, FPredictionKey(), Handle);
-			AbilitySystem->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueExecuted", Tag, FPredictionKey(), Handle);
+	if (Config::bLateGame && KillerPawn && KillerPawn != PlayerController->GetMyFortPawn()) {
+		auto* AbilitySystem = PlayerState->GetAbilitySystemComponent();
+		auto Handle = AbilitySystem->CallFunc<FGameplayEffectContextHandle>("AbilitySystemComponent", "MakeEffectContext");
+		FGameplayTag Tag;
+		static auto Cue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Shield.PotionConsumed");
+		Tag.TagName = Cue;
+		AbilitySystem->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueAdded", Tag, FPredictionKey(), Handle);
+		AbilitySystem->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueExecuted", Tag, FPredictionKey(), Handle);
 
-			auto Pawn = Cast<AFortPlayerControllerAthena>(KillerPlayerState->GetOwner())->GetMyFortPawn();
-			if (Pawn) {
-				auto Health = Pawn->GetHealth();
-				auto Shield = Pawn->GetShield();
+		auto Pawn = Cast<AFortPlayerControllerAthena>(KillerPlayerState->GetOwner())->GetMyFortPawn();
+		if (Pawn) {
+			auto Health = Pawn->GetHealth();
+			auto Shield = Pawn->GetShield();
 
-				if (Health >= 100.0f) {
-					Shield = Shield + 50.0f;
-				} else if (Health + 50.0f > 100.0f) {
-					float HealthOverflow = (Health + 50.0f) - 100.0f;
-					Health = 100.0f;
-					Shield = Shield + HealthOverflow;
-				} else {
-					Health += 50.0f;
-				}
+			if (Health >= 100.0f) {
+				Shield = Shield + 50.0f;
+			} else if (Health + 50.0f > 100.0f) {
+				float HealthOverflow = (Health + 50.0f) - 100.0f;
+				Health = 100.0f;
+				Shield = Shield + HealthOverflow;
+			} else {
+				Health += 50.0f;
+			}
     
-				Pawn->SetHealth(Health);
-				Pawn->SetShield(Shield);
-			}
+			Pawn->SetHealth(Health);
+			Pawn->SetShield(Shield);
 		}
+	}
 
-		int32 TotalAlive = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num();
-		if (TotalAlive == 1 && LastAliveController) {
-			AFortPlayerStateAthena* WinnerPlayerState = LastAliveController->GetPlayerState();
-			AFortPlayerPawn* WinnerPawn = LastAliveController->GetMyFortPawn();
+	int32 TotalAlive = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num();
+	if (TotalAlive == 1 && LastAliveController) {
+		AFortPlayerStateAthena* WinnerPlayerState = LastAliveController->GetPlayerState();
+		AFortPlayerPawn* WinnerPawn = LastAliveController->GetMyFortPawn();
        
-			if (WinnerPlayerState && WinnerPawn) {
-				WinnerPlayerState->SetPlace(1);
-				WinnerPlayerState->OnRep_Place();
+		if (WinnerPlayerState && WinnerPawn) {
+			WinnerPlayerState->SetPlace(1);
+			WinnerPlayerState->OnRep_Place();
 				
-				auto WinnerMatchReport = LastAliveController->GetMatchReport();
-				if (WinnerMatchReport && RewardResult) {
-					int32 WinnerXP = LastAliveController->GetXPComponent()->GetTotalXpEarned();
-					auto WinnerRewardResult = &WinnerMatchReport->GetEndOfMatchResults();
-					WinnerRewardResult->SetTotalBookXpGained(WinnerXP);
-					WinnerRewardResult->SetTotalSeasonXpGained(WinnerXP);
-					WinnerMatchReport->SetEndOfMatchResults(*WinnerRewardResult);
-					LastAliveController->ClientSendEndBattleRoyaleMatchForPlayer(true, *WinnerRewardResult);
+			auto WinnerMatchReport = LastAliveController->GetMatchReport();
+			if (WinnerMatchReport && RewardResult) {
+				int32 WinnerXP = LastAliveController->GetXPComponent()->GetTotalXpEarned();
+				auto WinnerRewardResult = &WinnerMatchReport->GetEndOfMatchResults();
+				WinnerRewardResult->SetTotalBookXpGained(WinnerXP);
+				WinnerRewardResult->SetTotalSeasonXpGained(WinnerXP);
+				WinnerMatchReport->SetEndOfMatchResults(*WinnerRewardResult);
+				LastAliveController->ClientSendEndBattleRoyaleMatchForPlayer(true, *WinnerRewardResult);
 
-					auto WinnerMatchStats = &WinnerMatchReport->GetMatchStats();
-					auto WinnerTeamStats = &WinnerMatchReport->GetTeamStats();
+				auto WinnerMatchStats = &WinnerMatchReport->GetMatchStats();
+				auto WinnerTeamStats = &WinnerMatchReport->GetTeamStats();
 
-					WinnerMatchStats->Stats[3] = WinnerPlayerState->GetKillScore();
-					WinnerMatchStats->Stats[8] = WinnerPlayerState->GetSquadId();
-					WinnerMatchReport->SetMatchStats(*WinnerMatchStats);
-					LastAliveController->ClientSendMatchStatsForPlayer(*WinnerMatchStats);
+				WinnerMatchStats->Stats[3] = WinnerPlayerState->GetKillScore();
+				WinnerMatchStats->Stats[8] = WinnerPlayerState->GetSquadId();
+				WinnerMatchReport->SetMatchStats(*WinnerMatchStats);
+				LastAliveController->ClientSendMatchStatsForPlayer(*WinnerMatchStats);
 
-					int32 TotalPlayers = TotalAlive + 1;
-					WinnerTeamStats->SetPlace(1);
-					WinnerTeamStats->SetTotalPlayers(TotalPlayers);
-					WinnerMatchReport->SetTeamStats(*WinnerTeamStats);
-					LastAliveController->ClientSendTeamStatsForPlayer(*WinnerTeamStats);
-				}
-
-				uint8 WinningTeamIndex = WinnerPlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex");
-				GameState->Set("FortGameStateAthena", "WinningTeam", WinningTeamIndex);
-				GameState->OnRep_WinningTeam();
-				GameState->Set("FortGameStateAthena", "WinningPlayerState", WinnerPlayerState);
-				GameState->OnRep_WinningPlayerState();
+				int32 TotalPlayers = TotalAlive + 1;
+				WinnerTeamStats->SetPlace(1);
+				WinnerTeamStats->SetTotalPlayers(TotalPlayers);
+				WinnerMatchReport->SetTeamStats(*WinnerTeamStats);
+				LastAliveController->ClientSendTeamStatsForPlayer(*WinnerTeamStats);
 			}
+
+			uint8 WinningTeamIndex = WinnerPlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex");
+			GameState->Set("FortGameStateAthena", "WinningTeam", WinningTeamIndex);
+			GameState->OnRep_WinningTeam();
+			GameState->Set("FortGameStateAthena", "WinningPlayerState", WinnerPlayerState);
+			GameState->OnRep_WinningPlayerState();
 		}
 	}
 
 	if (Config::bEchoSessions)
 	{
+		if (!bIsDBNO && !bRebooting) {
+			for (auto& Member : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
+				auto MemberController = (AFortPlayerControllerAthena*)Member;
+				if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) {
+					auto MemberPlayerState = MemberController->GetPlayerState();
+					std::thread t([=]() {
+						Nexa::Echo::LowerEchoSessionCount();
+					});
+					t.detach();
+					Nexa::BroadcastMatchResults(MemberController, MemberPlayerState, Nexa::GetState().PlaylistData, GameMode);
+				}
+			}
+		}
+
 		std::thread t([]() {
 			Nexa::Echo::LowerEchoSessionCount();
 		});

@@ -644,6 +644,26 @@ public:
 		this->ProcessEvent(Func, &FortPlayerControllerAthena_ClientSendMatchStatsForPlayer_Params);
 	}
 
+	void ClientReportTournamentPlacementPointsScored(int32 Placement, int32 PointsEarned)
+	{
+		static SDK::UFunction *Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerControllerAthena", "ClientReportTournamentPlacementPointsScored");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+
+		struct FortPlayerControllerAthena_ClientReportTournamentPlacementPointsScored final
+		{
+		public:
+			int32                                         Placement;                                         // 0x0000(0x0004)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+			int32                                         PointsEarned;                                      // 0x0004(0x0004)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+		} FortPlayerControllerAthena_ClientSendMatchStatsForPlayer_Params{Placement, PointsEarned};
+
+		this->ProcessEvent(Func, &FortPlayerControllerAthena_ClientSendMatchStatsForPlayer_Params);
+	}
+
 	void ClientSendTeamStatsForPlayer(const struct FAthenaMatchTeamStats &Result)
 	{
 		static SDK::UFunction *Func = nullptr;
