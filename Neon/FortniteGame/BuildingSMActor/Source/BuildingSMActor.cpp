@@ -62,7 +62,10 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         {
             if (BuildingActor->GetBuildingResourceAmountOverride().CurveTable) {
                 ResourceCurveTable = BuildingActor->GetBuildingResourceAmountOverride().CurveTable;
-            } else {
+            }
+
+            if (!ResourceCurveTable)
+            {
                 ResourceCurveTable = Runtime::StaticFindObject<UCurveTable>(
                     "/Game/Athena/Balance/DataTables/AthenaResourceRates.AthenaResourceRates");
             }

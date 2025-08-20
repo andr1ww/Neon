@@ -1335,6 +1335,13 @@ uint64 UFinder::InstructionForCollision()
     if (InstructionForCollision)
     {
         return InstructionForCollision;
+    } else
+    {
+        InstructionForCollision = Memcury::Scanner::FindPattern("40 53 48 83 EC ? 48 8B 01 48 8D 54 24 ? 48 89 74 24 ? 48 8B D9").Get();
+        if (InstructionForCollision)
+        {
+            return InstructionForCollision;
+        }
     }
 }
 

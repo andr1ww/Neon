@@ -57,17 +57,20 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
 
     PlayerController->GetQuestManager(ESubGame::Athena)->InitializeQuestAbilities(PlayerController->GetPawn());
 
-    PlayerState->Set(
-        "FortPlayerStateAthena", "SeasonLevelUIDisplay",
-        PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "CurrentLevel")
-    );
-    PlayerState->OnRep_SeasonLevelUIDisplay();
+	if (Fortnite_Version >= 11.00)
+	{
+		PlayerState->Set(
+			"FortPlayerStateAthena", "SeasonLevelUIDisplay",
+			PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "CurrentLevel")
+		);
+		PlayerState->OnRep_SeasonLevelUIDisplay();
 
-    PlayerController->GetXPComponent()->Set(
-        "FortPlayerControllerAthenaXPComponent", "bRegisteredWithQuestManager", true
-    );
-    PlayerController->GetXPComponent()->OnRep_bRegisteredWithQuestManager();
-
+		PlayerController->GetXPComponent()->Set(
+			"FortPlayerControllerAthenaXPComponent", "bRegisteredWithQuestManager", true
+		);
+		PlayerController->GetXPComponent()->OnRep_bRegisteredWithQuestManager();
+	}
+	
     if (Config::bEchoSessions)
     {
         std::string PlayerName = PlayerController->GetPlayerState()->GetPlayerName().ToString();

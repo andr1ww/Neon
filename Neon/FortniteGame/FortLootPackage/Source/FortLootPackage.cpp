@@ -203,39 +203,42 @@ void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
             LootTierData = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootTierData().Get(UDataTable::StaticClass(), true);
         }
 
-        auto GameFeatureDataObjects = Runtime::GetObjectsOfClass<UFortGameFeatureData>(UFortGameFeatureData::StaticClass());
-        for (auto GameFeatureData : GameFeatureDataObjects) {
-            auto& PlaylistOverrideLootTableData = GameFeatureData->GetPlaylistOverrideLootTableData();
+        if (Fortnite_Version >= 12.00)
+        {
+            auto GameFeatureDataObjects = Runtime::GetObjectsOfClass<UFortGameFeatureData>(UFortGameFeatureData::StaticClass());
+            for (auto GameFeatureData : GameFeatureDataObjects) {
+                auto& PlaylistOverrideLootTableData = GameFeatureData->GetPlaylistOverrideLootTableData();
     
-            auto GameplayTagContainer = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetGameplayTagContainer();
+                auto GameplayTagContainer = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetGameplayTagContainer();
     
-            for (auto& Value : PlaylistOverrideLootTableData) {
-                auto OverrideTag = Value.Key;
+                for (auto& Value : PlaylistOverrideLootTableData) {
+                    auto OverrideTag = Value.Key;
         
-                if (OverrideTag.TagName.ToString() == "None" || !OverrideTag.TagName.IsValid()) {
-                    continue;
-                }
-                
-                bool bFoundMatch = false;
-                if (GameplayTagContainer.HasTag(OverrideTag)) {
-                    bFoundMatch = true;
-                }
-                
-                if (bFoundMatch) {
-                    bFoundOverrides = true;
-            
-                    auto OverrideLootPackagesStr = Value.Value.GetLootPackageData().SoftObjectPtr.ObjectID.AssetPathName.ToString();
-                    auto bOverrideLPIsComposite = OverrideLootPackagesStr.ToString().contains("Composite");
-                    auto lpPtr = Value.Value.GetLootPackageData().Get(bOverrideLPIsComposite ? UCompositeDataTable::StaticClass() : UDataTable::StaticClass(), true);
-                    if (lpPtr) {
-                        LPTables.push_back(lpPtr);
+                    if (OverrideTag.TagName.ToString() == "None" || !OverrideTag.TagName.IsValid()) {
+                        continue;
                     }
+                
+                    bool bFoundMatch = false;
+                    if (GameplayTagContainer.HasTag(OverrideTag)) {
+                        bFoundMatch = true;
+                    }
+                
+                    if (bFoundMatch) {
+                        bFoundOverrides = true;
             
-                    auto OverrideLootTierDataStr = Value.Value.GetLootTierData().SoftObjectPtr.ObjectID.AssetPathName.ToString();
-                    auto bOverrideLTDIsComposite = OverrideLootTierDataStr.ToString().contains("Composite");
-                    auto ltdPtr = Value.Value.GetLootTierData().Get(bOverrideLTDIsComposite ? UCompositeDataTable::StaticClass() : UDataTable::StaticClass(), true);
-                    if (ltdPtr) {
-                        LTDTables.push_back(ltdPtr);
+                        auto OverrideLootPackagesStr = Value.Value.GetLootPackageData().SoftObjectPtr.ObjectID.AssetPathName.ToString();
+                        auto bOverrideLPIsComposite = OverrideLootPackagesStr.ToString().contains("Composite");
+                        auto lpPtr = Value.Value.GetLootPackageData().Get(bOverrideLPIsComposite ? UCompositeDataTable::StaticClass() : UDataTable::StaticClass(), true);
+                        if (lpPtr) {
+                            LPTables.push_back(lpPtr);
+                        }
+            
+                        auto OverrideLootTierDataStr = Value.Value.GetLootTierData().SoftObjectPtr.ObjectID.AssetPathName.ToString();
+                        auto bOverrideLTDIsComposite = OverrideLootTierDataStr.ToString().contains("Composite");
+                        auto ltdPtr = Value.Value.GetLootTierData().Get(bOverrideLTDIsComposite ? UCompositeDataTable::StaticClass() : UDataTable::StaticClass(), true);
+                        if (ltdPtr) {
+                            LTDTables.push_back(ltdPtr);
+                        }
                     }
                 }
             }

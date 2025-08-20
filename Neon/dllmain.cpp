@@ -286,6 +286,11 @@ void InitNullsAndRetTrues() {
 		Runtime::Hook(IMAGEBASE + 0x2092EA0, UFortQuestManager::SendStatEventWithTags, (void**)&UFortQuestManager::SendStatEventWithTagsOG);
 	}
 
+	if (Fortnite_Version == 10.40)
+	{
+		Runtime::Hook(IMAGEBASE + 0x176D8D0, UFortQuestManager::SendStatEventWithTags, (void**)&UFortQuestManager::SendStatEventWithTagsOG);
+	}
+
 	if (Fortnite_Version != 22.4)
 	{
 		auto matchmaking = Memcury::Scanner::FindPattern("83 BD ? ? ? ? 01 7F 18 49 8D 4D D8 48 8B D6 E8 ? ? ? ? 48", false).Get(); // 1.11
@@ -335,7 +340,6 @@ void InitNullsAndRetTrues() {
 	}
 
 	auto GameSessionDedicatedAthenaPatch = Memcury::Scanner::FindPattern("3B 41 38 7F ? 48 8B D0 48 8B 41 30 4C 39 04 D0 75 ? 48 8D 96", false).Get(); // todo check this sig more
-	Runtime::PatchBytes(IMAGEBASE + 0x19481B8, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
 
 	if (GameSessionDedicatedAthenaPatch)
 	{
@@ -426,9 +430,17 @@ void Main()
 	
 	InitNullsAndRetTrues();
 
-	Runtime::Hook(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 4C 89 44 24 ? 57 48 83 EC ? 48 8B FA 48 8B F1 33 D2").Get(), Ok, (void**)&OkOG);
+	if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.20)
+	{
+		Runtime::Hook(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 4C 89 44 24 ? 57 48 83 EC ? 48 8B FA 48 8B F1 33 D2").Get(), Ok, (void**)&OkOG);
+	}
 	
 	auto ListenInstruction = Memcury::Scanner::FindPattern("E8 ? ? ? ? 84 C0 75 ? 80 3D ? ? ? ? ? 72 ? 45 33 C0 48 8D 55").Get();
+	if (!ListenInstruction)
+	{
+		ListenInstruction = Memcury::Scanner::FindPattern("E8 ? ? ? ? 84 C0 75 ? 80 3D ? ? ? ? ? 72 ? 45 33 C0 48 8D 95").Get();
+	}
+	
 	Runtime::ModifyInstruction(ListenInstruction, Finder->InstructionForCollision());
 	Runtime::Hook(Finder->InstructionForCollision(), FortGameSessionDedicated::UWorld_Listen);
 	
@@ -461,6 +473,7 @@ void Main()
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogMutatorAI VeryVerbose", nullptr);
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAthenaBots VeryVerbose", nullptr);
 //	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogNavigation VeryVerbose", nullptr);
+	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogPackageLocalizationCache", nullptr);
 
 	ExecuteConsoleCommand(UWorld::GetWorld(), WorldName, nullptr);
 	if (Fortnite_Version >= 19.10)
@@ -494,7 +507,10 @@ void Main()
 	Runtime::Exec("/Script/FortniteGame.FortKismetLibrary.K2_RemoveItemFromPlayerByGuid", AFortPlayerControllerAthena::K2_RemoveItemFromPlayerByGuid, (void**)&AFortPlayerControllerAthena::K2_RemoveItemFromPlayerByGuidOG);
 	Runtime::Hook(Finder->SendComplexCustomStatEvent(), UFortQuestManager::SendComplexCustomStatEvent, (void**)&UFortQuestManager::SendComplexCustomStatEventOG);
 	Runtime::Hook(Finder->ClientOnPawnDied(), AFortPlayerControllerAthena::ClientOnPawnDied, (void**)&AFortPlayerControllerAthena::ClientOnPawnDiedOG);
-	Runtime::VFTHook(UAthenaNavSystem::GetDefaultObj()->GetVTable(), 0x53, UFortServerBotManagerAthena::InitializeForWorld, (void**)&UFortServerBotManagerAthena::InitializeForWorldOG);
+	if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.20)
+	{
+		Runtime::VFTHook(UAthenaNavSystem::GetDefaultObj()->GetVTable(), 0x53, UFortServerBotManagerAthena::InitializeForWorld, (void**)&UFortServerBotManagerAthena::InitializeForWorldOG);
+	}
 	Runtime::Hook(Finder->ServerOnAttemptInteract(), FortLootPackage::ServerOnAttemptInteract);
 	//	Runtime::Hook(Finder->SpawnLoot(), FortLootPackage::SpawnLoot);
 	Runtime::VFTHook(StaticClassImpl("FortPlayerPawnAthena")->GetClassDefaultObject()->GetVTable(), 0x119, AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues, (void**)&AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCuesOG);

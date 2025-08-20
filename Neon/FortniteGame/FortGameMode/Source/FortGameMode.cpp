@@ -201,21 +201,24 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
 
 //    GameMode->SetbAlwaysDBNO(true);
     GameState->SetDefaultRebootMachineHotfix(1);
-    
-    static bool bInitializedTeams = false;
-    if (!bInitializedTeams)
+
+    if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.30)
     {
-        GameState->GetTeamArray().Reset();
-        GameState->GetSquadArray().Reset();
-
-        for (int i = 0; i < 103; ++i)
+        static bool bInitializedTeams = false;
+        if (!bInitializedTeams)
         {
-            TArray<TWeakObjectPtr<AFortPlayerStateAthena>> TeamArray(4);
-            GameState->GetTeamArray().Add(TeamArray);
-            GameState->GetSquadArray().Add(TeamArray);
-        }
+            GameState->GetTeamArray().Reset();
+            GameState->GetSquadArray().Reset();
 
-        bInitializedTeams = true;
+            for (int i = 0; i < 103; ++i) 
+            {
+                TArray<TWeakObjectPtr<AFortPlayerStateAthena>> TeamArray(4);
+                GameState->GetTeamArray().Add(TeamArray);
+                GameState->GetSquadArray().Add(TeamArray);
+            }
+
+            bInitializedTeams = true;
+        }
     }
     
     if (GameMode->GetCurrentPlaylistId() == -1)
@@ -528,18 +531,22 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
         }
     }
 
-    TWeakObjectPtr<AFortPlayerStateAthena> WeakObjectPtr;
-    WeakObjectPtr.ObjectIndex = PlayerState->GetUniqueID();
-    WeakObjectPtr.ObjectSerialNumber = GUObjectArray.GetSerialNumber(PlayerState->GetUniqueID());
-    auto& ElementData2 = UWorld::GetWorld()->GetGameState()->GetTeamArray()[PlayerState->GetTeamIndex()];
-    auto& ElementData1 = GameState->GetSquadArray()[PlayerState->GetSquadId()];
-    if (!ElementData2.ElementData.GetData() || !ElementData1.ElementData.GetData())
-    {
-        return HandleStartingNewPlayerOG(GameMode, NewPlayer);
-    }
     
-    ElementData2.ElementData.Add(WeakObjectPtr);
-    ElementData1.ElementData.Add(WeakObjectPtr);
+    if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.30)
+    {
+        TWeakObjectPtr<AFortPlayerStateAthena> WeakObjectPtr;
+        WeakObjectPtr.ObjectIndex = PlayerState->GetUniqueID();
+        WeakObjectPtr.ObjectSerialNumber = GUObjectArray.GetSerialNumber(PlayerState->GetUniqueID());
+        auto& ElementData2 = UWorld::GetWorld()->GetGameState()->GetTeamArray()[PlayerState->GetTeamIndex()];
+        auto& ElementData1 = GameState->GetSquadArray()[PlayerState->GetSquadId()];
+        if (!ElementData2.ElementData.GetData() || !ElementData1.ElementData.GetData())
+        {
+            return HandleStartingNewPlayerOG(GameMode, NewPlayer);
+        }
+    
+        ElementData2.ElementData.Add(WeakObjectPtr);
+        ElementData1.ElementData.Add(WeakObjectPtr);
+    }
     
     return HandleStartingNewPlayerOG(GameMode, NewPlayer);
 }
