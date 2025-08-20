@@ -370,8 +370,8 @@ void AFortPlayerControllerAthena::ServerAttemptAircraftJump(UActorComponent* Com
 	FRotator Rotation;
 	Stack.StepCompiledIn(&Rotation);
 	Stack.IncrementCode();
-    
-	auto PlayerController = (AFortPlayerControllerAthena*)Comp->GetOwner(Comp);
+	
+	auto PlayerController = (AFortPlayerControllerAthena*)Comp->CallFunc<AActor*>("ActorComponent", "GetOwner", Comp);
 	auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
 	auto GameState = UWorld::GetWorld()->GetGameState();
 
