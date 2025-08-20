@@ -651,11 +651,22 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		if (Size == 0) {
 			Size = StaticClassImpl("DeathInfo")->GetSize();
 		}
+
+		FGameplayTagContainer CopyTags;
+
+		for (int i = 0; i < DeathTags.GameplayTags.Num(); ++i)
+		{
+			CopyTags.GameplayTags.Add(DeathTags.GameplayTags[i]);
+		}
+
+		for (int i = 0; i < DeathTags.ParentTags.Num(); ++i)
+		{
+			CopyTags.ParentTags.Add(DeathTags.ParentTags[i]);
+		}
 		
-		RtlSecureZeroMemory(DeathInfo, Size);
 		DeathInfo->SetbDBNO(bIsDBNO);
 		DeathInfo->SetDeathLocation(DeathLocation);
-		DeathInfo->SetDeathTags(DeathTags);
+		DeathInfo->SetDeathTags(CopyTags);
 		DeathInfo->SetDeathCause(DeathCause);
 		DeathInfo->SetDowner(bIsDBNO ? (AActor*)KillerPlayerState : nullptr);
 		DeathInfo->SetFinisherOrDowner((AActor*)KillerPlayerState);
@@ -712,15 +723,11 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		}
    
 		if (!bFoundMats) {
-			static auto Wood = Runtime::StaticFindObject<UFortWorldItemDefinition>("/Game/Items/ResourcePickups/WoodItemData.WoodItemData");
-			static auto Stone = Runtime::StaticFindObject<UFortWorldItemDefinition>("/Game/Items/ResourcePickups/StoneItemData.StoneItemData");
-			static auto Metal = Runtime::StaticFindObject<UFortWorldItemDefinition>("/Game/Items/ResourcePickups/MetalItemData.MetalItemData");
-        
-			AFortInventory::SpawnPickupDirect(Location, Wood, 50, 0,
+			AFortInventory::SpawnPickupDirect(Location, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Wood), 50, 0,
 				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
-			AFortInventory::SpawnPickupDirect(Location, Stone, 50, 0,
+			AFortInventory::SpawnPickupDirect(Location, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Stone), 50, 0,
 				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
-			AFortInventory::SpawnPickupDirect(Location, Metal, 50, 0,
+			AFortInventory::SpawnPickupDirect(Location, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Metal), 50, 0,
 				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 		}
 	}
@@ -792,7 +799,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	{
 		if (DamageCauser->IsA<AFortProjectileBase>())
 		{
-			auto Owner = Cast<AFortWeapon>(DamageCauser->CallFunc<AActor*>("Actor", "GetOwner"));
+			auto Owner = Cast<AFortWeapon>(DamageCauser->GetOwner());
 			ItemDef = Owner->IsValidLowLevel() ? Owner->GetWeaponData() : nullptr; 
 		}
 
