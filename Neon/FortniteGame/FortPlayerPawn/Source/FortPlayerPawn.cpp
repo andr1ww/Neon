@@ -70,7 +70,6 @@ void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
     if (PickupQuickbar == EFortQuickBars::Primary) 
     {
         TArray<UFortWorldItem*> PrimaryItems;
-        int TargetSlot = -1;
         
         for (int32 i = 0; i < ItemInstances.Num(); i++) {
             if (FortLootPackage::GetQuickbar(ItemInstances[i]->GetItemEntry().GetItemDefinition()) == EFortQuickBars::Primary) {
@@ -78,7 +77,7 @@ void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
             }
         }
         
-        if (MyFortPawn->GetCurrentWeapon() && 
+        if (PrimaryItems.Num() >= 5 && MyFortPawn->GetCurrentWeapon() && 
             FortLootPackage::GetQuickbar(MyFortPawn->GetCurrentWeapon()->GetWeaponData()) == EFortQuickBars::Primary) 
         {
             FGuid CurrentWeaponGuid = MyFortPawn->GetCurrentWeapon()->GetItemEntryGuid();
@@ -112,7 +111,7 @@ void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
                 }
             }
         }
-        else if (PrimaryItems.Num() <= 5) 
+        else if (PrimaryItems.Num() <= 5)
         {
             if (bIsAI) {
                 AFortInventory::GiveItem(AIController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), 
