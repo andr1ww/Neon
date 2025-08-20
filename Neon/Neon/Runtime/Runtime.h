@@ -577,3 +577,15 @@ std::vector<T*> GetObjectsOfClass(UClass* Class = T::StaticClass())
 		return ArrayOfObjects;
 	}
 }
+
+    
+#define DefUHookOg(_Name) static inline void (*_Name##OG)(UObject*, FFrame&); static void _Name(UObject*, FFrame&)
+
+#define callExecOG(_Tr, _Pt, _Th, _ParamsStruct) ([&](){ \
+auto _Fn = Runtime::StaticFindObject<UFunction>(_Pt "." # _Th); \
+if (_Fn) { \
+_Fn->SetNativeFunc((FNativeFuncPtr) _Th##OG); \
+_Tr->ProcessEvent(_Fn, &_ParamsStruct); \
+_Fn->SetNativeFunc((FNativeFuncPtr) _Th); \
+} \
+})()

@@ -515,7 +515,10 @@ bool FortLootPackage::ServerOnAttemptInteract(ABuildingContainer* Container, FIn
     if (!TargetContainer)
         TargetContainer = Container;
 
-    auto SpawnLocation = TargetContainer->K2_GetActorLocation() + TargetContainer->GetActorRightVector() * 70.f + FVector{ 0, 0, 50 };
+    FVector SpawnLocation = Container->K2_GetActorLocation() + 
+                           Container->GetActorForwardVector() * Container->GetLootSpawnLocation_Athena().X + 
+                           Container->GetActorRightVector() * Container->GetLootSpawnLocation_Athena().Y + 
+                           Container->GetActorUpVector() * Container->GetLootSpawnLocation_Athena().Z;
     UE_LOG(LogNeon, Log, "SpawnLocation: X=%f Y=%f Z=%f", SpawnLocation.X, SpawnLocation.Y, SpawnLocation.Z);
     
     FName TierGroup = TargetContainer->GetSearchLootTierGroup();
@@ -528,6 +531,65 @@ bool FortLootPackage::ServerOnAttemptInteract(ABuildingContainer* Container, FIn
     TargetContainer->CallFunc<void>("BuildingContainer", "BounceContainer");
 
     return true;
+}
+
+// should be in a diff class but wtv i put it here
+void FortLootPackage::ServerAttemptInteract(UFortControllerComponent_Interaction* Component, FFrame& Stack)
+{
+    class AActor* ReceivingActor;
+    class UPrimitiveComponent* InteractComponent;
+    ETInteractionType InteractType;
+    class UObject* OptionalObjectData;
+    EInteractionBeingAttempted InteractionBeingAttempted;
+    int32 RequestId;
+    Stack.StepCompiledIn(&ReceivingActor);
+    Stack.StepCompiledIn(&InteractComponent);
+    Stack.StepCompiledIn(&InteractType);
+    Stack.StepCompiledIn(&OptionalObjectData);
+    Stack.StepCompiledIn(&InteractionBeingAttempted);
+    Stack.StepCompiledIn(&RequestId);
+    Stack.IncrementCode();
+    
+    auto PlayerController = (AFortPlayerControllerAthena*)Component->CallFunc<AActor*>("ActorComponent", "GetOwner", Component);
+
+    if (ReceivingActor->IsA(ABuildingContainer::StaticClass()))
+    {
+        ABuildingContainer* Container = Cast<ABuildingContainer>(ReceivingActor);
+        FName LootTierGroupToUse = Container->GetSearchLootTierGroup();
+    
+        TArray<FNeonLootImproper> LootItems = PickLootDrops(LootTierGroupToUse);
+        auto SpawnLocation = PlayerController->GetMyFortPawn()->K2_GetActorLocation() + PlayerController->GetMyFortPawn()->GetActorRightVector() * 70.f + FVector{ 0, 0, 50 };
+        UE_LOG(LogNeon, Log, "SpawnLocation: X=%f Y=%f Z=%f", SpawnLocation.X, SpawnLocation.Y, SpawnLocation.Z);
+    
+        InternalSpawnLoot(LootTierGroupToUse, SpawnLocation, LootItems);
+    
+        Container->SetbAlreadySearched(true);
+        Container->CallFunc<void>("BuildingContainer", "OnRep_bAlreadySearched");
+        Container->Get<FFortSearchBounceData>("BuildingContainer", "SearchBounceData").SearchAnimationCount++;
+        Container->CallFunc<void>("BuildingContainer", "BounceContainer");
+    }
+
+    struct FortControllerComponent_Interaction_ServerAttemptInteract final
+    {
+    public:
+        class AActor*                                 ReceivingActor;                                    // 0x0000(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        class UPrimitiveComponent*                    InteractComponent;                                 // 0x0008(0x0008)(Parm, ZeroConstructor, InstancedReference, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        ETInteractionType                             InteractType;                                      // 0x0010(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        uint8                                         Pad_11[0x7];                                       // 0x0011(0x0007)(Fixing Size After Last Property [ Dumper-7 ])
+        class UObject*                                OptionalObjectData;                                // 0x0018(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        EInteractionBeingAttempted                    InteractionBeingAttempted;                         // 0x0020(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        uint8                                         Pad_21[0x3];                                       // 0x0021(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+        int32                                         RequestId;                                         // 0x0024(0x0004)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    } Params{};
+
+    Params.ReceivingActor = ReceivingActor;
+    Params.InteractComponent = InteractComponent;
+    Params.InteractType = InteractType;
+    Params.OptionalObjectData = OptionalObjectData;
+    Params.InteractionBeingAttempted = InteractionBeingAttempted;
+    Params.RequestId = RequestId;
+    
+    callExecOG(Component, "/Script/FortniteGame.FortControllerComponent_Interaction", ServerAttemptInteract, Params);
 }
 
 bool FortLootPackage::SpawnLoot(ABuildingContainer* Container) {

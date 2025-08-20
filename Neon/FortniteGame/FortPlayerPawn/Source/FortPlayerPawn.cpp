@@ -56,12 +56,8 @@ void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
     FFortItemList& Inventory = WorldInventory->GetInventory();
     TArray<UFortWorldItem*>& ItemInstances = Inventory.GetItemInstances();
 
-    int ItemCount = 0;
-    for (int32 i = 0; i < ItemInstances.Num(); i++) {
-        if (FortLootPackage::GetQuickbar(ItemInstances[i]->GetItemEntry().GetItemDefinition()) == EFortQuickBars::Primary) 
-            ++ItemCount;
-    }
-
+    EFortQuickBars PickupQuickbar = FortLootPackage::GetQuickbar(Pickup->GetPrimaryPickupItemEntry().GetItemDefinition());
+    
     int AmmoCount = 0;
     if (auto* WeaponDef = Cast<UFortWeaponItemDefinition>(Pickup->GetPrimaryPickupItemEntry().GetItemDefinition()))
     {
@@ -71,10 +67,20 @@ void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
         }
     }
 
-    if (ItemCount == 5 && FortLootPackage::GetQuickbar(Pickup->GetPrimaryPickupItemEntry().GetItemDefinition()) == EFortQuickBars::Primary) {
-        if (MyFortPawn && MyFortPawn->GetCurrentWeapon() &&
-            FortLootPackage::GetQuickbar(MyFortPawn->GetCurrentWeapon()->GetWeaponData()) == EFortQuickBars::Primary) {
+    if (PickupQuickbar == EFortQuickBars::Primary) 
+    {
+        TArray<UFortWorldItem*> PrimaryItems;
+        int TargetSlot = -1;
         
+        for (int32 i = 0; i < ItemInstances.Num(); i++) {
+            if (FortLootPackage::GetQuickbar(ItemInstances[i]->GetItemEntry().GetItemDefinition()) == EFortQuickBars::Primary) {
+                PrimaryItems.Add(ItemInstances[i]);
+            }
+        }
+        
+        if (MyFortPawn->GetCurrentWeapon() && 
+            FortLootPackage::GetQuickbar(MyFortPawn->GetCurrentWeapon()->GetWeaponData()) == EFortQuickBars::Primary) 
+        {
             FGuid CurrentWeaponGuid = MyFortPawn->GetCurrentWeapon()->GetItemEntryGuid();
             FFortItemEntry* foundItemEntry = nullptr;
         
@@ -87,7 +93,9 @@ void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
         
             if (foundItemEntry)
             {
-                AFortInventory::SpawnPickup(MyFortPawn->GetActorLocation() + MyFortPawn->GetActorForwardVector() * 70.f + FVector(0, 0, 50), foundItemEntry->GetItemDefinition(), foundItemEntry->GetCount(), foundItemEntry->GetLoadedAmmo(), EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, MyFortPawn, true);
+                AFortInventory::SpawnPickup(MyFortPawn->GetActorLocation() + MyFortPawn->GetActorForwardVector() * 70.f + FVector(0, 0, 50), 
+                    foundItemEntry->GetItemDefinition(), foundItemEntry->GetCount(), foundItemEntry->GetLoadedAmmo(), 
+                    EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, MyFortPawn, true);
                 
                 if (bIsAI) {
                     AFortInventory::Remove(AIController, CurrentWeaponGuid, 1);
@@ -96,20 +104,34 @@ void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
                 }
                 
                 if (bIsAI) {
-                    AFortInventory::GiveItem(AIController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount * 600, Pickup->GetPrimaryPickupItemEntry().GetLevel());
+                    AFortInventory::GiveItem(AIController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), 
+                        Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount * 600, Pickup->GetPrimaryPickupItemEntry().GetLevel());
                 } else {
-                    AFortInventory::GiveItem(PlayerController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount, Pickup->GetPrimaryPickupItemEntry().GetLevel());
+                    AFortInventory::GiveItem(PlayerController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), 
+                        Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount, Pickup->GetPrimaryPickupItemEntry().GetLevel());
                 }
-            } else {
-                AFortInventory::SpawnPickupDirect(PlayerController->GetViewTarget()->GetActorLocation(),
-                    Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), Pickup->GetPrimaryPickupItemEntry().GetLoadedAmmo(), EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, MyFortPawn, true);
             }
-        } else {
+        }
+        else if (PrimaryItems.Num() <= 5) 
+        {
+            if (bIsAI) {
+                AFortInventory::GiveItem(AIController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), 
+                    Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount * 600, Pickup->GetPrimaryPickupItemEntry().GetLevel());
+            } else {
+                AFortInventory::GiveItem(PlayerController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), 
+                    Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount, Pickup->GetPrimaryPickupItemEntry().GetLevel());
+            }
+        }
+        else 
+        {
             AFortInventory::SpawnPickupDirect(PlayerController->GetViewTarget()->GetActorLocation(),
-                Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), Pickup->GetPrimaryPickupItemEntry().GetLoadedAmmo(), EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, MyFortPawn, true);
+                Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), 
+                Pickup->GetPrimaryPickupItemEntry().GetLoadedAmmo(), EFortPickupSourceTypeFlag::Player, 
+                EFortPickupSpawnSource::Unset, MyFortPawn, true);
         }
     } 
-    else if (FortLootPackage::GetQuickbar(Pickup->GetPrimaryPickupItemEntry().GetItemDefinition()) != EFortQuickBars::Primary) {
+    else 
+    {
         FFortItemEntry* existingItemEntry = nullptr;
         FGuid existingItemGuid;
         
@@ -135,17 +157,12 @@ void AFortPlayerPawn::CompletePickupAnimation(AFortPickup* Pickup)
             }
         } else {
             if (bIsAI) {
-                AFortInventory::GiveItem(AIController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount * 600, Pickup->GetPrimaryPickupItemEntry().GetLevel());
+                AFortInventory::GiveItem(AIController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), 
+                    Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount * 600, Pickup->GetPrimaryPickupItemEntry().GetLevel());
             } else {
-                AFortInventory::GiveItem(PlayerController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount, Pickup->GetPrimaryPickupItemEntry().GetLevel());
+                AFortInventory::GiveItem(PlayerController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), 
+                    Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount, Pickup->GetPrimaryPickupItemEntry().GetLevel());
             }
-        }
-    }
-    else {
-        if (bIsAI) {
-            AFortInventory::GiveItem(AIController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount * 600, Pickup->GetPrimaryPickupItemEntry().GetLevel());
-        } else {
-            AFortInventory::GiveItem(PlayerController, Pickup->GetPrimaryPickupItemEntry().GetItemDefinition(), Pickup->GetPrimaryPickupItemEntry().GetCount(), AmmoCount, Pickup->GetPrimaryPickupItemEntry().GetLevel());
         }
     }
     
@@ -276,33 +293,6 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
     WeaponEntry->SetLoadedAmmo(WeaponEntry->GetLoadedAmmo() + AmmoToRemove);
     AFortInventory::ReplaceEntry(PC, *WeaponEntry);
 
-  /*  if (PC->GetMyFortPawn()) {
-        if (!PC->GetMyFortPawn()->GetbIsEmoteLeader()) {
-            static const auto ShieldsDefinition = Runtime::StaticLoadObject<UFortItemDefinition>("/Game/Athena/Items/Consumables/Shields/Athena_Shields.Athena_Shields");
-            static const auto MedkitDefinition = Runtime::StaticLoadObject<UFortItemDefinition>("/Game/Athena/Items/Consumables/Medkit/Athena_Medkit.Athena_Medkit");
-            static const auto ShieldCue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Shield.PotionConsumed");
-            static const auto HealthCue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Athena.Health.HealUsed");
-
-            if (auto Definition = WeaponEntry->GetItemDefinition(); Definition == ShieldsDefinition || Definition == MedkitDefinition)
-            {
-                if (auto PlayerState = Cast<AFortPlayerStateAthena>(PC->GetPlayerState()))
-                {
-                    auto Handle = PlayerState->GetAbilitySystemComponent()->CallFunc<FGameplayEffectContextHandle>("AbilitySystemComponent", "MakeEffectContext");
-                    FGameplayTag Tag{};
-                    Tag.TagName = (Definition == ShieldsDefinition) ? ShieldCue : HealthCue;
-        
-                    auto* AbilitySystem = PlayerState->GetAbilitySystemComponent();
-                    AbilitySystem->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueAdded", Tag, FPredictionKey(), Handle);
-                    AbilitySystem->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueExecuted", Tag, FPredictionKey(), Handle);
-                }
-            }
-        } else
-        {
-            PC->GetMyFortPawn()->SetbIsEmoteLeader(false);
-            PC->GetMyFortPawn()->OnRep_IsEmoteLeader();
-        }
-    }
-    */
     return ReloadWeaponOG(Weapon, AmmoToRemove);
 }
 

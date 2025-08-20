@@ -157,6 +157,13 @@ enum class EFortQuickBars : uint8
     EFortQuickBars_MAX                       = 4,
 };
 
+class UFortControllerComponent_Interaction : public UActorComponent
+{
+public:
+    DECLARE_STATIC_CLASS(UFortControllerComponent_Interaction)
+    DECLARE_DEFAULT_OBJECT(UFortControllerComponent_Interaction)
+};
+
 namespace FortLootPackage
 {
     struct FNeonLootImproper
@@ -184,4 +191,6 @@ namespace FortLootPackage
     void SpawnFloorLootForContainer(UBlueprintGeneratedClass* ContainerType);
     void InternalSpawnLoot(FName& TierGroup, FVector Loc, const TArray<FNeonLootImproper>& PrecomputedLoot);
     bool ServerOnAttemptInteract(ABuildingContainer* BuildingContainer, FInteractionType TYPE);
+    inline void (*ServerAttemptInteractOG)(UFortControllerComponent_Interaction* Component, FFrame& Stack);   
+void ServerAttemptInteract(UFortControllerComponent_Interaction* Component, FFrame& Stack);
 }

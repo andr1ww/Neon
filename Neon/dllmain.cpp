@@ -654,7 +654,6 @@ void Main()
 	{
 		Runtime::VFTHook(UAthenaNavSystem::GetDefaultObj()->GetVTable(), 0x53, UFortServerBotManagerAthena::InitializeForWorld, (void**)&UFortServerBotManagerAthena::InitializeForWorldOG);
 	}
-	Runtime::Hook(Finder->ServerOnAttemptInteract(), FortLootPackage::ServerOnAttemptInteract);
 	Runtime::VFTHook(StaticClassImpl("FortPlayerPawnAthena")->GetClassDefaultObject()->GetVTable(), 0x119, AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues, (void**)&AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCuesOG);
 	Runtime::Hook(Finder->ReloadWeapon(), AFortPlayerPawn::ReloadWeapon, (void**)&AFortPlayerPawn::ReloadWeaponOG); // this is right um we can make it uni after we get it to fucking call 
 	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);
@@ -669,6 +668,7 @@ void Main()
 	uint64 Addr = __int64(Runtime::StaticFindObject<UFunction>("/Script/Engine.PlayerController.SetVirtualJoystickVisibility")->GetNativeFunc());
 	Runtime::ModifyInstructionLEA(Finder->RebootingDelegate(), Addr, 3); 
 	Runtime::Hook(Addr, ABuildingGameplayActorSpawnMachine::RebootingDelegate);
+	Runtime::Exec("/Script/FortniteGame.FortControllerComponent_Interaction.ServerAttemptInteract", FortLootPackage::ServerAttemptInteract, (void**)&FortLootPackage::ServerAttemptInteractOG);
 	
 	if (Finder->CompletePickupAnimation())
 	{
