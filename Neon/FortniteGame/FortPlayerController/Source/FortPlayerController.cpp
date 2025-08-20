@@ -1076,6 +1076,7 @@ int32 AFortPlayerControllerAthena::K2_RemoveItemFromPlayerByGuid(UObject* Contex
     Stack.StepCompiledIn(&ItemGuid);
     Stack.StepCompiledIn(&AmountToRemove);
     Stack.StepCompiledIn(&bForceRemoval);
+	Stack.IncrementCode();
 
     UE_LOG(LogNeon, Log, "K2_RemoveItemFromPlayerByGuid Called!");
     AFortInventory::Remove(PlayerController, ItemGuid, 1);
