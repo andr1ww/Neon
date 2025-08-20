@@ -432,12 +432,23 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             }
         }
     }
-
+    
     if (bStartedBus)
     {
-        if (UWorld::GetWorld()->GetAuthorityGameMode()->GetAlivePlayers().Num() == 0)
+        static std::thread t;
+        static bool ts = false;
+
+        if (!ts)
         {
-            TerminateProcess(GetCurrentProcess(), 0);
+            ts = true;
+            t = std::thread([]() {
+                std::this_thread::sleep_for(std::chrono::seconds(20));
+                if (UWorld::GetWorld()->GetAuthorityGameMode()->GetAlivePlayers().Num() == 0)
+                {
+                    TerminateProcess(GetCurrentProcess(), 0);
+                }
+            });
+            t.detach();
         }
     }
     
