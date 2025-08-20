@@ -200,6 +200,47 @@ FFortRangedWeaponStats* AFortInventory::GetStats(UFortWeaponItemDefinition* Def)
     return Row ? (FFortRangedWeaponStats*)Row : nullptr;
 }
 
+
+UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level, FGuid GUID)
+{
+    if (!PlayerController || !Def || Count == 0)
+    {
+        return nullptr;
+    }
+
+    UFortWorldItem* BP = Def->CreateTemporaryItemInstanceBP(Count, Level);
+    
+    if (!BP) {
+        UE_LOG(LogNeon, Log, "Failed to create temporary item instance");
+        return nullptr;
+    }
+    
+    auto& ItemEntry = BP->GetItemEntry();
+    ItemEntry.SetCount(Count);
+    ItemEntry.SetLoadedAmmo(LoadedAmmo);
+    ItemEntry.SetLevel(Level);
+    ItemEntry.SetItemDefinition(Def);
+    ItemEntry.SetItemGuid(GUID);
+
+    AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+    FFortItemList& Inventory = WorldInventory->GetInventory();
+    TArray<FFortItemEntry>& ReplicatedEntriesOffsetPtr = Inventory.GetReplicatedEntries();
+    TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
+    
+    FFortItemEntryStateValue Value{};
+    Value.IntValue = 1;
+    Value.StateType = EFortItemEntryState::ShouldShowItemToast;
+    BP->GetItemEntry().GetStateValues().Add(Value);
+    
+    static int StructSize = StaticClassImpl("FortItemEntry")->GetSize();
+    ReplicatedEntriesOffsetPtr.Add(BP->GetItemEntry(), StructSize);
+    ItemInstancesOffsetPtr.Add(BP);
+    
+    WorldInventory->Update(PlayerController, &ItemEntry);
+    
+    return BP;
+}
+
 UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level)
 {
     if (!PlayerController || !Def || Count == 0)
@@ -485,7 +526,8 @@ void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFort
             Entry.GetItemDefinition(),
             Entry.GetCount(),
             Entry.GetLoadedAmmo(),
-            Entry.GetLevel()
+            Entry.GetLevel(),
+            Entry.GetItemGuid()
         );
     }
 }

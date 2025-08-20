@@ -285,6 +285,7 @@ public:
     void HandleInventoryLocalUpdate();
     void Update(AFortAthenaAIBotController* PlayerController, FFortItemEntry* Entry);
     void Update(AFortPlayerControllerAthena* PlayerController, FFortItemEntry* Entry);
+    static UObject* GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level, FGuid Guid);
     static UObject* GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level);
     static UObject* GiveItem(AFortAthenaAIBotController* Controller, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level);
     static void ReplaceEntry(AFortPlayerController*, FFortItemEntry&);

@@ -12,7 +12,7 @@ void Nexa::BroadcastMatchResults(AFortPlayerControllerAthena* Controller, AFortP
 {
     AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
     std::string AccountID = Helpers::GetAccountID(PlayerState);
-
+    UE_LOG(LogNeon, Log, "Broadcasting Match Results for AccountID: %s", AccountID.c_str());
     json Payload;
 
     // player controller object

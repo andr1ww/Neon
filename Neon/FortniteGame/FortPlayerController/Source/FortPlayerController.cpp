@@ -790,7 +790,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		}
 	}
 
-	bool bRebooting = PlayerState->GetPlayerTeam()->GetTeamMembers().Num() > 0;
+	bool bRebooting = PlayerState->GetPlayerTeam()->GetTeamMembers().Num() > 1;
 	if (bRebooting && DeathInfo->GetbDBNO()) for (auto& Member : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
 		auto MemberController = (AFortPlayerControllerAthena*)Member;
 		if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) bRebooting = false;
@@ -815,14 +815,13 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	}
 		
 	int32 AliveCount = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num();
-
-		     std::vector<std::pair<int, int>> PlacementScores = {
-			{1, 30},
-			{2, 25},
-			{5, 15},
-			{25, 10},
-			{50, 5},
-		};
+	std::vector<std::pair<int, int>> PlacementScores = {
+		{1, 30},
+		{2, 25},
+		{5, 15},
+		{25, 10},
+		{50, 5},
+	};
 	
 	for (const auto& entry : PlacementScores)
 	{
@@ -843,45 +842,45 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		return ClientOnPawnDiedOG(PlayerController, DeathReport);
 	}
 	
-	if (!bIsDBNO) {
-		((void (*)(AFortGameModeAthena*, AFortPlayerController*, AFortPlayerStateAthena*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char, bool))(Finder->RemoveFromAlivePlayers()))
-		  (GameMode, PlayerController, KillerPlayerState, KillerPawn, ItemDef, DeathCause, 0, false);
+	((void (*)(AFortGameModeAthena*, AFortPlayerController*, AFortPlayerStateAthena*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char, bool))(Finder->RemoveFromAlivePlayers()))
+	  (GameMode, PlayerController, KillerPlayerState, KillerPawn, ItemDef, DeathCause, 0, false);
 
-		if (!bRebooting) {
-			for (auto& Member : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
-				auto MemberController = (AFortPlayerControllerAthena*)Member;
-				if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) {
-					auto MemberPlayerState = MemberController->GetPlayerState();
-					auto MemberMatchReport = MemberController->GetMatchReport();
+	PlayerController->SetbMarkedAlive(false);
+	
+	if (!bRebooting) {
+		for (auto& Member : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
+			auto MemberController = (AFortPlayerControllerAthena*)Member;
+			if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) {
+				auto MemberPlayerState = MemberController->GetPlayerState();
+				auto MemberMatchReport = MemberController->GetMatchReport();
 					
-					if (MemberMatchReport && MemberPlayerState) {
-						MemberPlayerState->SetPlace(AliveCount);
-						MemberPlayerState->OnRep_Place();
+				if (MemberMatchReport && MemberPlayerState) {
+					MemberPlayerState->SetPlace(AliveCount);
+					MemberPlayerState->OnRep_Place();
 						
-						auto MemberMatchStats = &MemberMatchReport->GetMatchStats();
-						auto MemberTeamStats = &MemberMatchReport->GetTeamStats();
-						auto MemberRewardResult = &MemberMatchReport->GetEndOfMatchResults();
+					auto MemberMatchStats = &MemberMatchReport->GetMatchStats();
+					auto MemberTeamStats = &MemberMatchReport->GetTeamStats();
+					auto MemberRewardResult = &MemberMatchReport->GetEndOfMatchResults();
 						
-						if (MemberPlayerState->GetKillScore() && MemberPlayerState->GetSquadId() && MemberMatchStats) {
-							MemberMatchStats->Stats[3] = MemberPlayerState->GetKillScore();
-							MemberMatchStats->Stats[8] = MemberPlayerState->GetSquadId();
-							MemberMatchReport->SetMatchStats(*MemberMatchStats);
-							MemberController->ClientSendMatchStatsForPlayer(*MemberMatchStats);
-						}
-						
-						if (MemberTeamStats) {
-							MemberTeamStats->SetPlace(AliveCount);
-							MemberTeamStats->SetTotalPlayers(AliveCount);
-							MemberMatchReport->SetTeamStats(*MemberTeamStats);
-							MemberController->ClientSendTeamStatsForPlayer(*MemberTeamStats);
-						}
-						
-						int32 MemberXP = MemberController->GetXPComponent()->GetTotalXpEarned();
-						MemberRewardResult->SetTotalBookXpGained(MemberXP);
-						MemberRewardResult->SetTotalSeasonXpGained(MemberXP);
-						MemberMatchReport->SetEndOfMatchResults(*MemberRewardResult);
-						MemberController->ClientSendEndBattleRoyaleMatchForPlayer(true, *MemberRewardResult);
+					if (MemberPlayerState->GetKillScore() && MemberPlayerState->GetSquadId() && MemberMatchStats) {
+						MemberMatchStats->Stats[3] = MemberPlayerState->GetKillScore();
+						MemberMatchStats->Stats[8] = MemberPlayerState->GetSquadId();
+						MemberMatchReport->SetMatchStats(*MemberMatchStats);
+						MemberController->ClientSendMatchStatsForPlayer(*MemberMatchStats);
 					}
+						
+					if (MemberTeamStats) {
+						MemberTeamStats->SetPlace(AliveCount);
+						MemberTeamStats->SetTotalPlayers(AliveCount);
+						MemberMatchReport->SetTeamStats(*MemberTeamStats);
+						MemberController->ClientSendTeamStatsForPlayer(*MemberTeamStats);
+					}
+						
+					int32 MemberXP = MemberController->GetXPComponent()->GetTotalXpEarned();
+					MemberRewardResult->SetTotalBookXpGained(MemberXP);
+					MemberRewardResult->SetTotalSeasonXpGained(MemberXP);
+					MemberMatchReport->SetEndOfMatchResults(*MemberRewardResult);
+					MemberController->ClientSendEndBattleRoyaleMatchForPlayer(true, *MemberRewardResult);
 				}
 			}
 		}
@@ -995,25 +994,26 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 
 	if (Config::bEchoSessions)
 	{
-		if (!bIsDBNO && !bRebooting) {
+		if (!bRebooting) {
 			for (auto& Member : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
 				auto MemberController = (AFortPlayerControllerAthena*)Member;
 				if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) {
 					auto MemberPlayerState = MemberController->GetPlayerState();
+					Nexa::BroadcastMatchResults(MemberController, MemberPlayerState, Nexa::GetState().PlaylistData, GameMode);
 					std::thread t([=]() {
 						Nexa::Echo::LowerEchoSessionCount();
 					});
 					t.detach();
-					Nexa::BroadcastMatchResults(MemberController, MemberPlayerState, Nexa::GetState().PlaylistData, GameMode);
 				}
 			}
 		}
 
+		Nexa::BroadcastMatchResults(PlayerController, PlayerState, Nexa::GetState().PlaylistData, GameMode);
+		
 		std::thread t([]() {
 			Nexa::Echo::LowerEchoSessionCount();
 		});
 		t.detach();
-		Nexa::BroadcastMatchResults(PlayerController, PlayerState, Nexa::GetState().PlaylistData, GameMode);
 	}
    
 	ClientOnPawnDiedOG(PlayerController, DeathReport);

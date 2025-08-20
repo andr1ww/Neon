@@ -31,13 +31,13 @@ FItemAndCount ItemAndCount::GetAssaultRifles()
 
 FItemAndCount ItemAndCount::GetSnipers()
 {
-    static std::vector<FItemAndCount> Snipers{
+    static std::vector<FItemAndCount> Snipers {
         FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Sniper_Heavy_Athena_VR_Ore_T03.WID_Sniper_Heavy_Athena_VR_Ore_T03")), // heavy sniper
         FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/LTM/WID_Sniper_NoScope_Athena_VR_Ore_T03.WID_Sniper_NoScope_Athena_VR_Ore_T03")), // hunting
         FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Sniper_BoltAction_Scope_Athena_R_Ore_T03.WID_Sniper_BoltAction_Scope_Athena_R_Ore_T03")), // bolt sniper
-        FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Pistol_Chrono_Athena_SR.WID_Pistol_Chrono_Athena_SR")), // uh idk
-        FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Pistol_Chrono_Athena_VR.WID_Pistol_Chrono_Athena_VR")), // uh idk
-        FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Pistol_Chrono_Athena_UR.WID_Pistol_Chrono_Athena_UR")), // uh idk
+        //FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Pistol_Chrono_Athena_SR.WID_Pistol_Chrono_Athena_SR")), // uh idk
+      //  FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Pistol_Chrono_Athena_VR.WID_Pistol_Chrono_Athena_VR")), // uh idk
+    //    FItemAndCount(1, {}, Runtime::StaticFindObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/WID_Pistol_Chrono_Athena_UR.WID_Pistol_Chrono_Athena_UR")), // uh idk
     };       
     
     return Snipers[rand() % (Snipers.size() - 1)];

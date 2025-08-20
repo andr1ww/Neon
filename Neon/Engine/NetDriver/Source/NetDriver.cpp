@@ -435,7 +435,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 
     if (bStartedBus)
     {
-        if (NetDriver->GetClientConnections().Num() == 0)
+        if (UWorld::GetWorld()->GetAuthorityGameMode()->GetAlivePlayers().Num() == 0)
         {
             TerminateProcess(GetCurrentProcess(), 0);
         }

@@ -74,21 +74,23 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
     
     std::string BackendName = std::string(Obj->GetBackendName().ToString().ToString());
     
-    bool found = false;
-    for (auto& entry : PlayerNexaBroadcastQuestProgress[PlayerController]) {
-        if (entry.BackendName == BackendName) {
-            entry.Count = NewCount;
-            found = true;
-            break;
-        }
-    }
+	bool found = false;
+	for (auto& entry : PlayerNexaBroadcastQuestProgress[PlayerController]) {
+		if (entry.BackendName == BackendName) {
+			entry.Count = NewCount;
+			found = true;
+			UE_LOG(LogNeon, Log, "Updated NexaBroadcastQuestProgress: %s, Count: %d", BackendName.c_str(), NewCount);
+			break;
+		}
+	}
     
-    if (!found) {
-        FNexaBroadcastQuestProgress newEntry;
-        newEntry.BackendName = BackendName;
-        newEntry.Count = NewCount;
-        PlayerNexaBroadcastQuestProgress[PlayerController].push_back(newEntry);
-    }
+	if (!found) {
+		FNexaBroadcastQuestProgress newEntry;
+		newEntry.BackendName = BackendName;
+		newEntry.Count = NewCount;
+		PlayerNexaBroadcastQuestProgress[PlayerController].push_back(newEntry);
+		UE_LOG(LogNeon, Log, "Added NexaBroadcastQuestProgress: %s, Count: %d", BackendName.c_str(), NewCount);
+	}
     
     bool thisObjectiveCompleted = (NewCount >= Obj->GetCount()); 
     bool allObjsCompleted = false;
@@ -362,7 +364,6 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 					if (bFoundQuest)
 					{
 						ProgressQuest(Controller, QuestManager, CurrentQuest, QuestDef, Objective, Count); 
-						UE_LOG(LogNeon, Log, "BackendName: %s", Objective->GetBackendName().ToString().ToString().c_str());
 					}
 				}
 			}
@@ -389,7 +390,6 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 							continue;
 
 						ProgressQuest(Controller, QuestManager, CurrentQuest, QuestDef, Objective, Count);
-						UE_LOG(LogNeon, Log, "BackendName: %s", Objective->GetBackendName().ToString().ToString().c_str());
 					}
 				}
 			}
