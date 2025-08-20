@@ -428,6 +428,7 @@ public:
 class AFortPlayerPawn : public AFortPawn
 {
 public:
+	DEFINE_BOOL(AFortPlayerPawn, bIsEmoteLeader)
 	DEFINE_BOOL(AFortPlayerPawn, bStartedInteractSearch)
 	DEFINE_BOOL(AFortPlayerPawn, bIsSkydiving);
 	DEFINE_MEMBER(FGameplayTag, AFortPlayerPawn, EventReviveTag)

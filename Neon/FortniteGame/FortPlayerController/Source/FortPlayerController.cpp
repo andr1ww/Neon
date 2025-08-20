@@ -941,6 +941,14 @@ void AFortPlayerControllerAthena::ServerAttemptInventoryDrop(AFortPlayerControll
 		AFortInventory::Remove(PlayerController, ItemGuid);
 	else
 		AFortInventory::ReplaceEntry(PlayerController, *Entry);
+
+	static const auto ShieldsDefinition = Runtime::StaticLoadObject<UFortItemDefinition>("/Game/Athena/Items/Consumables/Shields/Athena_Shields.Athena_Shields");
+	static const auto MedkitDefinition = Runtime::StaticLoadObject<UFortItemDefinition>("/Game/Athena/Items/Consumables/Medkit/Athena_Medkit.Athena_Medkit");
+	if (Entry->GetItemDefinition() == ShieldsDefinition || Entry->GetItemDefinition() == MedkitDefinition) {
+		if (PlayerController->GetMyFortPawn()) {
+			PlayerController->GetMyFortPawn()->SetbIsEmoteLeader(true);
+		}
+	}
 }
 
 int32 AFortPlayerControllerAthena::K2_RemoveItemFromPlayerByGuid(UObject* Context, FFrame& Stack)
