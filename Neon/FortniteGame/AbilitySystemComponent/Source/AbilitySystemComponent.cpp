@@ -13,7 +13,8 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
     FGameplayAbilitySpec* Spec = nullptr;
     auto& ActivatableAbilities = AbilitySystemComponent->GetActivatableAbilities();
     auto& Items = ActivatableAbilities.GetItems();
-    int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
+    static int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
+    
     for (int i = 0; i < Items.Num(); i++) {
         auto& CurrentSpec = *reinterpret_cast<FGameplayAbilitySpec*>(__int64(Items.GetData()) + (i * GameplayAbilitySpecSize));
         
@@ -54,47 +55,62 @@ void UAbilitySystemComponent::InternalServerTryActivateAbility(
 
 void UAbilitySystemComponent::GiveAbility(UAbilitySystemComponent* AbilitySystemComponent, UClass* Ability)
 {
-    if (!Ability || !Ability->GetClassDefaultObject()) return;
-    
+    if (!Ability)
+        return;
+
+    static std::map<UClass*, UGameplayAbility*> CachedCDOs;
+    UGameplayAbility* CachedAbilityCDO = nullptr;
+
+    auto It = CachedCDOs.find(Ability);
+    if (It != CachedCDOs.end())
+    {
+        CachedAbilityCDO = It->second;
+    }
+    else
+    {
+        CachedAbilityCDO = Cast<UGameplayAbility>(Ability->GetClassDefaultObject());
+        if (!CachedAbilityCDO)
+            return;
+        CachedCDOs[Ability] = CachedAbilityCDO;
+    }
+
     static FGameplayAbilitySpec* StaticSpec = nullptr;
     static bool bInitialized = false;
-    
+
     if (!bInitialized)
     {
         int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
         StaticSpec = (FGameplayAbilitySpec*)malloc(GameplayAbilitySpecSize);
-        
-        if (!StaticSpec) return;
-        
+        if (!StaticSpec)
+            return;
         memset(StaticSpec, 0, GameplayAbilitySpecSize);
-        
-        new(StaticSpec) FGameplayAbilitySpec();
-        
+        new (StaticSpec) FGameplayAbilitySpec();
         bInitialized = true;
     }
-    
-    if (!StaticSpec) return;
-    
-    using GiveAbilityFunc = FGameplayAbilitySpecHandle(__fastcall*)(
+
+    if (!StaticSpec)
+        return;
+
+    using GiveAbilityFunc = FGameplayAbilitySpecHandle(__fastcall)(
         UAbilitySystemComponent*,
-        FGameplayAbilitySpecHandle*, 
+        FGameplayAbilitySpecHandle*,
         const FGameplayAbilitySpec&
     );
-    
+
     StaticSpec->MostRecentArrayReplicationKey = -1;
     StaticSpec->ReplicationID = -1;
     StaticSpec->ReplicationKey = -1;
     StaticSpec->GetHandle().Handle = rand();
-    StaticSpec->SetAbility((UGameplayAbility*)Ability->GetClassDefaultObject());
+    StaticSpec->SetAbility(CachedAbilityCDO);
     StaticSpec->SetSourceObject(nullptr);
     StaticSpec->SetInputID(-1);
     StaticSpec->SetLevel(1);
-    
+
     FGameplayAbilitySpecHandle Handle = StaticSpec->GetHandle();
-    
+
     if (Finder->GiveAbility())
     {
-        ((GiveAbilityFunc)Finder->GiveAbility())(AbilitySystemComponent, &Handle, *StaticSpec);
+        ((GiveAbilityFunc*)Finder->GiveAbility())(AbilitySystemComponent, &Handle, *StaticSpec);
     }
 }
 

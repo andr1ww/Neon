@@ -277,7 +277,7 @@ public:
 	};
 
 public:
-	AActor *GetOwner()
+	AActor *GetOwner(UActorComponent* This)
 	{
 		static SDK::UFunction *Func = nullptr;
 		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("ActorComponent", "GetOwner");
@@ -290,7 +290,9 @@ public:
 		{
 			UActorComponent *Comp;
 			AActor *ReturnValue;
-		} GetOwnerParams{this};
+		} GetOwnerParams{};
+
+		GetOwnerParams.Comp = This;
 
 		this->ProcessEvent(Func, &GetOwnerParams);
 

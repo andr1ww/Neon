@@ -160,7 +160,6 @@ public:
         Func->FunctionFlags() = Flgs;
     }
 
-
     void TossPickup(const struct FVector& FinalLocation, class AFortPawn* ItemOwner, int32 OverrideMaxStackCount, bool bToss, bool bShouldCombinePickupsWhenTossCompletes, const EFortPickupSourceTypeFlag InPickupSourceTypeFlags, const EFortPickupSpawnSource InPickupSpawnSource)
     {
         static SDK::UFunction* Func = nullptr;
@@ -241,6 +240,32 @@ public:
 
 class UFortGadgetItemDefinition : public UFortWorldItemDefinition
 {
+public:
+    class UFortWeaponItemDefinition* GetWeaponItemDefinition()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortGadgetItemDefinition", "GetWeaponItemDefinition");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return nullptr;
+
+        struct FortGadgetItemDefinition_GetWeaponItemDefinition final
+        {
+        public:
+            class UFortWeaponItemDefinition*              ReturnValue;                                       // 0x0000(0x0008)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        } Ok{};
+
+        auto Flgs = Func->FunctionFlags();
+        Func->FunctionFlags() |= 0x400;
+    
+        this->ProcessEvent(Func, &Ok);
+
+        Func->FunctionFlags() = Flgs;
+
+        return Ok.ReturnValue;
+    }
 public:
     DECLARE_STATIC_CLASS(UFortGadgetItemDefinition)
     DECLARE_DEFAULT_OBJECT(UFortGadgetItemDefinition)

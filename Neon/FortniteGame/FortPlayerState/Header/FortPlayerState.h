@@ -168,6 +168,34 @@ public:
     DEFINE_PTR(UAbilitySystemComponent, AFortPlayerStateAthena, AbilitySystemComponent);
 
 public:
+	
+	inline EDeathCause ToDeathCause(const struct FGameplayTagContainer& InTags, bool bWasDBNO)
+	{
+		static SDK::UFunction *Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerControllerAthena", "ClientSendTeamStatsForPlayer");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return EDeathCause::Unspecified;
+
+		struct FortPlayerStateAthena_ToDeathCause final
+		{
+		public:
+			struct FGameplayTagContainer                  InTags;                                            // 0x0000(0x0020)(ConstParm, Parm, OutParm, ReferenceParm, NativeAccessSpecifierPublic)
+			bool                                          bWasDBNO;                                          // 0x0020(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+			EDeathCause                                   ReturnValue;                                       // 0x0021(0x0001)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+			uint8                                         Pad_22[0x6];                                       // 0x0022(0x0006)(Fixing Struct Size After Last Property [ Dumper-7 ])
+		} FortPlayerStateAthena_ToDeathCause_Params{};
+
+		FortPlayerStateAthena_ToDeathCause_Params.InTags = std::move(InTags);
+		FortPlayerStateAthena_ToDeathCause_Params.bWasDBNO = bWasDBNO;
+
+		this->ProcessEvent(Func, &FortPlayerStateAthena_ToDeathCause_Params);
+
+		return FortPlayerStateAthena_ToDeathCause_Params.ReturnValue;
+	}
+	
 	void OnRep_DeathInfo()
 	{
 		static SDK::UFunction* Func = nullptr;

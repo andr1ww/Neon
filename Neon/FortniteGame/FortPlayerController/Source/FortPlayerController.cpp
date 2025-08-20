@@ -190,7 +190,7 @@ void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControll
     UFortWeaponItemDefinition* ItemDefinition = nullptr;
     if (Entry->GetItemDefinition()->IsA<UFortGadgetItemDefinition>())
     {
-        ItemDefinition = Cast<UFortGadgetItemDefinition>(Entry->GetItemDefinition())->CallFunc<UFortWeaponItemDefinition*>("FortGadgetItemDefinition", "GetWeaponItemDefinition");
+        ItemDefinition = Cast<UFortGadgetItemDefinition>(Entry->GetItemDefinition())->GetWeaponItemDefinition();
     } else
     {
         ItemDefinition = Cast<UFortWeaponItemDefinition>(Entry->GetItemDefinition());
@@ -361,7 +361,7 @@ void AFortPlayerControllerAthena::ServerAttemptAircraftJump(UActorComponent* Com
 	Stack.StepCompiledIn(&Rotation);
 	Stack.IncrementCode();
     
-	auto PlayerController = (AFortPlayerControllerAthena*)Comp->CallFunc<AActor*>("ActorComponent", "GetOwner", Comp);
+	auto PlayerController = (AFortPlayerControllerAthena*)Comp->GetOwner(Comp);
 	auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
 	auto GameState = UWorld::GetWorld()->GetGameState();
 
@@ -445,7 +445,7 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
         BuildingSMActor->InitializeKismetSpawnedBuildingActor(BuildingSMActor, PlayerController, true);
 
         if (AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState()) {
-            uint8 TeamIndex = PlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex");
+            uint8 TeamIndex = PlayerState->GetTeamIndex();
             BuildingSMActor->Set("BuildingActor", "TeamIndex", TeamIndex);
             BuildingSMActor->Set("BuildingActor", "Team", EFortTeam(TeamIndex));
         }
@@ -642,16 +642,11 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	bool bIsDBNO = VictimPawn && VictimPawn->IsDBNO();
  
 	auto DeathTags = DeathReport.GetTags();
-	EDeathCause DeathCause = PlayerState->CallFunc<EDeathCause>("FortPlayerStateAthena", "ToDeathCause", DeathTags, bIsDBNO);
+	EDeathCause DeathCause = PlayerState->ToDeathCause(DeathTags, bIsDBNO);
 
 	PlayerState->Set("FortPlayerState", "PawnDeathLocation", DeathLocation);
 	
 	if (DeathInfo) {
-		static int Size = 0;
-		if (Size == 0) {
-			Size = StaticClassImpl("DeathInfo")->GetSize();
-		}
-
 		FGameplayTagContainer CopyTags;
 
 		for (int i = 0; i < DeathTags.GameplayTags.Num(); ++i)
@@ -673,8 +668,8 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 
 		if (VictimPawn) {
 			DeathInfo->GetDistance() = (DeathCause != EDeathCause::FallDamage) 
-				? (KillerPawn && KillerPawn->GetClass()->GetFunction("GetDistanceTo") ? KillerPawn->CallFunc<float>("Actor", "GetDistanceTo", VictimPawn) : 0.0f)
-				: VictimPawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
+			? KillerPawn ? KillerPawn->GetDistanceTo(VictimPawn) : 0.0f
+			: VictimPawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
 		}
 
 		DeathInfo->SetbInitialized(true);
