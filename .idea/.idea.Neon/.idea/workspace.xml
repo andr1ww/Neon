@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerPawn/Source/FortPlayerPawn.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerPawn/Source/FortPlayerPawn.cpp" afterDir="false" />
-    </list>
+    <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -93,7 +91,7 @@
       <workItem from="1755517224148" duration="20598000" />
       <workItem from="1755542212954" duration="73599000" />
       <workItem from="1755660284370" duration="2720000" />
-      <workItem from="1755688898573" duration="2909000" />
+      <workItem from="1755688898573" duration="3344000" />
     </task>
     <servers />
   </component>
@@ -189,7 +187,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortPlayerPawn/Source/FortPlayerPawn.cpp</url>
-          <line>470</line>
+          <line>477</line>
           <option name="timeStamp" value="64" />
         </line-breakpoint>
       </breakpoints>

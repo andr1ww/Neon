@@ -947,6 +947,7 @@ void AFortPlayerControllerAthena::ServerAttemptInventoryDrop(AFortPlayerControll
 	if (Entry->GetItemDefinition() == ShieldsDefinition || Entry->GetItemDefinition() == MedkitDefinition) {
 		if (PlayerController->GetMyFortPawn()) {
 			PlayerController->GetMyFortPawn()->SetbIsEmoteLeader(true);
+			PlayerController->GetMyFortPawn()->OnRep_IsEmoteLeader();
 		}
 	}
 }

@@ -299,6 +299,7 @@ void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
         } else
         {
             PC->GetMyFortPawn()->SetbIsEmoteLeader(false);
+            PC->GetMyFortPawn()->OnRep_IsEmoteLeader();
         }
     }
     

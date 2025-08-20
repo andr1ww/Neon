@@ -466,6 +466,19 @@ public:
 		this->ProcessEvent(Func, nullptr);
 	}
 
+	void OnRep_IsEmoteLeader()
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerPawn", "OnRep_IsEmoteLeader");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+		
+		this->ProcessEvent(Func, nullptr);
+	}
+
 	void OnRep_StartedInteractSearch()
 	{
 		static SDK::UFunction* Func = nullptr;
