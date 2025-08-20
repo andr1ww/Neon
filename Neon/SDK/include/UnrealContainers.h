@@ -1309,7 +1309,7 @@ public:
     }
     FORCEINLINE const FSparseArrayElement& operator[](uint32 Index) const
     {
-        return *(const FSparseArrayElement*)&Data.at(Index).ElementData;
+        return *(const FSparseArrayElement*)&Data[Index].ElementData;
     }
     FORCEINLINE int32 GetNumFreeIndices() const
     {
@@ -1530,7 +1530,7 @@ public:
         ConstIterator(const ElementArrayType* InElements, int32 InIndex) 
             : ElementsPtr(InElements), CurrentIndex(InIndex)
         {
-            while (CurrentIndex < ElementsPtr->GetMaxIndex() && !ElementsPtr->IsAllocated(CurrentIndex))
+            while (CurrentIndex < ElementsPtr->Num() && !ElementsPtr->GetAllocationFlags()[CurrentIndex])
             {
                 ++CurrentIndex;
             }
@@ -1549,7 +1549,7 @@ public:
             ConstIterator& operator++()
         {
                 ++CurrentIndex;
-                while (CurrentIndex < ElementsPtr->Num() && !ElementsPtr->IsValidIndex(CurrentIndex))
+                while (CurrentIndex < ElementsPtr->Num() && !ElementsPtr->IsIndexValid(CurrentIndex))
                 {
                         ++CurrentIndex;
                 }
@@ -1591,7 +1591,7 @@ public:
 
     ConstIterator end() const
     {
-        return ConstIterator(&Elements, Elements.GetMaxIndex());
+        return ConstIterator(&Elements, Elements.Num());
     }
 
     int32 Num() const
