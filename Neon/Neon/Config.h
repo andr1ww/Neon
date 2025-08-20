@@ -8,7 +8,7 @@ namespace Config
     inline bool bCreative = false;
     inline bool bGameSessions = false;
     inline bool bEchoSessions = false;
-    inline std::string Playlist = "Playlist_DefaultSolo";
+    inline std::string Playlist = "Playlist_Low_Solo";
     inline int Port = 7777;
 
     namespace Echo

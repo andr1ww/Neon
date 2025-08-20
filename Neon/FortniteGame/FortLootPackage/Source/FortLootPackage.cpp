@@ -61,94 +61,93 @@ T* FortLootPackage::PickWeighted(TArray<T*>& Map, float (*RandFunc)(float), bool
 }
 
 void FortLootPackage::SetupLDSForPackage(TArray<FNeonLootImproper>& LootDrops, FName Package, int i, FName TierGroup, int WorldLevel, int RecursionDepth) {
-    if (RecursionDepth > 3 || LootDrops.Num() > 20) {
-        return;
-    }
+    static TArray<FFortLootPackageData*> LPGroupsAll;
     
-    TArray<FFortLootPackageData*> LPGroups;
-    for (auto const& Val : LPGroupsAll)
-    {
-        if (!Val)
-            continue;
+    if (RecursionDepth > 3 || LootDrops.Num() > 20) return;
+    
+    if (LPGroupsAll.Num() == 0) {
+        auto World = UWorld::GetWorld();
+        if (!World || !World->GetGameState()) return;
+        
+        auto GameState = Cast<AFortGameStateAthena>(World->GetGameState());
+        if (!GameState) return;
 
-        if (Val->GetLootPackageID().GetNumber() != Package.GetNumber())
-            continue;
-        if (i != -1 && Val->GetLootPackageCategory() != i)
-            continue;
-        if (WorldLevel >= 0) {
-            if (Val->GetMaxWorldLevel() >= 0 && WorldLevel > Val->GetMaxWorldLevel())
-                continue;
-            if (Val->GetMinWorldLevel() >= 0 && WorldLevel < Val->GetMinWorldLevel())
-                continue;
+        static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameState, "CurrentPlaylistInfo");
+        FPlaylistPropertyArray& CurrentPlaylistInfoPtr = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
+
+        static int LootPackagesOffset = Runtime::GetOffset(CurrentPlaylistInfoPtr.GetBasePlaylist(), "LootPackages");
+        static auto ErmOk = *(TSoftObjectPtr<UDataTable>*)(__int64(CurrentPlaylistInfoPtr.GetBasePlaylist()) + LootPackagesOffset);
+
+        UDataTable* LootPackages = ErmOk.Get(UCompositeDataTable::StaticClass(), true);
+        if (!LootPackages) LootPackages = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootPackages().Get(UDataTable::StaticClass(), true);
+        
+        auto AddPackages = [&](const TMap<FName, uint8*>& RowMap) {
+            for (const auto& RowPair : RowMap) {
+                if (auto Val = reinterpret_cast<FFortLootPackageData*>(RowPair.Value); IsValidPointer(Val)) {
+                    LPGroupsAll.Add(Val);
+                }
+            }
+        };
+        
+        AddPackages(LootPackages->GetRowMap());
+        
+        if (auto CompositeTable = Cast<UCompositeDataTable>(LootPackages)) {
+            for (auto ParentTable : CompositeTable->GetParentTables()) {
+                if (ParentTable) AddPackages(ParentTable->GetRowMap());
+            }
         }
+    }
 
+    TArray<FFortLootPackageData*> LPGroups;
+    for (auto Val : LPGroupsAll) {
+        if (!Val || Val->GetLootPackageID().GetComparisonIndex() != Package.GetComparisonIndex()) continue;
+        if (i != -1 && Val->GetLootPackageCategory() != i) continue;
+        if (WorldLevel >= 0 && ((Val->GetMaxWorldLevel() >= 0 && WorldLevel > Val->GetMaxWorldLevel()) || 
+                               (Val->GetMinWorldLevel() >= 0 && WorldLevel < Val->GetMinWorldLevel()))) continue;
         LPGroups.Add(Val);
     }
-    if (LPGroups.Num() == 0)
-    {
-        return;
-    }
+    
+    if (LPGroups.Num() == 0) return;
 
     auto LootPackage = PickWeighted(LPGroups, [](float Total) { return ((float)rand() / 32767.f) * Total; });
-    if (!LootPackage)
-    {
-        return;
-    }
+    if (!LootPackage) return;
     
     auto LootPackageCall = LootPackage->GetLootPackageCall();
-    if (LootPackageCall.GetData().Num() > 0)
-    {
-        SetupLDSForPackage(LootDrops, UKismetStringLibrary::Conv_StringToName(LootPackageCall), -1, TierGroup, WorldLevel, RecursionDepth + 1);
-        return;
-    }
-
-    auto ItemDefinition = (UFortWorldItemDefinition*)LootPackage->GetItemDefinition().Get();
-    if (!IsValidPointer(ItemDefinition))
-    {
-        return;
-    }
-
-    if (LootPackage->GetCount() <= 0) {
-        return;
-    }
-
-    bool found = false;
-    for (auto& LootDrop : LootDrops) {
-        if (LootDrop.ItemDefinition == ItemDefinition) {
-            LootDrop.Count += LootPackage->GetCount();
-            found = true;
-            break;
+    if (LootPackageCall.GetData().Num() > 0) {
+        for (int idx = 0; idx < LootPackage->GetCount(); idx++) {
+            SetupLDSForPackage(LootDrops, UKismetStringLibrary::Conv_StringToName(LootPackageCall), 0, TierGroup, WorldLevel, RecursionDepth + 1);
         }
+        return;
     }
 
-    if (!found) {
-        LootDrops.Add(FNeonLootImproper(ItemDefinition, LootPackage->GetCount()));
-    }
+    auto ItemDefinition = Cast<UFortWorldItemDefinition>(LootPackage->GetItemDefinition().Get());
+    if (!IsValidPointer(ItemDefinition) || LootPackage->GetCount() <= 0) return;
 
-    auto WeaponItemDefinition = Cast<UFortWeaponItemDefinition>(ItemDefinition);
-    bool IsWeapon = LootPackage->GetLootPackageID().ToString().ToString().contains(".Weapon.") && WeaponItemDefinition;
-    if (IsWeapon)
-    {
-        auto AmmoData = WeaponItemDefinition->GetAmmoData().Get();
-        if (AmmoData)
-        {
-            auto AmmoItemDefinition = Cast<UFortWorldItemDefinition>(AmmoData);
-            if (AmmoItemDefinition)
-            {
-                int AmmoCount = AmmoData->GetDropCount();
-                if (AmmoCount > 0)
-                {
-                    bool ammoFound = false;
-                    for (auto& LootDrop : LootDrops) {
-                        if (LootDrop.ItemDefinition == AmmoItemDefinition) {
-                            LootDrop.Count += AmmoCount;
-                            ammoFound = true;
-                            break;
-                        }
+    auto AddLoot = [&](UFortWorldItemDefinition* Item, int Count) {
+        for (auto& LootDrop : LootDrops) {
+            if (LootDrop.ItemDefinition == Item) {
+                LootDrop.Count += Count;
+                if (LootDrop.Count > Item->GetMaxStackSize().Value) {
+                    int32 Overflow = LootDrop.Count - Item->GetMaxStackSize().Value;
+                    LootDrop.Count = Item->GetMaxStackSize().Value;
+                    if (GetQuickbar(Item) == EFortQuickBars::Secondary) {
+                        LootDrops.Add(FNeonLootImproper(Item, Overflow));
                     }
-                    if (!ammoFound) {
-                        LootDrops.Add(FNeonLootImproper(AmmoItemDefinition, AmmoCount));
-                    }
+                }
+                return GetQuickbar(Item) == EFortQuickBars::Secondary;
+            }
+        }
+        LootDrops.Add(FNeonLootImproper(Item, Count));
+        return false;
+    };
+
+    AddLoot(ItemDefinition, LootPackage->GetCount());
+
+    if (auto WeaponItemDefinition = Cast<UFortWeaponItemDefinition>(ItemDefinition)) {
+        if (auto AmmoData = WeaponItemDefinition->GetAmmoData().Get()) {
+            if (auto AmmoItemDefinition = Cast<UFortWorldItemDefinition>(AmmoData)) {
+                if (int AmmoCount = AmmoData->GetDropCount(); AmmoCount > 0) {
+                    AddLoot(AmmoItemDefinition, AmmoCount);
                 }
             }
         }
@@ -162,7 +161,7 @@ void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
         return;
     }
     
-    if (LPGroupsAll.Num() > 0 && TierDataAllGroups.Num() > 0) {
+  /*  if (LPGroupsAll.Num() > 0 && TierDataAllGroups.Num() > 0) {
         return;
     }
 
@@ -307,15 +306,19 @@ void FortLootPackage::SetupLootGroups(AFortGameStateAthena* GameState)
     for (auto& [Key, Value] : TierDataGroupMap) {
         TierDataAllGroups.Add(Value);
     }
+
+    */
 }
 
 TArray<FortLootPackage::FNeonLootImproper> FortLootPackage::PickLootDrops(FName TierGroup, int LootTier, int WorldLevel) {
+    static TArray<FFortLootTierData*> TierDataAllGroups;
+    
     auto World = UWorld::GetWorld();
     if (!World) {
         return {};
     }
     
-    auto GameState = World->GetGameState();
+    auto GameState = Cast<AFortGameStateAthena>(World->GetGameState());
     if (!GameState) {
         return {};
     }
@@ -324,22 +327,53 @@ TArray<FortLootPackage::FNeonLootImproper> FortLootPackage::PickLootDrops(FName 
         WorldLevel = GameState->GetWorldLevel();
     }
     
-    SetupLootGroups(GameState);
+    if (TierDataAllGroups.Num() == 0) {
+        UDataTable* LootTierData = nullptr;
+        static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameState, "CurrentPlaylistInfo");
+            
+        FPlaylistPropertyArray& CurrentPlaylistInfoPtr = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
 
-    if (!TierDataAllGroups.Num())
-    {
-        return {};
+        static int LootTierDataOffset = Runtime::GetOffset(CurrentPlaylistInfoPtr.GetBasePlaylist(), "LootTierData");
+        static auto ErmOk2 = *(TSoftObjectPtr<UDataTable>*)(__int64(CurrentPlaylistInfoPtr.GetBasePlaylist()) + LootTierDataOffset);
+
+        LootTierData = ErmOk2.Get(UCompositeDataTable::StaticClass(), true);
+        
+        if (!LootTierData) {
+            LootTierData = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootTierData().Get(UDataTable::StaticClass(), true);
+        }
+        
+        if (auto CompositeTable = Cast<UCompositeDataTable>(LootTierData)) {
+            auto& ParentTables = CompositeTable->GetParentTables();
+            for (auto& ParentTable : ParentTables) {
+                if (ParentTable) {
+                    auto& RowMap = ParentTable->GetRowMap();
+                    for (const auto& RowPair : RowMap) {
+                        FFortLootTierData* Val = reinterpret_cast<FFortLootTierData*>(RowPair.Value);
+                        if (IsValidPointer(Val)) {
+                            TierDataAllGroups.Add(Val);
+                        }
+                    }
+                }
+            }
+        }
+        
+        auto& MainRowMap = LootTierData->GetRowMap();
+        for (const auto& RowPair : MainRowMap) {
+            FFortLootTierData* Val = reinterpret_cast<FFortLootTierData*>(RowPair.Value);
+            if (IsValidPointer(Val)) {
+                TierDataAllGroups.Add(Val);
+            }
+        }
     }
 
     TArray<FFortLootTierData*> TierDataGroups;
     for (auto const& Val : TierDataAllGroups) {
-        if (!Val) {
-            continue;
-        }
+        if (!Val) continue;
         
-        if (Val->GetTierGroup().GetNumber() == TierGroup.GetNumber() && 
-            (LootTier == -1 ? true : LootTier == Val->GetLootTier()))
+        if (Val->GetTierGroup().GetComparisonIndex() == TierGroup.GetComparisonIndex() && 
+            (LootTier == -1 ? true : LootTier == Val->GetLootTier())) {
             TierDataGroups.Add(Val);
+        }
     }
     
     if (TierDataGroups.Num() == 0) {
@@ -347,13 +381,7 @@ TArray<FortLootPackage::FNeonLootImproper> FortLootPackage::PickLootDrops(FName 
     }
     
     auto LootTierData = PickWeighted(TierDataGroups, [](float Total) { return ((float)rand() / 32767.f) * Total; });
-    if (!LootTierData)
-    {
-        return {};
-    }
-
-    auto& CategoryMinArray = LootTierData->GetLootPackageCategoryMinArray();
-    if (CategoryMinArray.Num() == 0) {
+    if (!LootTierData) {
         return {};
     }
 
@@ -364,29 +392,28 @@ TArray<FortLootPackage::FNeonLootImproper> FortLootPackage::PickLootDrops(FName 
 
         if (LootTierData->GetNumLootPackageDrops() > 1) {
             float idk = LootTierData->GetNumLootPackageDrops() - DropCount;
-
-            if (idk > 0.0000099999997f)
+            if (idk > 0.0000099999997f) {
                 DropCount += idk >= ((float)rand() / 32767);
+            }
         }
     }
 
     float AmountOfLootDrops = 0;
 
-    for (int i = 0; i < CategoryMinArray.Num(); ++i)
-    {
-        AmountOfLootDrops += CategoryMinArray[i];
+    for (auto& Min : LootTierData->GetLootPackageCategoryMinArray()) {
+        AmountOfLootDrops += Min;
     }
 
     int32 SumWeights = 0;
 
-    for (int i = 0; i < CategoryMinArray.Num(); ++i)
-    {
-        if (CategoryMinArray[i] > 0 && CategoryMinArray[i] != 0)
-            SumWeights += CategoryMinArray[i];
+    for (int i = 0; i < LootTierData->GetLootPackageCategoryWeightArray().Num(); ++i) {
+        if (LootTierData->GetLootPackageCategoryWeightArray()[i] > 0 && 
+            LootTierData->GetLootPackageCategoryMaxArray()[i] != 0) {
+            SumWeights += LootTierData->GetLootPackageCategoryWeightArray()[i];
+        }
     }
 
-    while (SumWeights > 0)
-    {
+    while (SumWeights > 0) {
         AmountOfLootDrops++;
 
         if (AmountOfLootDrops >= LootTierData->GetNumLootPackageDrops()) {
@@ -396,26 +423,17 @@ TArray<FortLootPackage::FNeonLootImproper> FortLootPackage::PickLootDrops(FName 
         SumWeights--;
     }
 
-    if (AmountOfLootDrops <= 0) {
+    if (!AmountOfLootDrops) {
         AmountOfLootDrops = 1;
     }
         
     TArray<FNeonLootImproper> LootDrops;
 
-    int32 MaxIterations = FMath::Min((int32)AmountOfLootDrops, CategoryMinArray.Num());
+    auto& CategoryMinArray = LootTierData->GetLootPackageCategoryMinArray();
     
-    for (int i = 0; i < MaxIterations; i++)
-    {
-        if (i >= CategoryMinArray.Num()) {
-            break;
-        }
-        
-        int CategoryMin = CategoryMinArray[i];
-        if (CategoryMin >= 1) {
-            for (int j = 0; j < CategoryMin; j++)
-            {
-                SetupLDSForPackage(LootDrops, LootTierData->GetLootPackage(), i, TierGroup, WorldLevel, 0);
-            }
+    for (int i = 0; i < AmountOfLootDrops && i < CategoryMinArray.Num(); i++) {
+        for (int j = 0; j < CategoryMinArray[i] && CategoryMinArray[i] >= 1; j++) {
+            SetupLDSForPackage(LootDrops, LootTierData->GetLootPackage(), i, TierGroup, WorldLevel, 0);
         }
     }
 
@@ -430,13 +448,6 @@ public:
 };
 
 void FortLootPackage::InternalSpawnLoot(FName& TierGroup, FVector Loc, const TArray<FNeonLootImproper>& PrecomputedLoot) {
-    for (auto& [SupportTierGroup, Redirect] : UWorld::GetWorld()->GetAuthorityGameMode()->GetRedirectAthenaLootTierGroups()) {
-        if (TierGroup.GetComparisonIndex() == SupportTierGroup.GetComparisonIndex()) {
-            TierGroup = Redirect;
-            break;
-        }
-    }
-    
     int32 SpawnedCount = 0;
     
     for (const FNeonLootImproper& Item : PrecomputedLoot) {
@@ -534,6 +545,7 @@ bool FortLootPackage::ServerOnAttemptInteract(ABuildingContainer* Container, FIn
 }
 
 // should be in a diff class but wtv i put it here
+
 void FortLootPackage::ServerAttemptInteract(UFortControllerComponent_Interaction* Component, FFrame& Stack)
 {
     class AActor* ReceivingActor;
@@ -550,25 +562,36 @@ void FortLootPackage::ServerAttemptInteract(UFortControllerComponent_Interaction
     Stack.StepCompiledIn(&RequestId);
     Stack.IncrementCode();
     
-    auto PlayerController = (AFortPlayerControllerAthena*)Component->CallFunc<AActor*>("ActorComponent", "GetOwner", Component);
-
     if (ReceivingActor->IsA(ABuildingContainer::StaticClass()))
     {
         ABuildingContainer* Container = Cast<ABuildingContainer>(ReceivingActor);
+        
+        if (Container->GetbAlreadySearched()) {
+            goto CallOriginal;
+        }
+        
         FName LootTierGroupToUse = Container->GetSearchLootTierGroup();
+        auto World = UWorld::GetWorld();
+        if (World && World->GetAuthorityGameMode()) {
+            for (auto& [SupportTierGroup, Redirect] : World->GetAuthorityGameMode()->GetRedirectAthenaLootTierGroups()) {
+                if (LootTierGroupToUse.GetComparisonIndex() == SupportTierGroup.GetComparisonIndex()) {
+                    LootTierGroupToUse = Redirect;
+                    break;
+                }
+            }
+        }
     
         TArray<FNeonLootImproper> LootItems = PickLootDrops(LootTierGroupToUse);
-        auto SpawnLocation = PlayerController->GetMyFortPawn()->K2_GetActorLocation() + PlayerController->GetMyFortPawn()->GetActorRightVector() * 70.f + FVector{ 0, 0, 50 };
-        UE_LOG(LogNeon, Log, "SpawnLocation: X=%f Y=%f Z=%f", SpawnLocation.X, SpawnLocation.Y, SpawnLocation.Z);
+        auto SpawnLocation = Container->K2_GetActorLocation() + Container->GetActorRightVector() * 70.f + FVector{ 0, 0, 50 };
     
         InternalSpawnLoot(LootTierGroupToUse, SpawnLocation, LootItems);
-    
         Container->SetbAlreadySearched(true);
         Container->CallFunc<void>("BuildingContainer", "OnRep_bAlreadySearched");
         Container->Get<FFortSearchBounceData>("BuildingContainer", "SearchBounceData").SearchAnimationCount++;
         Container->CallFunc<void>("BuildingContainer", "BounceContainer");
     }
 
+CallOriginal:
     struct FortControllerComponent_Interaction_ServerAttemptInteract final
     {
     public:

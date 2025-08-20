@@ -15,7 +15,9 @@ struct FFortLootTierData
     DEFINE_MEMBER(FName, FFortLootTierData, LootPackage);
     DEFINE_MEMBER(int32, FFortLootTierData, LootTier);
     DEFINE_MEMBER(FName, FFortLootTierData, TierGroup);
+    DEFINE_MEMBER(TArray<int32>, FFortLootTierData, LootPackageCategoryMaxArray)
     DEFINE_MEMBER(float, FFortLootTierData, NumLootPackageDrops);
+    DEFINE_MEMBER(TArray<int32>, FFortLootTierData, LootPackageCategoryWeightArray)
     DEFINE_MEMBER(TArray<int32>, FFortLootTierData, LootPackageCategoryMinArray)
 };
 
