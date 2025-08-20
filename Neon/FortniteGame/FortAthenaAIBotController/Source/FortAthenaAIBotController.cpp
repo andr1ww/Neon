@@ -239,8 +239,8 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
 			{
 				AFortAthenaAIBotController* Controller = (AFortAthenaAIBotController*)InstigatedBy;
 				DeathInfo->GetDistance() = (DeathCause != EDeathCause::FallDamage) 
-	? (Controller->GetPawn() && Controller->GetPawn()->GetClass()->GetFunction("GetDistanceTo") ? Controller->GetPawn()->GetDistanceTo(Pawn) : 0.0f)
-	: Pawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
+					? (Controller->GetPawn() && Controller->GetPawn()->GetClass()->GetFunction("GetDistanceTo") ? Controller->GetPawn()->GetDistanceTo(Pawn) : 0.0f)
+					: Pawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
 			}
 
 			DeathInfo->SetbInitialized(true);
@@ -249,47 +249,51 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
 		}
 
 		AFortPlayerStateAthena* KillerPlayerState = InstigatedBy->GetPlayerState();
+   	
+		if (Controller->GetFName().ToString().ToString().contains("Phoebe"))
+		{
+			KillerPlayerState->ClientReportKill(PlayerState);
 
-		int32 KillerScore = KillerPlayerState->GetKillScore() + 1;
-		int32 TeamScore = KillerPlayerState->GetTeamKillScore() + 1;
+			int32 KillerScore = KillerPlayerState->GetKillScore() + 1;
+			int32 TeamScore = KillerPlayerState->GetTeamKillScore() + 1;
 		
-		KillerPlayerState->SetKillScore(KillerScore);
-		KillerPlayerState->OnRep_KillScore();
-		KillerPlayerState->SetTeamKillScore(TeamScore);
-		KillerPlayerState->OnRep_TeamKillScore();
-		KillerPlayerState->ClientReportTeamKill(TeamScore);
+			KillerPlayerState->SetKillScore(KillerScore);
+			KillerPlayerState->OnRep_KillScore();
+			KillerPlayerState->SetTeamKillScore(TeamScore);
+			KillerPlayerState->OnRep_TeamKillScore();
+			KillerPlayerState->ClientReportTeamKill(TeamScore);
 
-		auto Team = KillerPlayerState->GetPlayerTeam();
-		if (Team) {
-			const auto& TeamMembers = Team->GetTeamMembers();
-			for (int32 i = 0; i < TeamMembers.Num(); ++i) {
-				auto MemberPlayerState = TeamMembers[i]->GetPlayerState();
-				if (MemberPlayerState != KillerPlayerState) {
-					int32 MemberTeamScore = MemberPlayerState->GetTeamKillScore() + 1;
-					MemberPlayerState->SetTeamKillScore(MemberTeamScore);
-					MemberPlayerState->OnRep_TeamKillScore();
-					MemberPlayerState->ClientReportTeamKill(MemberTeamScore);
+			auto Team = KillerPlayerState->GetPlayerTeam();
+			if (Team) {
+				const auto& TeamMembers = Team->GetTeamMembers();
+				for (int32 i = 0; i < TeamMembers.Num(); ++i) {
+					auto MemberPlayerState = TeamMembers[i]->GetPlayerState();
+					if (MemberPlayerState != KillerPlayerState) {
+						int32 MemberTeamScore = MemberPlayerState->GetTeamKillScore() + 1;
+						MemberPlayerState->SetTeamKillScore(MemberTeamScore);
+						MemberPlayerState->OnRep_TeamKillScore();
+						MemberPlayerState->ClientReportTeamKill(MemberTeamScore);
+					}
 				}
 			}
-		}
-   	
-		KillerPlayerState->ClientReportKill(PlayerState);
-		if (InstigatedBy->IsA<AFortPlayerControllerAthena>() && InstigatedBy->GetMyFortPawn())
-		{
-			int32 CurrentKills = KillerScore;
 
-			static UFortAccoladeItemDefinition* Bronze = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_014_Elimination_Bronze.AccoladeId_014_Elimination_Bronze");
-			static UFortAccoladeItemDefinition* Silver = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_015_Elimination_Silver.AccoladeId_015_Elimination_Silver");
-			static UFortAccoladeItemDefinition* Gold = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_016_Elimination_Gold.AccoladeId_016_Elimination_Gold");
+			if (InstigatedBy->IsA<AFortPlayerControllerAthena>() && InstigatedBy->GetMyFortPawn())
+			{
+				int32 CurrentKills = KillerScore;
 
-			if (CurrentKills == 1) {
-				UFortQuestManager::GiveAccolade(InstigatedBy, Bronze);
-			}
-			else if (CurrentKills == 4) {
-				UFortQuestManager::GiveAccolade(InstigatedBy, Silver);
-			}
-			else if (CurrentKills == 8) {
-				UFortQuestManager::GiveAccolade(InstigatedBy, Gold);
+				static UFortAccoladeItemDefinition* Bronze = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_014_Elimination_Bronze.AccoladeId_014_Elimination_Bronze");
+				static UFortAccoladeItemDefinition* Silver = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_015_Elimination_Silver.AccoladeId_015_Elimination_Silver");
+				static UFortAccoladeItemDefinition* Gold = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_016_Elimination_Gold.AccoladeId_016_Elimination_Gold");
+
+				if (CurrentKills == 1) {
+					UFortQuestManager::GiveAccolade(InstigatedBy, Bronze);
+				}
+				else if (CurrentKills == 4) {
+					UFortQuestManager::GiveAccolade(InstigatedBy, Silver);
+				}
+				else if (CurrentKills == 8) {
+					UFortQuestManager::GiveAccolade(InstigatedBy, Gold);
+				}
 			}
 		}
     	
