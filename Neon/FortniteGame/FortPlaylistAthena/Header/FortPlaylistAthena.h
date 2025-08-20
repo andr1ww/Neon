@@ -42,6 +42,7 @@ public:
 class UFortPlaylistAthena : public UFortPlaylist
 {
 public:
+    DEFINE_BOOL(UFortPlaylistAthena, bAutoAcquireSpawnChip)
     DEFINE_MEMBER(FString, UFortPlaylistAthena, RatingType)
     DEFINE_BOOL(UFortPlaylistAthena, bIsTournament)
     DEFINE_BOOL(UFortPlaylistAthena, bLimitedTimeMode)

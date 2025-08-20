@@ -79,8 +79,7 @@ public:
 class APlayerController : public AController
 {
 public:
-    
-public:
+    DEFINE_BOOL(APlayerController, bPlayerIsWaiting)
     DEFINE_MEMBER(APawn*, APlayerController, AcknowledgedPawn);
 public:
     DECLARE_STATIC_CLASS(APlayerController);

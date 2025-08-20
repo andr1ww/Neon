@@ -211,6 +211,21 @@ namespace Runtime
 		return Idx;
 	}
 
+static inline void ModifyInstructionLEA(uintptr_t instrAddr, uintptr_t targetAddr, int offset)
+{
+    int64_t delta = static_cast<int64_t>(targetAddr) - 
+                    static_cast<int64_t>(instrAddr + offset + 4);
+
+    auto patchLocation = reinterpret_cast<int32_t*>(instrAddr + offset);
+
+    DWORD oldProtect;
+    VirtualProtect(patchLocation, sizeof(int32_t), PAGE_EXECUTE_READWRITE, &oldProtect);
+
+    *patchLocation = static_cast<int32_t>(delta);
+
+    DWORD temp;
+    VirtualProtect(patchLocation, sizeof(int32_t), oldProtect, &temp);
+}
 	
 	__forceinline static void ModifyInstruction(uintptr_t pinstrAddr, uintptr_t pDetourAddr)
 	{

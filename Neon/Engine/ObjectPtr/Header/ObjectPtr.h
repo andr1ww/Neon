@@ -22,7 +22,7 @@ public:
 public:
     class UObject* Get() const
     {
-        return (UObject*)GUObjectArray.IndexToObject(ObjectIndex);
+        return (UObject*)GUObjectArray.IndexToObject(ObjectIndex)->Object;
     }
     class UObject* operator->() const;
     bool operator==(const FWeakObjectPtr& Other) const;

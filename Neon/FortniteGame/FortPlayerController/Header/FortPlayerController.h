@@ -554,9 +554,20 @@ public:
 	DECLARE_DEFAULT_OBJECT(AFortProjectileBase)
 };
 
+class UAthenaResurrectionComponent : public UActorComponent
+{
+public:
+	DEFINE_MEMBER(TWeakObjectPtr<AActor>, UAthenaResurrectionComponent, ResurrectionLocation);
+	DEFINE_MEMBER(int, UAthenaResurrectionComponent, ClosestSpawnMachineIndex);
+public:
+	DECLARE_STATIC_CLASS(UAthenaResurrectionComponent)
+	DECLARE_DEFAULT_OBJECT(UAthenaResurrectionComponent)
+};
+
 class AFortPlayerControllerAthena : public AFortPlayerController
 {
 public:
+	DEFINE_PTR(UAthenaResurrectionComponent, AFortPlayerControllerAthena, ResurrectionComponent);
 	DEFINE_BOOL(AFortPlayerControllerAthena, bMarkedAlive)
 	DEFINE_PTR(UFortPlayerControllerAthenaXPComponent, AFortPlayerControllerAthena, XPComponent);
 	DEFINE_PTR(UAthenaPlayerMatchReport, AFortPlayerControllerAthena, MatchReport);

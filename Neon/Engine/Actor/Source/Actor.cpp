@@ -112,6 +112,29 @@ FRotator AActor::K2_GetActorRotation()
     return Params.ReturnValue;
 }
 
+AActor* AActor::GetOwner()
+{
+    static SDK::UFunction* Func = nullptr;
+    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Actor", "GetOwner");
+
+    if (Func == nullptr)
+        Func = Info.Func;
+    if (!Func)
+        return nullptr;
+
+    struct Actor_GetTransform final
+    {
+    public:
+        AActor* ReturnValue;
+    };
+    Actor_GetTransform Params;
+
+    this->ProcessEvent(Func, &Params);
+
+    return Params.ReturnValue;
+}
+
+
 FTransform AActor::GetTransform()
 {
     static SDK::UFunction* Func = nullptr;

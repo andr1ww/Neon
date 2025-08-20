@@ -929,6 +929,82 @@ uint64 UFinder::BotManagerSetup()
     return CachedResult = StringRef.Get() ? FindBytes(StringRef, { 0x40, 0x55 }, 1000, 0, true) : 0;
 }
 
+uint64 UFinder::FinishResurrection()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+    
+    uintptr_t Addrr = Memcury::FindFunction(L"OnResurrectionCompleted"); 
+    
+    if (!Addrr)
+        return CachedResult;
+    
+    for (int i = 0; i < 2000; i++)
+    {
+        if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x40 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x53)
+        {
+            return CachedResult = Addrr - i;
+        }
+
+        if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(Addrr - i + 2) == 0x5C)
+        {
+            return CachedResult = Addrr - i;
+        }
+    }
+
+    return CachedResult;
+}
+
+uint64 UFinder::AddToAlivePlayers()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+    
+    auto Addrr = Memcury::Scanner::FindStringRef(L"FortGameModeAthena: Player [%s] doesn't have a valid PvP team, and won't be added to the alive players list.").Get();
+
+    if (!Addrr)
+        return 0;
+
+    for (int i = 0; i < 4000; i++)
+    {
+        if (*(uint8_t*)(uint8_t*)(Addrr - i) == 0x48 && *(uint8_t*)(uint8_t*)(Addrr - i + 1) == 0x85 && *(uint8_t*)(uint8_t*)(Addrr - i + 2) == 0xD2)
+        {
+            return CachedResult = Addrr - i;
+        }
+    }
+
+    return 0;
+}
+
+uint64 UFinder::RebootingDelegate()
+{
+    if (Fortnite_Version < 8.3)
+        return 0;
+
+    auto ServerOnAttemptInteractAddr = Memcury::Scanner::FindStringRef(L"[SCM] ABuildingGameplayActorSpawnMachine::ServerOnAttemptInteract - Start Rebooting", true, 0, Fortnite_Version >= 16).Get();
+	
+    for (int i = 0; i < 10000; i++)
+    {
+        if ((*(uint8_t*)(uint8_t*)(ServerOnAttemptInteractAddr + i) == 0x48 && *(uint8_t*)(uint8_t*)(ServerOnAttemptInteractAddr + i + 1) == 0x8D
+            && *(uint8_t*)(uint8_t*)(ServerOnAttemptInteractAddr + i + 2) == 0x05))
+        {
+            auto loadAddress = Memcury::Scanner(ServerOnAttemptInteractAddr + i).RelativeOffset(3).Get();
+
+            if (*(uint8_t*)(loadAddress) == 0xC3 || *(uint8_t*)(loadAddress) == 0xC2)
+            {
+                UE_LOG(LogNeon, Log, "Found Rebooting Delegate at: 0x%x", ServerOnAttemptInteractAddr + i);
+                return ServerOnAttemptInteractAddr + i;
+            }
+        }
+    }
+
+    auto addr = Memcury::Scanner::FindPattern("48 8D 05 ? ? ? ? 33 F6 48 89 44 24 ? 49 8B CE 49 8B 06 89 74 24 60 FF 90 ? ? ? ? 4C 8B A4 24 ? ? ? ? 48 8B 88 ? ? ? ? 48 85 C9").Get();
+
+    return addr;
+}
+
 uint64 UFinder::SpawnBotRet()
 {
     static uint64 CachedResult = 0;

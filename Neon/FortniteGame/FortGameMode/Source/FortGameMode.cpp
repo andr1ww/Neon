@@ -6,6 +6,7 @@
 #include "Engine/Kismet/Header/Kismet.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "Engine/UEngine/Header/UEngine.h"
+#include "FortniteGame/BuildingGameplayActor/Header/BuildingGameplayActor.h"
 #include "FortniteGame/FortInventory/Header/FortInventory.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
@@ -43,7 +44,40 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
     {
         return;
     }
-    
+
+    Playlist->SetbAutoAcquireSpawnChip(true);
+
+    auto AllRebootVans = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), ABuildingGameplayActorSpawnMachine::StaticClass());
+
+    for (int i = 0; i < AllRebootVans.Num(); i++)
+    {
+        auto CurrentRebootVan = (ABuildingGameplayActorSpawnMachine*)AllRebootVans[i];
+        static auto FortPlayerStartClass = APlayerStart::StaticClass();
+        TArray<AActor*> AllActors = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), FortPlayerStartClass);
+        AActor* ClosestActor = nullptr;
+        float ClosestDistance = 450;
+        auto RebootLocation = CurrentRebootVan->GetActorLocation();
+
+        for (int i = 0; i < AllActors.Num(); ++i)
+        {
+            auto Actor = AllActors[i];
+            if (!Actor || Actor == CurrentRebootVan)
+                continue;
+
+            auto ActorLocation = Actor->GetActorLocation();
+            float Distance = std::sqrt(std::pow(RebootLocation.X - ActorLocation.X, 2) + std::pow(RebootLocation.Y - ActorLocation.Y, 2) + std::pow(RebootLocation.Z - ActorLocation.Z, 2)) / 100.0f;
+            
+            if (Distance <= 450 && Distance < ClosestDistance)
+            {
+                ClosestDistance = Distance;
+                ClosestActor = Actor;
+            }
+        }
+
+        CurrentRebootVan->SetResurrectLocation(ClosestActor);
+    }
+
+    AllRebootVans.Free();
     
     if (Fortnite_Version >= 6.10)
     {

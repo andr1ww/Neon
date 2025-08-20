@@ -37,6 +37,10 @@ public:
         return -1;
     }
 
+    uint64 FinishResurrection();
+
+    uint64 RebootingDelegate();
+    
     uint64 StartAircraftPhase();
 
     uint64 StartNewSafeZonePhase();
@@ -156,6 +160,8 @@ public:
     uint64 ServerOnAttemptInteract();
 
     uint64 OnPlayImpactFX();
+
+    uint64 AddToAlivePlayers();
 };
 
 inline UFinder* Finder = new UFinder();

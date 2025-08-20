@@ -25,6 +25,7 @@ public:
 	FVector K2_GetActorLocation();
     FRotator K2_GetActorRotation();
     FTransform GetTransform();
+    AActor* GetOwner();
     bool K2_SetActorRotation(const struct FRotator& NewRotation, bool bTeleportPhysics);
     void K2_TeleportTo(const FVector Location, const FRotator Rot);
     float GetDistanceTo(AActor* Actor);

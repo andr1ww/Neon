@@ -141,9 +141,23 @@ public:
 	uint8                                         Pad_1B1B[0x8];                                     // 0x0048(0x0008)(Fixing Struct Size After Last Property [ Dumper-7 ])
 };
 
+struct FFortRespawnData final
+{
+public:
+	bool                                          bRespawnDataAvailable;                             // 0x0000(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          bClientIsReady;                                    // 0x0001(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	bool                                          bServerIsReady;                                    // 0x0002(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	uint8                                         Pad_3[0x1];                                        // 0x0003(0x0001)(Fixing Size After Last Property [ Dumper-7 ])
+	struct FVector                                RespawnLocation;                                   // 0x0004(0x000C)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	struct FRotator                               RespawnRotation;                                   // 0x0010(0x000C)(ZeroConstructor, IsPlainOldData, NoDestructor, NativeAccessSpecifierPublic)
+	float                                         RespawnCameraDistance;                             // 0x001C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
+
 class AFortPlayerStateAthena : public AFortPlayerStateZone
 {
 public:
+	DEFINE_MEMBER(int32, AFortPlayerStateAthena, RebootCounter);
+	DEFINE_MEMBER(FFortRespawnData, AFortPlayerStateAthena, RespawnData);
 	DEFINE_MEMBER(uint8, AFortPlayerStateAthena, TeamIndex);
 	DEFINE_MEMBER(uint8, AFortPlayerStateAthena, SquadId);
 	DEFINE_MEMBER(int32, AFortPlayerStateAthena, Place);

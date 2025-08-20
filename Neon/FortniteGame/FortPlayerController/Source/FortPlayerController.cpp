@@ -612,7 +612,6 @@ void AFortPlayerControllerAthena::ServerDBNOReviveInterrupted(AFortPlayerControl
 	Controller->CallFunc<void>("FortPlayerControllerZone", "ClientOnPawnRevived", PlayerController);
 }
 
-
 void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerController, FFortPlayerDeathReport& DeathReport)
 {
 	UE_LOG(LogNeon, Log, __FUNCTION__);
