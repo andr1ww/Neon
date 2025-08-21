@@ -41,6 +41,47 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
     }
 }
 
+void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerAthena* PlayerController)
+{
+	AFortGameModeAthena* GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
+	if (!GameMode || !PlayerController)
+		return;
+	AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState();
+	if (Config::bCreative)
+	{
+		AFortAthenaCreativePortal* Portal = nullptr;
+		for (int i = 0; i < GameMode->GetGameState()->GetCreativePortalManager()->GetAllPortals().Num(); i++)
+		{
+			auto CurrentPortal = GameMode->GetGameState()->GetCreativePortalManager()->GetAllPortals()[i];
+			if (!CurrentPortal->GetLinkedVolume() || CurrentPortal->GetLinkedVolume()->GetVolumeState() == EVolumeState::Ready)
+				continue;
+			Portal = CurrentPortal;
+		}
+
+		if (!Portal)
+			return;
+
+		Portal->GetLinkedVolume()->SetVolumeState(EVolumeState::Ready);
+		Portal->SetOwningPlayer(PlayerState->GetUniqueId());
+		Portal->OnRep_OwningPlayer();
+
+		if (!Portal->GetbPortalOpen()) {
+			Portal->SetbPortalOpen(true);
+			Portal->OnRep_PortalOpen();
+		}
+
+		Portal->GetPlayersReady().Add(PlayerState->GetUniqueId());
+		Portal->OnRep_PlayersReady();
+
+		Portal->SetbUserInitiatedLoad(true);
+		Portal->SetbInErrorState(false);
+
+		PlayerController->SetOwnedPortal(Portal);
+	}
+	
+	return ServerReadyToStartMatch(PlayerController);
+}
+
 void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
 {
     Stack.IncrementCode();
@@ -156,38 +197,6 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
 		Comp->CallFunc<void>("FortControllerComponent_PerkSystem", "OnRep_PerkSelection");
 		Comp->CallFunc<void>("FortControllerComponent_PerkSystem", "OnRep_SpyTechArray");
 		Comp->CallFunc<void>("FortControllerComponent_PerkSystem", "OnRep_RerollCount");
-	}
-
-	if (Config::bCreative)
-	{
-		AFortAthenaCreativePortal* Portal = nullptr;
-		for (int i = 0; i < GameMode->GetGameState()->GetCreativePortalManager()->GetAllPortals().Num(); i++)
-		{
-			auto CurrentPortal = GameMode->GetGameState()->GetCreativePortalManager()->GetAllPortals()[i];
-			if (!CurrentPortal->GetLinkedVolume() || CurrentPortal->GetLinkedVolume()->GetVolumeState() == EVolumeState::Ready)
-				continue;
-			Portal = CurrentPortal;
-		}
-
-		if (!Portal)
-			return;
-
-		Portal->GetLinkedVolume()->SetVolumeState(EVolumeState::Ready);
-		Portal->SetOwningPlayer(PlayerState->GetUniqueId());
-		Portal->OnRep_OwningPlayer();
-
-		if (!Portal->GetbPortalOpen()) {
-			Portal->SetbPortalOpen(true);
-			Portal->OnRep_PortalOpen();
-		}
-
-		Portal->GetPlayersReady().Add(PlayerState->GetUniqueId());
-		Portal->OnRep_PlayersReady();
-
-		Portal->SetbUserInitiatedLoad(true);
-		Portal->SetbInErrorState(false);
-
-		PlayerController->SetOwnedPortal(Portal);
 	}
 }
 

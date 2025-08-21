@@ -3,7 +3,7 @@
 
 namespace Config
 {
-    inline bool bLogProcessEvent = false;
+    inline bool bLogProcessEvent = true;
     inline bool bLateGame = false;
     inline bool bCreative = true;
     inline bool bGameSessions = false;

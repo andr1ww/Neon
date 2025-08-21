@@ -592,7 +592,7 @@ public:
 	static void ServerAttemptInventoryDrop(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	DefHookOg(void, ClientOnPawnDied, AFortPlayerControllerAthena *PlayerController, FFortPlayerDeathReport &DeathReport);
 	DefHookOg(void, ServerDBNOReviveInterrupted, AFortPlayerControllerAthena* PlayerController, class AFortPlayerPawnAthena* Pawn);
-
+	DefHookOg(void, ServerReadyToStartMatch, AFortPlayerControllerAthena*);
 	DefHookOg(int32, K2_RemoveItemFromPlayerByGuid, UObject *, FFrame &);
 	DefHookOg(int32, K2_RemoveItemFromPlayer, AFortPlayerControllerAthena *, UFortWorldItemDefinition *, int32, bool);
 

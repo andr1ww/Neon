@@ -74,7 +74,6 @@ void* ProcessEvent(UObject* Obj, UFunction* Function, void* Params)
 			!strstr(FunctionName.c_str(), ("ServerMove")) &&
 			!strstr(FunctionName.c_str(), ("OnVisibilitySetEvent")) &&
 			!strstr(FunctionName.c_str(), "ReceiveHit") &&
-			!strstr(FunctionName.c_str(), "ReadyToStartMatch") &&
 			!strstr(FunctionName.c_str(), "K2_GetComponentToWorld") &&
 			!strstr(FunctionName.c_str(), "ClientAckGoodMove") &&
 			!strstr(FunctionName.c_str(), "Prop_WildWest_WoodenWindmill_01") &&
@@ -641,6 +640,7 @@ void Main()
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerPlayEmoteItem", AFortPlayerControllerAthena::ServerPlayEmoteItem);
 	Runtime::Exec("/Script/FortniteGame.FortControllerComponent_Aircraft.ServerAttemptAircraftJump", AFortPlayerControllerAthena::ServerAttemptAircraftJump);
 	Runtime::Hook(Finder->OnDamageServer(), ABuildingSMActor::OnDamageServer, (void**)&ABuildingSMActor::OnDamageServerOG);
+	Runtime::Hook<&AFortPlayerController::StaticClass>("ServerReadyToStartMatch", AFortPlayerControllerAthena::ServerReadyToStartMatch, AFortPlayerControllerAthena::ServerReadyToStartMatchOG);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerCreateBuildingActor", AFortPlayerControllerAthena::ServerCreateBuildingActor);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerBeginEditingBuildingActor", AFortPlayerControllerAthena::ServerBeginEditingBuildingActor);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerEditBuildingActor", AFortPlayerControllerAthena::ServerEditBuildingActor);
