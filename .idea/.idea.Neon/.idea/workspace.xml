@@ -7,7 +7,8 @@
     <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/Engine/NetDriver/Source/NetDriver.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Engine/NetDriver/Source/NetDriver.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortGameSessionDedicated/Source/FortGameSessionDedicated.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortGameSessionDedicated/Source/FortGameSessionDedicated.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortLootPackage/Source/FortLootPackage.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortLootPackage/Source/FortLootPackage.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/Neon/Finder/Source/Finder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Finder/Source/Finder.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/dllmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/dllmain.cpp" afterDir="false" />
     </list>
@@ -150,7 +151,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortLootPackage/Source/FortLootPackage.cpp</url>
-          <line>174</line>
+          <line>179</line>
           <option name="timeStamp" value="67" />
         </line-breakpoint>
       </breakpoints>

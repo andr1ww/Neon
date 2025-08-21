@@ -408,7 +408,7 @@ void InitNullsAndRetTrues() {
 		Runtime::Patch(Func, 0x85);
 	}
 	
-	if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.50)
+	if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.50)
 	{
 		Runtime::Patch(IMAGEBASE + 0x1A45182, 0x90);
 		Runtime::Patch(IMAGEBASE + 0x1A45183, 0x90);
@@ -573,7 +573,7 @@ void Main()
 	
 	InitNullsAndRetTrues();
 
-	if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.20)
+	if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.20)
 	{
 		Runtime::Hook(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 4C 89 44 24 ? 57 48 83 EC ? 48 8B FA 48 8B F1 33 D2").Get(), Ok, (void**)&OkOG);
 	}
@@ -633,7 +633,7 @@ void Main()
 	Runtime::Exec("/Script/Engine.GameMode.ReadyToStartMatch", AFortGameModeAthena::ReadyToStartMatch, (void**)&ReadyToStartMatchOriginal);
 	Runtime::Hook<&AFortGameModeAthena::StaticClass>("SpawnDefaultPawnFor", AFortGameModeAthena::SpawnDefaultPawnFor);
 	Runtime::Exec("/Game/Athena/Items/Consumables/Parents/GA_Athena_MedConsumable_Parent.GA_Athena_MedConsumable_Parent_C.Triggered_4C02BFB04B18D9E79F84848FFE6D2C32", UGA_Athena_MedConsumable_Parent_C::Athena_MedConsumable_Triggered, (void**)&UGA_Athena_MedConsumable_Parent_C::Athena_MedConsumable_TriggeredOG);
-	Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.OnCapsuleBeginOverlap", AFortPlayerPawn::OnCapsuleBeginOverlap);
+	if (Fortnite_Version >= 12.00) Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.OnCapsuleBeginOverlap", AFortPlayerPawn::OnCapsuleBeginOverlap);
 	Runtime::Exec("/Script/Engine.PlayerController.ServerAcknowledgePossession", AFortPlayerControllerAthena::ServerAcknowledgePossession);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerExecuteInventoryItem", AFortPlayerControllerAthena::ServerExecuteInventoryItem);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerPlayEmoteItem", AFortPlayerControllerAthena::ServerPlayEmoteItem);
@@ -653,11 +653,11 @@ void Main()
 	Runtime::Exec("/Script/FortniteGame.FortKismetLibrary.K2_RemoveItemFromPlayerByGuid", AFortPlayerControllerAthena::K2_RemoveItemFromPlayerByGuid, (void**)&AFortPlayerControllerAthena::K2_RemoveItemFromPlayerByGuidOG);
 	Runtime::Hook(Finder->SendComplexCustomStatEvent(), UFortQuestManager::SendComplexCustomStatEvent, (void**)&UFortQuestManager::SendComplexCustomStatEventOG);
 	Runtime::Hook(Finder->ClientOnPawnDied(), AFortPlayerControllerAthena::ClientOnPawnDied, (void**)&AFortPlayerControllerAthena::ClientOnPawnDiedOG);
-	if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.20)
+	if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.20)
 	{
 		Runtime::VFTHook(UAthenaNavSystem::GetDefaultObj()->GetVTable(), 0x53, UFortServerBotManagerAthena::InitializeForWorld, (void**)&UFortServerBotManagerAthena::InitializeForWorldOG);
 	}
-	if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.20)
+	if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.20)
 	{
 		Runtime::VFTHook(StaticClassImpl("FortPlayerPawnAthena")->GetClassDefaultObject()->GetVTable(), 0x119, AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues, (void**)&AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCuesOG);
 	}

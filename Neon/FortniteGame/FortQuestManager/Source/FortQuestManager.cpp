@@ -399,7 +399,7 @@ void UFortQuestManager::SendStatEvent(UFortQuestManager* QuestManager, UObject* 
 
 void UFortQuestManager::GiveAccolade(AFortPlayerControllerAthena* PlayerController, UFortAccoladeItemDefinition* Accolade)
 {
-	if (!PlayerController || !Accolade) 
+	if (!PlayerController || !Accolade || Fortnite_Version <= 10.40) 
 	{
 		return;
 	}

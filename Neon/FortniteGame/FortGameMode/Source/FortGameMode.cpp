@@ -202,7 +202,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
 
     static bool bInit = false;
 
-    if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.50)
+    if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.50)
     {
         static bool bInitializedTeams = false;
         if (!bInitializedTeams)
@@ -453,7 +453,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     
     bool Res = GameMode->GetAlivePlayers().Num() >= GameMode->GetWarmupRequiredPlayerCount();
     
-    if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && Res && !Config::bCreative)
+    if (Res && !Config::bCreative)
     {
         auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
         auto WarmupDuration = 60.f;
@@ -548,7 +548,7 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
         }
     }
     
-    if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.50)
+    if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.50)
     {
         TWeakObjectPtr<AFortPlayerStateAthena> WeakObjectPtr;
         WeakObjectPtr.ObjectIndex = PlayerState->GetUniqueID();

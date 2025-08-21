@@ -333,7 +333,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             {
                 Loader = "/CycloneJerky/Gameplay/BP_Jerky_Loader.BP_Jerky_Loader_C";
                 StartEventPath = "/CycloneJerky/Gameplay/BP_Jerky_Loader.BP_Jerky_Loader_C.startevent";
-            } else if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.60)
+            } else if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.60)
             {
                 Loader = "/Fritter/BP_Fritter_Loader.BP_Fritter_Loader_C";
                 StartEventPath = "/Fritter/BP_Fritter_Loader.BP_Fritter_Loader_C.startevent";

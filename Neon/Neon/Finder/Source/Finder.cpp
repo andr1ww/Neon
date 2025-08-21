@@ -365,6 +365,7 @@ uint64 UFinder::SetWorld()
 
     if (Fortnite_Version.GetMajorVersion() == 14)
     {
+        return Memcury::Scanner::FindPattern("40 55 56 41 56 48 8B EC 48 83 EC ? 48 89 5C 24").Get();
         return uint64(UNetDriver::GetDefaultObj()->GetVTable()[0x5E]);
     }
 
@@ -1319,7 +1320,7 @@ uint64 UFinder::CreateAndConfigureNavigationSystem()
         return CachedResult;
 
     if (Fortnite_Version >= 12.f) {
-        if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.60) {
+        if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.60) {
             return IMAGEBASE + 0x48C8580;
         }
         auto Addr = Memcury::Scanner::FindPattern("48 89 5C 24 ? 56 48 83 EC ? F6 41 ? ? 48 8B DA", false).Get();
@@ -1465,7 +1466,7 @@ uint64 UFinder::InstructionForCollision()
 
 uint64 UFinder::GetGameSessionClass() // IM LAZY TO TRY AND MAKE A SIG (ITS NOT EASY FOR THIS FUNC)))GOIJ02OIGOIWEGOIWG
 {
-    if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.60)
+    if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.60)
     {
         return IMAGEBASE + 0x1E4F780;
     }

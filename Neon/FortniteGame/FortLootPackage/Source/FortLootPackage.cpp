@@ -80,6 +80,11 @@ void FortLootPackage::SetupLDSForPackage(TArray<FNeonLootImproper>& LootDrops, F
 
         UDataTable* LootPackages = ErmOk.Get(UCompositeDataTable::StaticClass(), true);
         if (!LootPackages) LootPackages = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootPackages().Get(UDataTable::StaticClass(), true);
+
+        if (!LootPackages)
+        {
+            LootPackages = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootPackages_Client.AthenaLootPackages_Client");
+        }
         
         auto AddPackages = [&](const TMap<FName, uint8*>& RowMap) {
             for (const auto& RowPair : RowMap) {
@@ -340,6 +345,11 @@ TArray<FortLootPackage::FNeonLootImproper> FortLootPackage::PickLootDrops(FName 
         
         if (!LootTierData) {
             LootTierData = CurrentPlaylistInfoPtr.GetBasePlaylist()->GetLootTierData().Get(UDataTable::StaticClass(), true);
+        }
+
+        if (!LootTierData)
+        {
+            LootTierData = Runtime::StaticLoadObject<UDataTable>("/Game/Items/DataTables/AthenaLootTierData_Client.AthenaLootTierData_Client");
         }
         
         if (auto CompositeTable = Cast<UCompositeDataTable>(LootTierData)) {
