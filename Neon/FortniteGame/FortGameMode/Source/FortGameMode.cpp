@@ -790,28 +790,31 @@ void AFortGameModeAthena::StartNewSafeZonePhase(AFortGameModeAthena* GameMode, i
 
     static bool bSetupLG = false;
 
-    for (auto& Controller : GameMode->GetAlivePlayers())
+    if (Phase > 1)
     {
-        FGameplayTagContainer SourceTags;
-        FGameplayTagContainer TargetTags; 
-        FGameplayTagContainer ContextTags;
-        UFortQuestManager* QuestManager = Controller->GetQuestManager(ESubGame::Athena);
-
-        if (!QuestManager) {
-            UE_LOG(LogNeon, Warning, "QuestManager is null for controller");
-            continue;
-        }
-
-        QuestManager->GetSourceAndContextTags(&SourceTags, &ContextTags);
-        
-        SourceTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"Athena.Quests.SurviveStormCircles")));
-        UFortQuestManager::SendStatEvent(QuestManager, nullptr, SourceTags, TargetTags, nullptr, nullptr, 1, EFortQuestObjectiveStatEvent::ComplexCustom, ContextTags);
-        static UFortAccoladeItemDefinition* NewStormCircle = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeID_SurviveStormCircle.AccoladeID_SurviveStormCircle");
-        UFortQuestManager::GiveAccolade(Controller, NewStormCircle);
-        if (Config::bLateGame && !bSetupLG)
+        for (auto& Controller : GameMode->GetAlivePlayers())
         {
-            for (int i = 0; i < 3; i++) {
-                UFortQuestManager::GiveAccolade(Controller, NewStormCircle);
+            FGameplayTagContainer SourceTags;
+            FGameplayTagContainer TargetTags; 
+            FGameplayTagContainer ContextTags;
+            UFortQuestManager* QuestManager = Controller->GetQuestManager(ESubGame::Athena);
+
+            if (!QuestManager) {
+                UE_LOG(LogNeon, Warning, "QuestManager is null for controller");
+                continue;
+            }
+
+            QuestManager->GetSourceAndContextTags(&SourceTags, &ContextTags);
+        
+            SourceTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"Athena.Quests.SurviveStormCircles")));
+            UFortQuestManager::SendStatEvent(QuestManager, nullptr, SourceTags, TargetTags, nullptr, nullptr, 1, EFortQuestObjectiveStatEvent::ComplexCustom, ContextTags);
+            static UFortAccoladeItemDefinition* NewStormCircle = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeID_SurviveStormCircle.AccoladeID_SurviveStormCircle");
+            UFortQuestManager::GiveAccolade(Controller, NewStormCircle);
+            if (Config::bLateGame && !bSetupLG)
+            {
+                for (int i = 0; i < 3; i++) {
+                    UFortQuestManager::GiveAccolade(Controller, NewStormCircle);
+                }
             }
         }
     }
