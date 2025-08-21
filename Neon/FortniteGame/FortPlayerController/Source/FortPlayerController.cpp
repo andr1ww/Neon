@@ -1095,6 +1095,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			GameState->OnRep_WinningTeam();
 			GameState->Set("FortGameStateAthena", "WinningPlayerState", WinnerPlayerState);
 			GameState->OnRep_WinningPlayerState();
+			static UFortAccoladeItemDefinition* victory = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_001_Victory.AccoladeId_001_Victory"); // obv what this is
 		}
 	}
 
