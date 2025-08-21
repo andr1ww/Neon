@@ -1159,10 +1159,26 @@ int32 AFortPlayerControllerAthena::K2_RemoveItemFromPlayerByGuid(UObject* Contex
     Stack.StepCompiledIn(&bForceRemoval);
 	Stack.IncrementCode();
 
-    UE_LOG(LogNeon, Log, "K2_RemoveItemFromPlayerByGuid Called!");
     AFortInventory::Remove(PlayerController, ItemGuid, 1);
 
-    return K2_RemoveItemFromPlayerByGuidOG(Context, Stack);
+	struct FortKismetLibrary_K2_RemoveItemFromPlayerByGuid final
+	{
+	public:
+		class AFortPlayerController*                  PlayerController;                                  // 0x0000(0x0008)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+		struct FGuid                                  ItemGuid;                                          // 0x0008(0x0010)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+		int32                                         AmountToRemove;                                    // 0x0018(0x0004)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+		bool                                          bForceRemoval;                                     // 0x001C(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+		uint8                                         Pad_1D[0x3];                                       // 0x001D(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+		int32                                         ReturnValue;                                       // 0x0020(0x0004)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+		uint8                                         Pad_24[0x4];                                       // 0x0024(0x0004)(Fixing Struct Size After Last Property [ Dumper-7 ])
+	} Params;
+	
+	Params.PlayerController = PlayerController;
+	Params.ItemGuid = std::move(ItemGuid);
+	Params.AmountToRemove = AmountToRemove;
+	Params.bForceRemoval = bForceRemoval;
+	
+	callExecOG(Context, "/Script/FortniteGame.FortKismetLibrary.K2_RemoveItemFromPlayerByGuid", K2_RemoveItemFromPlayerByGuid, Params);
 }
 
 int32 AFortPlayerControllerAthena::K2_RemoveItemFromPlayer(AFortPlayerControllerAthena* PC, UFortWorldItemDefinition* ItemDefinition, int32 AmountToRemove, bool bForceRemoval) {

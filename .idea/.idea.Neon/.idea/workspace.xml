@@ -5,8 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Neon/Engine/PlayerController/Header/PlayerController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Engine/PlayerController/Header/PlayerController.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/Engine/PlayerController/Source/PlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Engine/PlayerController/Source/PlayerController.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Neon/Config.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Config.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
