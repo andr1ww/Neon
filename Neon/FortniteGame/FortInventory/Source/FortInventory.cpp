@@ -245,6 +245,7 @@ UObject* AFortInventory::GiveItem(AFortPlayerControllerAthena* PlayerController,
 {
     if (!PlayerController || !Def || Count == 0)
     {
+        UE_LOG(LogNeon, Log, "Invalid parameters passed to GiveItem");
         return nullptr;
     }
 

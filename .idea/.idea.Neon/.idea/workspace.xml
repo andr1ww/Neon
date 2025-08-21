@@ -5,12 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortAthenaCreativePortal/Header/FortAthenaCreativePortal.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortAthenaCreativePortal/Source/FortAthenaCreativePortal.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortGameState/Header/FortGameState.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortGameState/Header/FortGameState.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/Neon.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon.vcxproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortAthenaCreativePortal/Header/FortAthenaCreativePortal.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortAthenaCreativePortal/Header/FortAthenaCreativePortal.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortAthenaCreativePortal/Source/FortAthenaCreativePortal.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortAthenaCreativePortal/Source/FortAthenaCreativePortal.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortInventory/Source/FortInventory.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortInventory/Source/FortInventory.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/dllmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/dllmain.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

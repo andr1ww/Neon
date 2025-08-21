@@ -161,7 +161,6 @@ public:
     }
 
     static void TeleportPlayerToLinkedVolume(AFortAthenaCreativePortal* Portal, FFrame& Stack);
-    static void TeleportPlayerForPlotLoadComplete(AFortAthenaCreativePortal* Portal, FFrame& Stack);
 
     DEFINE_MEMBER(TArray<struct FUniqueNetIdRepl>, AFortAthenaCreativePortal, PlayersReady)
     DEFINE_MEMBER(FUniqueNetIdRepl, AFortAthenaCreativePortal, OwningPlayer)

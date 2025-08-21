@@ -1,6 +1,8 @@
 ﻿#include "pch.h"
 #include "../Header/FortAthenaCreativePortal.h"
 
+#include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
+
 void AFortAthenaCreativePortal::TeleportPlayerToLinkedVolume(AFortAthenaCreativePortal* Portal, FFrame& Stack)
 {
     AFortPlayerPawn* PlayerPawn;
@@ -18,15 +20,27 @@ void AFortAthenaCreativePortal::TeleportPlayerToLinkedVolume(AFortAthenaCreative
 
     PlayerPawn->K2_TeleportTo(Location, FRotator());
     PlayerPawn->BeginSkydiving(false);
+
+    FFortItemList& Inventory = ((AFortPlayerControllerAthena*)PlayerPawn->GetController())->GetWorldInventory()->GetInventory();
+    TArray<UFortWorldItem*>& ItemInstances = Inventory.GetItemInstances();
+    
+    int32 ItemIndex = -1;
+
+    static UFortItemDefinition* Phone = Runtime::StaticLoadObject<UFortWeaponRangedItemDefinition>("/Game/Athena/Items/Weapons/Prototype/WID_CreativeTool.WID_CreativeTool");
+    if (!Phone)
+    {
+        UE_LOG(LogNeon, Log, "Failed to load Phone item definition");
+    }
+    
+    for (int32 i = 0; i < ItemInstances.Num(); i++) {
+        if (ItemInstances[i] && ItemInstances[i]->GetItemEntry().GetItemDefinition() == Phone) {
+            ItemIndex = i;
+            break;
+        }
+    }
+    
+    if (ItemIndex == -1) {
+        AFortInventory::GiveItem(((AFortPlayerControllerAthena*)PlayerPawn->GetController()), Phone, 1, 0, 0);
+    }
 }
 
-void AFortAthenaCreativePortal::TeleportPlayerForPlotLoadComplete(AFortAthenaCreativePortal* Portal, FFrame& Stack)
-{
-    AFortPlayerPawn* PlayerPawn = nullptr;
-    FRotator TeleportRotation;
-    Stack.StepCompiledIn(&PlayerPawn);
-    Stack.StepCompiledIn(&TeleportRotation);
-    Stack.IncrementCode();
-
-    AFortInventory::GiveItem((AFortPlayerControllerAthena*) PlayerPawn->GetController(), Runtime::StaticFindObject<UFortItemDefinition>("/Game/Athena/Items/Weapons/Prototype/WID_CreativeTool.WID_CreativeTool"), 1, 1, 0);
-}
