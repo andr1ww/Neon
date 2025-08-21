@@ -111,6 +111,8 @@ public:
 
     uint64 SpawnBot();
 
+    uint64 SendStatEventWithTags();
+    
     uint64 SpawnActor();
 
     uint64 SetupPickup();

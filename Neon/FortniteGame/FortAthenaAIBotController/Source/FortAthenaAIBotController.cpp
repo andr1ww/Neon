@@ -92,7 +92,7 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		}
 
 		auto& StartingItemsArray = GameMode->GetStartingItems();
-		int32 FItemAndCountSize = StaticClassImpl("ItemAndCount")->GetSize();
+		static int32 FItemAndCountSize = StaticClassImpl("ItemAndCount")->GetSize();
 		for (int i = 0; i < StartingItemsArray.Num(); i++)
 		{
 			auto Item = (FItemAndCount*) ((uint8*) StartingItemsArray.GetData() + (i * FItemAndCountSize));

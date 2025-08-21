@@ -427,7 +427,6 @@ void InitNullsAndRetTrues() {
 		Runtime::Hook(IMAGEBASE + 0x2ebf890, ProcessEvent, (void**)&ProcessEventOG); 
 		Runtime::Hook(IMAGEBASE + 0x2E688D0, RetTrue); // server context
 		Runtime::Hook(IMAGEBASE + 0x3F88350, RetTrue); // IsThereAnywhereToBuildNavigation
-		Runtime::Hook(IMAGEBASE + 0x2092EA0, UFortQuestManager::SendStatEventWithTags, (void**)&UFortQuestManager::SendStatEventWithTagsOG);
 	}
 
 	if (Fortnite_Version == 10.40)
@@ -714,6 +713,8 @@ void Main()
 	{
 		Runtime::Hook(Finder->SpawnBot(), UFortServerBotManagerAthena::SpawnBot, (void**)&UFortServerBotManagerAthena::SpawnBotOG);
 	}
+
+	Runtime::Hook(Finder->SendStatEventWithTags(), UFortQuestManager::SendStatEventWithTags, (void**)&UFortQuestManager::SendStatEventWithTagsOG);
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
