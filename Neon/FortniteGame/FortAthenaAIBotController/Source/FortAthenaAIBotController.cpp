@@ -215,15 +215,9 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
 		AFortPlayerStateAthena* PlayerState = (AFortPlayerStateAthena*)Controller->GetPlayerState();
     	
 		FDeathInfo* DeathInfo = &PlayerState->GetDeathInfo(); 
-		EDeathCause DeathCause = PlayerState->CallFunc<EDeathCause>("FortPlayerStateAthena", "ToDeathCause", Pawn->GetDeathTags(), false);
+		EDeathCause DeathCause = PlayerState->ToDeathCause(Pawn->GetDeathTags(), false);
     	
 		if (DeathInfo) {
-			static int Size = 0;
-			if (Size == 0) {
-				Size = StaticClassImpl("DeathInfo")->GetSize();
-			}
-		
-			RtlSecureZeroMemory(DeathInfo, Size);
 			DeathInfo->SetbDBNO(false);
 			DeathInfo->SetDeathLocation(Pawn->K2_GetActorLocation());
 			DeathInfo->SetDeathTags(Pawn->GetDeathTags());
