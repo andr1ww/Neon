@@ -713,6 +713,7 @@ void Main()
 	{
 		Runtime::Hook(Finder->SpawnBot(), UFortServerBotManagerAthena::SpawnBot, (void**)&UFortServerBotManagerAthena::SpawnBotOG);
 	}
+	UE_LOG(LogNeon, Log, "SendStatEventWithTags: 0x%x", Finder->SendStatEventWithTags());
 
 	Runtime::Hook(Finder->SendStatEventWithTags(), UFortQuestManager::SendStatEventWithTags, (void**)&UFortQuestManager::SendStatEventWithTagsOG);
 }

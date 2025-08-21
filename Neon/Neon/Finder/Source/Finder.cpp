@@ -363,6 +363,11 @@ uint64 UFinder::SetWorld()
         return Memcury::Scanner::FindPattern("E8 ? ? ? ? 48 8D 8B ? ? ? ? 48 8B D7 E8 ? ? ? ? 48 85 FF 0F 84 ? ? ? ? 83 64 24").RelativeOffset(1).Get();
     }
 
+    if (Fortnite_Version.GetMajorVersion() == 14)
+    {
+        return uint64(UNetDriver::GetDefaultObj()->GetVTable()[0x5E]);
+    }
+
     int SetWorldI = 0;
 
     int VTIndex = 0;
@@ -381,10 +386,6 @@ uint64 UFinder::SetWorld()
         return uint64(UNetDriver::GetDefaultObj()->GetVTable()[VTIndex]);
     } 
     
-    if (Fortnite_Version.GetMajorVersion() == 14)
-    {
-        return uint64(UNetDriver::GetDefaultObj()->GetVTable()[0x5E]);
-    }
     if (Fortnite_Version.GetMajorVersion() == 18)
     { 
         return uint64(UNetDriver::GetDefaultObj()->GetVTable()[0x73]);
@@ -574,6 +575,13 @@ uint64 UFinder::InitListen()
         return Memcury::Scanner::FindPattern(
             "4C 8B DC 49 89 5B 08 49 89 73 10 57 48 83 EC 50 48 8B BC 24 ? ? ? ? 49 8B F0 48 8B 01 48 8B"
         ).Get();
+    }
+
+    if (Fortnite_Version >= 13.40 && Fortnite_Version <= 15.50)
+    {
+        return Memcury::Scanner::FindPattern(
+            "48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B BC 24 ? ? ? ? 49 8B F0"
+            ).Get();
     }
 
     auto Addr = Memcury::Scanner::FindStringRef(L"%s IpNetDriver listening on port %i");
@@ -939,17 +947,15 @@ uint64 UFinder::StaticLoadObject()
 
 uint64 UFinder::SendStatEventWithTags()
 {
-    auto String = Memcury::Scanner::FindStringRef(L"SendStatEventWithTags: Cannot be called, %s is no longer registered!", true, 0, false).Get();
-
-    for (int i = 0; i < 1000; i++)
+    auto Sig = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B D9 49 8B F9 48 8B 49").Get();
+    if (Sig)
     {
-        if (*(uint8_t*)(String - i) == 0x48 && *(uint8_t*)(String - i + 1) == 0x8b && *(uint8_t*)(String - i + 2) == 0xc4)
-        {
-            return String - i;
-        }
+        return Sig;
     }
+    
+    auto String = Memcury::Scanner::FindStringRef(L"SendStatEventWithTags: Cannot be called, %s is no longer registered!", true, 0, false);
 
-    return 0;
+    return FindBytes(String, { 0x40, 0x55 }, 1000, 0, true);
 }
 
 uint64 UFinder::SpawnBot()

@@ -5,9 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortAthenaAIBotController/Source/FortAthenaAIBotController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortAthenaAIBotController/Source/FortAthenaAIBotController.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortQuestManager/Header/FortQuestManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortQuestManager/Header/FortQuestManager.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortQuestManager/Source/FortQuestManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortQuestManager/Source/FortQuestManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Engine/NetDriver/Source/NetDriver.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Engine/NetDriver/Source/NetDriver.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortGameSessionDedicated/Source/FortGameSessionDedicated.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortGameSessionDedicated/Source/FortGameSessionDedicated.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Neon/Finder/Source/Finder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Finder/Source/Finder.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/dllmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/dllmain.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

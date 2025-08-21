@@ -61,7 +61,7 @@ void FortGameSessionDedicated::UWorld_Listen()
     UWorld::GetWorld()->SetNetDriver(NetDriver);
     
     NetDriver->SetNetDriverName(GameNetDriver);
-    NetDriver->NetDriverSetWorld(UWorld::GetWorld());
+    NetDriver->SetWorld(UWorld::GetWorld());
 
     FURL URL{};
     URL.Port = Config::Port;
