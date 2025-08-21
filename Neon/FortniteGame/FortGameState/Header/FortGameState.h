@@ -268,7 +268,25 @@ public:
 		
         this->ProcessEvent(Func, nullptr);
     }
+    
+    void OnRep_GamePhase(EAthenaGamePhase OldGamePhase)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortGameStateAthena", "OnRep_GamePhase");
 
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct {
+        public:
+            EAthenaGamePhase                              OldGamePhase;                                      // 0x0000(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        } Params{OldGamePhase};
+        
+        this->ProcessEvent(Func, &Params);
+    }
+    
     void OnRep_PlayersLeft()
     {
         static SDK::UFunction* Func = nullptr;

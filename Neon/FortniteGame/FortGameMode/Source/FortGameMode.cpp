@@ -193,6 +193,9 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         return *Result = false;
     }
 
+    GameState->SetGamePhase(EAthenaGamePhase::Warmup);
+    GameState->OnRep_GamePhase(EAthenaGamePhase::Setup);
+    
     if (!GameState->GetMapInfo())
     {
         return *Result = false;
@@ -448,10 +451,13 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     {
         GameState->OnRep_CurrentPlaylistInfo();
         GameState->OnRep_CurrentPlaylistId();
+        GameMode->CallFunc<void>("GameMode", "StartMatch");
+        GameMode->CallFunc<void>("GameModeBase", "StartPlay");
+        
         Double = true;
     }
     
-    bool Res = GameMode->GetAlivePlayers().Num() >= GameMode->GetWarmupRequiredPlayerCount();
+    bool Res = GameMode->GetAlivePlayers().Num() > 0;
     
     if (Res && !Config::bCreative)
     {
@@ -510,6 +516,7 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
 
 void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer)
 {
+    UE_LOG(LogNeon, Log, __FUNCTION__);
     if (!NewPlayer->GetMatchReport())
     {
         NewPlayer->SetMatchReport((UAthenaPlayerMatchReport*)UGameplayStatics::SpawnObject(UAthenaPlayerMatchReport::StaticClass(), NewPlayer));

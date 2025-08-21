@@ -49,6 +49,10 @@ void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerA
 	AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState();
 	if (Config::bCreative)
 	{
+		GameMode->GetGameState()->SetGamePhase(EAthenaGamePhase::SafeZones);
+		GameMode->GetGameState()->SetGamePhaseStep(EAthenaGamePhaseStep::StormHolding);
+		GameMode->GetGameState()->OnRep_GamePhase(EAthenaGamePhase::SafeZones);
+		
 		AFortAthenaCreativePortal* Portal = nullptr;
 		for (int i = 0; i < GameMode->GetGameState()->GetCreativePortalManager()->GetAllPortals().Num(); i++)
 		{

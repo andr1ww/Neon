@@ -57,11 +57,13 @@ void FortGameSessionDedicated::UWorld_Listen()
     {
         NetDriver = ((UNetDriver * (*)(UObject*, UObject*, FName)) Finder->CreateNetDriver())(UEngine::GetEngine(), UWorld::GetWorld(), GameNetDriver);
     }
-        
-    UWorld::GetWorld()->SetNetDriver(NetDriver);
     
     NetDriver->SetNetDriverName(GameNetDriver);
     NetDriver->SetWorld(UWorld::GetWorld());
+        
+    UWorld::GetWorld()->SetNetDriver(NetDriver);
+
+    NetDriver->NetDriverSetWorld(UWorld::GetWorld());
 
     FURL URL{};
     URL.Port = Config::Port;
