@@ -425,6 +425,17 @@ public:
 	DECLARE_DEFAULT_OBJECT(UFortGameplayAbility)
 };
 
+// NumValues: 0x0005
+enum class EFortReloadFXState : uint8
+{
+	ReloadStart                              = 0,
+	ReloadCartridge                          = 1,
+	ReloadEnd                                = 2,
+	Max_None                                 = 3,
+	EFortReloadFXState_MAX                   = 4,
+};
+
+
 class AFortPlayerPawn : public AFortPawn
 {
 public:

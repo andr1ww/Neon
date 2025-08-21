@@ -449,6 +449,7 @@ __forceinline void HookStatic(const char* FuncName, void* detour, T& og = nullpt
 
 	static void Hook(uint64 Address, void* Detour, void** OG = nullptr)
 	{
+		if (Address == 0x0) return;
 		MH_CreateHook(LPVOID(Address), Detour, OG);
 		MH_EnableHook(LPVOID(Address));
 	}

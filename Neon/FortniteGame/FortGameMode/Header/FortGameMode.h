@@ -143,6 +143,13 @@ class APlayerStart : public ANavigationObjectBase {
 
 };
 
+class AFortPlayerStartCreative : public APlayerStart
+{
+public:
+    DECLARE_STATIC_CLASS(AFortPlayerStartCreative)
+    DECLARE_DEFAULT_OBJECT(AFortPlayerStartCreative)
+};
+
 class AFortPlayerStartWarmup : public APlayerStart
 {
 public:

@@ -45,39 +45,43 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
         return;
     }
 
-    Playlist->SetbAutoAcquireSpawnChip(true);
 
-    auto AllRebootVans = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), ABuildingGameplayActorSpawnMachine::StaticClass());
-
-    for (int i = 0; i < AllRebootVans.Num(); i++)
+    if (!Config::bCreative)
     {
-        auto CurrentRebootVan = (ABuildingGameplayActorSpawnMachine*)AllRebootVans[i];
-        static auto FortPlayerStartClass = APlayerStart::StaticClass();
-        TArray<AActor*> AllActors = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), FortPlayerStartClass);
-        AActor* ClosestActor = nullptr;
-        float ClosestDistance = 450;
-        auto RebootLocation = CurrentRebootVan->GetActorLocation();
+        GameState->SetDefaultRebootMachineHotfix(1);
+        Playlist->SetbAutoAcquireSpawnChip(true);
+        auto AllRebootVans = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), ABuildingGameplayActorSpawnMachine::StaticClass());
 
-        for (int i = 0; i < AllActors.Num(); ++i)
+        for (int i = 0; i < AllRebootVans.Num(); i++)
         {
-            auto Actor = AllActors[i];
-            if (!Actor || Actor == CurrentRebootVan)
-                continue;
+            auto CurrentRebootVan = (ABuildingGameplayActorSpawnMachine*)AllRebootVans[i];
+            static auto FortPlayerStartClass = APlayerStart::StaticClass();
+            TArray<AActor*> AllActors = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), FortPlayerStartClass);
+            AActor* ClosestActor = nullptr;
+            float ClosestDistance = 450;
+            auto RebootLocation = CurrentRebootVan->GetActorLocation();
 
-            auto ActorLocation = Actor->GetActorLocation();
-            float Distance = std::sqrt(std::pow(RebootLocation.X - ActorLocation.X, 2) + std::pow(RebootLocation.Y - ActorLocation.Y, 2) + std::pow(RebootLocation.Z - ActorLocation.Z, 2)) / 100.0f;
-            
-            if (Distance <= 450 && Distance < ClosestDistance)
+            for (int i = 0; i < AllActors.Num(); ++i)
             {
-                ClosestDistance = Distance;
-                ClosestActor = Actor;
+                auto Actor = AllActors[i];
+                if (!Actor || Actor == CurrentRebootVan)
+                    continue;
+
+                auto ActorLocation = Actor->GetActorLocation();
+                float Distance = std::sqrt(std::pow(RebootLocation.X - ActorLocation.X, 2) + std::pow(RebootLocation.Y - ActorLocation.Y, 2) + std::pow(RebootLocation.Z - ActorLocation.Z, 2)) / 100.0f;
+            
+                if (Distance <= 450 && Distance < ClosestDistance)
+                {
+                    ClosestDistance = Distance;
+                    ClosestActor = Actor;
+                }
             }
+
+            CurrentRebootVan->SetResurrectLocation(ClosestActor);
         }
 
-        CurrentRebootVan->SetResurrectLocation(ClosestActor);
+        AllRebootVans.Free();
     }
-
-    AllRebootVans.Free();
     
     if (Fortnite_Version >= 6.10)
     {
@@ -97,10 +101,10 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
         CurrentPlaylistInfo.MarkArrayDirty();
 
         GameState->SetCurrentPlaylistId(Playlist->GetPlaylistId());
-        GameState->SetAirCraftBehavior((EAirCraftBehavior)(Playlist->GetAirCraftBehavior()));
         GameMode->SetCurrentPlaylistId(Playlist->GetPlaylistId());
         GameMode->SetCurrentPlaylistName(Playlist->GetPlaylistName());
-        
+        GameState->SetAirCraftBehavior((EAirCraftBehavior)(Playlist->GetAirCraftBehavior()));
+
         GameState->OnRep_CurrentPlaylistId();
         GameState->OnRep_CurrentPlaylistInfo();
         GameState->OnRep_AdditionalPlaylistLevelsStreamed();
@@ -198,9 +202,8 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     GameMode->SetbWorldIsReady(true);
 
     static bool bInit = false;
-
+    UE_LOG(LogNeon, Log, "ReadyToStartMatch called! bInit: %s", bInit ? "true" : "false");
 //    GameMode->SetbAlwaysDBNO(true);
-    GameState->SetDefaultRebootMachineHotfix(1);
 
     if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.30)
     {
@@ -315,11 +318,19 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         }
     }
 
+    static auto FortPlayerStartCreativeClass = Runtime::StaticFindObject<UClass>("/Script/FortniteGame.FortPlayerStartCreative");
+    static auto FortPlayerStartWarmupClass = Runtime::StaticFindObject<UClass>("/Script/FortniteGame.FortPlayerStartWarmup");
+    TArray<AActor*> Actors = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), Config::bCreative ? FortPlayerStartCreativeClass : FortPlayerStartWarmupClass);
+    int WarmupSpots = Actors.Num();
+    Actors.Free();
+
+    if (WarmupSpots == 0) return *Result = false;
+
     if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && !bInit)
     {
         bInit = true;
         
-        if (!Config::bLateGame)
+        if (!Config::bLateGame && !Config::bCreative)
         {
             if (auto Manager = (UFortServerBotManagerAthena*)UGameplayStatics::SpawnObject(UFortServerBotManagerAthena::StaticClass(), GameMode))
             {
@@ -434,6 +445,14 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         
         bSetupLoot = true;
     }
+
+    static bool Double = false;
+    if (!Double)
+    {
+        GameState->OnRep_CurrentPlaylistInfo();
+        GameState->OnRep_CurrentPlaylistId();
+        Double = true;
+    }
     
     bool Res = GameMode->GetAlivePlayers().Num() >= GameMode->GetWarmupRequiredPlayerCount();
     
@@ -506,8 +525,6 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
     
     AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
     AFortPlayerStateAthena* PlayerState = NewPlayer->GetPlayerState();
-    
-    // ElementData2.Add(WeakObjectPtr);
     
     PlayerState->SetSquadId(PlayerState->GetTeamIndex() - 3);
     PlayerState->OnRep_SquadId();

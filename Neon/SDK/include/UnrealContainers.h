@@ -590,6 +590,11 @@ template <typename InElementType> class TArray {
         }
 
         inline void Free() {
+            if (Data && ArrayNum > 0 && sizeof(InElementType) > 0)
+            {
+                VirtualFree(Data, sizeof(InElementType) * ArrayNum, MEM_RELEASE); 
+            }
+            
                 ArrayMax = 0;
                 ArrayNum = 0;
                 Data = nullptr;

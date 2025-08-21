@@ -225,7 +225,6 @@ void AFortPlayerPawn::GiveItemToInventoryOwner(UObject* Object, FFrame& Stack) {
 	return GiveItemToInventoryOwnerOG(Object, Stack);
 }
 
-
 void AFortPlayerPawn::ReloadWeapon(AFortWeapon* Weapon, int32 AmmoToRemove)
 {
     if (!Weapon)

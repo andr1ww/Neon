@@ -11,6 +11,7 @@
 class AFortInventory;
 class UFortWeaponItemDefinition;
 class AFortAthenaAircraft;
+class AFortAthenaCreativePortal;
 
 class UAthenaCharacterItemDefinition : public UObject
 {
@@ -575,7 +576,7 @@ public:
 	DEFINE_PTR(UAthenaPlayerMatchReport, AFortPlayerControllerAthena, MatchReport);
 	DEFINE_PTR(AFortPlayerStateAthena, AFortPlayerControllerAthena, PlayerState);
 	DEFINE_BOOL(AFortPlayerControllerAthena, bHasServerFinishedLoading);
-
+	DEFINE_PTR(AFortAthenaCreativePortal, AFortPlayerControllerAthena, OwnedPortal);
 public:
 	DefHookOg(void, EnterAircraft, AFortPlayerControllerAthena *PlayerController, AFortAthenaAircraft *Aircraft);
 	static void ServerAttemptAircraftJump(UActorComponent *Comp, FFrame &Stack);

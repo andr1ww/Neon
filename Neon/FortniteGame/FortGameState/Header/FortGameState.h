@@ -110,9 +110,109 @@ public:
     DECLARE_DEFAULT_OBJECT(AFortAthenaAircraft)
 };
 
+enum class EVolumeState : uint8
+{
+    Uninitialized                            = 0,
+    ReadOnly                                 = 1,
+    Initializing                             = 2,
+    Ready                                    = 3,
+    EVolumeState_MAX                         = 4,
+};
+
+class AFortVolume : public AActor
+{
+public:
+    DEFINE_MEMBER(EVolumeState, AFortVolume, VolumeState)
+    DECLARE_STATIC_CLASS(AFortVolume)
+    DECLARE_DEFAULT_OBJECT(AFortVolume)
+};
+
+class AFortAthenaCreativePortal : public ABuildingActor
+{
+public:
+    AFortVolume* GetLinkedVolume()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortAthenaCreativePortal", "GetLinkedVolume");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return nullptr;
+
+        // 0x0008 (0x0008 - 0x0000)
+        struct FortAthenaCreativePortal_GetLinkedVolume final
+        {
+        public:
+            class AFortVolume*                            ReturnValue;                                       // 0x0000(0x0008)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        } Params{};
+		
+        this->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+
+    void OnRep_OwningPlayer()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortAthenaCreativePortal", "OnRep_OwningPlayer");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+		
+        this->ProcessEvent(Func, nullptr);
+    }
+
+    void OnRep_PlayersReady()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortAthenaCreativePortal", "OnRep_PlayersReady");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+		
+        this->ProcessEvent(Func, nullptr);
+    }
+
+    void OnRep_PortalOpen()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortAthenaCreativePortal", "OnRep_PortalOpen");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+		
+        this->ProcessEvent(Func, nullptr);
+    }
+
+    DEFINE_MEMBER(TArray<struct FUniqueNetIdRepl>, AFortAthenaCreativePortal, PlayersReady)
+    DEFINE_MEMBER(FUniqueNetIdRepl, AFortAthenaCreativePortal, OwningPlayer)
+    DEFINE_BOOL(AFortAthenaCreativePortal, bPortalOpen)
+    DEFINE_BOOL(AFortAthenaCreativePortal, bUserInitiatedLoad)
+    DEFINE_BOOL(AFortAthenaCreativePortal, bInErrorState)
+
+    DECLARE_STATIC_CLASS(AFortAthenaCreativePortal)
+    DECLARE_DEFAULT_OBJECT(AFortAthenaCreativePortal)
+};
+
+class AFortCreativePortalManager final : public AActor
+{
+public:
+    DEFINE_MEMBER(TArray<class AFortAthenaCreativePortal*>, AFortCreativePortalManager, AllPortals);
+    DECLARE_STATIC_CLASS(AFortCreativePortalManager)
+    DECLARE_DEFAULT_OBJECT(AFortCreativePortalManager)
+};
+
 class AFortGameStateZone : public AFortGameState
 {
 public:
+    DEFINE_PTR(AFortCreativePortalManager, AFortGameStateZone, CreativePortalManager);
     DEFINE_BOOL(AFortGameStateZone, bDBNODeathEnabled)
 };
 
