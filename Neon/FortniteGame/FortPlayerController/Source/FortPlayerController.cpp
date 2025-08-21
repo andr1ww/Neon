@@ -77,6 +77,20 @@ void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerA
 		Portal->SetbInErrorState(false);
 
 		PlayerController->SetOwnedPortal(Portal);
+		auto Comp = Portal->GetLinkedVolume()->CallFunc<UPlaysetLevelStreamComponent*>("Actor", "GetComponentByClass", UPlaysetLevelStreamComponent::StaticClass());
+
+		static auto PlaysetDih = Runtime::StaticLoadObject<UFortPlaysetItemDefinition>("/Game/Playsets/PID_Playset_60x60_Composed.PID_Playset_60x60_Composed");
+		Comp->SetPlayset(PlaysetDih);
+
+		auto Comp2 = Portal->GetLinkedVolume()->CallFunc<UFortLevelSaveComponent*>("Actor", "GetComponentByClass", UFortLevelSaveComponent::StaticClass());
+
+		Comp2->SetAccountIdOfOwner(PlayerState->GetUniqueId());
+		Comp2->SetbIsLoaded(true);
+		
+		PlayerController->SetCreativePlotLinkedVolume(Portal->GetLinkedVolume());
+		PlayerController->OnRep_CreativePlotLinkedVolume();
+
+		((void (*)(UPlaysetLevelStreamComponent*)) (Finder->LoadPlayset()))(Comp); 
 	}
 	
 	return ServerReadyToStartMatch(PlayerController);
@@ -198,6 +212,13 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
 		Comp->CallFunc<void>("FortControllerComponent_PerkSystem", "OnRep_SpyTechArray");
 		Comp->CallFunc<void>("FortControllerComponent_PerkSystem", "OnRep_RerollCount");
 	}
+
+	struct
+	{
+		
+	} Params{};
+	
+	callExecOG(PlayerController, "/Script/FortniteGame.FortPlayerController.ServerLoadingScreenDropped", ServerLoadingScreenDropped, Params);
 }
 
 void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) {

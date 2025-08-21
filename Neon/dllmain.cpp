@@ -648,7 +648,7 @@ void Main()
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerRepairBuildingActor", AFortPlayerControllerAthena::ServerRepairBuildingActor);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.ServerHandlePickupInfo", AFortPlayerPawn::ServerHandlePickupInfo);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.ServerSendZiplineState", AFortPlayerPawn::ServerSendZiplineState);
-	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerLoadingScreenDropped", AFortPlayerControllerAthena::ServerLoadingScreenDropped);
+	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerLoadingScreenDropped", AFortPlayerControllerAthena::ServerLoadingScreenDropped, (void**)&AFortPlayerControllerAthena::ServerLoadingScreenDroppedOG);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerAttemptInventoryDrop", AFortPlayerControllerAthena::ServerAttemptInventoryDrop);
 	Runtime::Exec("/Script/FortniteGame.FortKismetLibrary.GiveItemToInventoryOwner", AFortPlayerPawn::GiveItemToInventoryOwner, (void**)&AFortPlayerPawn::GiveItemToInventoryOwnerOG);
 	Runtime::Exec("/Script/FortniteGame.FortKismetLibrary.K2_RemoveItemFromPlayerByGuid", AFortPlayerControllerAthena::K2_RemoveItemFromPlayerByGuid, (void**)&AFortPlayerControllerAthena::K2_RemoveItemFromPlayerByGuidOG);

@@ -6,9 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Header/FortPlayerController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Header/FortPlayerController.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/Neon/Config.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Neon/Finder/Header/Finder.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Finder/Header/Finder.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Neon/Finder/Source/Finder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Finder/Source/Finder.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/dllmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/dllmain.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -124,58 +127,9 @@
           <option name="timeStamp" value="9" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp</url>
-          <line>257</line>
-          <option name="timeStamp" value="12" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp</url>
-          <line>246</line>
-          <option name="timeStamp" value="14" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Neon/Neon/Nexa/Curl/Curl.cpp</url>
           <line>14</line>
           <option name="timeStamp" value="15" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Neon/Engine/NetDriver/Source/NetDriver.cpp</url>
-          <line>359</line>
-          <option name="timeStamp" value="16" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp</url>
-          <line>472</line>
-          <option name="timeStamp" value="21" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Neon/FortniteGame/BuildingSMActor/Source/BuildingSMActor.cpp</url>
-          <option name="timeStamp" value="33" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortQuestManager/Source/FortQuestManager.cpp</url>
-          <line>399</line>
-          <option name="timeStamp" value="40" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp</url>
-          <line>237</line>
-          <option name="timeStamp" value="42" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp</url>
-          <line>238</line>
-          <option name="timeStamp" value="43" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Neon/Engine/NetDriver/Source/NetDriver.cpp</url>
-          <line>323</line>
-          <option name="timeStamp" value="45" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortServerBotManager/Source/FortServerBotManager.cpp</url>
-          <line>184</line>
-          <option name="timeStamp" value="47" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Neon/Neon/TickService/FortAthenaAI/Source/FortAthenaAI.cpp</url>
@@ -188,18 +142,13 @@
           <option name="timeStamp" value="62" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortQuestManager/Source/FortQuestManager.cpp</url>
-          <line>13</line>
-          <option name="timeStamp" value="63" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortPlayerPawn/Source/FortPlayerPawn.cpp</url>
           <line>465</line>
           <option name="timeStamp" value="64" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp</url>
-          <line>1104</line>
+          <line>1125</line>
           <option name="timeStamp" value="65" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">

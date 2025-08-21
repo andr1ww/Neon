@@ -135,6 +135,51 @@ uint64 UFinder::StaticFindObject()
     return CachedResult = Final;
 }
 
+uint64 UFinder::LoadPlayset(const std::vector<uint8_t>& Bytes, int recursive)
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+    
+    if (Engine_Version == 500)
+        return CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 4C 8B B1 ? ? ? ? 45").Get();
+
+    if (recursive >= 2)
+        return 0;
+
+    auto StringRef = Memcury::Scanner::FindStringRef(L"UPlaysetLevelStreamComponent::LoadPlayset Error: no owner for %s", Fortnite_Version >= 7, 1);
+
+    if (!StringRef.Get())
+        return 0;
+
+    for (int i = 0 + 0; i < 400 + 0; i++) 
+    {
+        auto CurrentByte = *(Memcury::ASM::MNEMONIC*)(true ? StringRef.Get() - i : StringRef.Get() + i);
+
+        if (CurrentByte == Bytes[0])
+        {
+            bool Found = true;
+            for (int j = 1; j < Bytes.size(); j++)
+            {
+                if (*(Memcury::ASM::MNEMONIC*)(true ? StringRef.Get() - i + j : StringRef.Get() + i + j) != Bytes[j])
+                {
+                    Found = false;
+                    break;
+                }
+            }
+            if (Found)
+            {
+                return true ? CachedResult = StringRef.Get() - i : StringRef.Get() + i;
+            }
+        }
+
+        if (CurrentByte == 0xC3)
+            return LoadPlayset({ 0x40, 0x55 }, ++recursive);
+    }
+
+    return 0;
+}
+
 
 uint64 UFinder::TickFlush()
 {

@@ -567,9 +567,46 @@ public:
 	DECLARE_DEFAULT_OBJECT(UAthenaResurrectionComponent)
 };
 
+class UFortLevelSaveComponent : public UFortItemDefinition
+{
+public:
+	DEFINE_BOOL(UFortLevelSaveComponent, bIsLoaded)
+	DEFINE_MEMBER(FUniqueNetIdRepl, UFortLevelSaveComponent, AccountIdOfOwner)
+	DECLARE_STATIC_CLASS(UFortLevelSaveComponent)
+	DECLARE_DEFAULT_OBJECT(UFortLevelSaveComponent)
+};
+
+class UFortPlaysetItemDefinition : public UFortItemDefinition
+{
+public:
+	DECLARE_STATIC_CLASS(UFortPlaysetItemDefinition)
+	DECLARE_DEFAULT_OBJECT(UFortPlaysetItemDefinition)
+};
+
+class UPlaysetLevelStreamComponent : public UActorComponent
+{
+public:
+	void SetPlayset(class UFortPlaysetItemDefinition* NewPlayset)
+	{
+		static SDK::UFunction *Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("PlaysetLevelStreamComponent", "SetPlayset");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return;
+
+		this->ProcessEvent(Func, &NewPlayset);
+	}
+	
+	DECLARE_STATIC_CLASS(UPlaysetLevelStreamComponent)
+	DECLARE_DEFAULT_OBJECT(UPlaysetLevelStreamComponent)
+};
+
 class AFortPlayerControllerAthena : public AFortPlayerController
 {
 public:
+	DEFINE_PTR(class AFortVolume, AFortPlayerControllerAthena, CreativePlotLinkedVolume);
 	DEFINE_PTR(UAthenaResurrectionComponent, AFortPlayerControllerAthena, ResurrectionComponent);
 	DEFINE_BOOL(AFortPlayerControllerAthena, bMarkedAlive)
 	DEFINE_PTR(UFortPlayerControllerAthenaXPComponent, AFortPlayerControllerAthena, XPComponent);
@@ -580,7 +617,7 @@ public:
 public:
 	DefHookOg(void, EnterAircraft, AFortPlayerControllerAthena *PlayerController, AFortAthenaAircraft *Aircraft);
 	static void ServerAttemptAircraftJump(UActorComponent *Comp, FFrame &Stack);
-	static void ServerLoadingScreenDropped(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
+	DefHookOg(void, ServerLoadingScreenDropped, AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerAcknowledgePossession(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerExecuteInventoryItem(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerPlayEmoteItem(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
@@ -643,6 +680,19 @@ public:
 		} FortPlayerControllerAthena_ClientSendMatchStatsForPlayer_Params{Result};
 
 		this->ProcessEvent(Func, &FortPlayerControllerAthena_ClientSendMatchStatsForPlayer_Params);
+	}
+
+	void OnRep_CreativePlotLinkedVolume()
+	{
+		static class UFunction *Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerControllerAthena", "OnRep_CreativePlotLinkedVolume");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return
+
+		this->ProcessEvent(Func, nullptr);
 	}
 
 	void ClientReportTournamentPlacementPointsScored(int32 Placement, int32 PointsEarned)

@@ -45,7 +45,6 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
         return;
     }
 
-
     if (!Config::bCreative)
     {
         GameState->SetDefaultRebootMachineHotfix(1);
@@ -154,7 +153,7 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
             GameState->OnFinishedStreamingAdditionalPlaylistLevel();
         }
 
-        if (Fortnite_Version == 12.41)
+   /*     if (Fortnite_Version == 12.41)
         {
             ABuildingFoundation* JerkyFoundation = Runtime::StaticFindObject<ABuildingFoundation>("/Game/Athena/Apollo/Maps/Apollo_POI_Foundations.Apollo_POI_Foundations.PersistentLevel.LF_Athena_POI_19x19_2");
             JerkyFoundation->SetDynamicFoundationType(EDynamicFoundationType::Static);
@@ -164,7 +163,7 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
             JerkyFoundation->OnRep_DynamicFoundationRepData();
             JerkyFoundation->SetDynamicFoundationEnabled(true);
         }
-
+*/
         static UClass* PlayerPawnClass = (UClass*)GUObjectArray.FindObject("PlayerPawn_Athena_C");
 
         if (GameMode)
@@ -202,10 +201,8 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     GameMode->SetbWorldIsReady(true);
 
     static bool bInit = false;
-    UE_LOG(LogNeon, Log, "ReadyToStartMatch called! bInit: %s", bInit ? "true" : "false");
-//    GameMode->SetbAlwaysDBNO(true);
 
-    if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.30)
+    if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.50)
     {
         static bool bInitializedTeams = false;
         if (!bInitializedTeams)
@@ -551,7 +548,7 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
         }
     }
     
-    if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.30)
+    if (Fortnite_Version <= 13.00 && Fortnite_Version >= 12.50)
     {
         TWeakObjectPtr<AFortPlayerStateAthena> WeakObjectPtr;
         WeakObjectPtr.ObjectIndex = PlayerState->GetUniqueID();
