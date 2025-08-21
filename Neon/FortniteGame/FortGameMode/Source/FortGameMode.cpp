@@ -320,8 +320,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
             }
         }
     }
-
-    GameState->SetDefaultParachuteDeployTraceForGroundDistance(1000.f);
     
     static auto FortPlayerStartCreativeClass = Runtime::StaticFindObject<UClass>("/Script/FortniteGame.FortPlayerStartCreative");
     static auto FortPlayerStartWarmupClass = Runtime::StaticFindObject<UClass>("/Script/FortniteGame.FortPlayerStartWarmup");
@@ -419,6 +417,11 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         }
 
         SetConsoleTitleA("Neon | Listening on Port: 7777");
+    }
+
+    if (Config::bLateGame)
+    {
+        GameState->SetDefaultParachuteDeployTraceForGroundDistance(1000.f);
     }
 
     if (Config::bEchoSessions)

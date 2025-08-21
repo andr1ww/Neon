@@ -285,7 +285,9 @@ void PostInitializeComponentsVolume(AFortPoiVolume* This)
 
 void InitNullsAndRetTrues() {
 	if (Fortnite_Version >= 23)
+	{
 		NullFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ? 4C 8B E2 4C 8B F1").Get());
+	}
 	
 	if (Fortnite_Version == 0) NullFuncs.push_back(Memcury::Scanner::FindPattern("48 89 54 24 ? 48 89 4C 24 ? 55 53 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 8B 41 08 C1 E8 05").Get());
 	else if (Fortnite_Version >= 3.3 && Fortnite_Version <= 4.5) NullFuncs.push_back(Memcury::Scanner::FindPattern("48 8B C4 57 48 81 EC ? ? ? ? 4C 8B 82 ? ? ? ? 48 8B F9 0F 29 70 E8 0F 29 78 D8").Get());
@@ -443,6 +445,13 @@ void InitNullsAndRetTrues() {
 				break;
 			}
 		}
+	}
+
+	auto BeginPlayPedestalScanner = Memcury::Scanner::FindPattern("40 53 41 56 48 83 EC 48 48 89 6C 24 ? 48 8B D9 48 89 74 24 ? 48 89 7C 24");
+
+	if (auto BeginPlayPedestal = BeginPlayPedestalScanner.Get())
+	{
+		NullFuncs.push_back(BeginPlayPedestal);
 	}
 	
 	for (auto& Func : NullFuncs) {
