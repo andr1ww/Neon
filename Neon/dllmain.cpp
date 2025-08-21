@@ -480,9 +480,13 @@ void InitNullsAndRetTrues() {
 		Runtime::Hook(IMAGEBASE + 0x1A9FF90, InitializeMMRInfos, (void**)&InitializeMMRInfosOG);
 		Runtime::Hook(IMAGEBASE + 0x6BB920, RetTrue);
 		Runtime::Hook(IMAGEBASE + 0x1EE9720, AFortPlayerControllerAthena::K2_RemoveItemFromPlayer, (void**)&AFortPlayerControllerAthena::K2_RemoveItemFromPlayerOG);
-		Runtime::Hook(IMAGEBASE + 0x2ebf890, ProcessEvent, (void**)&ProcessEventOG); 
 		Runtime::Hook(IMAGEBASE + 0x2E688D0, RetTrue); // server context
 		Runtime::Hook(IMAGEBASE + 0x3F88350, RetTrue); // IsThereAnywhereToBuildNavigation
+	}
+
+	if (Config::bLogProcessEvent)
+	{
+		Runtime::Hook(SDK::Offsets::UObject__ProcessEvent, ProcessEvent, (void**)&ProcessEventOG);
 	}
 
 	if (Fortnite_Version == 10.40)
