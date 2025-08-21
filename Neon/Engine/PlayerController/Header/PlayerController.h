@@ -7,6 +7,7 @@
 class AController : public AActor
 {
 public:
+    DEFINE_MEMBER(FName, AController, StateName)
     DEFINE_PTR(APlayerState, AController, PlayerState);
     DEFINE_PTR(APawn, AController, Pawn);
 public:
@@ -79,6 +80,8 @@ public:
 class APlayerController : public AController
 {
 public:
+    DEFINE_MEMBER(FRotator, APlayerController, LastSpectatorSyncRotation);
+    DEFINE_MEMBER(FVector, APlayerController, LastSpectatorSyncLocation);
     DEFINE_BOOL(APlayerController, bPlayerIsWaiting)
     DEFINE_MEMBER(APawn*, APlayerController, AcknowledgedPawn);
 public:

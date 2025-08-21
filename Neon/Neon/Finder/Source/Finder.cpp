@@ -180,6 +180,58 @@ uint64 UFinder::LoadPlayset(const std::vector<uint8_t>& Bytes, int recursive)
     return 0;
 }
 
+uint64 UFinder::GetPlayerViewPoint()
+{
+    uint64 FailedToSpawnPawnAddr = 0;
+
+    auto FailedToSpawnPawnStrRefAddr = Memcury::Scanner::FindStringRef(L"%s failed to spawn a pawn", true, 0, Fortnite_Version >= 19 && Fortnite_Version < 24).Get();
+
+    if (!FailedToSpawnPawnStrRefAddr)
+    {
+        return 0;
+    }
+
+    for (int i = 0; i < 1000; i++)
+    {
+        if (*(uint8_t*)(uint8_t*)(FailedToSpawnPawnStrRefAddr - i) == 0x40 && *(uint8_t*)(uint8_t*)(FailedToSpawnPawnStrRefAddr - i + 1) == 0x53)
+        {
+            FailedToSpawnPawnAddr = FailedToSpawnPawnStrRefAddr - i;
+            break;
+        }
+
+        if (*(uint8_t*)(uint8_t*)(FailedToSpawnPawnStrRefAddr - i) == 0x48 && *(uint8_t*)(uint8_t*)(FailedToSpawnPawnStrRefAddr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(FailedToSpawnPawnStrRefAddr - i + 2) == 0x5C)
+        {
+            FailedToSpawnPawnAddr = FailedToSpawnPawnStrRefAddr - i;
+            break;
+        }
+    }
+
+    if (!FailedToSpawnPawnAddr)
+    {
+        return 0;
+    }
+
+    static auto FortPlayerControllerAthenaDefault = Runtime::StaticFindObject<AFortPlayerControllerAthena>("/Script/FortniteGame.Default__FortPlayerControllerAthena"); // FindObject<UClass>(L"/Game/Athena/Athena_PlayerController.Default__Athena_PlayerController_C");
+    void** const PlayerControllerVFT = FortPlayerControllerAthenaDefault->GetVTable();
+
+    int FailedToSpawnPawnIdx = 0;
+
+    for (int i = 0; i < 500; i++)
+    {
+        if (PlayerControllerVFT[i] == (void*)FailedToSpawnPawnAddr)
+        {
+            FailedToSpawnPawnIdx = i;
+            break;
+        }
+    }
+
+    if (FailedToSpawnPawnIdx == 0)
+    {
+        return 0;
+    }
+
+    return __int64(PlayerControllerVFT[FailedToSpawnPawnIdx - 1]);
+}
 
 uint64 UFinder::TickFlush()
 {

@@ -617,6 +617,7 @@ public:
 public:
 	DefHookOg(void, EnterAircraft, AFortPlayerControllerAthena *PlayerController, AFortAthenaAircraft *Aircraft);
 	static void ServerAttemptAircraftJump(UActorComponent *Comp, FFrame &Stack);
+	DefHookOg(void, GetPlayerViewPoint, AFortPlayerControllerAthena* PlayerController, FVector &OutViewLocation, FRotator &OutViewRotation);
 	DefHookOg(void, ServerLoadingScreenDropped, AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerAcknowledgePossession(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerExecuteInventoryItem(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);

@@ -163,6 +163,8 @@ public:
 
     uint64 AddToAlivePlayers();
 
+    uint64 GetPlayerViewPoint();
+
     uint64 LoadPlayset(const std::vector<uint8_t>& Bytes = std::vector<uint8_t>({ 0x48, 0x89, 0x5C }), int recursive = 0);
 };
 

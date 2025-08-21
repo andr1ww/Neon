@@ -221,6 +221,25 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
 	callExecOG(PlayerController, "/Script/FortniteGame.FortPlayerController.ServerLoadingScreenDropped", ServerLoadingScreenDropped, Params);
 }
 
+void AFortPlayerControllerAthena::GetPlayerViewPoint(AFortPlayerControllerAthena* PlayerController, FVector& OutViewLocation, FRotator& OutViewRotation)
+{
+	if (PlayerController->GetStateName().ToString() == L"Spectating")
+	{
+		OutViewLocation = PlayerController->GetLastSpectatorSyncLocation();
+		OutViewRotation = PlayerController->GetLastSpectatorSyncRotation();
+		return;
+	}
+
+	if (PlayerController->GetMyFortPawn())
+	{
+		OutViewLocation = PlayerController->GetMyFortPawn()->GetActorLocation();
+		OutViewRotation = PlayerController->GetMyFortPawn()->K2_GetActorRotation();
+		return;
+	}
+
+	return GetPlayerViewPointOG(PlayerController, OutViewLocation, OutViewRotation);
+}
+
 void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) {
     FGuid ItemGuid;
     Stack.StepCompiledIn(&ItemGuid);
