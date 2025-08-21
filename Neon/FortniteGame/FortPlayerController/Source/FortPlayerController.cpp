@@ -41,8 +41,10 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
     }
 }
 
-void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerAthena* PlayerController)
+void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
 {
+	Stack.IncrementCode();
+	
 	AFortGameModeAthena* GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
 	if (!GameMode || !PlayerController)
 		return;
@@ -63,16 +65,31 @@ void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerA
 		}
 
 		if (!Portal)
+		{
+			UE_LOG(LogNeon, Log, "Failed to find portal! Report to andr1ww");
+			struct
+			{
+		
+			} Params{};
+	
+			callExecOG(PlayerController, "/Script/FortniteGame.FortPlayerController.ServerReadyToStartMatch", ServerReadyToStartMatch, Params);
 			return;
+		}
 
+		Portal->GetLinkedVolume()->SetbShowPublishWatermark(false);
+		Portal->GetLinkedVolume()->SetbNeverAllowSaving(false);
 		Portal->GetLinkedVolume()->SetVolumeState(EVolumeState::Ready);
+		Portal->GetLinkedVolume()->OnRep_VolumeState();
 		Portal->SetOwningPlayer(PlayerState->GetUniqueId());
 		Portal->OnRep_OwningPlayer();
 
-		if (!Portal->GetbPortalOpen()) {
-			Portal->SetbPortalOpen(true);
-			Portal->OnRep_PortalOpen();
-		}
+		Portal->GetIslandInfo().CreatorName = PlayerState->GetPlayerName();
+		Portal->GetIslandInfo().SupportCode = L"NexaGoated";
+		Portal->GetIslandInfo().Version = 1.0f;
+		Portal->OnRep_IslandInfo();
+
+		Portal->SetbPortalOpen(true);
+		Portal->OnRep_PortalOpen();
 
 		Portal->GetPlayersReady().Add(PlayerState->GetUniqueId());
 		Portal->OnRep_PlayersReady();
@@ -97,7 +114,12 @@ void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerA
 		((void (*)(UPlaysetLevelStreamComponent*)) (Finder->LoadPlayset()))(Comp); 
 	}
 	
-	return ServerReadyToStartMatch(PlayerController);
+	struct
+	{
+		
+	} Params{};
+	
+	callExecOG(PlayerController, "/Script/FortniteGame.FortPlayerController.ServerReadyToStartMatch", ServerReadyToStartMatch, Params);
 }
 
 void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
