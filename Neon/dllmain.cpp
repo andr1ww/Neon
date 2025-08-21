@@ -722,13 +722,13 @@ void Main()
 	{
 		Runtime::VFTHook(StaticClassImpl("FortPlayerPawnAthena")->GetClassDefaultObject()->GetVTable(), 0x119, AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues, (void**)&AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCuesOG);
 	}
-
+	
 	Runtime::Hook(Finder->ReloadWeapon(), AFortPlayerPawn::ReloadWeapon, (void**)&AFortPlayerPawn::ReloadWeaponOG); // this is right um we can make it uni after we get it to fucking call 
 	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);
 	Runtime::Hook(Finder->StartNewSafeZonePhase(), AFortGameModeAthena::StartNewSafeZonePhase, (void**)&AFortGameModeAthena::StartNewSafeZonePhaseOG);
 	Runtime::Hook<&AFortGameModeAthena::StaticClass>("HandleStartingNewPlayer", AFortGameModeAthena::HandleStartingNewPlayer, AFortGameModeAthena::HandleStartingNewPlayerOG);
 	Runtime::Hook<&AFortPlayerPawn::StaticClass>("ServerReviveFromDBNO", AFortPlayerPawn::ServerReviveFromDBNO);
-	Runtime::Hook<&AFortPlayerControllerAthena::StaticClass>("ServerDBNOReviveInterrupted", AFortPlayerControllerAthena::ServerDBNOReviveInterrupted, AFortPlayerControllerAthena::ServerDBNOReviveInterruptedOG);
+//	Runtime::Hook<&AFortPlayerControllerAthena::StaticClass>("ServerDBNOReviveInterrupted", AFortPlayerControllerAthena::ServerDBNOReviveInterrupted, AFortPlayerControllerAthena::ServerDBNOReviveInterruptedOG);
 	if (Config::bEchoSessions) Runtime::Hook(Finder->PickTeam(), AFortGameModeAthena::PickTeam, (void**)&AFortGameModeAthena::PickTeamOG);
 	Runtime::Hook(Finder->GetSquadIdForCurrentPlayer(), FortGameSessionDedicated::GetSquadIdForCurrentPlayer);
 	Runtime::Exec("/Script/FortniteGame.FortAthenaMutator_GiveItemsAtGamePhaseStep.OnGamePhaseStepChanged", AFortAthenaMutator_GiveItemsAtGamePhaseStep::OnGamePhaseStepChanged);

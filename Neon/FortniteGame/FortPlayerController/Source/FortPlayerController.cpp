@@ -691,7 +691,6 @@ void AFortPlayerControllerAthena::ServerRepairBuildingActor(AFortPlayerControlle
 void AFortPlayerControllerAthena::ServerDBNOReviveInterrupted(AFortPlayerControllerAthena* PlayerController, AFortPlayerPawnAthena* Pawn)
 {
 	ServerDBNOReviveInterruptedOG(PlayerController, Pawn);
-	UE_LOG(LogNeon, Log, __FUNCTION__);
 	if (!Pawn || !PlayerController) return;
 
 	auto PlayerState = reinterpret_cast<AFortPlayerStateAthena*>(Pawn->GetPlayerState());
@@ -702,35 +701,36 @@ void AFortPlayerControllerAthena::ServerDBNOReviveInterrupted(AFortPlayerControl
 	static UClass* Class = UGAB_AthenaDBNO_C::StaticClass();
 
 	if (!Class) return;
-
-	/*FGameplayEventData EventData{};
-	EventData.EventTag = Pawn->GetEventReviveTag();
-	EventData.ContextHandle = PlayerState->GetAbilitySystemComponent()->MakeEffectContext();
-	EventData.Instigator = EventInstigator;
-	EventData.InstigatorTags = ((AFortPlayerPawnAthena*)EventInstigator->GetPawn())->GetGameplayTags();
-	EventData.Target = Pawn;
-	EventData.TargetData = UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(Pawn);
-	EventData.TargetTags = Pawn->GetGameplayTags();
-	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Pawn, Pawn->GetEventReviveTag(), EventData);
-
-	for (auto& Item : PlayerState->GetAbilitySystemComponent()->GetActivatableAbilities().GetItems())
+	
+	auto& ActivatableAbilities = PlayerState->GetAbilitySystemComponent()->GetActivatableAbilities();
+	auto& Items = ActivatableAbilities.GetItems();
+	static int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
+    
+	for (int i = 0; i < Items.Num(); i++)
 	{
-		if (!Item.GetAbility()) continue; 
-		if (Item.GetAbility()->GetClass() == Class)
-		{
-			PlayerState->GetAbilitySystemComponent()->ClientCancelAbility(Item.GetHandle(), Item.ActivationInfo);
-			PlayerState->GetAbilitySystemComponent()->ClientEndAbility(Item.GetHandle(), Item.ActivationInfo);
-			PlayerState->GetAbilitySystemComponent()->ServerEndAbility(Item.GetHandle(), Item.ActivationInfo, Item.ActivationInfo.PredictionKeyWhenActivated);
-			PlayerState->GetAbilitySystemComponent()->ServerCancelAbility(Item.GetHandle(), Item.ActivationInfo);
-		}
+		auto& Spec = *reinterpret_cast<FGameplayAbilitySpec*>(__int64(Items.GetData()) + (i * GameplayAbilitySpecSize));
+
+		if (!Spec.GetAbility() || !Spec.GetAbility()->IsA(Class))
+			continue;
+		PlayerState->GetAbilitySystemComponent()->CallFunc<void>("AbilitySystemComponent", "ClientCancelAbility", Spec.GetHandle(), Spec.GetActivationInfo());
+		PlayerState->GetAbilitySystemComponent()->CallFunc<void>("AbilitySystemComponent", "ClientEndAbility", Spec.GetHandle(), Spec.GetActivationInfo());
+		PlayerState->GetAbilitySystemComponent()->CallFunc<void>("AbilitySystemComponent", "ServerEndAbility", Spec.GetHandle(), Spec.GetActivationInfo(), nullptr);
+			
+		break;
 	}
-	*/
-	Pawn->SetbIsDBNO(false);
-	Pawn->OnRep_IsDBNO();
-	Pawn->SetHealth(30);
+
+	Controller->GetMyFortPawn()->SetbIsDying(false);
+	Controller->GetMyFortPawn()->SetbPlayedDying(false);
+	
+	Controller->GetMyFortPawn()->SetbIsDBNO(false);
+	Controller->GetMyFortPawn()->OnRep_IsDBNO();
+	Controller->GetMyFortPawn()->SetHealth(30);
 	PlayerState->SetDeathInfo({});
 	PlayerState->OnRep_DeathInfo();
+	Controller->GetMyFortPawn()->CallFunc<void>("FortPlayerPawn", "ReviveFromDBNO");
 	Controller->CallFunc<void>("FortPlayerControllerZone", "ClientOnPawnRevived", PlayerController);
+
+	Controller->GetMyFortPawn()->Set("FortPlayerPawnAthena", "DBNORevivalStacking", 0);
 }
 
 void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerController, FFortPlayerDeathReport& DeathReport)
@@ -756,11 +756,9 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	FAthenaRewardResult* RewardResult = MatchReport ? &MatchReport->GetEndOfMatchResults() : nullptr;
 	FAthenaMatchStats* MatchStats = MatchReport ? &MatchReport->GetMatchStats() : nullptr;
 	FAthenaMatchTeamStats* TeamStats = MatchReport ? &MatchReport->GetTeamStats() : nullptr;
-
-	bool bIsDBNO = VictimPawn && VictimPawn->IsDBNO();
- 
+	
 	auto DeathTags = DeathReport.GetTags();
-	EDeathCause DeathCause = PlayerState->ToDeathCause(DeathTags, bIsDBNO);
+	EDeathCause DeathCause = PlayerState->ToDeathCause(DeathTags, false);
 
 	PlayerState->Set("FortPlayerState", "PawnDeathLocation", DeathLocation);
 	
@@ -777,11 +775,11 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			CopyTags.ParentTags.Add(DeathTags.ParentTags[i]);
 		}
 		
-		DeathInfo->SetbDBNO(bIsDBNO);
+		DeathInfo->SetbDBNO(false);
 		DeathInfo->SetDeathLocation(DeathLocation);
 		DeathInfo->SetDeathTags(CopyTags);
 		DeathInfo->SetDeathCause(DeathCause);
-		DeathInfo->SetDowner(bIsDBNO ? (AActor*)KillerPlayerState : nullptr);
+		DeathInfo->SetDowner(nullptr);
 		DeathInfo->SetFinisherOrDowner((AActor*)KillerPlayerState);
 
 		if (VictimPawn) {
@@ -899,7 +897,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	}
 
 	bool bRebooting = PlayerState->GetPlayerTeam()->GetTeamMembers().Num() > 1;
-	if (bRebooting && DeathInfo->GetbDBNO()) for (auto& Member : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
+	if (bRebooting) for (auto& Member : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
 		auto MemberController = (AFortPlayerControllerAthena*)Member;
 		if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) bRebooting = false;
 	}
@@ -1025,7 +1023,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		
 	for (int32 i = 0; i < AlivePlayers.Num(); ++i) {
 		const auto& AlivePC = AlivePlayers[i];
-		if (AlivePC && AlivePC != PlayerController && AlivePC->GetMyFortPawn() && !AlivePC->GetMyFortPawn()->IsDBNO()) {
+		if (AlivePC && AlivePC != PlayerController && AlivePC->GetMyFortPawn()) {
 			LastAliveController = AlivePC;
 		}
 	}

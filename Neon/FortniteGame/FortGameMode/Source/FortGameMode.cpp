@@ -202,7 +202,10 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     }
 
     GameMode->SetbWorldIsReady(true);
-
+    GameMode->SetbDBNOEnabled(true);
+    GameState->SetbDBNODeathEnabled(false);
+    GameMode->SetbAlwaysDBNO(false);
+    
     static bool bInit = false;
 
     if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.50)
@@ -318,6 +321,8 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         }
     }
 
+    GameState->SetDefaultParachuteDeployTraceForGroundDistance(1000.f);
+    
     static auto FortPlayerStartCreativeClass = Runtime::StaticFindObject<UClass>("/Script/FortniteGame.FortPlayerStartCreative");
     static auto FortPlayerStartWarmupClass = Runtime::StaticFindObject<UClass>("/Script/FortniteGame.FortPlayerStartWarmup");
     TArray<AActor*> Actors = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), Config::bCreative ? FortPlayerStartCreativeClass : FortPlayerStartWarmupClass);
@@ -491,6 +496,8 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         UE_LOG(LogNeon, Warning, "SpawnDefaultPawnFor: Cannot Spawn Pawn!");
         return 0;
     }
+
+//    Pawn->Set("FortPlayerPawnAthena", "ReviveFromDBNOTime", 2.f);
     
     auto& StartingItemsArray = GameMode->GetStartingItems();
     static int32 FItemAndCountSize = StaticClassImpl("ItemAndCount")->GetSize();

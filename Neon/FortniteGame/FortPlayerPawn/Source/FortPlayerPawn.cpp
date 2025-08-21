@@ -433,29 +433,25 @@ void AFortPlayerPawn::ServerReviveFromDBNO(AFortPlayerPawn* Pawn, AFortPlayerCon
 	static UClass* Class = UGAB_AthenaDBNO_C::StaticClass();
 
 	if (!Class) return;
+	
+    auto& ActivatableAbilities = PlayerState->GetAbilitySystemComponent()->GetActivatableAbilities();
+    auto& Items = ActivatableAbilities.GetItems();
+    static int32 GameplayAbilitySpecSize = StaticClassImpl("GameplayAbilitySpec")->GetSize();
+    
+    for (int i = 0; i < Items.Num(); i++)
+    {
+        auto& Spec = *reinterpret_cast<FGameplayAbilitySpec*>(__int64(Items.GetData()) + (i * GameplayAbilitySpecSize));
 
-	/*FGameplayEventData EventData{};
-	EventData.EventTag = Pawn->GetEventReviveTag();
-	EventData.ContextHandle = PlayerState->GetAbilitySystemComponent()->MakeEffectContext();
-	EventData.Instigator = EventInstigator;
-	EventData.InstigatorTags = ((AFortPlayerPawnAthena*)EventInstigator->GetPawn())->GetGameplayTags();
-	EventData.Target = Pawn;
-	EventData.TargetData = UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(Pawn);
-	EventData.TargetTags = Pawn->GetGameplayTags();
-	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Pawn, Pawn->GetEventReviveTag(), EventData);
+        if (!Spec.GetAbility() || !Spec.GetAbility()->IsA(Class))
+            continue;
+        PlayerState->GetAbilitySystemComponent()->CallFunc<void>("AbilitySystemComponent", "ClientCancelAbility", Spec.GetHandle(), Spec.GetActivationInfo());
+        PlayerState->GetAbilitySystemComponent()->CallFunc<void>("AbilitySystemComponent", "ClientEndAbility", Spec.GetHandle(), Spec.GetActivationInfo());
+        PlayerState->GetAbilitySystemComponent()->CallFunc<void>("AbilitySystemComponent", "ServerEndAbility", Spec.GetHandle(), Spec.GetActivationInfo(), nullptr);
+			
+        break;
+    }
 
-	for (auto& Item : PlayerState->GetAbilitySystemComponent()->GetActivatableAbilities().GetItems())
-	{
-		if (!Item.GetAbility()) continue; 
-		if (Item.GetAbility()->GetClass() == Class)
-		{
-			PlayerState->GetAbilitySystemComponent()->ClientCancelAbility(Item.GetHandle(), Item.ActivationInfo);
-			PlayerState->GetAbilitySystemComponent()->ClientEndAbility(Item.GetHandle(), Item.ActivationInfo);
-			PlayerState->GetAbilitySystemComponent()->ServerEndAbility(Item.GetHandle(), Item.ActivationInfo, Item.ActivationInfo.PredictionKeyWhenActivated);
-			PlayerState->GetAbilitySystemComponent()->ServerCancelAbility(Item.GetHandle(), Item.ActivationInfo);
-		}
-	}
-    */
+    
 	Pawn->SetbIsDBNO(false);
 	Pawn->OnRep_IsDBNO();
 	Pawn->SetHealth(30);

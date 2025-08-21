@@ -70,6 +70,27 @@ public:
     DECLARE_DEFAULT_OBJECT(IAbilitySystemInterface)
 };
 
+// Enum GameplayAbilities.EGameplayAbilityActivationMode
+// NumValues: 0x0006
+enum class EGameplayAbilityActivationMode : uint8
+{
+    Authority                                = 0,
+    NonAuthority                             = 1,
+    Predicting                               = 2,
+    Confirmed                                = 3,
+    Rejected                                 = 4,
+    EGameplayAbilityActivationMode_MAX       = 5,
+};
+
+struct FGameplayAbilityActivationInfo final
+{
+public:
+    EGameplayAbilityActivationMode                ActivationMode;                                    // 0x0000(0x0001)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    uint8                                         bCanBeEndedByOtherInstance : 1;                    // 0x0001(0x0001)(BitIndex: 0x00, PropSize: 0x0001 (NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic))
+    uint8                                         Pad_2[0x6];                                        // 0x0002(0x0006)(Fixing Size After Last Property [ Dumper-7 ])
+    struct FPredictionKey                         PredictionKeyWhenActivated;                        
+};
+
 struct FGameplayAbilitySpec final : public FFastArraySerializerItem
 {
     DEFINE_MEMBER(FGameplayAbilitySpecHandle, FGameplayAbilitySpec, Handle);
@@ -78,6 +99,7 @@ struct FGameplayAbilitySpec final : public FFastArraySerializerItem
     DEFINE_PTR(UObject, FGameplayAbilitySpec, SourceObject);
     DEFINE_MEMBER(int32, FGameplayAbilitySpec, Level);
     DEFINE_MEMBER(int32, FGameplayAbilitySpec, InputID);
+    DEFINE_MEMBER(FGameplayAbilityActivationInfo, FGameplayAbilitySpec, ActivationInfo);
 };
 
 struct FGameplayAbilitySpecContainer : public FFastArraySerializer

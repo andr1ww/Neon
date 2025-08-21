@@ -442,7 +442,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
         {
             ts = true;
             t = std::thread([]() {
-                std::this_thread::sleep_for(std::chrono::seconds(20));
+                std::this_thread::sleep_for(std::chrono::seconds(5));
                 if (UWorld::GetWorld()->GetAuthorityGameMode()->GetAlivePlayers().Num() == 0)
                 {
                     TerminateProcess(GetCurrentProcess(), 0);

@@ -64,6 +64,8 @@ class AFGF_Character : public ACharacter
 class AFortPawn : public AFGF_Character
 {
 public:
+	DEFINE_BOOL(AFortPawn, bPlayedDying)
+	DEFINE_BOOL(AFortPawn, bIsDying)
 	DEFINE_MEMBER(FGameplayTagContainer, AFortPawn, DeathTags);
 	DEFINE_BOOL(AFortPawn, bIsDBNO)
 	DEFINE_MEMBER(FGameplayTagContainer, AFortPawn, GameplayTags);

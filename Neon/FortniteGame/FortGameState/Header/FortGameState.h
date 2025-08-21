@@ -151,6 +151,7 @@ public:
 class AFortGameStateAthena : public AFortGameStateZone
 {
 public:
+    DEFINE_MEMBER(float, AFortGameStateAthena, DefaultParachuteDeployTraceForGroundDistance);
     DEFINE_PTR(AFortSafeZoneIndicator, AFortGameStateAthena, SafeZoneIndicator);
     void OnRep_WinningPlayerState()
     {
