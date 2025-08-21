@@ -170,6 +170,7 @@
     <ClInclude Include="FortniteGame\Common\Header\ItemDefinition.h" />
     <ClInclude Include="FortniteGame\Common\Header\Tags.h" />
     <ClInclude Include="FortniteGame\FortAthenaAIBotController\Header\FortAthenaAIBotController.h" />
+    <ClInclude Include="FortniteGame\FortAthenaCreativePortal\Header\FortAthenaCreativePortal.h" />
     <ClInclude Include="FortniteGame\FortAthenaMapInfo\Header\FortAthenaMapInfo.h" />
     <ClInclude Include="FortniteGame\FortAthenaMutator\Header\FortAthenaMutator.h" />
     <ClInclude Include="FortniteGame\FortGameMode\Header\FortGameMode.h" />
@@ -310,6 +311,7 @@
     </ClCompile>
     <ClCompile Include="FortniteGame\BuildingSMActor\Source\BuildingSMActor.cpp" />
     <ClCompile Include="FortniteGame\FortAthenaAIBotController\Source\FortAthenaAIBotController.cpp" />
+    <ClCompile Include="FortniteGame\FortAthenaCreativePortal\Source\FortAthenaCreativePortal.cpp" />
     <ClCompile Include="FortniteGame\FortAthenaMutator\Source\FortAthenaMutator.cpp" />
     <ClCompile Include="FortniteGame\FortGameMode\Source\FortGameMode.cpp" />
     <ClCompile Include="FortniteGame\FortGameSessionDedicated\Source\FortGameSessionDedicated.cpp" />

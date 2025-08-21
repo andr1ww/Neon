@@ -7,6 +7,7 @@
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
 #include "FortniteGame/BuildingGameplayActor/Header/BuildingGameplayActor.h"
 #include "FortniteGame/BuildingSMActor/Header/BuildingSMActor.h"
+#include "FortniteGame/FortAthenaCreativePortal/Header/FortAthenaCreativePortal.h"
 #include "FortniteGame/FortAthenaMutator/Header/FortAthenaMutator.h"
 #include "FortniteGame/FortGameMode/Header/FortGameMode.h"
 #include "FortniteGame/FortGameSessionDedicated/Header/FortGameSessionDedicated.h"
@@ -699,6 +700,8 @@ void Main()
 	Runtime::Exec("/Script/FortniteGame.FortControllerComponent_Aircraft.ServerAttemptAircraftJump", AFortPlayerControllerAthena::ServerAttemptAircraftJump);
 	Runtime::Hook(Finder->OnDamageServer(), ABuildingSMActor::OnDamageServer, (void**)&ABuildingSMActor::OnDamageServerOG);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerReadyToStartMatch", AFortPlayerControllerAthena::ServerReadyToStartMatch, (void**)&AFortPlayerControllerAthena::ServerReadyToStartMatchOG);
+	Runtime::Exec("/Script/FortniteGame.FortAthenaCreativePortal.TeleportPlayerToLinkedVolume", AFortAthenaCreativePortal::TeleportPlayerToLinkedVolume);
+	Runtime::Exec("/Script/FortniteGame.FortAthenaCreativePortal.TeleportPlayerForPlotLoadComplete", AFortAthenaCreativePortal::TeleportPlayerForPlotLoadComplete);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerCreateBuildingActor", AFortPlayerControllerAthena::ServerCreateBuildingActor);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerBeginEditingBuildingActor", AFortPlayerControllerAthena::ServerBeginEditingBuildingActor);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerEditBuildingActor", AFortPlayerControllerAthena::ServerEditBuildingActor);

@@ -6,6 +6,7 @@
 #include "Engine/ItemAndCount/Header/ItemAndCount.h"
 #include "Engine/NetDriver/Header/NetDriver.h"
 #include "FortniteGame/AbilitySystemComponent/Header/AbilitySystemComponent.h"
+#include "FortniteGame/FortAthenaCreativePortal/Header/FortAthenaCreativePortal.h"
 #include "FortniteGame/FortAthenaMutator/Header/FortAthenaMutator.h"
 #include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
