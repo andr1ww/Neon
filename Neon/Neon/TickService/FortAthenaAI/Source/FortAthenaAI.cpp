@@ -592,8 +592,8 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
     AActor* BestTarget = nullptr;
     float BestDistanceSq = 25000000.0f;
     
-    int32 PickupsPerFrame = 50;
-    int32 ChestsPerFrame = 20;
+    int32 PickupsPerFrame = 30;
+    int32 ChestsPerFrame = 10;
 
     for (int32 i = 0; i < PickupsPerFrame && PickupIndex < PickupArray.Num(); i++, PickupIndex++)
     {
