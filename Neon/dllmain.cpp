@@ -334,6 +334,60 @@ void InitNullsAndRetTrues() {
 	NullFuncs.push_back(Finder->KickPlayer());
 	RetTrueFuncs.push_back(Finder->WorldNetMode());
 	RetTrueFuncs.push_back(Finder->WorldGetNetMode());
+
+	auto GamePhaseStepStringAddr = Memcury::Scanner::FindStringRef(L"Gamephase Step: %s", false).Get();
+
+	uint64 BeginningOfGamePhaseStepFn = 0;
+	uint8_t* ByteToPatch = 0;
+
+	if (!GamePhaseStepStringAddr)
+	{
+		BeginningOfGamePhaseStepFn = Memcury::Scanner::FindPattern("48 89 5C 24 ? 57 48 83 EC 20 E8 ? ? ? ? 48 8B D8 48 85 C0 0F 84 ? ? ? ? E8").Get(); // not actually the func but its fine
+	}
+
+	if (!BeginningOfGamePhaseStepFn && !ByteToPatch)
+	{
+		for (int i = 0; i < 3000; i++)
+		{
+			if (*(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i) == 0x40 && *(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i + 1) == 0x55)
+			{
+				BeginningOfGamePhaseStepFn = GamePhaseStepStringAddr - i;
+				break;
+			}
+
+			if (*(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i) == 0x48 && *(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i + 2) == 0x5C)
+			{
+				BeginningOfGamePhaseStepFn = GamePhaseStepStringAddr - i;
+				break;
+			}
+
+			if (*(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i) == 0x48 && *(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i + 1) == 0x8B && *(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i + 2) == 0xC4)
+			{
+				BeginningOfGamePhaseStepFn = GamePhaseStepStringAddr - i;
+				break;
+			}
+		}
+	}
+
+	if (!ByteToPatch)
+	{
+		for (int i = 0; i < 500; i++)
+		{
+			if (*(uint8_t*)(uint8_t*)(BeginningOfGamePhaseStepFn + i) == 0x0F && *(uint8_t*)(uint8_t*)(BeginningOfGamePhaseStepFn + i + 1) == 0x84)
+			{
+				ByteToPatch = (uint8_t*)(uint8_t*)(BeginningOfGamePhaseStepFn + i + 1);
+				break;
+			}
+		}
+	}
+	
+	DWORD dwProtection;
+	VirtualProtect((PVOID)ByteToPatch, 1, PAGE_EXECUTE_READWRITE, &dwProtection);
+
+	*ByteToPatch = 0x85; // jz -> jnz
+
+	DWORD dwTemp;
+	VirtualProtect((PVOID)ByteToPatch, 1, dwProtection, &dwTemp);
 	
 	if (Fortnite_Version == 0) RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 57 41 56 41 57 48 81 EC ? ? ? ? 48 8B 01 49 8B E9 45 0F B6 F8").Get());
 	else if (Fortnite_Version >= 16.40) {
@@ -395,6 +449,8 @@ void InitNullsAndRetTrues() {
 		UE_LOG(LogNeon, Log, "NullFuncs: 0x%x", Func - IMAGEBASE);
 		Runtime::Patch(Func, 0xC3);
 	}
+
+	RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 8B C4 48 89 58 08 48 89 70 10 48 89 78 18 4C 89 60 20 55 41 56 41 57 48 8B EC 48 83 EC 60 49 8B D9 45 8A").Get()); // No reserve
 
 	for (auto& Func : RetTrueFuncs) {
 		if (Func == 0x0) continue;
@@ -618,7 +674,6 @@ void Main()
 //	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogNavigation VeryVerbose", nullptr);
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogPackageLocalizationCache", nullptr);
 
-	ExecuteConsoleCommand(UWorld::GetWorld(), WorldName, nullptr);
 	if (Fortnite_Version >= 19.10)
 	{
 		ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortUIDirector", nullptr);
@@ -716,6 +771,7 @@ void Main()
 	UE_LOG(LogNeon, Log, "SendStatEventWithTags: 0x%x", Finder->SendStatEventWithTags());
 
 	Runtime::Hook(Finder->SendStatEventWithTags(), UFortQuestManager::SendStatEventWithTags, (void**)&UFortQuestManager::SendStatEventWithTagsOG);
+	ExecuteConsoleCommand(UWorld::GetWorld(), WorldName, nullptr);
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)

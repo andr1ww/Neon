@@ -70,6 +70,7 @@ enum class ESubGame : uint8
 class AFortPlayerController : public APlayerController
 {
 public:
+	DEFINE_BOOL(AFortPlayerController, bHasServerFinishedLoading);
 	DEFINE_MEMBER(TArray<struct FFortUpdatedObjectiveStat>, AFortPlayerController, UpdatedObjectiveStats);
 	DEFINE_PTR(AFortInventory, AFortPlayerController, WorldInventory);
 	DEFINE_MEMBER(FFortAthenaLoadout, AFortPlayerController, CosmeticLoadoutPC);
@@ -612,7 +613,6 @@ public:
 	DEFINE_PTR(UFortPlayerControllerAthenaXPComponent, AFortPlayerControllerAthena, XPComponent);
 	DEFINE_PTR(UAthenaPlayerMatchReport, AFortPlayerControllerAthena, MatchReport);
 	DEFINE_PTR(AFortPlayerStateAthena, AFortPlayerControllerAthena, PlayerState);
-	DEFINE_BOOL(AFortPlayerControllerAthena, bHasServerFinishedLoading);
 	DEFINE_PTR(AFortAthenaCreativePortal, AFortPlayerControllerAthena, OwnedPortal);
 public:
 	DefHookOg(void, EnterAircraft, AFortPlayerControllerAthena *PlayerController, AFortAthenaAircraft *Aircraft);

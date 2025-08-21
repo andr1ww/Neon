@@ -57,6 +57,7 @@ public:
 class AFortPlayerState : public APlayerState
 {
 public:
+	DEFINE_BOOL(AFortPlayerState,bHasStartedPlaying)
 	DEFINE_PTR(AFortTeamInfo, AFortPlayerState, PlayerTeam); 
 };
 
