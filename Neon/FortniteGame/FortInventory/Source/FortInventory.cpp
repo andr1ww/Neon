@@ -325,14 +325,10 @@ AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry* Entr
 {
     if (!Entry || !Pawn) return nullptr;
 
-    AFortPickupAthena* NewPickup = UGameplayStatics::SpawnActorOG<AFortPickupAthena>(AFortPickupAthena::StaticClass(), Loc);
+    static auto PickupClass = AFortPickupAthena::StaticClass();
+    AFortPickupAthena* NewPickup = UGameplayStatics::SpawnActorOG<AFortPickupAthena>(PickupClass, Loc);
     if (NewPickup != nullptr && Entry != nullptr && Entry->GetItemDefinition() != nullptr)
     {
-        if (Finder->SetupPickup())
-        {
-            ((FVector * (*)(AFortPickup*, FFortItemEntry*, TArray<FFortItemEntry>, bool))(Finder->SetupPickup()))(NewPickup, Entry, TArray<FFortItemEntry>(), false);
-        }
-        
         NewPickup->SetbRandomRotation(RandomRotation);
         NewPickup->GetPrimaryPickupItemEntry().SetItemDefinition(Entry->GetItemDefinition());
         NewPickup->GetPrimaryPickupItemEntry().SetLoadedAmmo(Entry->GetLoadedAmmo());
@@ -351,7 +347,8 @@ AFortPickupAthena* AFortInventory::SpawnPickupDirect(FVector Loc, UFortItemDefin
     if (!ItemDefinition) return nullptr;
  //   if (ItemDefinition->GetFName().ToString().ToString().find("Pickaxe") != std::string::npos) return nullptr;
     
-    AFortPickupAthena* NewPickup = UGameplayStatics::SpawnActorOG<AFortPickupAthena>(AFortPickupAthena::StaticClass(), Loc);
+    static auto PickupClass = AFortPickupAthena::StaticClass();
+    AFortPickupAthena* NewPickup = UGameplayStatics::SpawnActorOG<AFortPickupAthena>(PickupClass, Loc);
     if (NewPickup != nullptr && ItemDefinition != nullptr)
     {
         NewPickup->SetbRandomRotation(true);

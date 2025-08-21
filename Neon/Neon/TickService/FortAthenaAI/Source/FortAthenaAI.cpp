@@ -371,7 +371,7 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
         bool bInSafeZone = DistanceToZone < GameState->GetSafeZoneIndicator()->GetNextRadius().Size();
             
         if (!bInSafeZone && DistanceToZone > GameState->GetSafeZoneIndicator()->GetNextRadius().Size() * 1.5f) {
-            static const FName BB_StormExecutionStatus = UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_Storm_ExecutionStatus"));
+/*            static const FName BB_StormExecutionStatus = UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_Storm_ExecutionStatus"));
             static const FName BB_StormDestination = UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_Storm_Destination"));
             static const FName BB_StormMovementState = UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_Storm_MovementState"));
                 
@@ -381,6 +381,8 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
                 BB->SetValueAsVector(BB_StormDestination, GameState->GetSafeZoneIndicator()->GetNextCenter());
                 BB->SetValueAsEnum(BB_StormMovementState, (uint8)1); 
             }
+*/
+            AI.Controller->MoveToLocation(GameState->GetSafeZoneIndicator()->GetNextCenter(), 100.0f, true, false, true, true, nullptr, false);
                 
             AI.TargetLoot = nullptr;
             AI.Moving = true;
@@ -592,7 +594,7 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
     AActor* BestTarget = nullptr;
     float BestDistanceSq = 25000000.0f;
     
-    int32 PickupsPerFrame = 30;
+    int32 PickupsPerFrame = 20;
     int32 ChestsPerFrame = 10;
 
     for (int32 i = 0; i < PickupsPerFrame && PickupIndex < PickupArray.Num(); i++, PickupIndex++)

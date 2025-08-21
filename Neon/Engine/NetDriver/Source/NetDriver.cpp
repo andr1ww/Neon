@@ -402,9 +402,9 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
                 && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) < 100
                 && GameMode->GetAliveBots().Num() < 100 && GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Default") && !Config::bLateGame)
             {
-                if (UKismetMathLibrary::RandomBoolWithWeight(0.05f))
+                if (UKismetMathLibrary::RandomBoolWithWeight(0.02f))
                 {
-               //     AFortAthenaAIBotController::SpawnPlayerBot(1);
+                    AFortAthenaAIBotController::SpawnPlayerBot(1);
                 }
             }
             
