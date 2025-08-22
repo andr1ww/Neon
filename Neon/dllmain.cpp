@@ -22,6 +22,8 @@
 #include "Neon/Runtime/Runtime.h"
 #include "Neon/TickService/FortAthenaAI/Header/FortAthenaAI.h"
 
+// I didnt do shit (@obsessedtech)
+
 static inline std::vector<uint64_t> NullFuncs = {};
 static inline std::vector<uint64_t> RetTrueFuncs = {};
 static inline std::vector<uint64_t> FuncsTo85 = {};
