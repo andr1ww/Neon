@@ -6,8 +6,17 @@
   <component name="ChangeListManager">
     <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Engine/Actor/Header/Actor.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Engine/Actor/Header/Actor.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Engine/Actor/Source/Actor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Engine/Actor/Source/Actor.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Engine/Quat/Header/Quat.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Engine/Quat/Header/Quat.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Engine/Rotator/Header/Rotator.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Engine/Rotator/Header/Rotator.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/BuildingSMActor/Header/BuildingSMActor.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/BuildingSMActor/Header/BuildingSMActor.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Header/FortPlayerController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Header/FortPlayerController.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerPawn/Header/FortPlayerPawn.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerPawn/Header/FortPlayerPawn.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerPawn/Source/FortPlayerPawn.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerPawn/Source/FortPlayerPawn.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerState/Header/FortPlayerState.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerState/Header/FortPlayerState.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/SDK/include/sdk/Math.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/SDK/include/sdk/Math.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/dllmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/dllmain.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -167,6 +176,11 @@
           <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp</url>
           <line>504</line>
           <option name="timeStamp" value="84" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortPlayerState/Header/FortPlayerState.h</url>
+          <line>1</line>
+          <option name="timeStamp" value="86" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -24,7 +24,7 @@ struct FRotator
             std::abs(NormalizeAxis(Yaw - Other.Yaw)) < Tolerance &&
             std::abs(NormalizeAxis(Roll - Other.Roll)) < Tolerance;
     }
-private:
+
     static float NormalizeAxis(float Angle)
     {
         Angle = std::fmod(Angle + 180.f, 360.f);

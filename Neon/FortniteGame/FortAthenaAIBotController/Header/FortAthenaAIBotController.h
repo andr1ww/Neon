@@ -2,7 +2,6 @@
 #include "pch.h"
 #include "Neon/Runtime/Runtime.h"
 #include "Engine/PlayerController/Header/PlayerController.h"
-#include "FortniteGame/FortInventory/Header/FortInventory.h"
 #include "FortniteGame/FortPlayerPawn/Header/FortPlayerPawn.h"
 #include "FortniteGame/FortPlayerState/Header/FortPlayerState.h"
 #include "FortniteGame/Common/Header/ItemDefinition.h"
@@ -12,6 +11,8 @@ class UBehaviorTree;
 class UBrainComponent;
 class UBlackboardComponent;
 class UFortAthenaNpcPatrollingComponent;
+class UFortAthenaAIBotInventoryItems;
+class AFortInventory;
 
 enum class EAlertLevel : uint8
 {
@@ -261,11 +262,71 @@ public:
     }
 };
 
-class UPrimitiveComponent : public AActor
+class UPrimitiveComponent : public USceneComponent
 {
+public:
+    void SetAllPhysicsAngularVelocityInRadians(const struct FVector& NewVel, bool bAddToCurrent)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("PrimitiveComponent", "SetAllPhysicsAngularVelocityInRadians");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct PrimitiveComponent_SetAllPhysicsLinearVelocity final
+        {
+        public:
+            struct FVector                                NewVel;                                            // 0x0000(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            bool                                          bAddToCurrent;                                     // 0x000C(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            uint8                                         Pad_D[0x3];                                        // 0x000D(0x0003)(Fixing Struct Size After Last Property [ Dumper-7 ])
+        };
+
+        PrimitiveComponent_SetAllPhysicsLinearVelocity Params;
+        Params.NewVel = NewVel;
+        Params.bAddToCurrent = bAddToCurrent;
+        
+        this->ProcessEvent(Func, &Params);
+    }
+    
+    void SetAllPhysicsLinearVelocity(const struct FVector& NewVel, bool bAddToCurrent)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("PrimitiveComponent", "SetAllPhysicsLinearVelocity");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct PrimitiveComponent_SetAllPhysicsLinearVelocity final
+        {
+        public:
+            struct FVector                                NewVel;                                            // 0x0000(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            bool                                          bAddToCurrent;                                     // 0x000C(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            uint8                                         Pad_D[0x3];                                        // 0x000D(0x0003)(Fixing Struct Size After Last Property [ Dumper-7 ])
+        };
+
+        PrimitiveComponent_SetAllPhysicsLinearVelocity Params;
+        Params.NewVel = NewVel;
+        Params.bAddToCurrent = bAddToCurrent;
+        
+        this->ProcessEvent(Func, &Params);
+    }
+
 public:
     DECLARE_STATIC_CLASS(UPrimitiveComponent)
     DECLARE_DEFAULT_OBJECT(UPrimitiveComponent)
+};
+
+class USkeletalMeshComponent : public UPrimitiveComponent
+{
+public:
+	
+public:
+    DECLARE_STATIC_CLASS(USkeletalMeshComponent)
+    DECLARE_DEFAULT_OBJECT(USkeletalMeshComponent)
 };
 
 class UFortAthenaAIBotDigestedSkillSet : public UObject

@@ -55,6 +55,20 @@ FVector AActor::GetActorRightVector()
     return this->CallFunc<FVector>("Actor","GetActorRightVector");
 }
 
+void AActor::OnRep_ReplicatedMovement()
+{
+    static SDK::UFunction* Func = nullptr;
+    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Actor", "OnRep_ReplicatedMovement");
+
+    if (Func == nullptr)
+        Func = Info.Func;
+    if (!Func)
+        return;
+
+    this->ProcessEvent(Func, nullptr);
+}
+
+
 void AActor::K2_DestroyActor()
 {
     static SDK::UFunction* Func = nullptr;
@@ -178,6 +192,41 @@ float AActor::GetDistanceTo(AActor* Actor)
     Params.OtherActor = std::move(Actor);
 
     this->ProcessEvent(Func, &Params);
+
+    return Params.ReturnValue;
+}
+
+bool AActor::K2_SetActorLocation(const struct FVector& NewLocation, bool bSweep, struct FHitResult* SweepHitResult, bool bTeleport)
+{
+    static SDK::UFunction* Func = nullptr;
+    SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Actor", "K2_SetActorLocation");
+
+    if (Func == nullptr)
+        Func = Info.Func;
+    if (!Func)
+        return false;
+
+    struct Actor_K2_SetActorLocation final
+    {
+    public:
+        struct FVector                                NewLocation;                                       // 0x0000(0x000C)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        bool                                          bSweep;                                            // 0x000C(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        uint8                                         Pad_D[0x3];                                        // 0x000D(0x0003)(Fixing Size After Last Property [ Dumper-7 ])
+        FHitResult                             SweepHitResult;                                    // 0x0010(0x008C)(Parm, OutParm, IsPlainOldData, NoDestructor, ContainsInstancedReference, NativeAccessSpecifierPublic)
+        bool                                          bTeleport;                                         // 0x009C(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        bool                                          ReturnValue;                                       // 0x009D(0x0001)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        uint8                                         Pad_9E[0x2];                                       // 0x009E(0x0002)(Fixing Struct Size After Last Property [ Dumper-7 ])
+    };
+    
+    Actor_K2_SetActorLocation Params;
+    Params.NewLocation = std::move(NewLocation);
+    Params.bSweep = bSweep;
+    Params.bTeleport = bTeleport;
+    
+    this->ProcessEvent(Func, &Params);
+
+    if (SweepHitResult != nullptr)
+        *SweepHitResult = std::move(Params.SweepHitResult);
 
     return Params.ReturnValue;
 }

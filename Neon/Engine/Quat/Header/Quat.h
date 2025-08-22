@@ -36,8 +36,28 @@ struct FQuat {
         return FQuat(0.f, 0.f, 0.f, 1.f);
     }
 
-    FRotator ToRotator() const;
+    FRotator ToRotator() const
+    {
+        const float RAD_TO_DEG = 180.0f / 3.14159265359f;
+    
+        float sinr_cosp = 2 * (W * X + Y * Z);
+        float cosr_cosp = 1 - 2 * (X * X + Y * Y);
+        float roll = atan2(sinr_cosp, cosr_cosp);
 
+        float sinp = 2 * (W * Y - Z * X);
+        float pitch;
+        if (abs(sinp) >= 1)
+            pitch = copysign(3.14159265359f / 2, sinp);
+        else
+            pitch = asin(sinp);
+
+        float siny_cosp = 2 * (W * Z + X * Y);
+        float cosy_cosp = 1 - 2 * (Y * Y + Z * Z);
+        float yaw = atan2(siny_cosp, cosy_cosp);
+
+        return FRotator(pitch * RAD_TO_DEG, yaw * RAD_TO_DEG, roll * RAD_TO_DEG);
+    }
+    
     FQuat operator*(const FQuat& Q) const
     {
         return FQuat(

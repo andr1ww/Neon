@@ -5,13 +5,14 @@
 #include "FortniteGame/BuildingSMActor/Header/BuildingSMActor.h"
 #include "FortniteGame/FortInventory/Header/FortInventory.h"
 #include "FortniteGame/FortPlayerPawn/Header/FortPlayerPawn.h"
-#include "FortniteGame/FortPlayerState/Header/FortPlayerState.h"
 #include "FortniteGame/Common/Header/ItemDefinition.h"
 
 class AFortInventory;
 class UFortWeaponItemDefinition;
 class AFortAthenaAircraft;
 class AFortAthenaCreativePortal;
+class UFortHeroType;
+class AFortPlayerStateAthena;
 
 class UAthenaCharacterItemDefinition : public UObject
 {

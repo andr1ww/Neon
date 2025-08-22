@@ -1,9 +1,12 @@
 ﻿#pragma once
 #include "pch.h"
+
+#include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 
 struct FFortAthenaLoadout;
 class AFortWeapon;
+class UPrimitiveComponent;
 
 class ACharacter : public APawn
 {
@@ -515,6 +518,27 @@ public:
 	DefHookOg(void, CompletePickupAnimation, AFortPickup* Pickup);
 	DefHookOg(void, GiveItemToInventoryOwner, UObject*, FFrame&);
 	DefHookOg(void, NetMulticast_Athena_BatchedDamageCues, AFortPlayerPawn*, FAthenaBatchedDamageGameplayCues_Shared, FAthenaBatchedDamageGameplayCues_NonShared);
+};
+
+struct FReplicatedPhysicsPawnState final
+{
+public:
+	struct FVector_NetQuantize100                 Translation;                                       // 0x0000(0x000C)(NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	uint8                                         Pad_C[0x4];                                        // 0x000C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
+	struct FQuat                                  Rotation;                                          // 0x0010(0x0010)(IsPlainOldData, NoDestructor, NativeAccessSpecifierPublic)
+	struct FVector_NetQuantize10                  LinearVelocity;                                    // 0x0020(0x000C)(NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	struct FVector_NetQuantize10                  AngularVelocity;                                   // 0x002C(0x000C)(NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	uint16_t                                        SyncKey;                                           // 0x0038(0x0002)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	uint8                                         Pad_3A[0x6];                                       // 0x003A(0x0006)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
+class AFortPhysicsPawn : public AFortPawn
+{
+public:
+	static void ServerMove(AFortPhysicsPawn* Context, FFrame& Stack);
+public:
+	DECLARE_STATIC_CLASS(AFortPhysicsPawn)
+	DECLARE_DEFAULT_OBJECT(AFortPhysicsPawn)
 };
 
 class UGA_Athena_MedConsumable_Parent_C : public UFortGameplayAbility

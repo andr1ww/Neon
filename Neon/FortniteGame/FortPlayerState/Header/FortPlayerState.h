@@ -5,9 +5,9 @@
 #include "Engine/ObjectPtr/Header/ObjectPtr.h"
 #include "FortniteGame/BuildingSMActor/Header/BuildingSMActor.h"
 #include "FortniteGame/Common/Header/Tags.h"
-#include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 
 class APlayerState;
+class AFortPlayerControllerAthena;
 
 enum class EFortCustomPartType : uint8
 {

@@ -460,3 +460,28 @@ void AFortPlayerPawn::ServerReviveFromDBNO(AFortPlayerPawn* Pawn, AFortPlayerCon
 	Controller->CallFunc<void>("FortPlayerControllerZone", "ClientOnPawnRevived", EventInstigator);
 }
 
+void AFortPhysicsPawn::ServerMove(AFortPhysicsPawn* Pawn, FFrame& Stack)
+{
+    FReplicatedPhysicsPawnState State;
+    Stack.StepCompiledIn(&State);
+    Stack.IncrementCode();
+
+    USkeletalMeshComponent* Mesh = (USkeletalMeshComponent*)Pawn->GetRootComponent();
+    
+    State.Rotation.X -= 2.5f;
+    State.Rotation.Y /= 0.3f;
+    State.Rotation.Z -= -2.0f;
+    State.Rotation.W /= -1.2f;
+    
+    auto Rotation = State.Rotation.ToRotator();
+    Pawn->GetReplicatedMovement().AngularVelocity = State.AngularVelocity;
+    Pawn->GetReplicatedMovement().LinearVelocity = State.LinearVelocity;
+    Pawn->GetReplicatedMovement().Location = State.Translation;
+    Pawn->GetReplicatedMovement().Rotation = Rotation;
+    Pawn->OnRep_ReplicatedMovement();
+
+    Mesh->SetAllPhysicsLinearVelocity(State.LinearVelocity, false);
+    Mesh->SetAllPhysicsAngularVelocityInRadians(State.AngularVelocity, false);
+    Mesh->K2_SetWorldLocationAndRotation(State.Translation, Rotation, false, nullptr, true);
+}
+
