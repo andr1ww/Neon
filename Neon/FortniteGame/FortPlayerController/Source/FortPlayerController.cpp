@@ -259,7 +259,7 @@ void AFortPlayerControllerAthena::GetPlayerViewPoint(AFortPlayerControllerAthena
 
 	if (PlayerController->GetMyFortPawn())
 	{
-		OutViewLocation = PlayerController->GetViewTarget()->GetActorLocation();
+		OutViewLocation = PlayerController->GetViewTarget()->K2_GetActorLocation();
 		OutViewRotation = PlayerController->GetControlRotation();
 		return;
 	}
@@ -774,7 +774,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	auto KillerPawn = DeathReport.GetKillerPawn();
 	auto VictimPawn = PlayerController->GetMyFortPawn();
 
-	FVector DeathLocation = VictimPawn ? VictimPawn->GetActorLocation() : FVector(0,0,0);
+	FVector DeathLocation = VictimPawn ? VictimPawn->K2_GetActorLocation() : FVector(0,0,0);
 
 	if (!KillerPlayerState && VictimPawn)
 		KillerPlayerState = ((AFortPlayerControllerAthena*)VictimPawn->GetController())->GetPlayerState();
@@ -1069,14 +1069,14 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 
 	if (/*Config::bLateGame && */KillerPawn && KillerPawn != VictimPawn && !KillerPawn->GetController()->IsA(AI)) {
 		auto* AbilitySystem = KillerPlayerState->GetAbilitySystemComponent();
-		auto Handle = AbilitySystem->CallFunc<FGameplayEffectContextHandle>("AbilitySystemComponent", "MakeEffectContext");
+		auto Handle = AbilitySystem->MakeEffectContext();
 		FGameplayTag Tag;
 		static auto Cue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Shield.PotionConsumed");
 		Tag.TagName = Cue;
 		AbilitySystem->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueAdded", Tag, FPredictionKey(), Handle);
 		AbilitySystem->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueExecuted", Tag, FPredictionKey(), Handle);
 
-		auto Pawn = Cast<AFortPlayerControllerAthena>(KillerPlayerState->GetOwner())->GetMyFortPawn();
+		auto Pawn = ((AFortPlayerControllerAthena*)KillerPlayerState->GetOwner())->GetMyFortPawn();
 		if (Pawn) {
 			auto Health = Pawn->GetHealth();
 			auto Shield = Pawn->GetShield();
@@ -1129,7 +1129,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 				LastAliveController->ClientSendTeamStatsForPlayer(*WinnerTeamStats);
 			}
 
-			uint8 WinningTeamIndex = WinnerPlayerState->Get<uint8>("FortPlayerStateAthena", "TeamIndex");
+			uint8 WinningTeamIndex = WinnerPlayerState->GetTeamIndex();
 			GameState->Set("FortGameStateAthena", "WinningTeam", WinningTeamIndex);
 			GameState->OnRep_WinningTeam();
 			GameState->Set("FortGameStateAthena", "WinningPlayerState", WinnerPlayerState);
@@ -1174,7 +1174,6 @@ void AFortPlayerControllerAthena::ServerCheat(AFortPlayerControllerAthena* Playe
 	UE_LOG(LogNeon, Log, "Wow");
 }
 
-
 void AFortPlayerControllerAthena::ServerAttemptInventoryDrop(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
 {
 	FGuid ItemGuid;
@@ -1206,7 +1205,7 @@ void AFortPlayerControllerAthena::ServerAttemptInventoryDrop(AFortPlayerControll
 	}
 	
 	Entry->SetCount(Entry->GetCount() - Count);
-	AFortInventory::SpawnPickup(PlayerController->GetPawn()->GetActorLocation() + PlayerController->GetPawn()->GetActorForwardVector() * 70.f + FVector(0, 0, 50), Entry, EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, PlayerController->GetMyFortPawn(), Count);
+	AFortInventory::SpawnPickup(PlayerController->GetPawn()->K2_GetActorLocation() + PlayerController->GetPawn()->GetActorForwardVector() * 70.f + FVector(0, 0, 50), Entry, EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, PlayerController->GetMyFortPawn(), Count);
 	if (Entry->GetCount() == 0)
 		AFortInventory::Remove(PlayerController, ItemGuid);
 	else

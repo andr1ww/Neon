@@ -153,6 +153,28 @@ public:
     
         this->ProcessEvent(Func, &Params);
     }
+
+    FGameplayEffectContextHandle MakeEffectContext()
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("AbilitySystemComponent", "MakeEffectContext");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return FGameplayEffectContextHandle();
+
+
+        struct AbilitySystemComponent_MakeEffectContext final
+        {
+        public:
+            struct FGameplayEffectContextHandle           ReturnValue;                                       // 0x0000(0x0018)(Parm, OutParm, ReturnParm, NativeAccessSpecifierPublic)
+        } Params{};
+
+        this->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
     
     void ServerTryActivateAbility(const struct FGameplayAbilitySpecHandle& AbilityToActivate, bool InputPressed, void* PredictionKey)
     {

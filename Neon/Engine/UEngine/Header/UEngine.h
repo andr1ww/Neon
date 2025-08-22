@@ -27,7 +27,7 @@ public:
 class UGameViewportClient : public UObject
 {
 public:
-    DEFINE_MEMBER(class UWorld*, UGameViewportClient, World);
+    DEFINE_PTR(class UWorld, UGameViewportClient, World);
 public:
     DECLARE_STATIC_CLASS(UGameViewportClient);
     DECLARE_DEFAULT_OBJECT(UGameViewportClient);

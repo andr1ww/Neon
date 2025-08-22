@@ -213,14 +213,14 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         static bool bInitializedTeams = false;
         if (!bInitializedTeams)
         {
-            GameState->GetTeamArray().Reset();
-            GameState->GetSquadArray().Reset();
+        //    GameState->GetTeamArray().Reset();
+      //      GameState->GetSquadArray().Reset();
 
             for (int i = 0; i < 103; ++i) 
             {
                 TArray<TWeakObjectPtr<AFortPlayerStateAthena>> TeamArray(4);
-                GameState->GetTeamArray().Add(TeamArray);
-                GameState->GetSquadArray().Add(TeamArray);
+          //      GameState->GetTeamArray().Add(TeamArray);
+            //    GameState->GetSquadArray().Add(TeamArray);
             }
 
             bInitializedTeams = true;
@@ -579,7 +579,7 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
         }
     }
     
-    if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.50)
+ /*   if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.50)
     {
         TWeakObjectPtr<AFortPlayerStateAthena> WeakObjectPtr;
         WeakObjectPtr.ObjectIndex = PlayerState->GetUniqueID();
@@ -594,7 +594,7 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
         ElementData2.ElementData.Add(WeakObjectPtr);
         ElementData1.ElementData.Add(WeakObjectPtr);
     }
-    
+    */
     return HandleStartingNewPlayerOG(GameMode, NewPlayer);
 }
 

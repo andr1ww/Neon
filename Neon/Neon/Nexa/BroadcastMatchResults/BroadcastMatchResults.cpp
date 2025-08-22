@@ -34,7 +34,7 @@ void Nexa::BroadcastMatchResults(AFortPlayerControllerAthena* Controller, AFortP
     }
     
     // player state object 
-    Payload["FortPlayerStateAthena"]["KillScore"] = PlayerState->GetKillScore();
+    Payload["FortPlayerStateAthena"]["KillScore"] = PlayerState->GetTeamKillScore();
     Payload["FortPlayerStateAthena"]["TeamKillScore"] = PlayerState->GetTeamKillScore();
     Payload["FortPlayerStateAthena"]["DeathInfo"]["DeathCause"] = PlayerState->GetDeathInfo().GetDeathCause();
     Payload["FortPlayerStateAthena"]["DeathInfo"]["DeathLocation"]["X"] = PlayerState->GetDeathInfo().GetDeathLocation().X;
