@@ -821,7 +821,7 @@ void AFortGameModeAthena::StartNewSafeZonePhase(AFortGameModeAthena* GameMode, i
 
     static bool bSetupLG = false;
 
-    if (Phase > 1)
+    if (GameState->GetSafeZonePhase() >= 1)
     {
         for (auto& Controller : GameMode->GetAlivePlayers())
         {

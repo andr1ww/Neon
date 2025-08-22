@@ -814,7 +814,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		static const UClass* AmmoClass = UFortAmmoItemDefinition::StaticClass();
 		static const UClass* MeleeClass = UFortWeaponMeleeItemDefinition::StaticClass();
    
-		auto Location = VictimPawn->GetActorLocation();
+		auto Location = VictimPawn->K2_GetActorLocation();
 		bool bFoundMats = false;
    
 		const auto& ItemInstances = WorldInventory->GetInventory().GetItemInstances();
@@ -910,23 +910,26 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	}
 
 	bool bRebooting = false;
-	auto PlayerTeam = PlayerState->GetPlayerTeam();
+	if (!KillerPawn->GetController()->IsA<AFortAthenaAIBotController>())
+	{
+		auto PlayerTeam = PlayerState->GetPlayerTeam();
 
-	if (PlayerTeam && PlayerTeam->GetTeamMembers().Num() > 1) {
-		bRebooting = true;
-		for (auto& Member : PlayerTeam->GetTeamMembers()) {
-			auto MemberController = (AFortPlayerControllerAthena*)Member;
-			if (MemberController && MemberController != PlayerController) {
-				if (!MemberController->GetbMarkedAlive()) {
-					bRebooting = false;
-					break;
+		if (PlayerTeam && PlayerTeam->GetTeamMembers().Num() > 1) {
+			bRebooting = true;
+			for (auto& Member : PlayerTeam->GetTeamMembers()) {
+				auto MemberController = (AFortPlayerControllerAthena*)Member;
+				if (MemberController && MemberController != PlayerController) {
+					if (!MemberController->GetbMarkedAlive()) {
+						bRebooting = false;
+						break;
+					}
 				}
 			}
+		} else {
+			bRebooting = false;
 		}
-	} else {
-		bRebooting = false;
 	}
-
+	
 	static int DamageCauserOffset = Runtime::GetOffsetStruct("FortPlayerDeathReport", "DamageCauser");
 	AActor* DamageCauser = *(AActor**)((char*)&DeathReport + DamageCauserOffset);
 	UFortWeaponItemDefinition* ItemDef = nullptr;
@@ -953,16 +956,19 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		{25, 10},
 		{50, 5},
 	};
-	
-	for (const auto& entry : PlacementScores)
+
+	if (!KillerPawn->GetController()->IsA<AFortAthenaAIBotController>())
 	{
-		if (entry.first == GameState->GetPlayersLeft())
+		for (const auto& entry : PlacementScores)
 		{
-			for (int i = 0; i < GameMode->GetAlivePlayers().Num(); i++)
+			if (entry.first == GameState->GetPlayersLeft())
 			{
-				GameMode->GetAlivePlayers()[i]->ClientReportTournamentPlacementPointsScored(GameState->GetPlayersLeft(), entry.second);
+				for (int i = 0; i < GameMode->GetAlivePlayers().Num(); i++)
+				{
+					GameMode->GetAlivePlayers()[i]->ClientReportTournamentPlacementPointsScored(GameState->GetPlayersLeft(), entry.second);
+				}
+				break;
 			}
-			break;
 		}
 	}
 	
@@ -1053,7 +1059,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		}
 	}
 
-	if (/*Config::bLateGame && */KillerPawn && KillerPawn != PlayerController->GetMyFortPawn()) {
+	if (/*Config::bLateGame && */KillerPawn && KillerPawn != VictimPawn && !KillerPawn->GetController()->IsA<AFortAthenaAIBotController>()) {
 		auto* AbilitySystem = KillerPlayerState->GetAbilitySystemComponent();
 		auto Handle = AbilitySystem->CallFunc<FGameplayEffectContextHandle>("AbilitySystemComponent", "MakeEffectContext");
 		FGameplayTag Tag;

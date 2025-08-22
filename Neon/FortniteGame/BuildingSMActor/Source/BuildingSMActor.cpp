@@ -23,8 +23,56 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
 
-    if (BuildingActor->GetbPlayerPlaced() == true || BuildingActor->GetHealth() <= 1.0f)
+    if (BuildingActor->GetHealth() <= 1.0f)
     {
+        return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
+    }
+
+    static UCurveTable* ResourceCurveTable = nullptr;
+    int ResourceAmount = 0;
+
+    if (BuildingActor->GetbPlayerPlaced() == true)
+    {
+        FGameplayTagContainer SourceTags;
+        FGameplayTagContainer TargetTags;
+        FGameplayTagContainer ContextTags;
+        UFortQuestManager* QuestManager = Controller->GetQuestManager(ESubGame::Athena);
+
+        if (!QuestManager) {
+            UE_LOG(LogNeon, Warning, "QuestManager is null for controller");
+        } else
+        {
+            if (BuildingActor->GetBuildingResourceAmountOverride().RowName.GetComparisonIndex() > 0) {
+                if (!ResourceCurveTable)
+                {
+                    if (BuildingActor->GetBuildingResourceAmountOverride().CurveTable) {
+                        ResourceCurveTable = BuildingActor->GetBuildingResourceAmountOverride().CurveTable;
+                    }
+
+                    if (!ResourceCurveTable)
+                    {
+                        ResourceCurveTable = Runtime::StaticFindObject<UCurveTable>(
+                            "/Game/Athena/Balance/DataTables/AthenaResourceRates.AthenaResourceRates");
+                    }
+                }
+        
+                float Out = UDataTableFunctionLibrary::EvaluateCurveTableRow(
+                    ResourceCurveTable,
+                    BuildingActor->GetBuildingResourceAmountOverride().RowName,
+                    0.0f
+                );
+        
+                float RC = Out / (BuildingActor->GetMaxHealth() / Damage);
+
+                ResourceAmount = round(RC);
+            }
+            
+            SourceTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"DamageDone.Building")));
+            ContextTags.GameplayTags.Add(FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"Athena.Playlist")));
+            
+            UFortQuestManager::SendStatEvent(QuestManager, BuildingActor, SourceTags, TargetTags, nullptr, nullptr, ResourceAmount, EFortQuestObjectiveStatEvent::Damage, ContextTags);
+        }
+        
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
     
@@ -53,9 +101,6 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
     }
 
     const float MaxStackSize = ResourceDefinition->GetMaxStackSize().Value;
-    int ResourceAmount = 0;
-
-    static UCurveTable* ResourceCurveTable = nullptr;
     
     if (BuildingActor->GetBuildingResourceAmountOverride().RowName.GetComparisonIndex() > 0) {
         if (!ResourceCurveTable)
