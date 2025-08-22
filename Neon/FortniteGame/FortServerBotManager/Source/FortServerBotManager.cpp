@@ -141,7 +141,7 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                             {
                                 UCustomCharacterPart* Part = Runtime::StaticLoadObject<UCustomCharacterPart>(UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary", "Conv_NameToString", Spec->GetCharacterParts()[j].SoftObjectPtr.ObjectID.AssetPathName).ToString());
                                 auto PartDef = VO.contains(Part->GetCharacterPartType()) ? VO[Part->GetCharacterPartType()] : Part;
-                                Ret->CallFunc<void>("FortPlayerPawn", "ServerChoosePart", Part->GetCharacterPartType() , PartDef);
+                                Ret->CallFunc<void>("FortPlayerPawn", "ServerChoosePart", PartDef->GetCharacterPartType() , PartDef);
                             }
                         }
                     }

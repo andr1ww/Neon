@@ -267,7 +267,12 @@ void PostInitializeComponentsVolume(AFortPoiVolume* This)
 	UBrushComponent* Comp = This->GetBrushComponent();
 	if (!Comp)
 	{
-		Comp = (UBrushComponent*)UGameplayStatics::SpawnObject(UBrushComponent::StaticClass(), This);
+		Comp = Runtime::StaticFindObject<UBrushComponent>("/Game/Athena/Apollo/Maps/Apollo_Terrain.Apollo_Terrain:PersistentLevel.SafeZoneVolume_4.BrushComponent0");
+		if (!Comp)
+		{
+			UE_LOG(LogNeon, Log, "no comp ig?");
+			return PostInitializeComponentsVolumeOG(This);
+		}
         
 		USceneComponent* RootComp = This->CallFunc<USceneComponent*>("Actor", "K2_GetRootComponent");
 		if (RootComp)
@@ -481,14 +486,7 @@ void InitNullsAndRetTrues() {
 	
 	if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.50)
 	{
-		Runtime::Patch(IMAGEBASE + 0x1A45182, 0x90);
-		Runtime::Patch(IMAGEBASE + 0x1A45183, 0x90);
-		Runtime::Patch(IMAGEBASE + 0x1A45184, 0x90);
-		Runtime::Patch(IMAGEBASE + 0x1A45185, 0x90);
-		Runtime::Patch(IMAGEBASE + 0x1A45186, 0x90);
-		Runtime::Patch(IMAGEBASE + 0x1A45187, 0x90);
-	
-	//	Runtime::Hook(IMAGEBASE + 0x1A45060, PostInitializeComponentsVolume, (void**)&PostInitializeComponentsVolumeOG);
+		Runtime::Hook(IMAGEBASE + 0x1A45060, PostInitializeComponentsVolume, (void**)&PostInitializeComponentsVolumeOG);
 		Runtime::Hook(IMAGEBASE + 0x1A3A640, RetTrue);
 		Runtime::Patch(IMAGEBASE + 0x1A9FFB6, 0xEB);
 		Runtime::Hook(IMAGEBASE + 0x1A8ED30, AFortAthenaMutatorOnSafeZoneUpdated, (void**)&AFortAthenaMutatorOnSafeZoneUpdatedOG);
