@@ -41,9 +41,40 @@ public:
 	DECLARE_DEFAULT_OBJECT(UAthenaPickaxeItemDefinition)
 };
 
+struct FCosmeticVariantInfo
+{
+public:
+	struct FGameplayTag                           VariantChannelTag;                                 // 0x0000(0x0008)(Edit, BlueprintVisible, BlueprintReadOnly, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	struct FGameplayTag                           ActiveVariantTag;                                  // 0x0008(0x0008)(Edit, BlueprintVisible, BlueprintReadOnly, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
+static_assert(alignof(FCosmeticVariantInfo) == 0x000004, "Wrong alignment on FCosmeticVariantInfo");
+static_assert(sizeof(FCosmeticVariantInfo) == 0x000010, "Wrong size on FCosmeticVariantInfo");
+static_assert(offsetof(FCosmeticVariantInfo, VariantChannelTag) == 0x000000, "Member 'FCosmeticVariantInfo::VariantChannelTag' has a wrong offset!");
+static_assert(offsetof(FCosmeticVariantInfo, ActiveVariantTag) == 0x000008, "Member 'FCosmeticVariantInfo::ActiveVariantTag' has a wrong offset!");
+
+// ScriptStruct FortniteGame.McpVariantChannelInfo
+// 0x0038 (0x0048 - 0x0010)
+struct FMcpVariantChannelInfo final : public FCosmeticVariantInfo
+{
+public:
+	struct FGameplayTagContainer                  OwnedVariantTags;                                  // 0x0010(0x0020)(Edit, BlueprintVisible, BlueprintReadOnly, NativeAccessSpecifierPublic)
+	class UFortItemDefinition*                    ItemVariantIsUsedFor;                              // 0x0030(0x0008)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	class FString                                 CustomData;                                        // 0x0038(0x0010)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+};
+
+
+class UFortCosmeticVariant : public UObject
+{
+public:
+	struct FGameplayTag                           VariantChannelTag;                                 // 0x0028(0x0008)(Edit, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
+	class FText                                   VariantChannelName;                                // 0x0030(0x0018)(Edit, Protected, NativeAccessSpecifierProtected)
+	struct FGameplayTag                           ActiveVariantTag;                                  // 0x0048(0x0008)(Transient, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
+};
+
 struct FFortAthenaLoadout final
 {
 public:
+	DEFINE_MEMBER(TArray<FMcpVariantChannelInfo>, FFortAthenaLoadout, CharacterVariantChannels);
 	DEFINE_PTR(UAthenaCharacterItemDefinition, FFortAthenaLoadout, Character);
 	DEFINE_PTR(UAthenaPickaxeItemDefinition, FFortAthenaLoadout, Pickaxe);
 };

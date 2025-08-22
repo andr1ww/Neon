@@ -93,6 +93,41 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                     }
                 } 
 
+                map<EFortCustomPartType, UCustomCharacterPart *> VO;
+                for (auto &CVC : BotData->GetCharacterCustomization()->GetCustomizationLoadout().GetCharacterVariantChannels())
+                {
+                    auto Cos = (UAthenaCosmeticItemDefinition*)CVC.ItemVariantIsUsedFor;
+                    FPartVariantDef *Def = nullptr;
+                    auto& Variants = Cos->GetItemVariants();
+                    auto Items = Variants.GetData();
+                    static int32 PartDefSize = StaticClassImpl("PartVariantDef")->GetSize();
+
+                    for (int32 i = 0; i < Variants.Num(); i++) {
+                        auto* var = reinterpret_cast<UFortCosmeticVariant*>(Items[i]);
+                        if (!var || !IsValidPointer(var)) continue;
+                        if (auto CCPV = Cast<UFortCosmeticCharacterPartVariant>(var)) {
+                            auto* PartOpts = CCPV->PartOptions.GetData();
+                            for (int32 j = 0; j < CCPV->PartOptions.Num(); j++) {
+                                auto& def = *reinterpret_cast<FPartVariantDef*>(__int64(PartOpts) + (j * PartDefSize));
+                                if (CVC.ActiveVariantTag.TagName.GetComparisonIndex() == def.GetCustomizationVariantTag().TagName.GetComparisonIndex()) {
+                                    Def = &def;
+                                    break;
+                                }
+                            }
+                            if (Def) break;
+                        }
+                    }
+
+                    if (Def)
+                    {
+                        for (auto &VP : Def->GetVariantParts())
+                        {
+                            UCustomCharacterPart* Part = VP.Get(UCustomCharacterPart::StaticClass(), true);
+                            VO[Part->GetCharacterPartType()] = Part;
+                        }
+                    }
+                }
+                
                 Controller->Set("FortAthenaAIBotController", "CosmeticLoadoutBC", BotData->GetCharacterCustomization()->GetCustomizationLoadout());
                 if (BotData->GetCharacterCustomization()->GetCustomizationLoadout().GetCharacter()->GetHeroDefinition())
                 {
@@ -102,10 +137,11 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
 
                         if (Spec)
                         {
-                            for (int32 i = 0; i < Spec->GetCharacterParts().Num(); i++)
+                            for (int32 j = 0; j < Spec->GetCharacterParts().Num(); j++)
                             {
-                                UCustomCharacterPart* Part = Runtime::StaticLoadObject<UCustomCharacterPart>(UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary", "Conv_NameToString", Spec->GetCharacterParts()[i].SoftObjectPtr.ObjectID.AssetPathName).ToString());
-                                Ret->CallFunc<void>("FortPlayerPawn", "ServerChoosePart", Part->GetCharacterPartType(), Part);
+                                UCustomCharacterPart* Part = Runtime::StaticLoadObject<UCustomCharacterPart>(UKismetStringLibrary::GetDefaultObj()->CallFunc<FString>("KismetStringLibrary", "Conv_NameToString", Spec->GetCharacterParts()[j].SoftObjectPtr.ObjectID.AssetPathName).ToString());
+                                auto PartDef = VO.contains(Part->GetCharacterPartType()) ? VO[Part->GetCharacterPartType()] : Part;
+                                Ret->CallFunc<void>("FortPlayerPawn", "ServerChoosePart", Part->GetCharacterPartType() , PartDef);
                             }
                         }
                     }

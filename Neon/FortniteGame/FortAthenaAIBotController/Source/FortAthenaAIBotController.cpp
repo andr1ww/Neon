@@ -279,6 +279,9 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
 				static UFortAccoladeItemDefinition* Silver = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_015_Elimination_Silver.AccoladeId_015_Elimination_Silver");
 				static UFortAccoladeItemDefinition* Gold = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_016_Elimination_Gold.AccoladeId_016_Elimination_Gold");
 
+				static UFortAccoladeItemDefinition* Elim = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_012_Elimination.AccoladeId_012_Elimination");
+				UFortQuestManager::GiveAccolade(InstigatedBy, Elim);
+
 				if (CurrentKills == 1) {
 					UFortQuestManager::GiveAccolade(InstigatedBy, Bronze);
 				}

@@ -417,6 +417,39 @@ public:
     DEFINE_MEMBER(FFortAthenaLoadout, UFortAthenaAIBotCharacterCustomization, CustomizationLoadout);
 };
 
+class UFortCosmeticVariantBackedByArray : public UFortCosmeticVariant
+{
+    
+};
+
+struct FBaseVariantDef
+{
+  DEFINE_MEMBER(FGameplayTag, FBaseVariantDef, CustomizationVariantTag); //0x0000(0x0008)(Edit, BlueprintVisible, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic) 
+};
+
+struct FPartVariantDef final : public FBaseVariantDef
+{
+    DEFINE_MEMBER(TArray<TSoftObjectPtr<UCustomCharacterPart>>, FPartVariantDef, VariantParts); // 0x0008(0x0010)(Edit, BlueprintVisible, ZeroConstructor, NativeAccessSpecifierPublic)
+};
+
+class UFortCosmeticCharacterPartVariant final : public UFortCosmeticVariantBackedByArray
+{
+public:
+    TArray<struct FPartVariantDef>                PartOptions;                                       // 0x0050(0x0010)(Edit, ZeroConstructor, Protected, NativeAccessSpecifierProtected)
+public:
+    DECLARE_STATIC_CLASS(UFortCosmeticCharacterPartVariant)
+    DECLARE_DEFAULT_OBJECT(UFortCosmeticCharacterPartVariant)
+};
+
+class UAthenaCosmeticItemDefinition : public UFortItemDefinition
+{
+public:
+    DEFINE_MEMBER(TArray<UFortCosmeticVariant*>, UAthenaCosmeticItemDefinition, ItemVariants); // 0x0000(0x0010)(Edit, BlueprintVisible, ZeroConstructor, NativeAccessSpecifierPublic)
+public:
+    DECLARE_STATIC_CLASS(UAthenaCosmeticItemDefinition)
+    DECLARE_DEFAULT_OBJECT(UAthenaCosmeticItemDefinition)
+};
+
 class UFortBotNameSettings : public UObject
 {
     
@@ -430,7 +463,6 @@ public:
     DEFINE_PTR(UFortAthenaAIBotCharacterCustomization, UFortAthenaAIBotCustomizationData, CharacterCustomization);
 	DEFINE_PTR(UFortAthenaAIBotInventoryItems, UFortAthenaAIBotCustomizationData, StartupInventory);
     DEFINE_PTR(UFortBotNameSettings, UFortAthenaAIBotCustomizationData, BotNameSettings);   
-
 	DEFINE_MEMBER(float, UFortAthenaAIBotCustomizationData, SkillLevel);
 };
 
