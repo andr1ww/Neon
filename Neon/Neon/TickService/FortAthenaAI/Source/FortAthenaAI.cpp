@@ -220,7 +220,7 @@ void TickService::FortAthenaAIService::AircraftPhase(FortAthenaAI& AI, float Cur
 
     if (!AI.bThankedBusDriver)
     {
-        if (UKismetMathLibrary::RandomBoolWithWeight(0.05f))
+        if (UKismetMathLibrary::RandomBoolWithWeight(0.01f))
         {
             AI.bThankedBusDriver = true;
             AI.Controller->ThankBusDriver();
@@ -238,7 +238,7 @@ void TickService::FortAthenaAIService::AircraftPhase(FortAthenaAI& AI, float Cur
         
         float personalJumpTime = CalledAt + UKismetMathLibrary::RandomFloatInRange(15.0f, 22.0f);
         
-        bool shouldJump = UKismetMathLibrary::RandomBoolWithWeight(0.05f) || CurrentTime > personalJumpTime;
+        bool shouldJump = UKismetMathLibrary::RandomBoolWithWeight(0.02f) || CurrentTime > personalJumpTime;
         
         if (shouldJump)
         {
@@ -278,6 +278,12 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
         ChestArray = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), ChestClass);
     }
 
+    if (!AI.LastFrame % 500 == 0)
+    {
+        PickupArray = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), PickupClass);
+        ChestArray = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), ChestClass);
+    }
+    
     FVector BotLocation = AI.Pawn->K2_GetActorLocation();
     float NearestDistanceSq = FLT_MAX;
 

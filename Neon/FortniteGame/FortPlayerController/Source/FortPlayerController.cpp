@@ -517,60 +517,71 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
     }
     
     if (!BuildingClass) {
-        return;
+        goto original;
     }
 
-    TArray<AActor*> ExistingBuildings;
-    char PlacementResultFlag;
-    static auto CantBuild = (__int64 (*)(UWorld*, UObject*, FVector, FRotator, bool, TArray<AActor*>*, char*))(Finder->CantBuild());
-    
-    if (CantBuild(UWorld::GetWorld(), BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot, CreateBuildingData.bMirrored, &ExistingBuildings, &PlacementResultFlag)) {
-    	ExistingBuildings.Free();
-    	return;
-    }
-
-    for (AActor* Building : ExistingBuildings) {
-        if (Building) Building->K2_DestroyActor();
-    }
-
-    ABuildingSMActor* BuildingSMActor = UGameplayStatics::SpawnActorOG<ABuildingSMActor>(
-        BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot, PlayerController);
+    {
+        TArray<AActor*> ExistingBuildings;
+        char PlacementResultFlag;
+        static auto CantBuild = (__int64 (*)(UWorld*, UObject*, FVector, FRotator, bool, TArray<AActor*>*, char*))(Finder->CantBuild());
         
-    if (BuildingSMActor) {
-    	if (!PlayerController->Get<bool>("FortPlayerController", "bBuildFree")) {
-    		auto* Resource = UFortKismetLibrary::K2_GetResourceItemDefinition(BuildingSMActor->GetResourceType());
-
-    		AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
-    		TArray<UFortWorldItem*>& ItemInstances = WorldInventory->GetInventory().GetItemInstances();
-        
-    		FFortItemEntry* ItemEntry = nullptr;
-    		for (UFortWorldItem* Item : ItemInstances) {
-    			if (Item->GetItemEntry().GetItemDefinition() == Resource) {
-    				ItemEntry = &Item->GetItemEntry();
-    				break;
-    			}
-    		}
-
-    		if (!ItemEntry || ItemEntry->GetCount() < 10) {
-    			return;
-    		}
-
-    		ItemEntry->SetCount(ItemEntry->GetCount() - 10);
-    		AFortInventory::ReplaceEntry(PlayerController, *ItemEntry);
-    	}
-    	
-        BuildingSMActor->SetbPlayerPlaced(true);
-        BuildingSMActor->InitializeKismetSpawnedBuildingActor(BuildingSMActor, PlayerController, true);
-
-        if (AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState()) {
-            uint8 TeamIndex = PlayerState->GetTeamIndex();
-            BuildingSMActor->Set("BuildingActor", "TeamIndex", TeamIndex);
-            BuildingSMActor->Set("BuildingActor", "Team", EFortTeam(TeamIndex));
+        if (CantBuild(UWorld::GetWorld(), BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot, CreateBuildingData.bMirrored, &ExistingBuildings, &PlacementResultFlag)) {
+            ExistingBuildings.Free();
+            goto original;
         }
 
-        PlayerController->Set("FortPlayerControllerAthena", "BuildingsCreated",
-            PlayerController->Get<int32>("FortPlayerControllerAthena", "BuildingsCreated") + 1);
+        for (AActor* Building : ExistingBuildings) {
+            if (Building) Building->K2_DestroyActor();
+        }
+
+        ABuildingSMActor* BuildingSMActor = UGameplayStatics::SpawnActorOG<ABuildingSMActor>(
+            BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot, PlayerController);
+            
+        if (BuildingSMActor) {
+            if (!PlayerController->Get<bool>("FortPlayerController", "bBuildFree")) {
+               auto* Resource = UFortKismetLibrary::K2_GetResourceItemDefinition(BuildingSMActor->GetResourceType());
+
+               AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+               TArray<UFortWorldItem*>& ItemInstances = WorldInventory->GetInventory().GetItemInstances();
+            
+               FFortItemEntry* ItemEntry = nullptr;
+               for (UFortWorldItem* Item : ItemInstances) {
+                  if (Item->GetItemEntry().GetItemDefinition() == Resource) {
+                     ItemEntry = &Item->GetItemEntry();
+                     break;
+                  }
+               }
+
+               if (!ItemEntry || ItemEntry->GetCount() < 10) {
+                 goto original;
+               }
+
+               ItemEntry->SetCount(ItemEntry->GetCount() - 10);
+               AFortInventory::ReplaceEntry(PlayerController, *ItemEntry);
+            }
+            
+            BuildingSMActor->SetbPlayerPlaced(true);
+            BuildingSMActor->InitializeKismetSpawnedBuildingActor(BuildingSMActor, PlayerController, true);
+
+            if (AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState()) {
+                uint8 TeamIndex = PlayerState->GetTeamIndex();
+                BuildingSMActor->Set("BuildingActor", "TeamIndex", TeamIndex);
+                BuildingSMActor->Set("BuildingActor", "Team", EFortTeam(TeamIndex));
+            }
+
+            PlayerController->Set("FortPlayerControllerAthena", "BuildingsCreated",
+                PlayerController->Get<int32>("FortPlayerControllerAthena", "BuildingsCreated") + 1);
+        }
     }
+    
+original:
+    struct FortPlayerController_ServerCreateBuildingActor final
+    {
+    public:
+        struct FCreateBuildingActorData               CreateBuildingData;                                // 0x0000(0x0038)(Parm, NoDestructor, NativeAccessSpecifierPublic)
+    } Params{CreateBuildingData};
+
+    return callExecOG(PlayerController, "/Script/FortniteGame.FortPlayerController", ServerCreateBuildingActor, Params);
 }
 
 void AFortPlayerControllerAthena::ServerBeginEditingBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
@@ -587,9 +598,11 @@ void AFortPlayerControllerAthena::ServerBeginEditingBuildingActor(AFortPlayerCon
     FFortItemList& Inventory = WorldInventory->GetInventory();
     TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
 
+	static UFortItemDefinition* Def = Runtime::StaticFindObject<UFortItemDefinition>("/Game/Items/Weapons/BuildingTools/EditTool.EditTool");
+	
     for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); ++i)
     {
-        if (ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemDefinition()->IsA<UFortEditToolItemDefinition>())
+        if (ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemDefinition() == Def)
         {
             ItemEntry = &ItemInstancesOffsetPtr[i]->GetItemEntry();
             break;
@@ -631,7 +644,7 @@ void AFortPlayerControllerAthena::ServerEditBuildingActor(AFortPlayerControllerA
     Stack.StepCompiledIn(&bMirrored);
     Stack.IncrementCode();
 
-    if (!PlayerController || !BuildingSMActor  || !BuildingSMActor->IsA<ABuildingSMActor>() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
+    if (!PlayerController || !BuildingSMActor || !BuildingSMActor->IsA<ABuildingSMActor>() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
 
     BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", nullptr);
 
@@ -639,7 +652,11 @@ void AFortPlayerControllerAthena::ServerEditBuildingActor(AFortPlayerControllerA
 
     ABuildingSMActor* NewBuild = ReplaceBuildingActor(BuildingSMActor, 1, NewClass, BuildingSMActor->Get<int32>("BuildingActor", "CurrentBuildingLevel"), RotationIterations, bMirrored, PlayerController);
 
-    if (NewBuild) NewBuild->SetbPlayerPlaced(true);
+    if (NewBuild)
+    {
+    	NewBuild->Set("BuildingActor", "TeamIndex", PlayerController->GetPlayerState()->GetTeamIndex());
+	    NewBuild->SetbPlayerPlaced(true);
+    }
 }
 
 void AFortPlayerControllerAthena::ServerEndEditingBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
@@ -654,6 +671,14 @@ void AFortPlayerControllerAthena::ServerEndEditingBuildingActor(AFortPlayerContr
 	
     PlayerController->Set("FortPlayerControllerAthena", "BuildingsEdited", 
     PlayerController->Get<int32>("FortPlayerControllerAthena", "BuildingsEdited") + 1);
+
+	AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->GetMyFortPawn()->GetCurrentWeapon());
+	if (EditingTool)
+	{
+		EditingTool->Set("FortWeap_EditingTool", "bEditConfirmed", true);
+		EditingTool->Set("FortWeap_EditingTool", "EditActor", nullptr);
+		EditingTool->OnRep_EditActor();
+	}
 }
 
 void AFortPlayerControllerAthena::ServerRepairBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
@@ -763,21 +788,9 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	PlayerState->Set("FortPlayerState", "PawnDeathLocation", DeathLocation);
 	
 	if (DeathInfo) {
-		FGameplayTagContainer CopyTags;
-
-		for (int i = 0; i < DeathTags.GameplayTags.Num(); ++i)
-		{
-			CopyTags.GameplayTags.Add(DeathTags.GameplayTags[i]);
-		}
-
-		for (int i = 0; i < DeathTags.ParentTags.Num(); ++i)
-		{
-			CopyTags.ParentTags.Add(DeathTags.ParentTags[i]);
-		}
-		
 		DeathInfo->SetbDBNO(false);
 		DeathInfo->SetDeathLocation(DeathLocation);
-		DeathInfo->SetDeathTags(CopyTags);
+		DeathInfo->SetDeathTags(DeathTags);
 		DeathInfo->SetDeathCause(DeathCause);
 		DeathInfo->SetDowner(nullptr);
 		DeathInfo->SetFinisherOrDowner((AActor*)KillerPlayerState);
@@ -896,10 +909,22 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		}
 	}
 
-	bool bRebooting = PlayerState->GetPlayerTeam()->GetTeamMembers().Num() > 1;
-	if (bRebooting) for (auto& Member : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
-		auto MemberController = (AFortPlayerControllerAthena*)Member;
-		if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) bRebooting = false;
+	bool bRebooting = false;
+	auto PlayerTeam = PlayerState->GetPlayerTeam();
+
+	if (PlayerTeam && PlayerTeam->GetTeamMembers().Num() > 1) {
+		bRebooting = true;
+		for (auto& Member : PlayerTeam->GetTeamMembers()) {
+			auto MemberController = (AFortPlayerControllerAthena*)Member;
+			if (MemberController && MemberController != PlayerController) {
+				if (!MemberController->GetbMarkedAlive()) {
+					bRebooting = false;
+					break;
+				}
+			}
+		}
+	} else {
+		bRebooting = false;
 	}
 
 	static int DamageCauserOffset = Runtime::GetOffsetStruct("FortPlayerDeathReport", "DamageCauser");
@@ -1028,8 +1053,8 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		}
 	}
 
-	if (Config::bLateGame && KillerPawn && KillerPawn != PlayerController->GetMyFortPawn()) {
-		auto* AbilitySystem = PlayerState->GetAbilitySystemComponent();
+	if (/*Config::bLateGame && */KillerPawn && KillerPawn != PlayerController->GetMyFortPawn()) {
+		auto* AbilitySystem = KillerPlayerState->GetAbilitySystemComponent();
 		auto Handle = AbilitySystem->CallFunc<FGameplayEffectContextHandle>("AbilitySystemComponent", "MakeEffectContext");
 		FGameplayTag Tag;
 		static auto Cue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Shield.PotionConsumed");

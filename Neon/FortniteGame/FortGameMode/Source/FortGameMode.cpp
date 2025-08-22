@@ -264,14 +264,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 Playlist = Runtime::StaticFindObject<UFortPlaylistAthena>(path);
 
                 FPlaylistData PlaylistData{};
-
-                if (PlaylistName.contains("vamp")) {
-                    PlaylistData.EventWindowId = L"ARENA_S" + Fortnite_Version.GetMajorVersion();
-                    PlaylistData.TournamentId = L"eventTemplate_ARENA_S" + Fortnite_Version.GetMajorVersion();
-                    UE_LOG(LogNeon, Log, "Enabling LateGame");
-                    Config::bLateGame = true;
-                }
-
+                
                 if (NexaAuth::NexaAuthToken.empty() || NexaAuth::NexaAuthToken == "")
                 {
                     NexaAuth::SetAuthToken();
@@ -279,6 +272,15 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 
                 if (Playlist)
                 {
+                    PlaylistData.PlaylistName = Playlist->GetPlaylistName();
+
+                    if (PlaylistName.find("vamp") != std::string::npos) {
+                        PlaylistData.EventWindowId = L"ARENA_S" + Fortnite_Version.GetMajorVersion();
+                        PlaylistData.TournamentId = L"eventTemplate_ARENA_S" + Fortnite_Version.GetMajorVersion();
+                        UE_LOG(LogNeon, Log, "Enabling LateGame");
+                        Config::bLateGame = true;
+                    }
+                    
                     SetPlaylist(GameMode, Playlist);
                     Nexa::Echo::EchoSessionUpdate(Playlist);
                     if (PlaylistName.find("showdownalt") != std::string::npos)
@@ -302,6 +304,15 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                         Nexa::Echo::EchoSessionUpdate(Playlist);
 
                         FPlaylistData PlaylistData{};
+                        PlaylistData.PlaylistName = Playlist->GetPlaylistName();
+
+                        if (PlaylistName.find("vamp") != std::string::npos) {
+                            PlaylistData.EventWindowId = L"ARENA_S" + Fortnite_Version.GetMajorVersion();
+                            PlaylistData.TournamentId = L"eventTemplate_ARENA_S" + Fortnite_Version.GetMajorVersion();
+                            UE_LOG(LogNeon, Log, "Enabling LateGame");
+                            Config::bLateGame = true;
+                        }
+                        
                         if (PlaylistName.find("showdownalt") != std::string::npos)
                         {
                             PlaylistData.EventWindowId = L"LG_ARENA_S" + Fortnite_Version.GetMajorVersion();

@@ -622,7 +622,7 @@ public:
 	static void ServerAcknowledgePossession(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerExecuteInventoryItem(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerPlayEmoteItem(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
-	static void ServerCreateBuildingActor(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
+	DefHookOg(void, ServerCreateBuildingActor, AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerBeginEditingBuildingActor(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerEditBuildingActor(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerEndEditingBuildingActor(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);

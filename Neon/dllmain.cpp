@@ -710,7 +710,7 @@ void Main()
 	Runtime::Hook(Finder->OnDamageServer(), ABuildingSMActor::OnDamageServer, (void**)&ABuildingSMActor::OnDamageServerOG);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerReadyToStartMatch", AFortPlayerControllerAthena::ServerReadyToStartMatch, (void**)&AFortPlayerControllerAthena::ServerReadyToStartMatchOG);
 	Runtime::Exec("/Script/FortniteGame.FortAthenaCreativePortal.TeleportPlayerToLinkedVolume", AFortAthenaCreativePortal::TeleportPlayerToLinkedVolume);
-	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerCreateBuildingActor", AFortPlayerControllerAthena::ServerCreateBuildingActor);
+	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerCreateBuildingActor", AFortPlayerControllerAthena::ServerCreateBuildingActor, (void**)&AFortPlayerControllerAthena::ServerCreateBuildingActorOG);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerBeginEditingBuildingActor", AFortPlayerControllerAthena::ServerBeginEditingBuildingActor);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerEditBuildingActor", AFortPlayerControllerAthena::ServerEditBuildingActor);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerEndEditingBuildingActor", AFortPlayerControllerAthena::ServerEndEditingBuildingActor);

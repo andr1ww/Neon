@@ -8,6 +8,8 @@
 #include "Neon/Finder/Header/Finder.h"
 #include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
 #include "Neon/Config.h"
+#include "Neon/Nexa/Nexa.h"
+#include "Neon/Nexa/Echo/Echo.h"
 #include "Neon/TickService/FortAthenaAI/Header/FortAthenaAI.h"
 
 UWorld* UWorld::GetWorld()
@@ -397,7 +399,8 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
         if (!bStartedBus)
         {
             static bool bSet = false;
-            
+            static bool bOk = false;
+
             if (GameState->GetGamePhase() == EAthenaGamePhase::Warmup && GameMode->GetAlivePlayers().Num() > 0
                 && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) < 100
                 && GameMode->GetAliveBots().Num() < 100 && GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Default") && !Config::bLateGame)
@@ -406,6 +409,15 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
                 {
                     AFortAthenaAIBotController::SpawnPlayerBot(1);
                 }
+            } else if (Config::bEchoSessions && GameState->GetGamePhase() == EAthenaGamePhase::Warmup && GameMode->GetAlivePlayers().Num() > 0
+                && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) == 100
+                && GameMode->GetAliveBots().Num() == 100 && GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Default") && !Config::bLateGame & !bOk)
+            {
+                bOk = true;
+                std::thread t([]() {
+                    Nexa::Echo::CloseEchoSession();
+                });
+                t.detach();
             }
             
             if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && bSet)
