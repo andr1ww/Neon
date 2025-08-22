@@ -672,9 +672,9 @@ public:
 	DECLARE_STATIC_CLASS(AFortPlayerControllerAthena)
 	DECLARE_DEFAULT_OBJECT(AFortPlayerControllerAthena)
 public:
-	void ClientSendEndBattleRoyaleMatchForPlayer(bool bSuccess, const FAthenaRewardResult& Result)
+	void ClientSendEndBattleRoyaleMatchForPlayer(bool bSuccess, const FAthenaRewardResult Result)
 	{
-		  static SDK::UFunction* Func = nullptr;
+		/*   static SDK::UFunction* Func = nullptr;
 		   SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPlayerControllerAthena", "ClientSendEndBattleRoyaleMatchForPlayer");
 
 		   if (Func == nullptr)
@@ -693,7 +693,9 @@ public:
 		   FortPlayerControllerAthena_ClientSendEndBattleRoyaleMatchForPlayer_Params.bSuccess = bSuccess;
 		   FortPlayerControllerAthena_ClientSendEndBattleRoyaleMatchForPlayer_Params.Result = Result;
 
-		this->ProcessEvent(Func, &FortPlayerControllerAthena_ClientSendEndBattleRoyaleMatchForPlayer_Params);
+		   this->ProcessEvent(Func, &FortPlayerControllerAthena_ClientSendEndBattleRoyaleMatchForPlayer_Params);
+   */
+		this->CallFunc<void>("FortPlayerControllerAthena", "ClientSendEndBattleRoyaleMatchForPlayer", bSuccess, Result);
 	}
 
 	void ClientSendMatchStatsForPlayer(const struct FAthenaMatchStats &Result)
