@@ -307,16 +307,16 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                         PlaylistData.PlaylistName = Playlist->GetPlaylistName();
 
                         if (PlaylistName.find("vamp") != std::string::npos) {
-                            PlaylistData.EventWindowId = L"ARENA_S" + Fortnite_Version.GetMajorVersion();
-                            PlaylistData.TournamentId = L"eventTemplate_ARENA_S" + Fortnite_Version.GetMajorVersion();
+                            PlaylistData.EventWindowId = L"ARENA_S" + std::to_wstring(Fortnite_Version.GetMajorVersion());
+                            PlaylistData.TournamentId = L"eventTemplate_ARENA_S" + std::to_wstring(Fortnite_Version.GetMajorVersion());
                             UE_LOG(LogNeon, Log, "Enabling LateGame");
                             Config::bLateGame = true;
                         }
                         
                         if (PlaylistName.find("showdownalt") != std::string::npos)
                         {
-                            PlaylistData.EventWindowId = L"LG_ARENA_S" + Fortnite_Version.GetMajorVersion();
-                            PlaylistData.TournamentId = L"eventTemplate_LG_ARENA_S" + Fortnite_Version.GetMajorVersion();
+                            PlaylistData.EventWindowId = L"ARENA_S" + std::to_wstring(Fortnite_Version.GetMajorVersion());
+                            PlaylistData.TournamentId = L"eventTemplate_ARENA_S" + std::to_wstring(Fortnite_Version.GetMajorVersion());
                         }
 			
                         Nexa::SetPlaylistData(PlaylistData);

@@ -8,8 +8,15 @@
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "Neon/Config.h"
 
+
 void Nexa::BroadcastMatchResults(AFortPlayerControllerAthena* Controller, AFortPlayerStateAthena* PlayerState, FPlaylistData PlaylistData, AFortGameModeAthena* GameMode)
 {
+    static int StartingPlayers = 0;
+    if (StartingPlayers == 0)
+    {
+        StartingPlayers = GameMode->GetAlivePlayers().Num();
+    }
+    
     AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
     std::string AccountID = Helpers::GetAccountID(PlayerState);
     UE_LOG(LogNeon, Log, "Broadcasting Match Results for AccountID: %s", AccountID.c_str());
@@ -23,7 +30,7 @@ void Nexa::BroadcastMatchResults(AFortPlayerControllerAthena* Controller, AFortP
     } else
     {
         Payload["FortPlayerControllerAthena"]["MatchReport"]["Place"] = 20;
-        Payload["FortPlayerControllerAthena"]["MatchReport"]["TotalPlayers"] = Nexa::GetState().StartingPlayers;
+        Payload["FortPlayerControllerAthena"]["MatchReport"]["TotalPlayers"] = StartingPlayers;
     }
     
     // player state object 
