@@ -32,6 +32,12 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(AFortPlayerControl
         void* (*ApplyCharacterCustomization)(AFortPlayerStateAthena*, APawn*) = decltype(ApplyCharacterCustomization)(Finder->ApplyCharacterCustomization());
         ApplyCharacterCustomization(PlayerController->GetPlayerState(), PawnToAcknowledge);
     } else {
+    	PlayerController->GetPlayerState()->Set(
+"FortPlayerStateAthena", "SeasonLevelUIDisplay",
+PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "CurrentLevel")
+);
+    	PlayerController->GetPlayerState()->OnRep_SeasonLevelUIDisplay();
+    	
         UFortKismetLibrary::UpdatePlayerCustomCharacterPartsVisualization(PlayerController->GetPlayerState());
     }
 
@@ -141,12 +147,6 @@ void AFortPlayerControllerAthena::ServerLoadingScreenDropped(AFortPlayerControll
 
 	if (Fortnite_Version >= 11.00)
 	{
-		PlayerState->Set(
-			"FortPlayerStateAthena", "SeasonLevelUIDisplay",
-			PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComponent", "CurrentLevel")
-		);
-		PlayerState->OnRep_SeasonLevelUIDisplay();
-
 		PlayerController->GetXPComponent()->Set(
 			"FortPlayerControllerAthenaXPComponent", "bRegisteredWithQuestManager", true
 		);
