@@ -260,7 +260,7 @@ void AFortPlayerControllerAthena::GetPlayerViewPoint(AFortPlayerControllerAthena
 	if (PlayerController->GetMyFortPawn())
 	{
 		OutViewLocation = PlayerController->GetViewTarget()->GetActorLocation();
-		OutViewRotation = PlayerController->GetMyFortPawn()->K2_GetActorRotation();
+		OutViewRotation = PlayerController->GetControlRotation();
 		return;
 	}
 

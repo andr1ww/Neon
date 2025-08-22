@@ -42,11 +42,11 @@ void Nexa::BroadcastMatchResults(AFortPlayerControllerAthena* Controller, AFortP
     Payload["FortPlayerStateAthena"]["DeathInfo"]["DeathLocation"]["Z"] = PlayerState->GetDeathInfo().GetDeathLocation().Z;
 
     // playlist object 
-    Payload["PlaylistData"]["PlaylistName"] = PlaylistData.PlaylistName.ToString().ToString().c_str();
-    if (PlaylistData.TournamentId.IsValid())
+    Payload["PlaylistData"]["PlaylistName"] = GameMode->GetCurrentPlaylistName().ToString().ToString().c_str();
+    if (!PlaylistData.TournamentId.empty())
     {
-        Payload["PlaylistData"]["TournamentId"] = PlaylistData.TournamentId.ToString().c_str();
-        Payload["PlaylistData"]["EventWindowId"] = PlaylistData.EventWindowId.ToString().c_str();
+        Payload["PlaylistData"]["TournamentId"] = PlaylistData.TournamentId.c_str();
+        Payload["PlaylistData"]["EventWindowId"] = PlaylistData.EventWindowId.c_str();
     }
 
     // game mode object 

@@ -11,6 +11,29 @@ public:
     DEFINE_PTR(APlayerState, AController, PlayerState);
     DEFINE_PTR(APawn, AController, Pawn);
 public:
+    FRotator GetControlRotation()
+    {
+        static class SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("Controller", "GetControlRotation");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return FRotator();
+
+        struct Controller_GetViewTarget final
+        {
+        public:
+            class FRotator                                 ReturnValue;                                       // 0x0000(0x0008)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        };
+        
+        Controller_GetViewTarget Params{};
+
+        this->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+    
     AActor* GetViewTarget()
     {
         static class SDK::UFunction* Func = nullptr;
