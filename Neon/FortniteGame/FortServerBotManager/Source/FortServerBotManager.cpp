@@ -102,15 +102,23 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
                     auto Items = Variants.GetData();
                     static int32 PartDefSize = StaticClassImpl("PartVariantDef")->GetSize();
 
+                    UE_LOG(LogNeon, Log, "Processing Variant Channel: %s", CVC.ActiveVariantTag.TagName.ToString().ToString().c_str());
+
                     for (int32 i = 0; i < Variants.Num(); i++) {
                         auto* var = reinterpret_cast<UFortCosmeticVariant*>(Items[i]);
                         if (!var || !IsValidPointer(var)) continue;
                         if (auto CCPV = Cast<UFortCosmeticCharacterPartVariant>(var)) {
+                            UE_LOG(LogNeon, Log, "Found Character Part Variant");
                             auto* PartOpts = CCPV->PartOptions.GetData();
                             for (int32 j = 0; j < CCPV->PartOptions.Num(); j++) {
                                 auto& def = *reinterpret_cast<FPartVariantDef*>(__int64(PartOpts) + (j * PartDefSize));
-                                if (CVC.ActiveVariantTag.TagName.GetComparisonIndex() == def.GetCustomizationVariantTag().TagName.GetComparisonIndex()) {
+                                auto activeTagIndex = CVC.ActiveVariantTag.TagName.GetComparisonIndex();
+                                auto defTagIndex = def.GetCustomizationVariantTag().TagName.GetComparisonIndex();
+                                UE_LOG(LogNeon, Log, "Comparing tags: Active=%d, Def=%d", activeTagIndex, defTagIndex);
+                
+                                if (activeTagIndex == defTagIndex) {
                                     Def = &def;
+                                    UE_LOG(LogNeon, Log, "Found matching variant def!");
                                     break;
                                 }
                             }
@@ -120,11 +128,19 @@ AFortPlayerPawn* UFortServerBotManagerAthena::SpawnBot(UFortServerBotManagerAthe
 
                     if (Def)
                     {
+                        UE_LOG(LogNeon, Log, "Processing variant parts");
                         for (auto &VP : Def->GetVariantParts())
                         {
-                            UCustomCharacterPart* Part = VP.Get(UCustomCharacterPart::StaticClass(), true);
-                            VO[Part->GetCharacterPartType()] = Part;
+                            if (UCustomCharacterPart* Part = VP.Get(UCustomCharacterPart::StaticClass(), true))
+                            {
+                                UE_LOG(LogNeon, Log, "Adding part type: %d", (int)Part->GetCharacterPartType());
+                                VO[Part->GetCharacterPartType()] = Part;
+                            }
                         }
+                    }
+                    else
+                    {
+                        UE_LOG(LogNeon, Warning, "No matching variant definition found");
                     }
                 }
                 

@@ -1464,6 +1464,21 @@ uint64 UFinder::InstructionForCollision()
     }
 }
 
+uint64 UFinder::SetEditingPlayer()
+{
+    static uint64 CachedResult = 0;
+    if (CachedResult != 0)
+        return CachedResult;
+
+    auto Addr = Memcury::Scanner::FindPattern("48 89 5C 24 ? 57 48 83 EC ? 80 B9 ? ? ? ? ? 48 8B FA 48 8B D9 75 ? 48 83 B9").Get();
+    if (Addr != 0)
+    {
+        return CachedResult = Addr;
+    }
+
+    return 0;
+}
+
 uint64 UFinder::GetGameSessionClass() // IM LAZY TO TRY AND MAKE A SIG (ITS NOT EASY FOR THIS FUNC)))GOIJ02OIGOIWEGOIWG
 {
     if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.60)

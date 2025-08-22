@@ -371,8 +371,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
         {
             ServerReplicateActors(NetDriver, DeltaSeconds);
         }
-
-            
+        
         if (GetAsyncKeyState(VK_F6)) {
             for (auto& ClientConnection : NetDriver->GetClientConnections())
             {
@@ -407,7 +406,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             {
                 if (UKismetMathLibrary::RandomBoolWithWeight(0.02f))
                 {
-                    AFortAthenaAIBotController::SpawnPlayerBot(1);
+        //            AFortAthenaAIBotController::SpawnPlayerBot(1);
                 }
             } else if (Config::bEchoSessions && GameState->GetGamePhase() == EAthenaGamePhase::Warmup && GameMode->GetAlivePlayers().Num() > 0
                 && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) == 100

@@ -113,6 +113,27 @@ public:
     DEFINE_MEMBER(FCurveTableRowHandle, ABuildingSMActor, BuildingResourceAmountOverride)
     DEFINE_MEMBER(EFortResourceType, ABuildingSMActor, ResourceType)
 public:
+    void SetMirrored(bool bIsMirrored)
+    {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BuildingSMActor", "SetMirrored");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        struct BuildingSMActor_SetMirrored final
+        {
+        public:
+            bool                                          bIsMirrored;                                       // 0x0000(0x0001)(Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        } Params {};
+
+        Params.bIsMirrored = bIsMirrored;
+
+        this->ProcessEvent(Func, &Params);
+    }
+    
     DefHookOg(void, OnDamageServer, ABuildingSMActor*, float, FGameplayTagContainer, FVector, FHitResult, AFortPlayerControllerAthena*, AActor*, FGameplayEffectContextHandle);
 public:
     DECLARE_STATIC_CLASS(ABuildingSMActor)

@@ -411,7 +411,8 @@ public:
 
 		this->ProcessEvent(Func, nullptr);
 	}
-
+	DEFINE_BOOL(AFortWeap_EditingTool, bEditConfirmed)
+	DEFINE_PTR(ABuildingSMActor, AFortWeap_EditingTool, EditActor);
 public:
 	DECLARE_STATIC_CLASS(AFortWeap_EditingTool)
 	DECLARE_DEFAULT_OBJECT(AFortWeap_EditingTool)

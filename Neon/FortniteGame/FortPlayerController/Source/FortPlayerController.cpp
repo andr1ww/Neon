@@ -561,6 +561,7 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
             }
             
             BuildingSMActor->SetbPlayerPlaced(true);
+        	BuildingSMActor->SetMirrored(CreateBuildingData.bMirrored);
             BuildingSMActor->InitializeKismetSpawnedBuildingActor(BuildingSMActor, PlayerController, true);
 
             if (AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState()) {
@@ -568,9 +569,6 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
                 BuildingSMActor->Set("BuildingActor", "TeamIndex", TeamIndex);
                 BuildingSMActor->Set("BuildingActor", "Team", EFortTeam(TeamIndex));
             }
-
-            PlayerController->Set("FortPlayerControllerAthena", "BuildingsCreated",
-                PlayerController->Get<int32>("FortPlayerControllerAthena", "BuildingsCreated") + 1);
         }
     }
     
@@ -622,12 +620,14 @@ void AFortPlayerControllerAthena::ServerBeginEditingBuildingActor(AFortPlayerCon
 	
     PlayerController->ProcessEvent(Func, &ItemEntry->GetItemGuid());
 
-	BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", PlayerController->GetPlayerState());
-
-    AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->GetMyFortPawn()->GetCurrentWeapon());
+//	BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", PlayerController->GetPlayerState());
+	auto SetEditingPlayer = (void (*)(ABuildingSMActor*, AFortPlayerState*))(Finder->SetEditingPlayer());
+	SetEditingPlayer(BuildingSMActor, PlayerController->GetPlayerState());
+	
+    AFortWeap_EditingTool* EditingTool = (AFortWeap_EditingTool*)(PlayerController->GetMyFortPawn()->GetCurrentWeapon());
     if (EditingTool)
     {
-        EditingTool->Set("FortWeap_EditingTool", "EditActor", BuildingSMActor);
+        EditingTool->SetEditActor(BuildingSMActor);
         EditingTool->OnRep_EditActor();
     }
 }
@@ -644,10 +644,11 @@ void AFortPlayerControllerAthena::ServerEditBuildingActor(AFortPlayerControllerA
     Stack.StepCompiledIn(&bMirrored);
     Stack.IncrementCode();
 
-    if (!PlayerController || !BuildingSMActor || !BuildingSMActor->IsA<ABuildingSMActor>() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
+    if (!PlayerController || !BuildingSMActor || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
 
-    BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", nullptr);
-
+	auto SetEditingPlayer = (void (*)(ABuildingSMActor*, AFortPlayerState*))(Finder->SetEditingPlayer());
+	SetEditingPlayer(BuildingSMActor, nullptr);
+	
     static auto ReplaceBuildingActor = (ABuildingSMActor * (*)(ABuildingSMActor*, unsigned int, UObject*, unsigned int, int, bool, AFortPlayerController*))(Finder->ReplaceBuildingActor());
 
     ABuildingSMActor* NewBuild = ReplaceBuildingActor(BuildingSMActor, 1, NewClass, BuildingSMActor->Get<int32>("BuildingActor", "CurrentBuildingLevel"), RotationIterations, bMirrored, PlayerController);
@@ -665,18 +666,16 @@ void AFortPlayerControllerAthena::ServerEndEditingBuildingActor(AFortPlayerContr
     Stack.StepCompiledIn(&BuildingSMActor);
     Stack.IncrementCode();
 
-    if (!PlayerController || !BuildingSMActor || !BuildingSMActor || !BuildingSMActor->IsA<ABuildingSMActor>() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->GetTeamIndex()) return;
+    if (!PlayerController || !BuildingSMActor || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->GetTeamIndex()) return;
 
-	BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", nullptr);
+	auto SetEditingPlayer = (void (*)(ABuildingSMActor*, AFortPlayerState*))(Finder->SetEditingPlayer());
+	SetEditingPlayer(BuildingSMActor, nullptr);
 	
-    PlayerController->Set("FortPlayerControllerAthena", "BuildingsEdited", 
-    PlayerController->Get<int32>("FortPlayerControllerAthena", "BuildingsEdited") + 1);
-
-	AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->GetMyFortPawn()->GetCurrentWeapon());
+	AFortWeap_EditingTool* EditingTool =  (AFortWeap_EditingTool*)(PlayerController->GetMyFortPawn()->GetCurrentWeapon());
 	if (EditingTool)
 	{
-		EditingTool->Set("FortWeap_EditingTool", "bEditConfirmed", true);
-		EditingTool->Set("FortWeap_EditingTool", "EditActor", nullptr);
+		EditingTool->SetbEditConfirmed(true);
+		EditingTool->SetEditActor(nullptr);
 		EditingTool->OnRep_EditActor();
 	}
 }
