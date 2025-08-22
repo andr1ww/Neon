@@ -608,6 +608,15 @@ void FortLootPackage::ServerAttemptInteract(UFortControllerComponent_Interaction
         Container->CallFunc<void>("BuildingContainer", "BounceContainer");
     }
 
+    if (ReceivingActor->IsA(AFortAthenaSupplyDrop::StaticClass()))
+    {
+        static FName Loot_AthenaSupplyDrop = UKismetStringLibrary::Conv_StringToName(L"Loot_AthenaSupplyDrop");
+        TArray<FNeonLootImproper> LootItems = PickLootDrops(Loot_AthenaSupplyDrop);
+        auto SpawnLocation = ReceivingActor->K2_GetActorLocation() + ReceivingActor->GetActorRightVector() * 70.f + FVector{ 0, 0, 50 };	
+
+        InternalSpawnLoot(Loot_AthenaSupplyDrop, SpawnLocation, LootItems);
+    }
+    
 CallOriginal:
     struct FortControllerComponent_Interaction_ServerAttemptInteract final
     {

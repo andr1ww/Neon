@@ -92,6 +92,13 @@ public:
     struct FVector                                InteractPoint;                                     // 0x002C(0x000C)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 };
 
+class AFortAthenaSupplyDrop : public AActor
+{
+public:
+    DECLARE_STATIC_CLASS(AFortAthenaSupplyDrop)
+    DECLARE_DEFAULT_OBJECT(AFortAthenaSupplyDrop)
+};
+
 class ABuildingContainer : public AActor
 {
 public:
