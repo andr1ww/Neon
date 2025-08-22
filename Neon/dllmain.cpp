@@ -284,6 +284,11 @@ void PostInitializeComponentsVolume(AFortPoiVolume* This)
 }
 
 void InitNullsAndRetTrues() {
+	auto ServerCheatAllIndex = Runtime::GetFunctionIdx(Runtime::StaticFindObject<UFunction>("/Script/FortniteGame.FortPlayerController.ServerCheatAll"));
+
+	if (ServerCheatAllIndex)
+		NullFuncs.push_back(__int64(AFortPlayerControllerAthena::GetDefaultObj()->GetVTable()[ServerCheatAllIndex]));
+	
 	if (Fortnite_Version >= 23)
 	{
 		NullFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ? 4C 8B E2 4C 8B F1").Get());
@@ -705,6 +710,7 @@ void Main()
 	if (Fortnite_Version >= 12.00) Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.OnCapsuleBeginOverlap", AFortPlayerPawn::OnCapsuleBeginOverlap);
 	Runtime::Exec("/Script/Engine.PlayerController.ServerAcknowledgePossession", AFortPlayerControllerAthena::ServerAcknowledgePossession);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerExecuteInventoryItem", AFortPlayerControllerAthena::ServerExecuteInventoryItem);
+	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerCheat", AFortPlayerControllerAthena::ServerCheat);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerPlayEmoteItem", AFortPlayerControllerAthena::ServerPlayEmoteItem);
 	Runtime::Exec("/Script/FortniteGame.FortControllerComponent_Aircraft.ServerAttemptAircraftJump", AFortPlayerControllerAthena::ServerAttemptAircraftJump);
 	Runtime::Hook(Finder->OnDamageServer(), ABuildingSMActor::OnDamageServer, (void**)&ABuildingSMActor::OnDamageServerOG);

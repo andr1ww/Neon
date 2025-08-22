@@ -1157,6 +1157,16 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	ClientOnPawnDiedOG(PlayerController, DeathReport);
 }
 
+void AFortPlayerControllerAthena::ServerCheat(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+	FString Msg;
+	Stack.StepCompiledIn(&Msg);
+	Stack.IncrementCode();
+
+	UE_LOG(LogNeon, Log, "Wow");
+}
+
+
 void AFortPlayerControllerAthena::ServerAttemptInventoryDrop(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
 {
 	FGuid ItemGuid;
