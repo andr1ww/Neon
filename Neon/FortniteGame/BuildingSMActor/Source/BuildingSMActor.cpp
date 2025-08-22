@@ -75,10 +75,13 @@ void ABuildingSMActor::OnDamageServer(ABuildingSMActor* BuildingActor,
         
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
+
+    static const UClass* Weapon = AFortWeapon::StaticClass();
+    static const UClass* MeleeWeapon = UFortWeaponMeleeItemDefinition::StaticClass();
     
     if (!DamageCauser || 
-    DamageCauser && !DamageCauser->IsA<AFortWeapon>() || 
-    !static_cast<AFortWeapon*>(DamageCauser)->GetWeaponData()->IsA<UFortWeaponMeleeItemDefinition>()) {
+    DamageCauser && !DamageCauser->IsA(Weapon) || 
+    !static_cast<AFortWeapon*>(DamageCauser)->GetWeaponData()->IsA(MeleeWeapon)) {
         return OnDamageServerOG(BuildingActor, Damage, DamageTags, Momentum, HitInfo, Controller, DamageCauser, Context);
     }
 

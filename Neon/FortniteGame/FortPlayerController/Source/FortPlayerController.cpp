@@ -296,12 +296,14 @@ void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControll
     }
 	
     UFortWeaponItemDefinition* ItemDefinition = nullptr;
-    if (Entry->GetItemDefinition()->IsA<UFortGadgetItemDefinition>())
+	static const UClass* GadgetItem = UFortGadgetItemDefinition::StaticClass();
+	
+    if (Entry->GetItemDefinition()->IsA(GadgetItem))
     {
-        ItemDefinition = Cast<UFortGadgetItemDefinition>(Entry->GetItemDefinition())->GetWeaponItemDefinition();
+        ItemDefinition = ((UFortGadgetItemDefinition*)Entry->GetItemDefinition())->GetWeaponItemDefinition();
     } else
     {
-        ItemDefinition = Cast<UFortWeaponItemDefinition>(Entry->GetItemDefinition());
+        ItemDefinition = (UFortWeaponItemDefinition*)(Entry->GetItemDefinition());
     }
     
     AFortPawn* MyFortPawn = PlayerController->GetMyFortPawn();
@@ -457,11 +459,13 @@ void AFortPlayerControllerAthena::EnterAircraft(AFortPlayerControllerAthena* Pla
 			}
 		} while (!HealSlot2.Item);
 
+		static const UClass* WeaponItemDef = UFortWeaponItemDefinition::StaticClass();
+
 		int ShotgunClipSize = AFortInventory::GetStats((UFortWeaponItemDefinition*)Shotgun.Item)->GetClipSize();
 		int AssaultRifleClipSize = AFortInventory::GetStats((UFortWeaponItemDefinition*)AssaultRifle.Item)->GetClipSize();
 		int SniperClipSize = AFortInventory::GetStats((UFortWeaponItemDefinition*)Sniper.Item)->GetClipSize();
-		int HealClipSize = Heal.Item->IsA<UFortWeaponItemDefinition>() ? AFortInventory::GetStats((UFortWeaponItemDefinition*)Heal.Item)->GetClipSize() : 0;
-		int HealSlot2ClipSize = HealSlot2.Item->IsA<UFortWeaponItemDefinition>() ? AFortInventory::GetStats((UFortWeaponItemDefinition*)HealSlot2.Item)->GetClipSize() : 0;
+		int HealClipSize = Heal.Item->IsA(WeaponItemDef) ? AFortInventory::GetStats((UFortWeaponItemDefinition*)Heal.Item)->GetClipSize() : 0;
+		int HealSlot2ClipSize = HealSlot2.Item->IsA(WeaponItemDef) ? AFortInventory::GetStats((UFortWeaponItemDefinition*)HealSlot2.Item)->GetClipSize() : 0;
 
 		AFortInventory::GiveItem(PlayerController, AssaultRifle.Item, AssaultRifle.Count, AssaultRifleClipSize, 1);
 		AFortInventory::GiveItem(PlayerController, Shotgun.Item, Shotgun.Count, ShotgunClipSize, 1);
@@ -858,7 +862,9 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	if (!KillerPlayerState) KillerPlayerState = PlayerState;
 	if (!KillerPawn) KillerPawn = VictimPawn;
 
-	if (KillerPlayerState && KillerPawn && KillerPawn->GetController() && KillerPawn->GetController() != PlayerController && !KillerPawn->GetController()->IsA<AFortAthenaAIBotController>())
+	static const UClass* AI = AFortAthenaAIBotController::StaticClass();
+	
+	if (KillerPlayerState && KillerPawn && KillerPawn->GetController() && KillerPawn->GetController() != PlayerController && !KillerPawn->GetController()->IsA(AI))
 	{
 		int32 KillerScore = KillerPlayerState->GetKillScore() + 1;
 		int32 TeamScore = KillerPlayerState->GetTeamKillScore() + 1;
@@ -911,7 +917,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	}
 
 	bool bRebooting = false;
-	if (!KillerPawn->GetController()->IsA<AFortAthenaAIBotController>())
+	if (!KillerPawn->GetController()->IsA(AI))
 	{
 		auto PlayerTeam = PlayerState->GetPlayerTeam();
 
@@ -934,16 +940,17 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	static int DamageCauserOffset = Runtime::GetOffsetStruct("FortPlayerDeathReport", "DamageCauser");
 	AActor* DamageCauser = *(AActor**)((char*)&DeathReport + DamageCauserOffset);
 	UFortWeaponItemDefinition* ItemDef = nullptr;
-		
+
+	static const UClass* FortProjectileBase = AFortProjectileBase::StaticClass();
 	if (DamageCauser)
 	{
-		if (DamageCauser->IsA<AFortProjectileBase>())
+		if (DamageCauser->IsA(FortProjectileBase))
 		{
-			auto Owner = Cast<AFortWeapon>(DamageCauser->GetOwner());
+			auto Owner = (AFortWeapon*)(DamageCauser->GetOwner());
 			ItemDef = Owner->IsValidLowLevel() ? Owner->GetWeaponData() : nullptr; 
 		}
 
-		if (auto WeaponDef = Cast<AFortWeapon>(DamageCauser))
+		if (auto WeaponDef = (AFortWeapon*)(DamageCauser))
 		{
 			ItemDef = WeaponDef->GetWeaponData();
 		}
@@ -958,7 +965,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		{50, 5},
 	};
 
-	if (!KillerPawn->GetController()->IsA<AFortAthenaAIBotController>())
+	if (!KillerPawn->GetController()->IsA(AI))
 	{
 		for (const auto& entry : PlacementScores)
 		{
@@ -1060,7 +1067,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		}
 	}
 
-	if (/*Config::bLateGame && */KillerPawn && KillerPawn != VictimPawn && !KillerPawn->GetController()->IsA<AFortAthenaAIBotController>()) {
+	if (/*Config::bLateGame && */KillerPawn && KillerPawn != VictimPawn && !KillerPawn->GetController()->IsA(AI)) {
 		auto* AbilitySystem = KillerPlayerState->GetAbilitySystemComponent();
 		auto Handle = AbilitySystem->CallFunc<FGameplayEffectContextHandle>("AbilitySystemComponent", "MakeEffectContext");
 		FGameplayTag Tag;
