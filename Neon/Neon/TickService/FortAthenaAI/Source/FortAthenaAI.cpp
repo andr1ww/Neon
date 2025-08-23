@@ -270,6 +270,7 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
     static bool bArraysPopulated = false;
     static int32 PickupIndex = 0;
     static int32 ChestIndex = 0;
+    static map<APawn*, AActor*> CachedBestTargets;
 
     if (!bArraysPopulated)
     {
@@ -278,7 +279,7 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
         ChestArray = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), ChestClass);
     }
 
-    if (!AI.LastFrame % 500 == 0)
+    if (AI.LastFrame % 500 == 0)
     {
         PickupArray = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), PickupClass);
         ChestArray = UGameplayStatics::GetAllActorsOfClass(UWorld::GetWorld(), ChestClass);
@@ -378,17 +379,6 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
         bool bInSafeZone = DistanceToZone < GameState->GetSafeZoneIndicator()->GetNextRadius().Size();
             
         if (!bInSafeZone && DistanceToZone > GameState->GetSafeZoneIndicator()->GetNextRadius().Size() * 1.5f) {
-/*            static const FName BB_StormExecutionStatus = UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_Storm_ExecutionStatus"));
-            static const FName BB_StormDestination = UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_Storm_Destination"));
-            static const FName BB_StormMovementState = UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_Storm_MovementState"));
-                
-            auto* BB = AI.Controller->GetBlackboard();
-            if (BB) {
-                BB->SetValueAsEnum(BB_StormExecutionStatus, (uint8)EExecutionStatus::ExecutionAllowed);
-                BB->SetValueAsVector(BB_StormDestination, GameState->GetSafeZoneIndicator()->GetNextCenter());
-                BB->SetValueAsEnum(BB_StormMovementState, (uint8)1); 
-            }
-*/
             AI.Controller->MoveToLocation(GameState->GetSafeZoneIndicator()->GetNextCenter(), 100.0f, true, false, true, true, nullptr, false);
                 
             AI.TargetLoot = nullptr;
@@ -608,75 +598,82 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
 
     AActor* BestTarget = nullptr;
     float BestDistanceSq = 25000000.0f;
-    
-    int32 PickupsPerFrame = 20;
-    int32 ChestsPerFrame = 10;
 
-    for (int32 i = 0; i < PickupsPerFrame && PickupIndex < PickupArray.Num(); i++, PickupIndex++)
+    if (AI.LastFrame % 5 == 0)
     {
-        AActor* PickupActor = PickupArray[PickupIndex];
-        if (!PickupActor || !PickupActor->IsValidLowLevel())
-            continue;
+        int32 PickupsPerFrame = 20;
+        int32 ChestsPerFrame = 10;
 
-        AFortPickupAthena* Pickup = static_cast<AFortPickupAthena*>(PickupActor);
-        if (Pickup->GetbPickedUp())
-            continue;
-            
-        auto* ItemDef = Pickup->GetPrimaryPickupItemEntry().GetItemDefinition();
-        if (!ItemDef)
-            continue;
-            
-        if (ItemDef->IsA<UFortAmmoItemDefinition>())
-            continue;
-
-        FVector PickupPos = PickupActor->K2_GetActorLocation();
-        float dx = BotLocation.X - PickupPos.X;
-        float dy = BotLocation.Y - PickupPos.Y;
-        float distSq = dx * dx + dy * dy;
-        if (distSq < BestDistanceSq)
+        for (int32 i = 0; i < PickupsPerFrame && PickupIndex < PickupArray.Num(); i++, PickupIndex++)
         {
-            BestDistanceSq = distSq;
-            BestTarget = PickupActor;
-        }
-    }
-    if (PickupIndex >= PickupArray.Num())
-        PickupIndex = 0;
-
-    if (!BestTarget)
-    {
-        for (int32 i = 0; i < ChestsPerFrame && ChestIndex < ChestArray.Num(); i++, ChestIndex++)
-        {
-            AActor* Chest = ChestArray[ChestIndex];
-            if (!Chest || !Chest->IsValidLowLevel())
+            AActor* PickupActor = PickupArray[PickupIndex];
+            if (!PickupActor || !PickupActor->IsValidLowLevel())
                 continue;
 
-            FVector ChestPos = Chest->K2_GetActorLocation();
-            float dx = BotLocation.X - ChestPos.X;
-            float dy = BotLocation.Y - ChestPos.Y;
+            AFortPickupAthena* Pickup = static_cast<AFortPickupAthena*>(PickupActor);
+            if (Pickup->GetbPickedUp())
+                continue;
+            
+            auto* ItemDef = Pickup->GetPrimaryPickupItemEntry().GetItemDefinition();
+            if (!ItemDef)
+                continue;
+            
+            if (ItemDef->IsA<UFortAmmoItemDefinition>())
+                continue;
+
+            FVector PickupPos = PickupActor->K2_GetActorLocation();
+            float dx = BotLocation.X - PickupPos.X;
+            float dy = BotLocation.Y - PickupPos.Y;
             float distSq = dx * dx + dy * dy;
             if (distSq < BestDistanceSq)
             {
                 BestDistanceSq = distSq;
-                BestTarget = Chest;
+                BestTarget = PickupActor;
             }
         }
-        if (ChestIndex >= ChestArray.Num())
-            ChestIndex = 0;
+        if (PickupIndex >= PickupArray.Num())
+            PickupIndex = 0;
+
+        if (!BestTarget)
+        {
+            for (int32 i = 0; i < ChestsPerFrame && ChestIndex < ChestArray.Num(); i++, ChestIndex++)
+            {
+                AActor* Chest = ChestArray[ChestIndex];
+                if (!Chest || !Chest->IsValidLowLevel())
+                    continue;
+
+                FVector ChestPos = Chest->K2_GetActorLocation();
+                float dx = BotLocation.X - ChestPos.X;
+                float dy = BotLocation.Y - ChestPos.Y;
+                float distSq = dx * dx + dy * dy;
+                if (distSq < BestDistanceSq)
+                {
+                    BestDistanceSq = distSq;
+                    BestTarget = Chest;
+                }
+            }
+            if (ChestIndex >= ChestArray.Num())
+                ChestIndex = 0;
+        }
+
+        CachedBestTargets[AI.Pawn] = BestTarget;
     }
 
-    if (!BestTarget)
+    AActor* CurrentBestTarget = CachedBestTargets.contains(AI.Pawn) ? CachedBestTargets[AI.Pawn] : nullptr;
+
+    if (CurrentBestTarget && CurrentBestTarget->IsValidLowLevel())
+    {
+        AI.TargetLoot = CurrentBestTarget;
+    }
+    else if (!AI.TargetLoot)
     {
         FVector RandomDirection = FVector(
             UKismetMathLibrary::RandomFloatInRange(-1.0f, 1.0f),
             UKismetMathLibrary::RandomFloatInRange(-1.0f, 1.0f),
             0.0f
         ).GetNormalized();
-        
+    
         FVector WanderTarget = BotLocation + (RandomDirection * 2000.0f);
         AI.Controller->MoveToLocation(WanderTarget, 100.0f, true, false, true, true, nullptr, false);
-    }
-    else
-    {
-        AI.TargetLoot = BestTarget;
     }
 }
