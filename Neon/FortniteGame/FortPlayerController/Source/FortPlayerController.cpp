@@ -1086,6 +1086,22 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		}
 	}
 
+	if (Config::bEchoSessions)
+	{
+		if (!bRebooting) {
+			for (auto& MemberController : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
+				if (!IsValidPointer(MemberController))
+					continue;
+				if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) {
+					auto MemberPlayerState = MemberController->GetPlayerState();
+					Nexa::BroadcastMatchResults(MemberController, MemberPlayerState, Nexa::GetState().PlaylistData, GameMode);
+				}
+			}
+		}
+
+		Nexa::BroadcastMatchResults(PlayerController, PlayerState, Nexa::GetState().PlaylistData, GameMode);
+	}
+
 	int32 TotalAlive = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num();
 	if (TotalAlive == 1 && LastAliveController) {
 		AFortPlayerStateAthena* WinnerPlayerState = LastAliveController->GetPlayerState();
@@ -1123,24 +1139,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			GameState->Set("FortGameStateAthena", "WinningPlayerState", WinnerPlayerState);
 		}
 	}
-
-	if (Config::bEchoSessions)
-	{
-		if (!bRebooting) {
-			for (auto& Member : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
-				auto MemberController = (AFortPlayerControllerAthena*)Member;
-				if (!IsValidPointer(MemberController))
-					continue;
-				if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) {
-					auto MemberPlayerState = MemberController->GetPlayerState();
-					Nexa::BroadcastMatchResults(MemberController, MemberPlayerState, Nexa::GetState().PlaylistData, GameMode);
-				}
-			}
-		}
-
-		Nexa::BroadcastMatchResults(PlayerController, PlayerState, Nexa::GetState().PlaylistData, GameMode);
-	}
-   
+	
 	PlayerState->OnRep_DeathInfo();
 	KillerPlayerState->OnRep_KillScore();
 	KillerPlayerState->OnRep_TeamKillScore();

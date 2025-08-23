@@ -73,11 +73,19 @@ void Nexa::BroadcastMatchResults(AFortPlayerControllerAthena* Controller, AFortP
     Payload["Nexa"]["AccountId"] = AccountID;
     std::vector<FNexaBroadcastQuestProgress> QuestProgress = UFortQuestManager::GetNexaBroadcastQuestProgress(Controller);
     Payload["Nexa"]["BroadcastQuestProgress"] = json::array();
-    for (const auto& Progress : QuestProgress) {
-        json ProgressJson;
-        ProgressJson["BackendName"] = Progress.BackendName;
-        ProgressJson["Count"] = Progress.Count;
-        Payload["Nexa"]["BroadcastQuestProgress"].push_back(ProgressJson);
+    if (!QuestProgress.empty()) {
+        for (const auto& Progress : QuestProgress) {
+            if (!Progress.BackendName.empty()) {
+                json ProgressJson;
+                ProgressJson["BackendName"] = Progress.BackendName;
+                ProgressJson["Count"] = Progress.Count;
+                try {
+                    Payload["Nexa"]["BroadcastQuestProgress"].push_back(ProgressJson);
+                } catch (const json::exception& e) {
+                    UE_LOG(LogNeon, Warning, "Failed to push quest progress: %s", e.what());
+                }
+            }
+        }
     }
     
     std::string endpoint = "http://147.93.1.220/nxa/server/api/v1/" + Config::Echo::Session + "/BroadcastMatchRewards";
