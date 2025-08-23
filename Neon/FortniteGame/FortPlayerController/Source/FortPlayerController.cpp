@@ -854,22 +854,22 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
         
 			if (ItemDef == Wood || ItemDef == Stone || ItemDef == Metal) {
 				bFoundMats = true;
-				AFortInventory::SpawnPickup(DeathLocation, ItemDef, Count, LoadedAmmo,
+				AFortInventory::SpawnPickupDirect(DeathLocation, ItemDef, Count, LoadedAmmo,
 					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 			}
 			
 			if (ItemDef->IsA(WeaponClass) || ItemDef->IsA(ConsumableClass) || ItemDef->IsA(AmmoClass)) {
-				AFortInventory::SpawnPickup(DeathLocation, ItemDef, Count, LoadedAmmo,
+				AFortInventory::SpawnPickupDirect(DeathLocation, ItemDef, Count, LoadedAmmo,
 					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 			}
 		}
    
 		if (!bFoundMats) {
-			AFortInventory::SpawnPickup(DeathLocation, Wood, 50, 0,
+			AFortInventory::SpawnPickupDirect(DeathLocation, Wood, 50, 0,
 				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
-			AFortInventory::SpawnPickup(DeathLocation, Stone, 50, 0,
+			AFortInventory::SpawnPickupDirect(DeathLocation, Stone, 50, 0,
 				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
-			AFortInventory::SpawnPickup(DeathLocation, Metal, 50, 0,
+			AFortInventory::SpawnPickupDirect(DeathLocation, Metal, 50, 0,
 				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 		}
 	}

@@ -529,22 +529,15 @@ void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFort
 }
 
 FFortItemEntry* AFortInventory::MakeItemEntry(UFortItemDefinition* ItemDefinition, int32 Count, int32 Level) {
-    static FFortItemEntry* IE = nullptr;
-    static bool bInitialized = false;
+    if (!ItemDefinition) return nullptr;
     
-    if (!bInitialized) {
-        int32 FortItemEntrySize = StaticClassImpl("FortItemEntry")->GetSize();
-        IE = (FFortItemEntry*)malloc(FortItemEntrySize);
-        
-        if (IE) {
-            memset(IE, 0, FortItemEntrySize);
-            new(IE) FFortItemEntry();
-        }
-        
-        bInitialized = true;
-    }
+    static int32 FortItemEntrySize = StaticClassImpl("FortItemEntry")->GetSize();
     
+    static FFortItemEntry* IE = (FFortItemEntry*)malloc(FortItemEntrySize);
     if (!IE) return nullptr;
+    
+    memset(IE, 0, FortItemEntrySize);
+    new(IE) FFortItemEntry();
     
     IE->MostRecentArrayReplicationKey = -1;
     IE->ReplicationID = -1;
@@ -552,7 +545,15 @@ FFortItemEntry* AFortInventory::MakeItemEntry(UFortItemDefinition* ItemDefinitio
 
     IE->SetItemDefinition(ItemDefinition);
     IE->SetCount(Count);
-    IE->SetLoadedAmmo(/*ItemDefinition->IsA<UFortWeaponItemDefinition>() ? GetStats((UFortWeaponItemDefinition*)ItemDefinition)->ClipSize : */0);
+    
+    if (ItemDefinition->IsA<UFortWeaponItemDefinition>()) {
+        UFortWeaponItemDefinition* WeaponDef = Cast<UFortWeaponItemDefinition>(ItemDefinition);
+        int32 ClipSize = GetStats(WeaponDef) ? GetStats(WeaponDef)->GetClipSize() : 0;
+        IE->SetLoadedAmmo(ClipSize);
+    } else {
+        IE->SetLoadedAmmo(0);
+    }
+    
     IE->SetDurability(1.f);
     IE->SetGameplayAbilitySpecHandle(FGameplayAbilitySpecHandle(-1));
     IE->SetLevel(Level);
