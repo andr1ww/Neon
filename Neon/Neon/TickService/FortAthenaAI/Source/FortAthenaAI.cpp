@@ -317,11 +317,12 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
         AI.LastPosition = BotLocation;
     }
 
+    static const UClass* Meele = UFortWeaponMeleeItemDefinition::StaticClass();
     bool bHasWeapon = false;
     if (AI.Pawn && AI.Pawn->GetCurrentWeapon()) {
         auto* CurrentWeapon = AI.Pawn->GetCurrentWeapon();
         if (CurrentWeapon && CurrentWeapon->GetWeaponData()) {
-            bHasWeapon = !CurrentWeapon->GetWeaponData()->IsA(UFortWeaponMeleeItemDefinition::StaticClass());
+            bHasWeapon = !CurrentWeapon->GetWeaponData()->IsA(Meele);
         }
     }
 
@@ -411,12 +412,13 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
             FVector EnemyVelocity = ((AFortPlayerPawn*)AI.NearestEnemy)->GetMovementComponent()->GetVelocity();
             float TimeToTarget = Distance / 30000.0f;
             FVector PredictedPosition = EnemyLocation + (EnemyVelocity * TimeToTarget);
-
+            
             FVector RandomOffset = FVector(
-                UKismetMathLibrary::RandomFloatInRange(-100.0f, 100.0f),
-                UKismetMathLibrary::RandomFloatInRange(-100.0f, 100.0f),
-                UKismetMathLibrary::RandomFloatInRange(-50.0f, 50.0f)
+                FRand() * 200.0f - 100.0f,
+                FRand() * 200.0f - 100.0f,
+                FRand() * 100.0f - 50.0f
             );
+            
             PredictedPosition += RandomOffset;
 
             FRotator AimRotation = UKismetMathLibrary::FindLookAtRotation(BotLocation, PredictedPosition);
@@ -475,7 +477,7 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
         return;
     }
     
-    if (TargetLoot && TargetLoot->IsValidLowLevel())
+    if (TargetLoot && TargetLoot->IsValidLowLevelFast())
     {
         FVector TargetPos = TargetLoot->K2_GetActorLocation();
         float dx = BotLocation.X - TargetPos.X;
@@ -494,7 +496,8 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
 
             if (DistanceSq < 90000.0f)
             {
-                if (TargetLoot->IsA(AFortPickupAthena::StaticClass()))
+                static const UClass* PickupClass = AFortPickupAthena::StaticClass();
+                if (TargetLoot->IsA(PickupClass))
                 {
                     AFortPickupAthena* Pickup = static_cast<AFortPickupAthena*>(TargetLoot);
                     auto& PickupData = Pickup->GetPickupLocationData();
@@ -520,7 +523,10 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
                                 continue;
                                 
                             auto* WeaponDef = Cast<UFortWeaponItemDefinition>(Entry->GetItemEntry().GetItemDefinition());
-                            if (WeaponDef && !WeaponDef->IsA(UFortWeaponMeleeItemDefinition::StaticClass()) && !WeaponDef->IsA(UAthenaPickaxeItemDefinition::StaticClass())) {
+                            static const UClass* MeleeItemDef = UFortWeaponMeleeItemDefinition::StaticClass();
+                            static const UClass* PickaxeItemDef = UAthenaPickaxeItemDefinition::StaticClass();
+                            
+                            if (WeaponDef && !WeaponDef->IsA(MeleeItemDef) && !WeaponDef->IsA(PickaxeItemDef)) {
                                 FString ItemName = WeaponDef->GetFName().ToString();
                                 if (!ItemName.ToString().contains(("Shield"))) {
                                     int32 Rarity = (int32)WeaponDef->GetRarity();
@@ -564,7 +570,10 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
                                     continue;
                                     
                                 auto* WeaponDef = Cast<UFortWeaponItemDefinition>(Entry->GetItemEntry().GetItemDefinition());
-                                if (WeaponDef && !WeaponDef->IsA(UFortWeaponMeleeItemDefinition::StaticClass()) && !WeaponDef->IsA(UAthenaPickaxeItemDefinition::StaticClass())) {
+                                static const UClass* WeaponDefClass = UFortWeaponMeleeItemDefinition::StaticClass();
+                                static const UClass* PickaxeDefClass = UAthenaPickaxeItemDefinition::StaticClass();
+                                
+                                if (WeaponDef && !WeaponDef->IsA(WeaponDefClass) && !WeaponDef->IsA(PickaxeDefClass)) {
                                     FString ItemName = WeaponDef->GetFName().ToString();
                                     if (!ItemName.ToString().contains(("Shield"))) {
                                         int32 Rarity = (int32)WeaponDef->GetRarity();
