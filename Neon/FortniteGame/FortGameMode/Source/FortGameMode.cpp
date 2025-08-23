@@ -164,6 +164,7 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
             JerkyFoundation->SetDynamicFoundationEnabled(true);
         }
 */
+        
         static UClass* PlayerPawnClass = (UClass*)GUObjectArray.FindObject("PlayerPawn_Athena_C");
 
         if (GameMode)
@@ -872,31 +873,41 @@ void ABuildingFoundation::SetDynamicFoundationEnabledF(ABuildingFoundation* Foun
 {
     bool bEnabled;
     Stack.StepCompiledIn(&bEnabled);
-    Foundation->GetDynamicFoundationRepData().EnabledState = (bEnabled ? EDynamicFoundationEnabledState::Enabled : EDynamicFoundationEnabledState::Disabled);
-    Foundation->OnRep_DynamicFoundationRepData();
+    Stack.IncrementCode();
+    
     Foundation->SetFoundationEnabledState(bEnabled ? EDynamicFoundationEnabledState::Enabled : EDynamicFoundationEnabledState::Disabled);
-    return SetDynamicFoundationEnabledFOG(Foundation, Stack);
+    Foundation->SetDynamicFoundationType(EDynamicFoundationType::Static);
+    Foundation->SetbServerStreamedInLevel(true);
+    Foundation->GetDynamicFoundationRepData().EnabledState = (EDynamicFoundationEnabledState::Enabled);
+    Foundation->OnRep_DynamicFoundationRepData();
+    Foundation->SetDynamicFoundationEnabled(true);
+
+    struct {bool bEnabled;} Params{bEnabled};
+    
+    return callExecOG(Foundation, "/Script/FortniteGame.BuildingFoundation.SetDynamicFoundationEnabled", SetDynamicFoundationEnabledF, Params);
 }
 
 void ABuildingFoundation::SetDynamicFoundationTransformF(ABuildingFoundation* Foundation, FFrame& Stack)
 {
     FTransform Transform;
     Stack.StepCompiledIn(&Transform);
+    Stack.IncrementCode();
 
-    auto Rotation = Transform.Rotation;
-    auto Location = Transform.Translation;
-    
     Foundation->SetDynamicFoundationTransform(Transform);
-    Foundation->GetStreamingData().SetFoundationLocation(Location);
-    Foundation->GetDynamicFoundationRepData().Rotation = Rotation;
-    Foundation->GetDynamicFoundationRepData().Translation = Location;
+    Foundation->GetStreamingData().SetFoundationLocation(Transform.Translation);
+    Foundation->GetDynamicFoundationRepData().Rotation = Transform.Rotation;
+    Foundation->GetDynamicFoundationRepData().Translation = Transform.Translation;
     Foundation->OnRep_DynamicFoundationRepData();
     if (Foundation->GetFName().ToString().ToString() == "Fortilla_Foundation_MANG")
     {
         for (auto &World : Foundation->GetAdditionalWorlds())
         {
-            ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::Conv_NameToString(World.SoftObjectPtr.ObjectID.AssetPathName), Location, Rotation.ToRotator(), nullptr, FString());
+            bool Success = false;
+            ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::Conv_NameToString(World.SoftObjectPtr.ObjectID.AssetPathName), Transform.Translation, Transform.Rotation.ToRotator(), &Success, FString());
         }
     }
-    return SetDynamicFoundationTransformFOG(Foundation, Stack);
+
+    struct {FTransform Ok;} Params{Transform};
+    
+    return callExecOG(Foundation, "/Script/FortniteGame.BuildingFoundation.SetDynamicFoundationTransform", SetDynamicFoundationTransformF, Params);
 }
