@@ -795,7 +795,8 @@ void Main()
 	
 	if (Finder->OnPossessedPawnDied()) Runtime::Hook(Finder->OnPossessedPawnDied(), AFortAthenaAIBotController::OnPossessedPawnDied, (void**)&AFortAthenaAIBotController::OnPossessedPawnDiedOG); 
 	if (Finder->DispatchRequest()) Runtime::Hook(Finder->DispatchRequest(), HTTP::DispatchRequest, (void**)&HTTP::DispatchRequestOriginal);
-
+	Runtime::Exec("/Script/FortniteGame.BuildingFoundation.SetDynamicFoundationTransform", ABuildingFoundation::SetDynamicFoundationTransformF, (void**)&ABuildingFoundation::SetDynamicFoundationTransformFOG);
+	Runtime::Exec("/Script/FortniteGame.BuildingFoundation.SetDynamicFoundationEnabled", ABuildingFoundation::SetDynamicFoundationTransformF, (void**)&ABuildingFoundation::SetDynamicFoundationEnabledFOG);
 
 	if (Finder->SpawnBot()) Runtime::Hook(Finder->SpawnBot(), UFortServerBotManagerAthena::SpawnBot, (void**)&UFortServerBotManagerAthena::SpawnBotOG);
 

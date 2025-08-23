@@ -867,3 +867,36 @@ void AFortGameModeAthena::StartNewSafeZonePhase(AFortGameModeAthena* GameMode, i
         StartNewSafeZonePhaseOG(GameMode, Phase);
     }
 }
+
+void ABuildingFoundation::SetDynamicFoundationEnabledF(ABuildingFoundation* Foundation, FFrame& Stack)
+{
+    bool bEnabled;
+    Stack.StepCompiledIn(&bEnabled);
+    Foundation->GetDynamicFoundationRepData().EnabledState = (bEnabled ? EDynamicFoundationEnabledState::Enabled : EDynamicFoundationEnabledState::Disabled);
+    Foundation->OnRep_DynamicFoundationRepData();
+    Foundation->SetFoundationEnabledState(bEnabled ? EDynamicFoundationEnabledState::Enabled : EDynamicFoundationEnabledState::Disabled);
+    return SetDynamicFoundationEnabledFOG(Foundation, Stack);
+}
+
+void ABuildingFoundation::SetDynamicFoundationTransformF(ABuildingFoundation* Foundation, FFrame& Stack)
+{
+    FTransform Transform;
+    Stack.StepCompiledIn(&Transform);
+
+    auto Rotation = Transform.Rotation;
+    auto Location = Transform.Translation;
+    
+    Foundation->SetDynamicFoundationTransform(Transform);
+    Foundation->GetStreamingData().SetFoundationLocation(Location);
+    Foundation->GetDynamicFoundationRepData().Rotation = Rotation;
+    Foundation->GetDynamicFoundationRepData().Translation = Location;
+    Foundation->OnRep_DynamicFoundationRepData();
+    if (Foundation->GetFName().ToString().ToString() == "Fortilla_Foundation_MANG")
+    {
+        for (auto &World : Foundation->GetAdditionalWorlds())
+        {
+            ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::Conv_NameToString(World.SoftObjectPtr.ObjectID.AssetPathName), Location, Rotation.ToRotator(), nullptr, FString());
+        }
+    }
+    return SetDynamicFoundationTransformFOG(Foundation, Stack);
+}

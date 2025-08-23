@@ -247,15 +247,25 @@ enum class EDynamicFoundationType : uint8
 struct FDynamicBuildingFoundationRepData final
 {
 public:
-    struct FRotator                               Rotation;                                          // 0x0000(0x000C)(ZeroConstructor, IsPlainOldData, NoDestructor, NativeAccessSpecifierPublic)
-    struct FVector                                Translation;    
-DEFINE_MEMBER(EDynamicFoundationEnabledState, FDynamicBuildingFoundationRepData, EnabledState);                                  // 0x000C(0x000C)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-    uint8                                         Pad_1D3B[0x3];                                     // 0x0019(0x0003)(Fixing Struct Size After Last Property [ Dumper-7 ])
+    struct FVector                                Translation;                                       // 0x0000(0x000C)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    uint8                                         Pad_C[0x4];                                        // 0x000C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
+    struct FQuat                                  Rotation;                                          // 0x0010(0x0010)(IsPlainOldData, NoDestructor, NativeAccessSpecifierPublic)
+    EDynamicFoundationEnabledState                EnabledState;                                      // 0x0020(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    uint8                                         Pad_21[0xF];                                       // 0x0021(0x000F)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
+struct FBuildingFoundationStreamingData final
+{
+public:
+    DEFINE_MEMBER(FVector, FBuildingFoundationStreamingData, FoundationLocation);
 };
 
 class ABuildingFoundation : public ABuildingSMActor
 {
 public:
+    DEFINE_MEMBER(FTransform, ABuildingFoundation, DynamicFoundationTransform);
+    DEFINE_MEMBER(FBuildingFoundationStreamingData, ABuildingFoundation, StreamingData);
+    DEFINE_MEMBER(TArray<TSoftObjectPtr<class UWorld>>, ABuildingFoundation, AdditionalWorlds);
     DEFINE_MEMBER(EDynamicFoundationType, ABuildingFoundation, DynamicFoundationType);
     DEFINE_MEMBER(bool, ABuildingFoundation, bServerStreamedInLevel);
     DEFINE_MEMBER(FDynamicBuildingFoundationRepData, ABuildingFoundation, DynamicFoundationRepData);
@@ -307,6 +317,9 @@ public:
 		
         this->ProcessEvent(Func, &Params);
     }
+
+    DefHookOg(void, SetDynamicFoundationEnabledF, ABuildingFoundation*, FFrame&);
+    DefHookOg(void, SetDynamicFoundationTransformF, ABuildingFoundation*, FFrame&);
 };
 
 class AFortGameModeAthena : public AFortGameMode
