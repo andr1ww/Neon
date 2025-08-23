@@ -448,7 +448,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
     {
         static FName WaitingPostMatch = UKismetStringLibrary::Conv_StringToName(L"WaitingPostMatch");
         auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
-        bool ts = GameMode->GetMatchState().GetNumber() == WaitingPostMatch.GetNumber() && NetDriver->GetClientConnections().Num() == 0;
+        bool ts = GameMode->GetMatchState().GetNumber() == WaitingPostMatch.GetNumber() && GameMode->GetAlivePlayers().Num() == 0;
 
         if (ts)
         {

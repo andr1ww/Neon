@@ -24,8 +24,10 @@ struct FortAthenaAI
     AFortPlayerPawn* Pawn = nullptr;
     FVector Target = FVector(0,0,0);
     bool bThankedBusDriver = false;
+    float StuckStartTime = 0.f;
     bool bSkydiving = false;
     bool bLanded = false;
+    bool bLastLineOfSight = false;
     bool Emoting = false;
     bool Moving = false;
     bool bUsingPickaxe = false;

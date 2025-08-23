@@ -3,6 +3,8 @@
 
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
+#include "Neon/Nexa/Nexa.h"
+#include "Neon/Nexa/NexaHelpers.h"
 
 void UFortQuestManager::SendComplexCustomStatEvent(UFortQuestManager* QuestManager, UObject* TargetObj, FGameplayTagContainer& SourceTags, FGameplayTagContainer& TargetTags, bool* QuestActive, bool* QuestCompleted, int32 Count)
 {
@@ -11,60 +13,26 @@ void UFortQuestManager::SendComplexCustomStatEvent(UFortQuestManager* QuestManag
 	return SendComplexCustomStatEventOG(QuestManager, TargetObj, SourceTags, TargetTags, QuestActive, QuestCompleted, Count);
 }
 
-void SendObjectiveStat(AFortPlayerControllerAthena* PlayerController, const FName& BackendName, UFortQuestItemDefinition* QuestDefinition, int32 Count)
-{
-	if (!PlayerController) {
-		return;
-	}
-
-	for (auto& UpdatedObjectiveStat : PlayerController->GetUpdatedObjectiveStats())
-	{
-		if (UpdatedObjectiveStat.BackendName.GetComparisonIndex() == BackendName.GetComparisonIndex())
-		{
-			UpdatedObjectiveStat.Quest = QuestDefinition;
-			UpdatedObjectiveStat.CurrentStage++;
-			UpdatedObjectiveStat.StatDelta = Count;
-			UpdatedObjectiveStat.StatValue = QuestDefinition->GetObjectiveCompletionCount();
-			PlayerController->OnRep_UpdatedObjectiveStats();
-			return;
-		}
-	}
-	
-	static FFortUpdatedObjectiveStat* NewUpdatedObjectiveStat = nullptr;
-	static int FFortUpdatedObjectiveStatSize = 0;
-	if (!NewUpdatedObjectiveStat)
-	{
-		FFortUpdatedObjectiveStatSize = StaticClassImpl("FortUpdatedObjectiveStat")->GetSize();
-		NewUpdatedObjectiveStat = (FFortUpdatedObjectiveStat*)malloc(FFortUpdatedObjectiveStatSize);
-		memset(NewUpdatedObjectiveStat, 0, sizeof(FFortUpdatedObjectiveStat));
-	}
-
-	if (NewUpdatedObjectiveStat)
-	{
-		NewUpdatedObjectiveStat->BackendName = BackendName;
-		NewUpdatedObjectiveStat->Quest = QuestDefinition;
-		NewUpdatedObjectiveStat->CurrentStage++;
-		NewUpdatedObjectiveStat->StatDelta = Count;
-		NewUpdatedObjectiveStat->StatValue = QuestDefinition->GetObjectiveCompletionCount();
-
-		PlayerController->GetUpdatedObjectiveStats().Add(*NewUpdatedObjectiveStat, FFortUpdatedObjectiveStatSize);
-	}
-
-	PlayerController->OnRep_UpdatedObjectiveStats();
-}
-
-static std::unordered_map<AFortPlayerControllerAthena*, std::vector<FNexaBroadcastQuestProgress>> PlayerNexaBroadcastQuestProgress;
+static std::unordered_map<std::string, std::vector<FNexaBroadcastQuestProgress>> PlayerNexaBroadcastQuestProgress;
 
 std::vector<FNexaBroadcastQuestProgress> UFortQuestManager::GetNexaBroadcastQuestProgress(AFortPlayerControllerAthena* PlayerController) {
-    if (!PlayerController) {
-        return {};
-    }
-    
-    return PlayerNexaBroadcastQuestProgress[PlayerController];
+	if (!PlayerController) {
+		return {};
+	}
+
+	std::string AccountID = Nexa::Helpers::GetAccountID(PlayerController->GetPlayerState());
+	auto it = PlayerNexaBroadcastQuestProgress.find(AccountID);
+	if (it != PlayerNexaBroadcastQuestProgress.end()) {
+		return it->second;
+	}
+
+	return {};
 }
+
 
 static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQuestManager* QuestManager, UFortQuestItem* QuestItem, UFortQuestItemDefinition* QuestDefinition, FFortMcpQuestObjectiveInfo* Obj, int32 IncrementCount)
 {
+	UE_LOG(LogNeon, Log, __FUNCTION__);
     static std::unordered_map<AFortPlayerControllerAthena*, std::vector<FFortMcpQuestObjectiveInfo>> ObjCompArray;
     auto Count = QuestManager->GetObjectiveCompletionCount(QuestDefinition, Obj->GetBackendName());
 
@@ -74,8 +42,11 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
     
     std::string BackendName = std::string(Obj->GetBackendName().ToString().ToString());
     
+	std::string AccountID = Nexa::Helpers::GetAccountID(PlayerController->GetPlayerState());
+	auto& ProgressList = PlayerNexaBroadcastQuestProgress[AccountID];
+
 	bool found = false;
-	for (auto& entry : PlayerNexaBroadcastQuestProgress[PlayerController]) {
+	for (auto& entry : ProgressList) {
 		if (entry.BackendName == BackendName) {
 			entry.Count = NewCount;
 			found = true;
@@ -83,14 +54,15 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
 			break;
 		}
 	}
-    
+
 	if (!found) {
 		FNexaBroadcastQuestProgress newEntry;
 		newEntry.BackendName = BackendName;
 		newEntry.Count = NewCount;
-		PlayerNexaBroadcastQuestProgress[PlayerController].push_back(newEntry);
+		ProgressList.push_back(newEntry);
 		UE_LOG(LogNeon, Log, "Added NexaBroadcastQuestProgress: %s, Count: %d", BackendName.c_str(), NewCount);
 	}
+
     
     bool thisObjectiveCompleted = (NewCount >= Obj->GetCount()); 
     bool allObjsCompleted = false;
@@ -148,7 +120,40 @@ static void ProgressQuest(AFortPlayerControllerAthena* PlayerController, UFortQu
             if (TeamMemberPlayerController->IsA<AFortAthenaAIBotController>())
                 continue;
 
-            SendObjectiveStat(TeamMemberPlayerController, Obj->GetBackendName(), QuestDefinition, NewCount);
+        	for (auto& UpdatedObjectiveStat : PlayerController->GetUpdatedObjectiveStats())
+        	{
+        		if (UpdatedObjectiveStat.BackendName.GetComparisonIndex() == Obj->GetBackendName().GetComparisonIndex())
+        		{
+        			UpdatedObjectiveStat.Quest = QuestDefinition;
+        			UpdatedObjectiveStat.CurrentStage++;
+        			UpdatedObjectiveStat.StatDelta = Count;
+        			UpdatedObjectiveStat.StatValue = QuestDefinition->GetObjectiveCompletionCount();
+        			PlayerController->OnRep_UpdatedObjectiveStats();
+        			return;
+        		}
+        	}
+	
+        	static FFortUpdatedObjectiveStat* NewUpdatedObjectiveStat = nullptr;
+        	static int FFortUpdatedObjectiveStatSize = 0;
+        	if (!NewUpdatedObjectiveStat)
+        	{
+        		FFortUpdatedObjectiveStatSize = StaticClassImpl("FortUpdatedObjectiveStat")->GetSize();
+        		NewUpdatedObjectiveStat = (FFortUpdatedObjectiveStat*)malloc(FFortUpdatedObjectiveStatSize);
+        		memset(NewUpdatedObjectiveStat, 0, sizeof(FFortUpdatedObjectiveStat));
+        	}
+
+        	if (NewUpdatedObjectiveStat)
+        	{
+        		NewUpdatedObjectiveStat->BackendName = Obj->GetBackendName();
+        		NewUpdatedObjectiveStat->Quest = QuestDefinition;
+        		NewUpdatedObjectiveStat->CurrentStage++;
+        		NewUpdatedObjectiveStat->StatDelta = Count;
+        		NewUpdatedObjectiveStat->StatValue = QuestDefinition->GetObjectiveCompletionCount();
+
+        		PlayerController->GetUpdatedObjectiveStats().Add(*NewUpdatedObjectiveStat, FFortUpdatedObjectiveStatSize);
+        	}
+
+        	PlayerController->OnRep_UpdatedObjectiveStats();
 
             if (TeamMemberPlayerController == PlayerController)
             {
