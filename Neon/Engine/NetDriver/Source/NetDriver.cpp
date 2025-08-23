@@ -408,9 +408,9 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
                 {
                     AFortAthenaAIBotController::SpawnPlayerBot(1);
                 }
-            } else if (Config::bEchoSessions && GameState->GetGamePhase() == EAthenaGamePhase::Warmup && GameMode->GetAlivePlayers().Num() > 0
+            } else if (Config::bEchoSessions
                 && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) == 100
-                && GameMode->GetAliveBots().Num() == 100 && GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Default") && !Config::bLateGame & !bOk)
+                && GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Default") && !Config::bLateGame & !bOk)
             {
                 bOk = true;
                 std::thread t([]() {
@@ -446,20 +446,14 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
     
     if (bStartedBus)
     {
-        static std::thread t;
-        static bool ts = false;
+        static FName WaitingPostMatch = UKismetStringLibrary::Conv_StringToName(L"WaitingPostMatch");
+        auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
+        auto GameState = UWorld::GetWorld()->GetGameState();
+        bool ts = GameMode->GetMatchState().GetNumber() == WaitingPostMatch.GetNumber() && GameState->GetPlayersLeft() == 0;
 
-        if (!ts)
+        if (ts)
         {
-            ts = true;
-            t = std::thread([]() {
-                std::this_thread::sleep_for(std::chrono::seconds(10));
-                if (UWorld::GetWorld()->GetAuthorityGameMode()->GetAlivePlayers().Num() == 0)
-                {
-                    TerminateProcess(GetCurrentProcess(), 0);
-                }
-            });
-            t.detach();
+            TerminateProcess(GetCurrentProcess(), 0);
         }
     }
     

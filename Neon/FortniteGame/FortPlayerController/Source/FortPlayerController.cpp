@@ -763,7 +763,6 @@ void AFortPlayerControllerAthena::ServerDBNOReviveInterrupted(AFortPlayerControl
 
 void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerController, FFortPlayerDeathReport& DeathReport)
 {
-	UE_LOG(LogNeon, Log, __FUNCTION__);
 	if (!PlayerController)
 		return ClientOnPawnDiedOG(PlayerController, DeathReport);
 
@@ -806,7 +805,6 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 
 		DeathInfo->SetbInitialized(true);
 		PlayerState->SetDeathInfo(*DeathInfo);
-		PlayerState->OnRep_DeathInfo();
 	}
    
 	auto WorldInventory = PlayerController->GetWorldInventory();
@@ -817,12 +815,9 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		static const UClass* AmmoClass = UFortAmmoItemDefinition::StaticClass();
 		static const UClass* MeleeClass = UFortWeaponMeleeItemDefinition::StaticClass();
    
-		auto Location = VictimPawn->K2_GetActorLocation();
 		bool bFoundMats = false;
    
-		const auto& ItemInstances = WorldInventory->GetInventory().GetItemInstances();
-   
-		for (const auto& entry : ItemInstances) {
+		for (const auto& entry : WorldInventory->GetInventory().GetItemInstances()) {
 			auto ItemDef = entry->GetItemEntry().GetItemDefinition();
         
 			if (ItemDef->IsA(MeleeClass)) continue;
@@ -832,29 +827,21 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
         
 			if (ItemDef->IsA(ResourceClass)) {
 				bFoundMats = true;
-				AFortInventory::SpawnPickupDirect(Location, ItemDef, Count, LoadedAmmo,
+				AFortInventory::SpawnPickupDirect(DeathLocation, ItemDef, Count, LoadedAmmo,
 					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 			}
-			else if (ItemDef->IsA(WeaponClass)) {
-				AFortInventory::SpawnPickupDirect(Location, ItemDef, Count, LoadedAmmo,
-					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
-			}
-			else if (ItemDef->IsA(ConsumableClass)) {
-				AFortInventory::SpawnPickupDirect(Location, ItemDef, Count, LoadedAmmo,
-					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
-			}
-			else if (ItemDef->IsA(AmmoClass)) {
-				AFortInventory::SpawnPickupDirect(Location, ItemDef, Count, LoadedAmmo,
+			else if (ItemDef->IsA(WeaponClass) || ItemDef->IsA(ConsumableClass) || ItemDef->IsA(AmmoClass)) {
+				AFortInventory::SpawnPickupDirect(DeathLocation, ItemDef, Count, LoadedAmmo,
 					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 			}
 		}
    
 		if (!bFoundMats) {
-			AFortInventory::SpawnPickupDirect(Location, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Wood), 50, 0,
+			AFortInventory::SpawnPickupDirect(DeathLocation, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Wood), 50, 0,
 				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
-			AFortInventory::SpawnPickupDirect(Location, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Stone), 50, 0,
+			AFortInventory::SpawnPickupDirect(DeathLocation, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Stone), 50, 0,
 				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
-			AFortInventory::SpawnPickupDirect(Location, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Metal), 50, 0,
+			AFortInventory::SpawnPickupDirect(DeathLocation, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Metal), 50, 0,
 				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 		}
 	}
@@ -870,48 +857,43 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		int32 TeamScore = KillerPlayerState->GetTeamKillScore() + 1;
 		
 		KillerPlayerState->SetKillScore(KillerScore);
-		KillerPlayerState->OnRep_KillScore();
 		KillerPlayerState->SetTeamKillScore(TeamScore);
-		KillerPlayerState->OnRep_TeamKillScore();
 		KillerPlayerState->ClientReportTeamKill(TeamScore);
+		KillerPlayerState->ClientReportKill(PlayerState);
 
 		auto Team = KillerPlayerState->GetPlayerTeam();
 		if (Team) {
-			const auto& TeamMembers = Team->GetTeamMembers();
-			for (int32 i = 0; i < TeamMembers.Num(); ++i) {
-				auto MemberPlayerState = TeamMembers[i]->GetPlayerState();
+			for (int32 i = 0; i < Team->GetTeamMembers().Num(); ++i) {
+				auto MemberPlayerState = Team->GetTeamMembers()[i]->GetPlayerState();
 				if (MemberPlayerState != KillerPlayerState) {
-					int32 MemberTeamScore = MemberPlayerState->GetTeamKillScore() + 1;
-					MemberPlayerState->SetTeamKillScore(MemberTeamScore);
-					MemberPlayerState->OnRep_TeamKillScore();
-					MemberPlayerState->ClientReportTeamKill(MemberTeamScore);
+					MemberPlayerState->SetTeamKillScore(TeamScore);
+					KillerPlayerState->ClientReportTeamKill(TeamScore);
 				}
 			}
 		}
    	
-		KillerPlayerState->ClientReportKill(PlayerState);
 		if (auto CPlayerController = (AFortPlayerControllerAthena*)KillerPawn->GetController()) {
 			if (CPlayerController->GetMyFortPawn() && MatchStats) {
-				int32 CurrentKills = KillerScore;
-
 				static UFortAccoladeItemDefinition* Bronze = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_014_Elimination_Bronze.AccoladeId_014_Elimination_Bronze");
 				static UFortAccoladeItemDefinition* Silver = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_015_Elimination_Silver.AccoladeId_015_Elimination_Silver");
 				static UFortAccoladeItemDefinition* Gold = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_016_Elimination_Gold.AccoladeId_016_Elimination_Gold");
 				static UFortAccoladeItemDefinition* Elim = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_012_Elimination.AccoladeId_012_Elimination");
+				
 				UFortQuestManager::GiveAccolade(CPlayerController, Elim);
 				
-				if (CurrentKills == 1) {
+				if (KillerScore == 1) {
 					UFortQuestManager::GiveAccolade(CPlayerController, Bronze);
 				}
-				else if (CurrentKills == 4) {
+				else if (KillerScore == 4) {
 					UFortQuestManager::GiveAccolade(CPlayerController, Silver);
 				}
-				else if (CurrentKills == 8) {
+				else if (KillerScore == 8) {
 					UFortQuestManager::GiveAccolade(CPlayerController, Gold);
 				}
 
-				MatchStats->Stats[3] = CurrentKills;
+				MatchStats->Stats[3] = KillerScore;
 				MatchReport->SetMatchStats(*MatchStats);
+				PlayerController->ClientSendTeamStatsForPlayer(*TeamStats);
 			}
 		}
 	}
@@ -932,8 +914,6 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 					}
 				}
 			}
-		} else {
-			bRebooting = false;
 		}
 	}
 	
@@ -957,25 +937,19 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	}
 		
 	int32 AliveCount = GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num();
-	std::vector<std::pair<int, int>> PlacementScores = {
-		{1, 30},
-		{2, 25},
-		{5, 15},
-		{25, 10},
-		{50, 5},
-	};
-
+	
 	if (!KillerPawn->GetController()->IsA(AI))
 	{
-		for (const auto& entry : PlacementScores)
+		if (GameState->GetPlayersLeft() <= 25)
 		{
-			if (entry.first == GameState->GetPlayersLeft())
+			int Score = (GameState->GetPlayersLeft() == 1) ? 30 : 
+						(GameState->GetPlayersLeft() == 2) ? 25 :
+						(GameState->GetPlayersLeft() <= 5) ? 15 :
+						(GameState->GetPlayersLeft() <= 25) ? 10 : 5;
+			
+			for (int i = 0; i < GameMode->GetAlivePlayers().Num(); i++)
 			{
-				for (int i = 0; i < GameMode->GetAlivePlayers().Num(); i++)
-				{
-					GameMode->GetAlivePlayers()[i]->ClientReportTournamentPlacementPointsScored(GameState->GetPlayersLeft(), entry.second);
-				}
-				break;
+				GameMode->GetAlivePlayers()[i]->ClientReportTournamentPlacementPointsScored(GameState->GetPlayersLeft(), Score);
 			}
 		}
 	}
@@ -1001,7 +975,6 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 					
 				if (MemberMatchReport && MemberPlayerState) {
 					MemberPlayerState->SetPlace(AliveCount);
-					MemberPlayerState->OnRep_Place();
 						
 					auto MemberMatchStats = &MemberMatchReport->GetMatchStats();
 					auto MemberTeamStats = &MemberMatchReport->GetTeamStats();
@@ -1025,7 +998,6 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 					MemberRewardResult->SetTotalBookXpGained(MemberXP);
 					MemberRewardResult->SetTotalSeasonXpGained(MemberXP);
 					MemberMatchReport->SetEndOfMatchResults(*MemberRewardResult);
-					MemberController->ClientSendEndBattleRoyaleMatchForPlayer(true, *MemberRewardResult);
 				}
 			}
 		}
@@ -1036,45 +1008,39 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		RewardResult->SetTotalBookXpGained(TotalXP);
 		RewardResult->SetTotalSeasonXpGained(TotalXP);
 		MatchReport->SetEndOfMatchResults(*RewardResult);
-		PlayerController->ClientSendEndBattleRoyaleMatchForPlayer(true, *RewardResult);
 
 		int32 PlayerPlace = AliveCount;
 		PlayerState->SetPlace(PlayerPlace);
-		PlayerState->OnRep_Place();
 
 		if (PlayerState->GetKillScore() && PlayerState->GetSquadId() && MatchStats) {
 			MatchStats->Stats[3] = PlayerState->GetKillScore();
 			MatchStats->Stats[8] = PlayerState->GetSquadId();
 			MatchReport->SetMatchStats(*MatchStats);
-			PlayerController->ClientSendMatchStatsForPlayer(*MatchStats);
 		}
 
 		if (TeamStats) {
 			TeamStats->SetPlace(PlayerPlace);
 			TeamStats->SetTotalPlayers(PlayerPlace);
 			MatchReport->SetTeamStats(*TeamStats);
-			PlayerController->ClientSendTeamStatsForPlayer(*TeamStats);
 		}
 	}
    	
 	AFortPlayerControllerAthena* LastAliveController = nullptr;
-	const auto& AlivePlayers = GameMode->GetAlivePlayers();
 		
-	for (int32 i = 0; i < AlivePlayers.Num(); ++i) {
-		const auto& AlivePC = AlivePlayers[i];
-		if (AlivePC && AlivePC != PlayerController && AlivePC->GetMyFortPawn()) {
-			LastAliveController = AlivePC;
+	for (int32 i = 0; i < GameMode->GetAlivePlayers().Num(); ++i) {
+		if (GameMode->GetAlivePlayers()[i] && GameMode->GetAlivePlayers()[i] != PlayerController && GameMode->GetAlivePlayers()[i]->GetMyFortPawn()) {
+			LastAliveController = GameMode->GetAlivePlayers()[i];
+			break;
 		}
 	}
 
-	if (/*Config::bLateGame && */KillerPawn && KillerPawn != VictimPawn && !KillerPawn->GetController()->IsA(AI)) {
+	if (KillerPawn && KillerPawn != VictimPawn && !KillerPawn->GetController()->IsA(AI)) {
 		auto* AbilitySystem = KillerPlayerState->GetAbilitySystemComponent();
 		auto Handle = AbilitySystem->MakeEffectContext();
 		FGameplayTag Tag;
 		static auto Cue = UKismetStringLibrary::Conv_StringToName(L"GameplayCue.Shield.PotionConsumed");
 		Tag.TagName = Cue;
 		AbilitySystem->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueAdded", Tag, FPredictionKey(), Handle);
-		AbilitySystem->CallFunc<void>("AbilitySystemComponent", "NetMulticast_InvokeGameplayCueExecuted", Tag, FPredictionKey(), Handle);
 
 		auto Pawn = ((AFortPlayerControllerAthena*)KillerPlayerState->GetOwner())->GetMyFortPawn();
 		if (Pawn) {
@@ -1103,7 +1069,6 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
        
 		if (WinnerPlayerState && WinnerPawn) {
 			WinnerPlayerState->SetPlace(1);
-			WinnerPlayerState->OnRep_Place();
 				
 			auto WinnerMatchReport = LastAliveController->GetMatchReport();
 			if (WinnerMatchReport && RewardResult) {
@@ -1131,10 +1096,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 
 			uint8 WinningTeamIndex = WinnerPlayerState->GetTeamIndex();
 			GameState->Set("FortGameStateAthena", "WinningTeam", WinningTeamIndex);
-			GameState->OnRep_WinningTeam();
 			GameState->Set("FortGameStateAthena", "WinningPlayerState", WinnerPlayerState);
-			GameState->OnRep_WinningPlayerState();
-			static UFortAccoladeItemDefinition* victory = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_001_Victory.AccoladeId_001_Victory"); // obv what this is
 		}
 	}
 
@@ -1146,22 +1108,20 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 				if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) {
 					auto MemberPlayerState = MemberController->GetPlayerState();
 					Nexa::BroadcastMatchResults(MemberController, MemberPlayerState, Nexa::GetState().PlaylistData, GameMode);
-					std::thread t([=]() {
-						Nexa::Echo::LowerEchoSessionCount();
-					});
-					t.detach();
 				}
 			}
 		}
 
 		Nexa::BroadcastMatchResults(PlayerController, PlayerState, Nexa::GetState().PlaylistData, GameMode);
-		
-		std::thread t([]() {
-			Nexa::Echo::LowerEchoSessionCount();
-		});
-		t.detach();
 	}
    
+	PlayerState->OnRep_DeathInfo();
+	KillerPlayerState->OnRep_KillScore();
+	KillerPlayerState->OnRep_TeamKillScore();
+	PlayerState->OnRep_Place();
+	GameState->OnRep_WinningTeam();
+	GameState->OnRep_WinningPlayerState();
+	
 	ClientOnPawnDiedOG(PlayerController, DeathReport);
 }
 

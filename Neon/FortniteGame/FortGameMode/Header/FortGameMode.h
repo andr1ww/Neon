@@ -110,7 +110,16 @@ public:
     DECLARE_DEFAULT_OBJECT(AFortAthenaVehicle)
 };
 
-class AFortGameMode : public AGameModeBase
+class AGameMode : public AGameModeBase
+{
+public:
+    DEFINE_MEMBER(FName, AGameMode, MatchState);
+public:
+    DECLARE_STATIC_CLASS(AGameMode)
+    DECLARE_DEFAULT_OBJECT(AGameMode)
+};
+
+class AFortGameMode : public AGameMode
 {
 public:
     DEFINE_BOOL(AFortGameMode, bDBNOEnabled)
