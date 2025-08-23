@@ -6,9 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortInventory/Source/FortInventory.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortInventory/Source/FortInventory.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/Neon/Config.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Engine/NetDriver/Source/NetDriver.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Engine/NetDriver/Source/NetDriver.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Header/FortGameMode.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Header/FortGameMode.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Neon/Finder/Source/Finder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Finder/Source/Finder.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/dllmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/dllmain.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

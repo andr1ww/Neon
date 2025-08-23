@@ -335,7 +335,7 @@ public:
     DECLARE_STATIC_CLASS(AFortGameModeAthena);
 public:
     DefHookOg(bool, ReadyToStartMatch, AFortGameModeAthena* GameMode, FFrame& Stack, bool* Result);
-    static APawn* SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, FFrame& Stack);
+    static APawn* SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer, AActor* StartSpot);
     DefHookOg(void, HandleStartingNewPlayer, AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer);
     DefHookOg(void, StartAircraftPhase, AFortGameModeAthena* GameMode, char a2);
     DefHookOg(void, StartNewSafeZonePhase, AFortGameModeAthena* GameMode, int Phase);

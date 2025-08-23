@@ -611,6 +611,12 @@ FGameplayTag* Ok(void* a1, void* a2, FName f)
 	return OkOG(a1, a2, f);
 }
 
+static void NullCall(uint64_t Offset)
+{
+	for (int i = 0; i < 5; i++)
+		Runtime::Patch(IMAGEBASE + Offset + i, 0x90); // call -> nop
+}
+
 void Main()
 {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
@@ -708,7 +714,7 @@ void Main()
 	}
 	
 	Runtime::Exec("/Script/Engine.GameMode.ReadyToStartMatch", AFortGameModeAthena::ReadyToStartMatch, (void**)&AFortGameModeAthena::ReadyToStartMatchOG);
-	Runtime::Exec("/Script/Engine.GameMode.SpawnDefaultPawnFor", AFortGameModeAthena::SpawnDefaultPawnFor);
+	Runtime::Hook<&AFortGameModeAthena::StaticClass>("SpawnDefaultPawnFor", AFortGameModeAthena::SpawnDefaultPawnFor);
 	int InternalServerTryActivateAbilityIndex = 0;
 
 	if (Engine_Version > 4.20)
@@ -720,7 +726,7 @@ void Main()
 			UE_LOG(LogNeon, Log, "InternalServerTryActivateAbilityIndex: 0x%x", InternalServerTryActivateAbilityIndex);
 		}
 	}
-	
+
 	Runtime::VFTHook(SDK::StaticClassImpl("FortAbilitySystemComponentAthena")->GetClassDefaultObject()->GetVTable(), InternalServerTryActivateAbilityIndex, UAbilitySystemComponent::InternalServerTryActivateAbility);
 	Runtime::Hook(Finder->GetPlayerViewPoint(), AFortPlayerControllerAthena::GetPlayerViewPoint, (void**)&AFortPlayerControllerAthena::GetPlayerViewPointOG);
 	Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
@@ -791,7 +797,7 @@ void Main()
 	if (Finder->DispatchRequest()) Runtime::Hook(Finder->DispatchRequest(), HTTP::DispatchRequest, (void**)&HTTP::DispatchRequestOriginal);
 
 
-	if (Finder->SpawnBot())Runtime::Hook(Finder->SpawnBot(), UFortServerBotManagerAthena::SpawnBot, (void**)&UFortServerBotManagerAthena::SpawnBotOG);
+	if (Finder->SpawnBot()) Runtime::Hook(Finder->SpawnBot(), UFortServerBotManagerAthena::SpawnBot, (void**)&UFortServerBotManagerAthena::SpawnBotOG);
 
 	Runtime::Hook(Finder->SendStatEventWithTags(), UFortQuestManager::SendStatEventWithTags, (void**)&UFortQuestManager::SendStatEventWithTagsOG);
 	

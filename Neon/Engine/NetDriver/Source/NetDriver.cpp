@@ -358,19 +358,19 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             bStartedEvent = true;
         }
     }
+
+    if (Finder->RepDriverServerReplicateActors() && Fortnite_Version.GetMajorVersion() <= 20)
+    {
+        reinterpret_cast<void(*)(UReplicationDriver*)>(NetDriver->GetReplicationDriver()->GetVTable()[Finder->RepDriverServerReplicateActors()])(NetDriver->GetReplicationDriver());
+    } else
+    {
+        ServerReplicateActors(NetDriver, DeltaSeconds);
+    }
     
     if (NetDriver->GetClientConnections().Num() > 0)
     {
         AFortGameModeAthena* GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
         AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
-        
-        if (Finder->RepDriverServerReplicateActors() && Fortnite_Version.GetMajorVersion() <= 20)
-        {
-            reinterpret_cast<void(*)(UReplicationDriver*)>(NetDriver->GetReplicationDriver()->GetVTable()[Finder->RepDriverServerReplicateActors()])(NetDriver->GetReplicationDriver());
-        } else
-        {
-            ServerReplicateActors(NetDriver, DeltaSeconds);
-        }
         
         if (GetAsyncKeyState(VK_F6)) {
             for (auto& ClientConnection : NetDriver->GetClientConnections())

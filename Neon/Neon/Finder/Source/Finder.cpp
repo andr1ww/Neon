@@ -235,36 +235,42 @@ uint64 UFinder::GetPlayerViewPoint()
 
 uint64 UFinder::TickFlush()
 {
-    if (Engine_Version == 4.16)
-        return Memcury::Scanner::FindPattern("4C 8B DC 55 53 56 57 49 8D AB ? ? ? ? 48 81 EC ? ? ? ? 41 0F 29 7B").Get(); // 2.4.2
-
-    if (Engine_Version == 4.19)
-        return Memcury::Scanner::FindPattern("4C 8B DC 55 49 8D AB ? ? ? ? 48 81 EC ? ? ? ? 45 0F 29 43 ? 45 0F 29 4B ? 48 8B 05 ? ? ? ? 48").Get(); // 2.4.2
-
-    if (Engine_Version == 4.27)
-    {
-        auto addr = Memcury::Scanner::FindPattern("48 8B C4 48 89 58 18 55 56 57 41 54 41 55 41 56 41 57 48 8D A8 ? ? ? ? 48 81 EC ? ? ? ? 0F 29 70 B8 0F 29 78 A8 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 8A", false).Get();
-
-        if (!addr) // s18
-            addr = Memcury::Scanner::FindPattern("48 8B C4 48 89 58 18 55 56 57 41 54 41 55 41 56 41 57 48 8D A8 ? ? ? ? 48 81 EC ? ? ? ? 0F 29 70 B8 0F 29 78 A8 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 44 0F", false).Get();
-	
-        if (!addr)
-            addr = Memcury::Scanner::FindPattern("48 8B C4 48 89 58 18 55 56 57 41 54 41 55 41 56 41 57 48 8D A8 ? ? ? ? 48 81 EC ? ? ? ? 0F 29 70 B8 0F 29 78 A8 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 48 8B F9 48 89 4D 38 48 8D 4D 40").Get(); // 16.50
-
-        return addr;
-    }
-
     auto Addr = Memcury::Scanner::FindStringRef(L"STAT_NetTickFlush", false);
 
     if (!Addr.Get())
     {
-        if (Engine_Version == 4.20) // 2.5
+        if (Fortnite_Version <= 2.5) // 2.5
         {
             return Memcury::Scanner::FindPattern("4C 8B DC 55 49 8D AB ? ? ? ? 48 81 EC ? ? ? ? 45 0F 29 43 ? 45 0F 29 4B ? 48 8B 05 ? ? ? ? 48 33").Get();
         }
     }
 
-    return FindBytes(Addr, (Fortnite_Version < 18 ? std::vector<uint8_t>{ 0x4C, 0x8B } : std::vector<uint8_t>{ 0x48, 0x8B, 0xC4 }), 1000, 0, true);
+    auto ERm = Addr.ScanFor({ 0x4C, 0x8B, 0xDC }, false).Get();
+
+    if (ERm)
+    {
+        return ERm;
+    } else
+    {
+        if (Engine_Version == 4.16)
+            return Memcury::Scanner::FindPattern("4C 8B DC 55 53 56 57 49 8D AB ? ? ? ? 48 81 EC ? ? ? ? 41 0F 29 7B").Get(); // 2.4.2
+
+        if (Engine_Version == 4.19)
+            return Memcury::Scanner::FindPattern("4C 8B DC 55 49 8D AB ? ? ? ? 48 81 EC ? ? ? ? 45 0F 29 43 ? 45 0F 29 4B ? 48 8B 05 ? ? ? ? 48").Get(); // 2.4.2
+
+        if (Fortnite_Version >= 16.40)
+        {
+            auto addr = Memcury::Scanner::FindPattern("48 8B C4 48 89 58 18 55 56 57 41 54 41 55 41 56 41 57 48 8D A8 ? ? ? ? 48 81 EC ? ? ? ? 0F 29 70 B8 0F 29 78 A8 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 8A", false).Get();
+
+            if (!addr) // s18
+                addr = Memcury::Scanner::FindPattern("48 8B C4 48 89 58 18 55 56 57 41 54 41 55 41 56 41 57 48 8D A8 ? ? ? ? 48 81 EC ? ? ? ? 0F 29 70 B8 0F 29 78 A8 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 44 0F", false).Get();
+	
+            if (!addr)
+                addr = Memcury::Scanner::FindPattern("48 8B C4 48 89 58 18 55 56 57 41 54 41 55 41 56 41 57 48 8D A8 ? ? ? ? 48 81 EC ? ? ? ? 0F 29 70 B8 0F 29 78 A8 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 48 8B F9 48 89 4D 38 48 8D 4D 40").Get(); // 16.50
+
+            return addr;
+        }
+    }
 }
 
 uint64 UFinder::InitHost()
@@ -749,27 +755,37 @@ uint64 UFinder::RepDriverServerReplicateActors()
     static uint64 CachedResult = 0;
     if (CachedResult != 0)
         return CachedResult;
+
+    auto Addr = Memcury::Scanner::FindStringRef(L"NET_PrepareReplication")
+        .ScanFor({ 0x4C, 0x8B, 0xDC }, false).Get();
+
+    if (Addr)
+    {
+    //    return CachedResult = Addr;
+    }
     
-    if (Engine_Version == 4.20)
+    int Season = (int) std::floor(std::stod(Fortnite_Version.ToString()));
+
+    if (Fortnite_Version >= 3.5 && Fortnite_Version <= 4.5)
         CachedResult = 0x53;
-    else if (Engine_Version == 4.21)
-        CachedResult = Fortnite_Version.GetMajorVersion() == 5 ? 0x54 : 0x56;
-    else if (Engine_Version >= 4.22 && Engine_Version <= 4.24)
+    else if (Fortnite_Version >= 5.00 && Fortnite_Version <= 6.31)
+        CachedResult = Season == 5 ? 0x54 : 0x56;
+    else if (Engine_Version >= 4.22 && Fortnite_Version >= 11.00 && Fortnite_Version <= 12.20)
         CachedResult = Fortnite_Version >= 7.40 && Fortnite_Version < 8.40 ? 0x57 :
-        Engine_Version == 4.24 ? (Fortnite_Version >= 11.00 && Fortnite_Version <= 11.10 ? 0x57 :
+        Fortnite_Version >= 11.00 && Fortnite_Version <= 12.20 ? (Fortnite_Version >= 11.00 && Fortnite_Version <= 11.10 ? 0x57 :
             (Fortnite_Version == 11.30 || Fortnite_Version == 11.31 ? 0x59 : 0x5A)) : 0x56;
 
     // ^ I know this makes no sense, 7.40-8.40 is 0x57, other 7-10 is 0x56, 11.00-11.10 = 0x57, 11.30-11.31 = 0x59, other S11 is 0x5A
 
-    else if (Fortnite_Version.GetMajorVersion() == 12 || Fortnite_Version.GetMajorVersion() == 13)
+    else if (Season == 12 || Season == 13)
         CachedResult = 0x5D;
-    else if (Fortnite_Version.GetMajorVersion() == 14 || Fortnite_Version <= 15.2) // never tested 15.2
+    else if (Season == 14 || Fortnite_Version <= 15.2) // never tested 15.2
         CachedResult = 0x5E;
     else if (Fortnite_Version >= 15.3 && Engine_Version < 5.00) // 15.3-18 = 0x5F
         CachedResult = 0x5F;
-    else if (Fortnite_Version.GetMajorVersion() >= 19 && Fortnite_Version.GetMajorVersion() <= 20)
+    else if (Season >= 19 && Season <= 20)
         CachedResult = 0x66;
-    else if (Fortnite_Version.GetMajorVersion() >= 21)
+    else if (Season >= 21)
         CachedResult = 0x67; // checked onb 22.30
 
     return CachedResult;
