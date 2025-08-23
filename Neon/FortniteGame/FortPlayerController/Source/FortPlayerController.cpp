@@ -267,6 +267,21 @@ void AFortPlayerControllerAthena::GetPlayerViewPoint(AFortPlayerControllerAthena
 	return GetPlayerViewPointOG(PlayerController, OutViewLocation, OutViewRotation);
 }
 
+class UFortContextTrapItemDefinition : public UFortTrapItemDefinition
+{
+public:
+	DECLARE_STATIC_CLASS(UFortContextTrapItemDefinition)
+	DECLARE_DEFAULT_OBJECT(UFortContextTrapItemDefinition)
+};
+
+class AFortDecoTool_ContextTrap : public AFortWeapon
+{
+public:
+	DEFINE_PTR(UFortContextTrapItemDefinition, AFortDecoTool_ContextTrap, ContextTrapItemDefinition);
+public:
+	DECLARE_STATIC_CLASS(AFortDecoTool_ContextTrap)
+};
+
 void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) {
     FGuid ItemGuid;
     Stack.StepCompiledIn(&ItemGuid);
@@ -297,6 +312,15 @@ void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControll
 	
     UFortWeaponItemDefinition* ItemDefinition = nullptr;
 	static const UClass* GadgetItem = UFortGadgetItemDefinition::StaticClass();
+	static const UClass* DecoItem = UFortDecoItemDefinition::StaticClass();
+
+	if (auto Deco = (UFortContextTrapItemDefinition *) ItemDefinition->IsA(DecoItem)) {
+		PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "PickUpActor", nullptr, Deco);
+		PlayerController->GetMyFortPawn()->GetCurrentWeapon()->SetItemEntryGuid(ItemGuid);
+
+		if (auto ContextTrap = (AFortDecoTool_ContextTrap*)PlayerController->GetMyFortPawn()->GetCurrentWeapon()) ContextTrap->SetContextTrapItemDefinition(Deco);
+		return;
+	}
 	
     if (Entry->GetItemDefinition()->IsA(GadgetItem))
     {

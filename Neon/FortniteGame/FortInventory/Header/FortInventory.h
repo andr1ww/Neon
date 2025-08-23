@@ -15,6 +15,7 @@ class AFortAthenaAIBotController;
 class AFortPlayerController;
 class AFortPawn;
 class AFortPlayerPawn;
+class UFortTrapItemDefinition;
 
 enum class EFortPickupSpawnSource : uint8
 {
@@ -236,6 +237,12 @@ class UFortWorldItem : public UFortItem
 {
 public:
     DEFINE_MEMBER(FFortItemEntry, UFortWorldItem, ItemEntry);
+};
+
+class UFortDecoItemDefinition : public UFortWorldItemDefinition
+{
+public:
+    DECLARE_STATIC_CLASS(UFortDecoItemDefinition)
 };
 
 class UFortGadgetItemDefinition : public UFortWorldItemDefinition

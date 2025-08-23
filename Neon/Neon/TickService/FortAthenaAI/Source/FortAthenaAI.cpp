@@ -477,7 +477,7 @@ void TickService::FortAthenaAIService::SafeZonesPhase(FortAthenaAI& AI, float Cu
         return;
     }
     
-    if (TargetLoot && TargetLoot->IsValidLowLevelFast())
+    if (TargetLoot && TargetLoot->IsValidLowLevel())
     {
         FVector TargetPos = TargetLoot->K2_GetActorLocation();
         float dx = BotLocation.X - TargetPos.X;
