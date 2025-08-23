@@ -170,6 +170,66 @@ public:
     uint64 LoadPlayset(const std::vector<uint8_t>& Bytes = std::vector<uint8_t>({ 0x48, 0x89, 0x5C }), int recursive = 0);
 
     uint64 SetEditingPlayer();
+
+    uint64 PostUpdate();
+
+    inline void Init()
+    {
+        GetMaxTickRate();
+        DispatchRequest();
+        CreateNetDriver();
+        ApplyCharacterCustomization();
+        KickPlayer();
+        GameSessionPatch();
+        CreateChannel();
+        SendClientAdjustment();
+        CallPreReplication();
+        RemoveNetworkActor();
+        DemoReplicateActor();
+        WorldGetNetMode();
+        RepDriverServerReplicateActors();
+        StaticFindObject();
+        StaticLoadObject();
+        InternalTryActivateAbility();
+        ConstructSpec();
+        GiveAbility();
+        GiveAbilityAndActivateOnce();
+        GetInterfaceAddress();
+        OnDamageServer();
+        ClientOnPawnDied();
+        SpawnBot();
+        SendStatEventWithTags();
+        SpawnActor();
+        SetupPickup();
+        CantBuild();
+        ReplaceBuildingActor();
+        BotManagerSetup();
+        SpawnBotRet();
+        OnPossessedPawnDied();
+        CompletePickupAnimation();
+        RemoveFromAlivePlayers();
+        RegisterComponentWithWorld();
+        CreateAndConfigureNavigationSystem();
+        SendComplexCustomStatEvent();
+        SpawnLoot();
+        ReloadWeapon();
+        GetCommandLet();
+        GetSquadIdForCurrentPlayer();
+        OnSafeZoneStateChange();
+        InstructionForCollision();
+        GetGameSessionClass();
+        MatchmakingSerivcePerms();
+        EnterAircraft();
+        OnRep_ZiplineState();
+        PickTeam();
+        ServerOnAttemptInteract();
+        OnPlayImpactFX();
+        AddToAlivePlayers();
+        GetPlayerViewPoint();
+        LoadPlayset();
+        SetEditingPlayer();
+        PostUpdate();
+    }
 };
 
 inline UFinder* Finder = new UFinder();

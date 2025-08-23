@@ -102,10 +102,23 @@ public:
 class ABuildingContainer : public AActor
 {
 public:
+    DEFINE_MEMBER(int32, ABuildingContainer, ReplicatedLootTier);
     DEFINE_MEMBER(FVector, ABuildingContainer, LootSpawnLocation_Athena);
     DEFINE_BOOL(ABuildingContainer, bAlreadySearched);
     DEFINE_MEMBER(FName, ABuildingContainer, SearchLootTierGroup);
 public:
+    void OnRep_LootTier() {
+        static class UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BuildingContainer", "OnRep_LootTier");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return;
+
+        this->ProcessEvent(Func, nullptr);
+    }
+    
     bool BP_SpawnLoot(AFortPlayerPawn* PlayerPawn) {
         static class UFunction* Func = nullptr;
         SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("BuildingContainer", "BP_SpawnLoot");
@@ -202,4 +215,23 @@ namespace FortLootPackage
     bool ServerOnAttemptInteract(ABuildingContainer* BuildingContainer, FInteractionType TYPE);
     inline void (*ServerAttemptInteractOG)(UFortControllerComponent_Interaction* Component, FFrame& Stack);   
 void ServerAttemptInteract(UFortControllerComponent_Interaction* Component, FFrame& Stack);
+
+    static __int64 (*PostUpdateOG)(class ABuildingContainer* BuildingContainer, uint32 a2, __int64 a3);
+    static __int64 PostUpdate(class ABuildingContainer* BuildingContainer, uint32 a2, __int64 a3)
+{
+    FName DefaultLootTierGroup = ((ABuildingContainer*)BuildingContainer->GetClass()->GetClassDefaultObject())->GetSearchLootTierGroup();
+
+    if (BuildingContainer->GetSearchLootTierGroup().GetNumber() != DefaultLootTierGroup.GetNumber())
+    {
+        BuildingContainer->SetReplicatedLootTier(2);
+    }
+    else
+    {
+        BuildingContainer->SetReplicatedLootTier(1);
+    }
+    
+    BuildingContainer->OnRep_LootTier();
+
+    return PostUpdateOG(BuildingContainer, a2, a3);
+}
 }

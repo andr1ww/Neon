@@ -959,6 +959,20 @@ uint64 UFinder::SendStatEventWithTags()
     return FindBytes(String, { 0x40, 0x55 }, 1000, 0, true);
 }
 
+uint64 UFinder::PostUpdate()
+{
+    auto String = Memcury::Scanner::FindStringRef(L"ABuildingSMActor::PostUpdate() Building: %s, AltMeshIdx: %d", true, 0, Fortnite_Version >= 16).Get();
+    for (int i = 0; i < 1000; i++)
+    {
+        if (*(uint8_t*)(String - i) == 0x48 && *(uint8_t*)(String - i + 1) == 0x8b && *(uint8_t*)(String - i + 2) == 0xc4)
+        {
+            return String - i;
+        }
+    }
+
+    return 0;
+}
+
 uint64 UFinder::SpawnBot()
 {
     auto String = Memcury::Scanner::FindStringRef(L"UFortServerBotManagerAthena::SpawnBot invalid spawn location", true, 0, false).Get();

@@ -830,7 +830,8 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 				AFortInventory::SpawnPickupDirect(DeathLocation, ItemDef, Count, LoadedAmmo,
 					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 			}
-			else if (ItemDef->IsA(WeaponClass) || ItemDef->IsA(ConsumableClass) || ItemDef->IsA(AmmoClass)) {
+			
+			if (ItemDef->IsA(WeaponClass) || ItemDef->IsA(ConsumableClass) || ItemDef->IsA(AmmoClass)) {
 				AFortInventory::SpawnPickupDirect(DeathLocation, ItemDef, Count, LoadedAmmo,
 					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 			}
@@ -905,8 +906,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 
 		if (PlayerTeam && PlayerTeam->GetTeamMembers().Num() > 1) {
 			bRebooting = true;
-			for (auto& Member : PlayerTeam->GetTeamMembers()) {
-				auto MemberController = (AFortPlayerControllerAthena*)Member;
+			for (auto& MemberController : PlayerTeam->GetTeamMembers()) {
 				if (MemberController && MemberController != PlayerController) {
 					if (!MemberController->GetbMarkedAlive()) {
 						bRebooting = false;
@@ -927,7 +927,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		if (DamageCauser->IsA(FortProjectileBase))
 		{
 			auto Owner = (AFortWeapon*)(DamageCauser->GetOwner());
-			ItemDef = Owner->IsValidLowLevel() ? Owner->GetWeaponData() : nullptr; 
+			ItemDef = Owner->IsValidLowLevelFast() ? Owner->GetWeaponData() : nullptr; 
 		}
 
 		if (auto WeaponDef = (AFortWeapon*)(DamageCauser))
@@ -953,22 +953,19 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			}
 		}
 	}
+
+	((void (*)(AFortGameModeAthena*, AFortPlayerController*, AFortPlayerStateAthena*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char, bool))(Finder->RemoveFromAlivePlayers()))
+  (GameMode, PlayerController, KillerPlayerState, KillerPawn, ItemDef, DeathCause, 0, false);
 	
 	if (bRebooting) {
-		((void (*)(AFortGameModeAthena*, AFortPlayerController*, AFortPlayerStateAthena*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char, bool))(Finder->RemoveFromAlivePlayers()))
-		  (GameMode, PlayerController, KillerPlayerState, KillerPawn, ItemDef, DeathCause, 0, false);
 		PlayerController->SetbMarkedAlive(false);
 		return ClientOnPawnDiedOG(PlayerController, DeathReport);
 	}
-	
-	((void (*)(AFortGameModeAthena*, AFortPlayerController*, AFortPlayerStateAthena*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char, bool))(Finder->RemoveFromAlivePlayers()))
-	  (GameMode, PlayerController, KillerPlayerState, KillerPawn, ItemDef, DeathCause, 0, false);
 
 	PlayerController->SetbMarkedAlive(false);
 	
 	if (!bRebooting) {
-		for (auto& Member : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
-			auto MemberController = (AFortPlayerControllerAthena*)Member;
+		for (auto& MemberController : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
 			if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) {
 				auto MemberPlayerState = MemberController->GetPlayerState();
 				auto MemberMatchReport = MemberController->GetMatchReport();

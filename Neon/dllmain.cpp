@@ -633,6 +633,8 @@ void Main()
 		t.detach();
 		CreateThread(0, 0, Nexa::Echo::Heartbeat, 0, 0, 0);
 	}
+
+	Finder->Init();
 	
 	Sleep(5000);
 	while (!IsInFrontend())
@@ -647,7 +649,7 @@ void Main()
 	}
 	
 	InitNullsAndRetTrues();
-
+	
 	if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.20)
 	{
 		Runtime::Hook(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 4C 89 44 24 ? 57 48 83 EC ? 48 8B FA 48 8B F1 33 D2").Get(), Ok, (void**)&OkOG);
@@ -730,6 +732,7 @@ void Main()
 	Runtime::Hook(Finder->SendComplexCustomStatEvent(), UFortQuestManager::SendComplexCustomStatEvent, (void**)&UFortQuestManager::SendComplexCustomStatEventOG);
 	Runtime::Hook(Finder->ClientOnPawnDied(), AFortPlayerControllerAthena::ClientOnPawnDied, (void**)&AFortPlayerControllerAthena::ClientOnPawnDiedOG);
 	Runtime::Exec("/Script/FortniteGame.FortPhysicsPawn.ServerMove", AFortPhysicsPawn::ServerMove);
+	Runtime::Hook(Finder->PostUpdate(), FortLootPackage::PostUpdate, (void**)&FortLootPackage::PostUpdateOG);
 	if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.20)
 	{
 		Runtime::VFTHook(UAthenaNavSystem::GetDefaultObj()->GetVTable(), 0x53, UFortServerBotManagerAthena::InitializeForWorld, (void**)&UFortServerBotManagerAthena::InitializeForWorldOG);
