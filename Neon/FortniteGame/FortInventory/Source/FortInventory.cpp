@@ -19,8 +19,7 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
     this->SetbRequiresLocalUpdate(true);
     this->HandleInventoryLocalUpdate();
 
-    this->GetInventory().MarkItemDirty(*Entry);
-    this->GetInventory().MarkArrayDirty();
+    Entry ? this->GetInventory().MarkItemDirty(*Entry) : this->GetInventory().MarkArrayDirty();
 }
 
 void AFortInventory::Update(AFortAthenaAIBotController* PlayerController, FFortItemEntry* Entry)

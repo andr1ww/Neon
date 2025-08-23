@@ -954,7 +954,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		if (DamageCauser->IsA(FortProjectileBase))
 		{
 			auto Owner = (AFortWeapon*)(DamageCauser->GetOwner());
-			ItemDef = Owner->IsValidLowLevelFast() ? Owner->GetWeaponData() : nullptr; 
+			ItemDef = Owner->IsValidLowLevel() ? Owner->GetWeaponData() : nullptr; 
 		}
 
 		if (auto WeaponDef = (AFortWeapon*)(DamageCauser))
