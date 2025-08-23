@@ -496,8 +496,14 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     return *Result = Res;
 }
 
-APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer, AActor* StartSpot)
+APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, FFrame& Stack)
 {
+    AFortPlayerControllerAthena* NewPlayer;
+    AActor* StartSpot;
+    Stack.StepCompiledIn(&NewPlayer);
+    Stack.StepCompiledIn(&StartSpot);
+    Stack.IncrementCode();
+    
     if (NewPlayer->GetPawn()) {
         UE_LOG(LogNeon, Warning, "Early return!");
 		return 0;

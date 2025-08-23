@@ -465,11 +465,13 @@ void InitNullsAndRetTrues() {
 	{
 		NullFuncs.push_back(BeginPlayPedestal);
 	}
+
+	NullFuncs.push_back(IMAGEBASE + 0x2983710);
 	
 	for (auto& Func : NullFuncs) {
 		if (Func == 0x0) continue;
 		UE_LOG(LogNeon, Log, "NullFuncs: 0x%x", Func - IMAGEBASE);
-		Runtime::Patch(Func, 0xC3);
+		Runtime::Hook(Func, Return);
 	}
 
 	RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 8B C4 48 89 58 08 48 89 70 10 48 89 78 18 4C 89 60 20 55 41 56 41 57 48 8B EC 48 83 EC 60 49 8B D9 45 8A").Get()); // No reserve
@@ -700,15 +702,33 @@ void Main()
 		ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortUIDirector", nullptr);
 	}
 	
-	if (Finder->CreateAndConfigureNavigationSystem()) {
+	if (Finder->CreateAndConfigureNavigationSystem() && Fortnite_Version <= 13.00 && Fortnite_Version >= 11.00) {
 		Runtime::Hook(Finder->CreateAndConfigureNavigationSystem(), UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem, (void**)&UFortServerBotManagerAthena::CreateAndConfigureNavigationSystemOG);
 		UE_LOG(LogNeon, Log, "CreateAndConfigureNavigationSystem: 0x%x", Finder->CreateAndConfigureNavigationSystem() - IMAGEBASE);
 	}
 	
-	Runtime::Exec("/Game/Abilities/Player/Interrogation/GAB_InterrogatePlayer_Reveal.GAB_InterrogatePlayer_Reveal_C.EndInterrogation", UGAB_InterrogatePlayer_Reveal_C::EndInterrogation);
 	Runtime::Exec("/Script/Engine.GameMode.ReadyToStartMatch", AFortGameModeAthena::ReadyToStartMatch, (void**)&AFortGameModeAthena::ReadyToStartMatchOG);
-	Runtime::Hook<&AFortGameModeAthena::StaticClass>("SpawnDefaultPawnFor", AFortGameModeAthena::SpawnDefaultPawnFor);
+	Runtime::Exec("/Script/Engine.GameMode.SpawnDefaultPawnFor", AFortGameModeAthena::SpawnDefaultPawnFor);
+	int InternalServerTryActivateAbilityIndex = 0;
+
+	if (Engine_Version > 4.20)
+	{
+		static auto OnRep_ReplicatedAnimMontageFn = Runtime::StaticFindObject<UFunction>("/Script/GameplayAbilities.AbilitySystemComponent.OnRep_ReplicatedAnimMontage");
+		if (OnRep_ReplicatedAnimMontageFn)
+		{
+			InternalServerTryActivateAbilityIndex = Runtime::GetVTableIndex(OnRep_ReplicatedAnimMontageFn) - 1;
+			UE_LOG(LogNeon, Log, "InternalServerTryActivateAbilityIndex: 0x%x", InternalServerTryActivateAbilityIndex);
+		}
+	}
+	
+	Runtime::VFTHook(SDK::StaticClassImpl("FortAbilitySystemComponentAthena")->GetClassDefaultObject()->GetVTable(), InternalServerTryActivateAbilityIndex, UAbilitySystemComponent::InternalServerTryActivateAbility);
+	Runtime::Hook(Finder->GetPlayerViewPoint(), AFortPlayerControllerAthena::GetPlayerViewPoint, (void**)&AFortPlayerControllerAthena::GetPlayerViewPointOG);
+	Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
+	Runtime::Hook(Finder->GetMaxTickRate(), UNetDriver::GetMaxTickRate);
+	if (Finder->DispatchRequest()) Runtime::Hook(Finder->DispatchRequest(), HTTP::DispatchRequest, (void**)&HTTP::DispatchRequestOriginal);
+
 	Runtime::Exec("/Game/Athena/Items/Consumables/Parents/GA_Athena_MedConsumable_Parent.GA_Athena_MedConsumable_Parent_C.Triggered_4C02BFB04B18D9E79F84848FFE6D2C32", UGA_Athena_MedConsumable_Parent_C::Athena_MedConsumable_Triggered, (void**)&UGA_Athena_MedConsumable_Parent_C::Athena_MedConsumable_TriggeredOG);
+	Runtime::Exec("/Game/Abilities/Player/Interrogation/GAB_InterrogatePlayer_Reveal.GAB_InterrogatePlayer_Reveal_C.EndInterrogation", UGAB_InterrogatePlayer_Reveal_C::EndInterrogation);
 	if (Fortnite_Version >= 12.00) Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.OnCapsuleBeginOverlap", AFortPlayerPawn::OnCapsuleBeginOverlap);
 	Runtime::Exec("/Script/Engine.PlayerController.ServerAcknowledgePossession", AFortPlayerControllerAthena::ServerAcknowledgePossession);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerExecuteInventoryItem", AFortPlayerControllerAthena::ServerExecuteInventoryItem);
@@ -768,33 +788,13 @@ void Main()
 	}
 	
 	if (Finder->OnPossessedPawnDied()) Runtime::Hook(Finder->OnPossessedPawnDied(), AFortAthenaAIBotController::OnPossessedPawnDied, (void**)&AFortAthenaAIBotController::OnPossessedPawnDiedOG); 
-	int InternalServerTryActivateAbilityIndex = 0;
+	if (Finder->DispatchRequest()) Runtime::Hook(Finder->DispatchRequest(), HTTP::DispatchRequest, (void**)&HTTP::DispatchRequestOriginal);
 
-	if (Engine_Version > 4.20)
-	{
-		static auto OnRep_ReplicatedAnimMontageFn = Runtime::StaticFindObject<UFunction>("/Script/GameplayAbilities.AbilitySystemComponent.OnRep_ReplicatedAnimMontage");
-		if (OnRep_ReplicatedAnimMontageFn)
-		{
-			InternalServerTryActivateAbilityIndex = Runtime::GetVTableIndex(OnRep_ReplicatedAnimMontageFn) - 1;
-			UE_LOG(LogNeon, Log, "InternalServerTryActivateAbilityIndex: 0x%x", InternalServerTryActivateAbilityIndex);
-		}
-	}
-	
-	Runtime::VFTHook(SDK::StaticClassImpl("FortAbilitySystemComponentAthena")->GetClassDefaultObject()->GetVTable(), InternalServerTryActivateAbilityIndex, UAbilitySystemComponent::InternalServerTryActivateAbility);
-	Runtime::Hook(Finder->GetPlayerViewPoint(), AFortPlayerControllerAthena::GetPlayerViewPoint, (void**)&AFortPlayerControllerAthena::GetPlayerViewPointOG);
-	Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
-	Runtime::Hook(Finder->GetMaxTickRate(), UNetDriver::GetMaxTickRate);
-	if (Finder->DispatchRequest())
-	{
-		Runtime::Hook(Finder->DispatchRequest(), HTTP::DispatchRequest, (void**)&HTTP::DispatchRequestOriginal);
-	}
 
-	if (Finder->SpawnBot())
-	{
-		Runtime::Hook(Finder->SpawnBot(), UFortServerBotManagerAthena::SpawnBot, (void**)&UFortServerBotManagerAthena::SpawnBotOG);
-	}
+	if (Finder->SpawnBot())Runtime::Hook(Finder->SpawnBot(), UFortServerBotManagerAthena::SpawnBot, (void**)&UFortServerBotManagerAthena::SpawnBotOG);
 
 	Runtime::Hook(Finder->SendStatEventWithTags(), UFortQuestManager::SendStatEventWithTags, (void**)&UFortQuestManager::SendStatEventWithTagsOG);
+	
 	ExecuteConsoleCommand(UWorld::GetWorld(), WorldName, nullptr);
 }
 

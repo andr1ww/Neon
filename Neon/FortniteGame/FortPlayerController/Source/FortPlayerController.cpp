@@ -854,22 +854,22 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
         
 			if (ItemDef == Wood || ItemDef == Stone || ItemDef == Metal) {
 				bFoundMats = true;
-				AFortInventory::SpawnPickupDirect(DeathLocation, ItemDef, Count, LoadedAmmo,
+				AFortInventory::SpawnPickup(DeathLocation, ItemDef, Count, LoadedAmmo,
 					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 			}
 			
 			if (ItemDef->IsA(WeaponClass) || ItemDef->IsA(ConsumableClass) || ItemDef->IsA(AmmoClass)) {
-				AFortInventory::SpawnPickupDirect(DeathLocation, ItemDef, Count, LoadedAmmo,
+				AFortInventory::SpawnPickup(DeathLocation, ItemDef, Count, LoadedAmmo,
 					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 			}
 		}
    
 		if (!bFoundMats) {
-			AFortInventory::SpawnPickupDirect(DeathLocation, Wood, 50, 0,
+			AFortInventory::SpawnPickup(DeathLocation, Wood, 50, 0,
 				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
-			AFortInventory::SpawnPickupDirect(DeathLocation, Stone, 50, 0,
+			AFortInventory::SpawnPickup(DeathLocation, Stone, 50, 0,
 				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
-			AFortInventory::SpawnPickupDirect(DeathLocation, Metal, 50, 0,
+			AFortInventory::SpawnPickup(DeathLocation, Metal, 50, 0,
 				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 		}
 	}
@@ -1238,6 +1238,7 @@ int32 AFortPlayerControllerAthena::K2_RemoveItemFromPlayerByGuid(UObject* Contex
 	Params.bForceRemoval = bForceRemoval;
 	
 	callExecOG(Context, "/Script/FortniteGame.FortKismetLibrary.K2_RemoveItemFromPlayerByGuid", K2_RemoveItemFromPlayerByGuid, Params);
+	return -1;
 }
 
 int32 AFortPlayerControllerAthena::K2_RemoveItemFromPlayer(AFortPlayerControllerAthena* PC, UFortWorldItemDefinition* ItemDefinition, int32 AmountToRemove, bool bForceRemoval) {

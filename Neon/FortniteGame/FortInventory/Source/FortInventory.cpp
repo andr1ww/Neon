@@ -533,7 +533,7 @@ FFortItemEntry* AFortInventory::MakeItemEntry(UFortItemDefinition* ItemDefinitio
     
     static int32 FortItemEntrySize = StaticClassImpl("FortItemEntry")->GetSize();
     
-    static FFortItemEntry* IE = (FFortItemEntry*)malloc(FortItemEntrySize);
+    FFortItemEntry* IE = (FFortItemEntry*)malloc(FortItemEntrySize);
     if (!IE) return nullptr;
     
     memset(IE, 0, FortItemEntrySize);
@@ -545,9 +545,11 @@ FFortItemEntry* AFortInventory::MakeItemEntry(UFortItemDefinition* ItemDefinitio
 
     IE->SetItemDefinition(ItemDefinition);
     IE->SetCount(Count);
+
+    static UClass* Weapon = UFortWeaponItemDefinition::StaticClass();
     
-    if (ItemDefinition->IsA<UFortWeaponItemDefinition>()) {
-        UFortWeaponItemDefinition* WeaponDef = Cast<UFortWeaponItemDefinition>(ItemDefinition);
+    if (ItemDefinition->IsA(Weapon)) {
+        UFortWeaponItemDefinition* WeaponDef = (UFortWeaponItemDefinition*)(ItemDefinition);
         int32 ClipSize = GetStats(WeaponDef) ? GetStats(WeaponDef)->GetClipSize() : 0;
         IE->SetLoadedAmmo(ClipSize);
     } else {
