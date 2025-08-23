@@ -450,7 +450,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
         auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
         bool ts = GameMode->GetMatchState().GetNumber() == WaitingPostMatch.GetNumber() && GameMode->GetAlivePlayers().Num() == 0;
 
-        if (ts)
+        if (ts || GameMode->GetAlivePlayers().Num() == 0 && GameMode->GetAliveBots().Num() > 1)
         {
             static bool bTerminating = false;
             if (!bTerminating)
