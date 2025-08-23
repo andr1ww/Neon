@@ -194,13 +194,8 @@ public:
         Params.bShouldCombinePickupsWhenTossCompletes = bShouldCombinePickupsWhenTossCompletes;
         Params.InPickupSourceTypeFlags = InPickupSourceTypeFlags;
         Params.InPickupSpawnSource = InPickupSpawnSource;
-
-        auto Flgs = Func->FunctionFlags();
-        Func->FunctionFlags() |= 0x400;
-    
+        
         this->ProcessEvent(Func, &Params);
-
-        Func->FunctionFlags() = Flgs;
     }
 public:
     DEFINE_PTR(AFortPlayerPawn, AFortPickup, PawnWhoDroppedPickup);

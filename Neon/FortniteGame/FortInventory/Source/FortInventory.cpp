@@ -328,20 +328,12 @@ AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry* Entr
     AFortPickupAthena* NewPickup = UGameplayStatics::SpawnActorOG<AFortPickupAthena>(PickupClass, Loc);
     if (NewPickup != nullptr && Entry != nullptr && Entry->GetItemDefinition() != nullptr)
     {
-        if (Finder->SetupPickup())
-        {
-            static void (*InitPickup)(AFortPickup* Pickup, __int64 ItemEntry, TArray<FFortItemEntry> MultiItemPickupEntriesIGuess, bool bSplitOnPickup)= decltype(InitPickup)(Finder->SetupPickup());
-
-            TArray<FFortItemEntry> Idfk{};
-            InitPickup(NewPickup, __int64(Entry), Idfk, false);
-        }
-        
         NewPickup->SetbRandomRotation(RandomRotation);
         NewPickup->GetPrimaryPickupItemEntry().SetItemDefinition(Entry->GetItemDefinition());
         NewPickup->GetPrimaryPickupItemEntry().SetLoadedAmmo(Entry->GetLoadedAmmo());
         NewPickup->GetPrimaryPickupItemEntry().SetCount(OverrideCount != -1 ? OverrideCount : Entry->GetCount());
-        NewPickup->OnRep_PrimaryPickupItemEntry();
         NewPickup->SetPawnWhoDroppedPickup(Pawn);
+        NewPickup->OnRep_PrimaryPickupItemEntry();
             
         NewPickup->TossPickup(Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
     }
