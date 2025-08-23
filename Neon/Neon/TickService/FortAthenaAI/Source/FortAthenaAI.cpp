@@ -87,6 +87,7 @@ void TickService::FortAthenaAIService::Tick()
             if (AI.LastFrame % 10 == 0)
             {
                 WarmupPhase(AI, CurrentTime);
+                break;
             }
         }
         else if (GamePhase == EAthenaGamePhase::Aircraft)
@@ -94,6 +95,7 @@ void TickService::FortAthenaAIService::Tick()
             if (AI.LastFrame % 5 == 0)
             {
                 AircraftPhase(AI, CurrentTime);
+                break;
             }
         } else if (GamePhase == EAthenaGamePhase::SafeZones)
         {

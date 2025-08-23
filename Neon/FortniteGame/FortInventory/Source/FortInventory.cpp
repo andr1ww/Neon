@@ -19,9 +19,9 @@ void AFortInventory::Update(AFortPlayerControllerAthena* PlayerController, FFort
     this->SetbRequiresLocalUpdate(true);
     this->HandleInventoryLocalUpdate();
 
-    Entry ? this->GetInventory().MarkItemDirty(*Entry) : this->GetInventory().MarkArrayDirty();
+    this->GetInventory().MarkItemDirty(*Entry);
+    this->GetInventory().MarkArrayDirty();
 }
-
 
 void AFortInventory::Update(AFortAthenaAIBotController* PlayerController, FFortItemEntry* Entry)
 {
@@ -329,6 +329,14 @@ AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, FFortItemEntry* Entr
     AFortPickupAthena* NewPickup = UGameplayStatics::SpawnActorOG<AFortPickupAthena>(PickupClass, Loc);
     if (NewPickup != nullptr && Entry != nullptr && Entry->GetItemDefinition() != nullptr)
     {
+        if (Finder->SetupPickup())
+        {
+            static void (*InitPickup)(AFortPickup* Pickup, __int64 ItemEntry, TArray<FFortItemEntry> MultiItemPickupEntriesIGuess, bool bSplitOnPickup)= decltype(InitPickup)(Finder->SetupPickup());
+
+            TArray<FFortItemEntry> Idfk{};
+            InitPickup(NewPickup, __int64(Entry), Idfk, false);
+        }
+        
         NewPickup->SetbRandomRotation(RandomRotation);
         NewPickup->GetPrimaryPickupItemEntry().SetItemDefinition(Entry->GetItemDefinition());
         NewPickup->GetPrimaryPickupItemEntry().SetLoadedAmmo(Entry->GetLoadedAmmo());
@@ -382,7 +390,7 @@ AFortPickupAthena* AFortInventory::SpawnPickup(FVector Loc, UFortItemDefinition*
     return SpawnPickup(Loc, ItemEntry, SourceTypeFlag, SpawnSource, Pawn, -1, Toss, true, true);
 }
 
-void AFortInventory::ReplaceEntry(AFortAthenaAIBotController* AIController, FFortItemEntry& Entry) {
+void AFortInventory::ReplaceEntry(AFortAthenaAIBotController* AIController, FFortItemEntry& Entry, FGuid GUID) {
     if (!AIController) return;
     
     AFortInventory* WorldInventory = AIController->GetInventory();
@@ -455,7 +463,7 @@ void AFortInventory::ReplaceEntry(AFortAthenaAIBotController* AIController, FFor
     }
 }
 
-void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFortItemEntry& Entry) {
+void AFortInventory::ReplaceEntry(AFortPlayerController* PlayerController, FFortItemEntry& Entry, FGuid GUID) {
     if (!PlayerController) return;
     
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();

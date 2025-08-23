@@ -295,8 +295,8 @@ public:
     static UObject* GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level, FGuid Guid);
     static UObject* GiveItem(AFortPlayerControllerAthena* PlayerController, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level);
     static UObject* GiveItem(AFortAthenaAIBotController* Controller, UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level);
-    static void ReplaceEntry(AFortPlayerController*, FFortItemEntry&);
-    static void ReplaceEntry(AFortAthenaAIBotController* AIController, FFortItemEntry& Entry);
+    static void ReplaceEntry(AFortPlayerController*, FFortItemEntry&, FGuid = FGuid());
+    static void ReplaceEntry(AFortAthenaAIBotController* AIController, FFortItemEntry& Entry, FGuid = FGuid());
     static void Remove(AFortAthenaAIBotController* AIController, FGuid Guid, int AmountToRemove);
     static void Remove(AFortPlayerController* PlayerController, FGuid Guid, int AmountToRemove = -1);
     static FGuid FindGuidByDefinition(AFortPlayerControllerAthena* PC, UFortItemDefinition* ItemDef);

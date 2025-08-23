@@ -213,39 +213,39 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
 		TickService::FortAthenaAIService::RemoveFromService(Controller);
 
 		AFortPlayerStateAthena* PlayerState = (AFortPlayerStateAthena*)Controller->GetPlayerState();
-    	
-		FDeathInfo* DeathInfo = &PlayerState->GetDeathInfo(); 
-		EDeathCause DeathCause = PlayerState->ToDeathCause(Pawn->GetDeathTags(), false);
-    	
-		if (DeathInfo) {
-			DeathInfo->SetbDBNO(false);
-			DeathInfo->SetDeathLocation(Pawn->K2_GetActorLocation());
-			DeathInfo->SetDeathTags(Pawn->GetDeathTags());
-			DeathInfo->SetDeathCause(DeathCause);
-			DeathInfo->SetDowner( nullptr);
-			DeathInfo->SetFinisherOrDowner(InstigatedBy->GetPlayerState());
-
-			if (Pawn && InstigatedBy->IsA<AFortPlayerControllerAthena>()) {
-				DeathInfo->GetDistance() = (DeathCause != EDeathCause::FallDamage) 
-					? (InstigatedBy->GetMyFortPawn() && InstigatedBy->GetMyFortPawn()->GetClass()->GetFunction("GetDistanceTo") ? InstigatedBy->GetMyFortPawn()->GetDistanceTo(Pawn) : 0.0f)
-					: Pawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
-			} else if (Pawn && InstigatedBy->IsA<AFortAthenaAIBotController>())
-			{
-				AFortAthenaAIBotController* Controller = (AFortAthenaAIBotController*)InstigatedBy;
-				DeathInfo->GetDistance() = (DeathCause != EDeathCause::FallDamage) 
-					? (Controller->GetPawn() && Controller->GetPawn()->GetClass()->GetFunction("GetDistanceTo") ? Controller->GetPawn()->GetDistanceTo(Pawn) : 0.0f)
-					: Pawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
-			}
-
-			DeathInfo->SetbInitialized(true);
-			PlayerState->SetDeathInfo(*DeathInfo);
-			PlayerState->OnRep_DeathInfo();
-		}
 
 		AFortPlayerStateAthena* KillerPlayerState = InstigatedBy->GetPlayerState();
    	
 		if (Controller->GetFName().ToString().ToString().contains("Phoebe"))
 		{
+			FDeathInfo* DeathInfo = &PlayerState->GetDeathInfo(); 
+			EDeathCause DeathCause = PlayerState->ToDeathCause(Pawn->GetDeathTags(), false);
+    	
+			if (DeathInfo) {
+				DeathInfo->SetbDBNO(false);
+				DeathInfo->SetDeathLocation(Pawn->K2_GetActorLocation());
+				DeathInfo->SetDeathTags(Pawn->GetDeathTags());
+				DeathInfo->SetDeathCause(DeathCause);
+				DeathInfo->SetDowner( nullptr);
+				DeathInfo->SetFinisherOrDowner(InstigatedBy->GetPlayerState());
+
+				if (Pawn && InstigatedBy->IsA<AFortPlayerControllerAthena>()) {
+					DeathInfo->GetDistance() = (DeathCause != EDeathCause::FallDamage) 
+						? (InstigatedBy->GetMyFortPawn() && InstigatedBy->GetMyFortPawn()->GetClass()->GetFunction("GetDistanceTo") ? InstigatedBy->GetMyFortPawn()->GetDistanceTo(Pawn) : 0.0f)
+						: Pawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
+				} else if (Pawn && InstigatedBy->IsA<AFortAthenaAIBotController>())
+				{
+					AFortAthenaAIBotController* Controller = (AFortAthenaAIBotController*)InstigatedBy;
+					DeathInfo->GetDistance() = (DeathCause != EDeathCause::FallDamage) 
+						? (Controller->GetPawn() && Controller->GetPawn()->GetClass()->GetFunction("GetDistanceTo") ? Controller->GetPawn()->GetDistanceTo(Pawn) : 0.0f)
+						: Pawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
+				}
+
+				DeathInfo->SetbInitialized(true);
+				PlayerState->SetDeathInfo(*DeathInfo);
+				PlayerState->OnRep_DeathInfo();
+			}
+			
 			KillerPlayerState->ClientReportKill(PlayerState);
 
 			int32 KillerScore = KillerPlayerState->GetKillScore() + 1;
