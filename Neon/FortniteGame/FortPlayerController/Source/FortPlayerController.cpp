@@ -1126,6 +1126,8 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		if (!bRebooting) {
 			for (auto& Member : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
 				auto MemberController = (AFortPlayerControllerAthena*)Member;
+				if (!IsValidPointer(MemberController))
+					continue;
 				if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) {
 					auto MemberPlayerState = MemberController->GetPlayerState();
 					Nexa::BroadcastMatchResults(MemberController, MemberPlayerState, Nexa::GetState().PlaylistData, GameMode);

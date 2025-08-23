@@ -15,6 +15,7 @@ void Nexa::BroadcastMatchResults(AFortPlayerControllerAthena* Controller, AFortP
     if (StartingPlayers == 0)
     {
         StartingPlayers = GameMode->GetAlivePlayers().Num();
+        Nexa::SetStartingPlayers(StartingPlayers);
     }
     
     AFortGameStateAthena* GameState = UWorld::GetWorld()->GetGameState();
