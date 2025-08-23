@@ -46,14 +46,22 @@ void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 		Spawns.Remove(RandomIndex);
 		FVector Loc = BotSpawn->GetActorLocation();
 		Loc.Z += 250;
-		
-	//	AFortPlayerPawn* Pawn = UGameplayStatics::SpawnActorOG<AFortPlayerPawnAthena>(BotBP, Loc, {});
-		AFortPlayerPawn* Pawn = GameMode->GetServerBotManager()->GetCachedBotMutator()->SpawnBot(BotBP, BotSpawn, Loc, {}, false);
-		AFortAthenaAIBotController* Controller = (AFortAthenaAIBotController*)Pawn->GetController();
 
-	//	GameMode->GetAlivePlayers().Add(Cast<AFortPlayerControllerAthena>(Controller));
-	//	++GameState->GetPlayersLeft();
-	//	GameState->OnRep_PlayersLeft();
+		AFortPlayerPawn* Pawn = nullptr;
+		AFortAthenaAIBotController* Controller = nullptr;
+		
+		if (Fortnite_Version <= 13.40 && Fortnite_Version >= 11.00)
+		{
+			Pawn = GameMode->GetServerBotManager()->GetCachedBotMutator()->SpawnBot(BotBP, BotSpawn, Loc, {}, false);
+			Controller = (AFortAthenaAIBotController*)Pawn->GetController();
+		} else
+		{
+			auto GameState = GameMode->GetGameState();
+			Pawn = UGameplayStatics::SpawnActorOG<AFortPlayerPawnAthena>(BotBP, Loc, {});
+			GameMode->GetAlivePlayers().Add(Cast<AFortPlayerControllerAthena>(Controller));
+			++GameState->GetPlayersLeft();
+			GameState->OnRep_PlayersLeft();
+		}
 		
 		if (Characters.size() != 0)
 		{

@@ -1050,12 +1050,11 @@ uint64 UFinder::ReplaceBuildingActor()
         return CachedResult = Memcury::Scanner::FindPattern("4C 89 44 24 ? 55 56 57 41 55 41 56 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 45").Get(); 
     }
 
-    auto BytesToFind = Engine_Version == 4.20 || (Engine_Version == 4.21 && Fortnite_Version < 6.30) || Engine_Version >= 4.27 ? std::vector<uint8_t>{ 0x48, 0x8B, 0xC4 }
+    auto BytesToFind = Fortnite_Version <= 2.5 || (Fortnite_Version >= 5.00 && Fortnite_Version < 6.30) || Fortnite_Version >= 16.40 ? std::vector<uint8_t>{ 0x48, 0x8B, 0xC4 }
     : std::vector<uint8_t>{ 0x4C, 0x8B };
 
     return CachedResult = FindBytes(StringRef, BytesToFind, 1000, 0, true);
 }
-
 
 uint64 UFinder::BotManagerSetup()
 {

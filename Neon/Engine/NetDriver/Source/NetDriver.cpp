@@ -400,23 +400,26 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             static bool bSet = false;
             static bool bOk = false;
 
-            if (GameState->GetGamePhase() == EAthenaGamePhase::Warmup && GameMode->GetAlivePlayers().Num() > 0
-                && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) < 100
-                && GameMode->GetAliveBots().Num() < 100 && GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Default") && !Config::bLateGame)
+            if (Fortnite_Version <= 13.40)
             {
-                if (UKismetMathLibrary::RandomBoolWithWeight(0.02f))
+                if (GameState->GetGamePhase() == EAthenaGamePhase::Warmup && GameMode->GetAlivePlayers().Num() > 0
+                    && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) < 100
+                    && GameMode->GetAliveBots().Num() < 100 && GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Default") && !Config::bLateGame)
                 {
-                    AFortAthenaAIBotController::SpawnPlayerBot(1);
+                    if (UKismetMathLibrary::RandomBoolWithWeight(0.02f))
+                    {
+                        AFortAthenaAIBotController::SpawnPlayerBot(1);
+                    }
+                } else if (Config::bEchoSessions
+                    && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) == 100
+                    && GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Default") && !Config::bLateGame & !bOk)
+                {
+                    bOk = true;
+                    std::thread t([]() {
+                        Nexa::Echo::CloseEchoSession();
+                    });
+                    t.detach();
                 }
-            } else if (Config::bEchoSessions
-                && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) == 100
-                && GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Default") && !Config::bLateGame & !bOk)
-            {
-                bOk = true;
-                std::thread t([]() {
-                    Nexa::Echo::CloseEchoSession();
-                });
-                t.detach();
             }
             
             if (Fortnite_Version <= 13.40 && Fortnite_Version >= 12.00 && bSet)
