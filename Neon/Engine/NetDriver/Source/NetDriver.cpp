@@ -448,12 +448,19 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
     {
         static FName WaitingPostMatch = UKismetStringLibrary::Conv_StringToName(L"WaitingPostMatch");
         auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
-        auto GameState = UWorld::GetWorld()->GetGameState();
         bool ts = GameMode->GetMatchState().GetNumber() == WaitingPostMatch.GetNumber() && NetDriver->GetClientConnections().Num() == 0;
 
         if (ts)
         {
-            TerminateProcess(GetCurrentProcess(), 0);
+            static bool bTerminating = false;
+            if (!bTerminating)
+            {
+                bTerminating = true;
+                std::thread([](){ 
+                    Sleep(7000);  
+                    TerminateProcess(GetCurrentProcess(), 0);
+                }).detach();
+            }
         }
     }
     

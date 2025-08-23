@@ -14,7 +14,7 @@ void Nexa::BroadcastMatchResults(AFortPlayerControllerAthena* Controller, AFortP
     static int StartingPlayers = 0;
     if (StartingPlayers == 0)
     {
-        StartingPlayers = GameMode->GetAlivePlayers().Num();
+        StartingPlayers = GameMode->GetAlivePlayers().Num() + 1;
         Nexa::SetStartingPlayers(StartingPlayers);
     }
     

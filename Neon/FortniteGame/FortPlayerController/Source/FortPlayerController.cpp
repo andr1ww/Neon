@@ -830,10 +830,13 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		DeathInfo->SetbInitialized(true);
 		PlayerState->SetDeathInfo(*DeathInfo);
 	}
+
+	static auto Wood = Runtime::StaticFindObject<UFortWorldItemDefinition>("/Game/Items/ResourcePickups/WoodItemData.WoodItemData");
+	static auto Stone = Runtime::StaticFindObject<UFortWorldItemDefinition>("/Game/Items/ResourcePickups/StoneItemData.StoneItemData");
+	static auto Metal = Runtime::StaticFindObject<UFortWorldItemDefinition>("/Game/Items/ResourcePickups/MetalItemData.MetalItemData");
    
 	auto WorldInventory = PlayerController->GetWorldInventory();
 	if (WorldInventory && VictimPawn) {
-		static const UClass* ResourceClass = UFortResourceItemDefinition::StaticClass();
 		static const UClass* WeaponClass = UFortWeaponRangedItemDefinition::StaticClass();
 		static const UClass* ConsumableClass = UFortConsumableItemDefinition::StaticClass();
 		static const UClass* AmmoClass = UFortAmmoItemDefinition::StaticClass();
@@ -849,24 +852,24 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			int Count = entry->GetItemEntry().GetCount();
 			int LoadedAmmo = entry->GetItemEntry().GetLoadedAmmo();
         
-			if (ItemDef->IsA(ResourceClass)) {
+			if (ItemDef == Wood || ItemDef == Stone || ItemDef == Metal) {
 				bFoundMats = true;
-				AFortInventory::SpawnPickupDirect(DeathLocation, ItemDef, Count, LoadedAmmo,
+				AFortInventory::SpawnPickup(DeathLocation, ItemDef, Count, LoadedAmmo,
 					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 			}
 			
 			if (ItemDef->IsA(WeaponClass) || ItemDef->IsA(ConsumableClass) || ItemDef->IsA(AmmoClass)) {
-				AFortInventory::SpawnPickupDirect(DeathLocation, ItemDef, Count, LoadedAmmo,
+				AFortInventory::SpawnPickup(DeathLocation, ItemDef, Count, LoadedAmmo,
 					EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 			}
 		}
    
 		if (!bFoundMats) {
-			AFortInventory::SpawnPickupDirect(DeathLocation, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Wood), 50, 0,
+			AFortInventory::SpawnPickup(DeathLocation, Wood, 50, 0,
 				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
-			AFortInventory::SpawnPickupDirect(DeathLocation, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Stone), 50, 0,
+			AFortInventory::SpawnPickup(DeathLocation, Stone, 50, 0,
 				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
-			AFortInventory::SpawnPickupDirect(DeathLocation, UFortKismetLibrary::K2_GetResourceItemDefinition(EFortResourceType::Metal), 50, 0,
+			AFortInventory::SpawnPickup(DeathLocation, Metal, 50, 0,
 				EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, VictimPawn, true);
 		}
 	}
