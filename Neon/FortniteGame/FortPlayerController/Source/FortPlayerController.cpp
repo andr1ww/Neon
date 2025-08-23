@@ -314,14 +314,14 @@ void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControll
 	static const UClass* GadgetItem = UFortGadgetItemDefinition::StaticClass();
 	static const UClass* DecoItem = UFortDecoItemDefinition::StaticClass();
 
-	if (auto Deco = (UFortContextTrapItemDefinition *) ItemDefinition->IsA(DecoItem)) {
+/*	if (auto Deco = (UFortContextTrapItemDefinition *) Entry->GetItemDefinition()->IsA(DecoItem)) {
 		PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "PickUpActor", nullptr, Deco);
 		PlayerController->GetMyFortPawn()->GetCurrentWeapon()->SetItemEntryGuid(ItemGuid);
 
 		if (auto ContextTrap = (AFortDecoTool_ContextTrap*)PlayerController->GetMyFortPawn()->GetCurrentWeapon()) ContextTrap->SetContextTrapItemDefinition(Deco);
 		return;
 	}
-	
+*/	
     if (Entry->GetItemDefinition()->IsA(GadgetItem))
     {
         ItemDefinition = ((UFortGadgetItemDefinition*)Entry->GetItemDefinition())->GetWeaponItemDefinition();
