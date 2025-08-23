@@ -1053,7 +1053,7 @@ uint64 UFinder::ReplaceBuildingActor()
     auto BytesToFind = Fortnite_Version <= 2.5 || (Fortnite_Version >= 5.00 && Fortnite_Version < 6.30) || Fortnite_Version >= 16.40 ? std::vector<uint8_t>{ 0x48, 0x8B, 0xC4 }
     : std::vector<uint8_t>{ 0x4C, 0x8B };
 
-    return CachedResult = FindBytes(StringRef, BytesToFind, 1000, 0, true);
+    return CachedResult = StringRef.ScanFor(BytesToFind, 1000, 0, true).Get();
 }
 
 uint64 UFinder::BotManagerSetup()
