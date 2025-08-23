@@ -672,7 +672,7 @@ void AFortPlayerControllerAthena::ServerEditBuildingActor(AFortPlayerControllerA
     Stack.StepCompiledIn(&bMirrored);
     Stack.IncrementCode();
 
-    if (!PlayerController || !BuildingSMActor || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
+    if (!PlayerController || !BuildingSMActor || !PlayerController->GetMyFortPawn() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
 
 	auto SetEditingPlayer = (void (*)(ABuildingSMActor*, AFortPlayerState*))(Finder->SetEditingPlayer());
 	SetEditingPlayer(BuildingSMActor, nullptr);
