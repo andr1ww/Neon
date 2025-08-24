@@ -624,9 +624,39 @@ public:
 	DECLARE_DEFAULT_OBJECT(UPlaysetLevelStreamComponent)
 };
 
+enum class EFortMinigameState : uint8
+{
+	PreGame                                  = 0,
+	Setup                                    = 1,
+	Transitioning                            = 2,
+	WaitingForCameras                        = 3,
+	Warmup                                   = 4,
+	InProgress                               = 5,
+	PostGameTimeDilation                     = 6,
+	PostRoundEnd                             = 7,
+	PostGameEnd                              = 8,
+	PostGameAbandon                          = 9,
+	PostGameReset                            = 10,
+	EFortMinigameState_MAX                   = 11,
+};
+
 class AFortMinigame : public AActor
 {
 public:
+	void OnRep_CurrentState()
+	{
+		static class UFunction *Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortMinigame", "OnRep_CurrentState");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return
+
+		this->ProcessEvent(Func, nullptr);
+	}
+	
+	DEFINE_MEMBER(EFortMinigameState, AFortMinigame, CurrentState)
 	DECLARE_STATIC_CLASS(AFortMinigame)
 	DECLARE_DEFAULT_OBJECT(AFortMinigame)
 };

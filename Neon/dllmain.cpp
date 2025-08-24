@@ -841,6 +841,7 @@ void Main()
 	Runtime::Exec("/Script/FortniteGame.FortProjectileBase.OnStopCallback", AFortProjectileBase::OnStopCallback, (void**)&AFortProjectileBase::OnStopCallbackOG);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerControllerAthena.ServerStartMinigame", AFortPlayerControllerAthena::ServerStartMinigame, (void**)&AFortPlayerControllerAthena::ServerStartMinigameOG);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerControllerAthena.ServerClientIsReadyToRespawn", AFortPlayerControllerAthena::ServerClientIsReadyToRespawn);
+	Runtime::Exec("/Script/FortniteGame.FortPlayerControllerAthena.ServerEndMinigame", AFortPlayerControllerAthena::ServerEndMinigame, (void**)&AFortPlayerControllerAthena::ServerEndMinigameOG);
 
 	Runtime::Hook(Finder->ReloadWeapon(), AFortPlayerPawn::ReloadWeapon, (void**)&AFortPlayerPawn::ReloadWeaponOG); // this is right um we can make it uni after we get it to fucking call 
 	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);

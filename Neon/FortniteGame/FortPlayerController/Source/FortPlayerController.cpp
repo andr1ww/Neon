@@ -91,6 +91,26 @@ void AFortPlayerControllerAthena::ServerClientIsReadyToRespawn(AFortPlayerContro
 	}
 }
 
+void AFortPlayerControllerAthena::ServerEndMinigame(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+	UE_LOG(LogNeon, Log, __FUNCTION__);
+	Stack.IncrementCode();
+
+	ServerEndMinigameOG(PlayerController, Stack);
+	
+	AFortMinigame* MiniGame = PlayerController->CallFunc<AFortMinigame*>("FortPlayerControllerAthena", "GetMinigame");
+
+	std::thread([MiniGame]()
+		{
+			while (MiniGame->GetCurrentState() != EFortMinigameState::PostGameReset)
+			{
+					std::this_thread::sleep_for(std::chrono::milliseconds(200));
+			}
+			MiniGame->SetCurrentState(EFortMinigameState::PreGame);
+			MiniGame->OnRep_CurrentState();
+		}).detach();
+}
+
 void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
 {
 	Stack.IncrementCode();
@@ -1416,6 +1436,47 @@ void AFortPlayerControllerAthena::ServerCheat(AFortPlayerControllerAthena* Playe
 	Stack.IncrementCode();
 
 	UE_LOG(LogNeon, Log, "Wow");
+
+	
+	std::vector<std::string> Args;
+	auto Message = Msg.ToString();
+	
+	size_t start = Message.find('\\');
+
+	while (start != std::string::npos)
+	{
+		size_t end = Message.find('\\', start + 1);
+
+		if (end == std::string::npos)
+			break;
+
+		Message.replace(start, end - start + 2, "");
+		start = Message.find('\\');
+	}
+
+	int zz = 0;
+
+	while (Message.find(" ") != std::string::npos)
+	{
+		auto arg = Message.substr(0, Message.find(' '));
+		Args.push_back(arg);
+		Message.erase(0, Message.find(' ') + 1);
+		zz++;
+	}
+
+	Args.push_back(Message);
+
+	auto FullCmd = Msg.ToString();
+	
+	if (FullCmd.starts_with("start"))
+	{
+		auto fn1 = Runtime::StaticFindObject<UFunction>("/Script/FortniteGame.FortMinigame.AdvanceState");
+    
+		AFortMinigame* MG = PlayerController->CallFunc<AFortMinigame*>("FortPlayerControllerAthena", "GetMinigame");
+		UE_LOG(LogNeon, Log, "CurrentStateBefore: %d", MG->GetCurrentState());
+		MG->ProcessEvent(fn1, nullptr);
+		UE_LOG(LogNeon, Log, "CurrentStateAfter: %d", MG->GetCurrentState());
+	}
 }
 
 void AFortPlayerControllerAthena::ServerAttemptInventoryDrop(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
