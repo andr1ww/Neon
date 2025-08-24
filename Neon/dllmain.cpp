@@ -778,6 +778,24 @@ void Main()
 		}
 	}
 
+	if (Config::bCreative)
+	{
+		uint64 Addr = 0;
+		Runtime::Hook(IMAGEBASE + 0x1949470, RetFalse);
+		Addr = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 55 57 41 56 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 5D").Get(); // works on 12.61
+		if (Addr)
+		{
+			Runtime::Hook(Addr, RetFalse);
+		} else
+		{
+			Addr = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 48 81 EC ? ? ? ? 48 8B 9C 24 ? ? ? ? 33 FF").Get();
+			if (Addr)
+			{
+				Runtime::Hook(Addr, RetFalse);
+			}
+		}
+	} 
+
 	Runtime::VFTHook(SDK::StaticClassImpl("FortAbilitySystemComponentAthena")->GetClassDefaultObject()->GetVTable(), InternalServerTryActivateAbilityIndex, UAbilitySystemComponent::InternalServerTryActivateAbility);
 	Runtime::Hook(Finder->GetPlayerViewPoint(), AFortPlayerControllerAthena::GetPlayerViewPoint, (void**)&AFortPlayerControllerAthena::GetPlayerViewPointOG);
 	Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
@@ -821,6 +839,8 @@ void Main()
 	}
 	Runtime::Exec("/Script/FortniteGame.FortPlayerControllerAthena.ServerGiveCreativeItem", AFortPlayerControllerAthena::ServerGiveCreativeItem);
 	Runtime::Exec("/Script/FortniteGame.FortProjectileBase.OnStopCallback", AFortProjectileBase::OnStopCallback, (void**)&AFortProjectileBase::OnStopCallbackOG);
+	Runtime::Exec("/Script/FortniteGame.FortPlayerControllerAthena.ServerStartMinigame", AFortPlayerControllerAthena::ServerStartMinigame, (void**)&AFortPlayerControllerAthena::ServerStartMinigameOG);
+	Runtime::Exec("/Script/FortniteGame.FortPlayerControllerAthena.ServerClientIsReadyToRespawn", AFortPlayerControllerAthena::ServerClientIsReadyToRespawn);
 
 	Runtime::Hook(Finder->ReloadWeapon(), AFortPlayerPawn::ReloadWeapon, (void**)&AFortPlayerPawn::ReloadWeaponOG); // this is right um we can make it uni after we get it to fucking call 
 	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);

@@ -50,6 +50,47 @@ PlayerController->GetXPComponent()->Get<int32>("FortPlayerControllerAthenaXPComp
     }
 }
 
+void AFortPlayerControllerAthena::ServerClientIsReadyToRespawn(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+	Stack.IncrementCode();
+	
+	if (!PlayerController) return;
+	auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
+	auto GameState = GameMode->GetGameState();
+	auto PlayerState = PlayerController->GetPlayerState();
+	
+	if (GameState->IsRespawningAllowed(PlayerState))
+	{
+		if (PlayerState->GetRespawnData().bServerIsReady && PlayerState->GetRespawnData().bRespawnDataAvailable)
+		{
+			PlayerState->GetRespawnData().bClientIsReady = true;
+				
+			FTransform SpawnTransform{};
+			SpawnTransform.Translation = PlayerState->GetRespawnData().RespawnLocation;
+			SpawnTransform.Rotation = FRotToQuat(FRotator(
+				PlayerState->GetRespawnData().RespawnRotation.Pitch, 
+				PlayerState->GetRespawnData().RespawnRotation.Yaw, 
+				PlayerState->GetRespawnData().RespawnRotation.Roll
+			));
+			
+			SpawnTransform.Scale3D = FVector(1, 1, 1);
+
+			AFortPlayerPawn* Pawn = (AFortPlayerPawn*)GameMode->CallFunc<APawn*>("GameModeBase", "SpawnDefaultPawnAtTransform", PlayerController,  SpawnTransform); 
+			if (!Pawn) return;
+
+			PlayerController->CallFunc<void>("Controller", "Possess", Pawn);
+			Pawn->SetHealth(100);
+			Pawn->SetShield(0);
+			
+			PlayerController->CallFunc<void>("FortPlayerControllerAthena", "RespawnPlayerAfterDeath", true);
+
+			Pawn->BeginSkydiving(true);
+			Pawn->SetbIsRespawning(false);
+			PlayerState->GetRespawnData().bRespawnDataAvailable = false;
+		}
+	}
+}
+
 void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
 {
 	Stack.IncrementCode();
@@ -60,9 +101,6 @@ void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerA
 	AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState();
 	if (Config::bCreative)
 	{
-		GameMode->GetGameState()->SetGamePhase(EAthenaGamePhase::SafeZones);
-		GameMode->GetGameState()->OnRep_GamePhase(EAthenaGamePhase::Warmup);
-		
 		AFortAthenaCreativePortal* Portal = nullptr;
 		for (int i = 0; i < GameMode->GetGameState()->GetCreativePortalManager()->GetAllPortals().Num(); i++)
 		{
@@ -610,7 +648,7 @@ void AFortPlayerControllerAthena::ServerGiveCreativeItem(AFortPlayerControllerAt
     }
     else
     {
-        LoadedAmmo = CreativeItemPtr->GetLoadedAmmo();
+        LoadedAmmo = CreativeItemPtr->GetLoadedAmmo() == 0 ? 1 : CreativeItemPtr->GetLoadedAmmo();
     }
 
     AFortInventory::GiveItem(PlayerController, ItemDef, Count, LoadedAmmo, 1);
@@ -690,6 +728,50 @@ void AFortPlayerControllerAthena::ServerCreateBuildingAndSpawnDeco(AFortDecoTool
 	Tool->ServerSpawnDeco(Location, Rotation, Building, InBuildingAttachmentType);
 }
 */
+
+void AFortPlayerControllerAthena::ServerStartMinigame(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+	Stack.IncrementCode();
+	
+	ServerStartMinigameOG(PlayerController, Stack);
+	auto GM = Cast<AFortGameModeAthena>(UWorld::GetWorld()->GetAuthorityGameMode());
+	static auto AdvanceState = Runtime::StaticFindObject<UFunction>("/Script/FortniteGame.FortMinigame.AdvanceState");
+	static auto HandleMinigameStarted = Runtime::StaticFindObject<UFunction>("/Script/FortniteGame.FortMinigame.HandleMinigameStarted");
+	static auto GetParticipatingPlayers = Runtime::StaticFindObject<UFunction>("/Script/FortniteGame.FortMinigame.GetParticipatingPlayers");
+	static auto HandleVolumeEditModeChange = Runtime::StaticFindObject<UFunction>("/Script/FortniteGame.FortMinigame.HandleVolumeEditModeChange");
+	AFortMinigame* MiniGame = PlayerController->CallFunc<AFortMinigame*>("FortPlayerControllerAthena", "GetMinigame");
+	
+	struct FortMinigame_GetParticipatingPlayers final
+	{
+	public:
+		TArray<class AFortPlayerState*>               OutPlayers;                                        // 0x0000(0x0010)(Parm, OutParm, ZeroConstructor, NativeAccessSpecifierPublic)
+	} ret{};
+	
+	MiniGame->ProcessEvent(GetParticipatingPlayers, &ret);
+	TArray<class AFortPlayerState*> Players = ret.OutPlayers;
+	
+	for (int i = 0; i < Players.Num(); i++)
+	{
+		auto Player = Cast<AFortPlayerStateAthena>(Players[i]);
+		auto PC = Cast<AFortPlayerControllerAthena>(Player->GetOwner());
+		PC->GetMyFortPawn()->CallFunc<void>(
+			"FortPawn", "ForceKill",
+			FGameplayTag(UKismetStringLibrary::Conv_StringToName(L"DeathCause.BanHammer")),
+			PC, nullptr
+		);
+	}
+	
+	std::thread([MiniGame]()
+		{
+			std::this_thread::sleep_for(std::chrono::seconds(3));
+			MiniGame->ProcessEvent(AdvanceState, nullptr);
+			MiniGame->ProcessEvent(HandleMinigameStarted, nullptr);
+
+			struct { bool bInEditMode; } params{ true };
+			MiniGame->ProcessEvent(HandleVolumeEditModeChange, &params);
+		}).detach();
+}
+
 void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
 {
 	FCreateBuildingActorData CreateBuildingData;

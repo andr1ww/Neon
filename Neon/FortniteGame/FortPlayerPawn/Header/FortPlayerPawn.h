@@ -461,6 +461,7 @@ enum class EFortReloadFXState : uint8
 class AFortPlayerPawn : public AFortPawn
 {
 public:
+	DEFINE_BOOL(AFortPlayerPawn, bIsRespawning)
 	DEFINE_BOOL(AFortPlayerPawn, bIsEmoteLeader)
 	DEFINE_BOOL(AFortPlayerPawn, bStartedInteractSearch)
 	DEFINE_BOOL(AFortPlayerPawn, bIsSkydiving);

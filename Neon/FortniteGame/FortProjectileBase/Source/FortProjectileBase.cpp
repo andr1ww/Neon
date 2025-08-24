@@ -95,6 +95,8 @@ void AFortProjectileBase::OnStopCallback(AFortProjectileBase* ProjectileBase, FF
                             if (World)
                             {
                                 FVector ProjectileLocation = ProjectileBase->K2_GetActorLocation();
+                                FRotator ProjectileRotation = ProjectileBase->K2_GetActorRotation();
+                                
                                 if (ULevel* Level = World->GetPersistentLevel())
                                 {
                                     auto& Actors = *reinterpret_cast<TArray<class AActor*>*>(
@@ -103,11 +105,30 @@ void AFortProjectileBase::OnStopCallback(AFortProjectileBase* ProjectileBase, FF
                                     {
                                         if (Actor && Actor->GetRootComponent())
                                         {
-                                            FVector SpawnLocation = ProjectileLocation + Actor->GetRootComponent()->GetRelativeLocation();
+                                            FVector RelativeLocation = Actor->GetRootComponent()->GetRelativeLocation();
+                                            FRotator RelativeRotation = Actor->GetRootComponent()->GetRelativeRotation();
+                                            
+                                            float yawRad = (ProjectileRotation.Yaw + 180.0f) * 3.14159265359f / 180.0f;
+                                            float cosYaw = std::cos(yawRad);
+                                            float sinYaw = std::sin(yawRad);
+                                            
+                                            FVector RotatedLocation = FVector(
+                                                RelativeLocation.X * cosYaw - RelativeLocation.Y * sinYaw,
+                                                RelativeLocation.X * sinYaw + RelativeLocation.Y * cosYaw,
+                                                RelativeLocation.Z
+                                            );
+                                            FVector SpawnLocation = ProjectileLocation + RotatedLocation;
+                                            
+                                            FRotator FinalRotation = FRotator(
+                                                RelativeRotation.Pitch,
+                                                RelativeRotation.Yaw + ProjectileRotation.Yaw + 180.0f,
+                                                RelativeRotation.Roll
+                                            );
+                                            
                                             UGameplayStatics::SpawnActorOG<AActor>(
                                                 Actor->GetClass(), 
                                                 SpawnLocation, 
-                                                Actor->GetRootComponent()->GetRelativeRotation()
+                                                FinalRotation
                                             );
                                         }
                                     }
@@ -118,10 +139,13 @@ void AFortProjectileBase::OnStopCallback(AFortProjectileBase* ProjectileBase, FF
                 }
             }
         }
+
+        struct { FHitResult Hit; } Params{Result};
+        callExecOG(ProjectileBase, "/Script/FortniteGame.FortProjectileBase.OnStopCallback", OnStopCallback, Params);
+        ProjectileBase->K2_DestroyActor();
+        return;
     }
 
     struct { FHitResult Hit; } Params{Result};
     callExecOG(ProjectileBase, "/Script/FortniteGame.FortProjectileBase.OnStopCallback", OnStopCallback, Params);
-
-    ProjectileBase->K2_DestroyActor();
 }

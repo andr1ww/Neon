@@ -483,6 +483,12 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     {
         GameState->OnRep_CurrentPlaylistInfo();
         GameState->OnRep_CurrentPlaylistId();
+
+        if (Config::bCreative && Fortnite_Version >= 12.00)
+        {
+            GameMode->CallFunc<void>("GameMode", "StartMatch");
+            GameMode->CallFunc<void>("GameModeBase", "StartPlay");
+        }
         
         Double = true;
     }
@@ -493,15 +499,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     {
         auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
         auto WarmupDuration = 60.f;
-
-        GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
-        GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
-        GameMode->Set("FortGameModeAthena", "WarmupCountdownDuration", WarmupDuration);
-        GameMode->Set("FortGameModeAthena", "WarmupEarlyCountdownDuration", WarmupDuration);
-    } else
-    {
-        auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
-        auto WarmupDuration = 900000000000.f;
 
         GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
         GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
@@ -597,6 +594,7 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
             UGameplayStatics::SpawnActorOG<AActor>(Runtime::StaticFindObject<UClass>("/Game/Athena/Playlists/Barrier/Barrier.Barrier_C"), FVector{ 0, 0, -2000 }, FRotator{});
         }
     }
+    
     
  /*   if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.50)
     {

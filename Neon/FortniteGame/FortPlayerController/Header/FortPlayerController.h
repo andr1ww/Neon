@@ -624,6 +624,13 @@ public:
 	DECLARE_DEFAULT_OBJECT(UPlaysetLevelStreamComponent)
 };
 
+class AFortMinigame : public AActor
+{
+public:
+	DECLARE_STATIC_CLASS(AFortMinigame)
+	DECLARE_DEFAULT_OBJECT(AFortMinigame)
+};
+
 class AFortPlayerControllerAthena : public AFortPlayerController
 {
 public:
@@ -649,7 +656,10 @@ public:
 	static void ServerEndEditingBuildingActor(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerRepairBuildingActor(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerAttemptInventoryDrop(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
+	static void ServerClientIsReadyToRespawn(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerGiveCreativeItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
+	DefHookOg(void, ServerStartMinigame, AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
+	DefHookOg(void, ServerEndMinigame, AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	DefHookOg(void, ClientOnPawnDied, AFortPlayerControllerAthena *PlayerController, FFortPlayerDeathReport &DeathReport);
 	DefHookOg(void, ServerDBNOReviveInterrupted, AFortPlayerControllerAthena* PlayerController, class AFortPlayerPawnAthena* Pawn);
 	DefHookOg(void, ServerReadyToStartMatch, AFortPlayerControllerAthena*, FFrame&);
