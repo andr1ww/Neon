@@ -40,7 +40,7 @@ void* ProcessEvent(UObject* Obj, UFunction* Function, void* Params)
 			firstCall = false;
 		}
 		std::string FunctionName = Function->GetFName().ToString().ToString();
-			if (!strstr(FunctionName.c_str(), ("EvaluateGraphExposedInputs")) &&
+		if (!strstr(FunctionName.c_str(), ("EvaluateGraphExposedInputs")) &&
 			!strstr(FunctionName.c_str(), ("Tick")) &&
 			!strstr(FunctionName.c_str(), ("OnSubmixEnvelope")) &&
 			!strstr(FunctionName.c_str(), ("OnSubmixSpectralAnalysis")) &&
@@ -116,9 +116,9 @@ void* ProcessEvent(UObject* Obj, UFunction* Function, void* Params)
 			!strstr(FunctionName.c_str(), "CustomStateChanged") &&
 			!strstr(FunctionName.c_str(), "OnBuildingActorInitialized") &&
 			!strstr(FunctionName.c_str(), "OnWorldReady") &&
-						!strstr(FunctionName.c_str(), "OnMovementModeChange") &&
-						!strstr(FunctionName.c_str(), "OnGameplayTaskResourcesClaimed") &&
-						!strstr(FunctionName.c_str(), "K2_OnMovementModeChanged") &&
+			!strstr(FunctionName.c_str(), "OnMovementModeChange") &&
+			!strstr(FunctionName.c_str(), "OnGameplayTaskResourcesClaimed") &&
+			!strstr(FunctionName.c_str(), "K2_OnMovementModeChanged") &&
 			!strstr(FunctionName.c_str(), "ShouldDie") &&
 			!strstr(FunctionName.c_str(), "OnAttachToBuilding") &&
 			!strstr(FunctionName.c_str(), "Clown Spinner") &&
@@ -176,9 +176,9 @@ void* ProcessEvent(UObject* Obj, UFunction* Function, void* Params)
 			!strstr(FunctionName.c_str(), "ServerUpdateLevelVisibility") &&
 			!strstr(FunctionName.c_str(), "UpdatePlayerPositionsWithinTheMID") &&
 			!strstr(FunctionName.c_str(), "ExecuteUbergraph_BGA_Petrol_Pickup"))
-			{
-				logFile << "ProcessEvent: " << FunctionName << std::endl;
-			}
+		{
+			logFile << "ProcessEvent: " << FunctionName << std::endl;
+		}
 	}
 
 	return ProcessEventOG(Obj, Function, Params);
@@ -215,7 +215,7 @@ void InitializeMMRInfos(AFortAthenaMutator_Bots* a1)
 	*(int32*)(IMAGEBASE + 0x78B2F64) = 70;
 	*(int32*)(IMAGEBASE + 0x78B2F6C) = 70;
 
-    return InitializeMMRInfosOG(a1);
+	return InitializeMMRInfosOG(a1);
 }
 
 class UModel final : public UObject
@@ -229,20 +229,20 @@ public:
 // NumValues: 0x0005
 enum class ECollisionTraceFlag : uint8
 {
-	CTF_UseDefault                           = 0,
-	CTF_UseSimpleAndComplex                  = 1,
-	CTF_UseSimpleAsComplex                   = 2,
-	CTF_UseComplexAsSimple                   = 3,
-	CTF_MAX                                  = 4,
+	CTF_UseDefault = 0,
+	CTF_UseSimpleAndComplex = 1,
+	CTF_UseSimpleAsComplex = 2,
+	CTF_UseComplexAsSimple = 3,
+	CTF_MAX = 4,
 };
 
 class UBodySetup : public UObject
 {
 public:
 	DEFINE_BOOL(UBodySetup, bDoubleSidedGeometry)
-	DEFINE_BOOL(UBodySetup, bGenerateMirroredCollision)
-	DEFINE_MEMBER(ECollisionTraceFlag, UBodySetup, CollisionTraceFlag)
-	DECLARE_STATIC_CLASS(UBodySetup)
+		DEFINE_BOOL(UBodySetup, bGenerateMirroredCollision)
+		DEFINE_MEMBER(ECollisionTraceFlag, UBodySetup, CollisionTraceFlag)
+		DECLARE_STATIC_CLASS(UBodySetup)
 	DECLARE_DEFAULT_OBJECT(UBodySetup)
 };
 
@@ -250,7 +250,7 @@ class UBrushComponent : public AActor
 {
 public:
 	DEFINE_PTR(UBodySetup, UBrushComponent, BrushBodySetup)
-	DEFINE_PTR(UModel, UBrushComponent, Brush)
+		DEFINE_PTR(UModel, UBrushComponent, Brush)
 public:
 	DECLARE_STATIC_CLASS(UBrushComponent)
 	DECLARE_DEFAULT_OBJECT(UBrushComponent)
@@ -260,7 +260,7 @@ class ABrush : public AActor
 {
 public:
 	DEFINE_PTR(UModel, UBrushComponent, Brush)
-	DEFINE_PTR(UBrushComponent, ABrush, BrushComponent)
+		DEFINE_PTR(UBrushComponent, ABrush, BrushComponent)
 public:
 	DECLARE_STATIC_CLASS(ABrush)
 	DECLARE_DEFAULT_OBJECT(ABrush)
@@ -282,10 +282,10 @@ public:
 
 enum class EAttachmentRule : uint8
 {
-	KeepRelative                             = 0,
-	KeepWorld                                = 1,
-	SnapToTarget                             = 2,
-	EAttachmentRule_MAX                      = 3,
+	KeepRelative = 0,
+	KeepWorld = 1,
+	SnapToTarget = 2,
+	EAttachmentRule_MAX = 3,
 };
 
 DefHookOg(void, PostInitializeComponentsVolume, AFortPoiVolume* This);
@@ -293,29 +293,29 @@ void PostInitializeComponentsVolume(AFortPoiVolume* This)
 {
 	This->SetBrushComponent((UBrushComponent*)UGameplayStatics::SpawnObject(
 		UBrushComponent::StaticClass(), This));
-	
+
 	static void (*SetCollisonProfileName)(UBrushComponent*, __int64,
-										  __int64) =
+		__int64) =
 		decltype(SetCollisonProfileName)(
 			This->GetBrushComponent()->GetVTable()[(0x620 / 8)]);
 	((void (*)(UObject * Component, UObject * World))(Finder->RegisterComponentWithWorld()))(This->GetBrushComponent(), UWorld::GetWorld());
 
 	static void (*SetGenerateOverlapEvents)(UBrushComponent*, bool) =
-			decltype(SetGenerateOverlapEvents)(IMAGEBASE + 0x40ECA30);
-	
+		decltype(SetGenerateOverlapEvents)(IMAGEBASE + 0x40ECA30);
+
 	SetCollisonProfileName(
 		This->GetBrushComponent(),
 		*reinterpret_cast<__int64*>(IMAGEBASE + 0x8317CB0), 1);
 	SetGenerateOverlapEvents(This->GetBrushComponent(), 0);
-	
+
 	UBodySetup* BodySetup = (UBodySetup*)UGameplayStatics::SpawnObject(
-	UBodySetup::StaticClass(), This->GetBrushComponent());
+		UBodySetup::StaticClass(), This->GetBrushComponent());
 	BodySetup->SetCollisionTraceFlag(ECollisionTraceFlag::CTF_UseComplexAsSimple);
 	BodySetup->SetbGenerateMirroredCollision(false);
 	BodySetup->SetbDoubleSidedGeometry(true);
 
 	This->GetBrushComponent()->SetBrushBodySetup(BodySetup);
-	
+
 	return PostInitializeComponentsVolumeOG(This);
 }
 
@@ -324,12 +324,12 @@ void InitNullsAndRetTrues() {
 
 	if (ServerCheatAllIndex)
 		NullFuncs.push_back(__int64(AFortPlayerControllerAthena::GetDefaultObj()->GetVTable()[ServerCheatAllIndex]));
-	
+
 	if (Fortnite_Version >= 23)
 	{
 		NullFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ? 4C 8B E2 4C 8B F1").Get());
 	}
-	
+
 	if (Fortnite_Version == 0) NullFuncs.push_back(Memcury::Scanner::FindPattern("48 89 54 24 ? 48 89 4C 24 ? 55 53 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 8B 41 08 C1 E8 05").Get());
 	else if (Fortnite_Version >= 3.3 && Fortnite_Version <= 4.5) NullFuncs.push_back(Memcury::Scanner::FindPattern("48 8B C4 57 48 81 EC ? ? ? ? 4C 8B 82 ? ? ? ? 48 8B F9 0F 29 70 E8 0F 29 78 D8").Get());
 	else if (Fortnite_Version == 4.1) NullFuncs.push_back(Memcury::Scanner::FindPattern("4C 8B DC 55 49 8D AB ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 49 89 5B 10 48 8D 05 ? ? ? ? 48 8B 1D ? ? ? ? 49 89 73 18 33 F6 40").Get());
@@ -424,7 +424,7 @@ void InitNullsAndRetTrues() {
 			}
 		}
 	}
-	
+
 	DWORD dwProtection;
 	VirtualProtect((PVOID)ByteToPatch, 1, PAGE_EXECUTE_READWRITE, &dwProtection);
 
@@ -432,7 +432,7 @@ void InitNullsAndRetTrues() {
 
 	DWORD dwTemp;
 	VirtualProtect((PVOID)ByteToPatch, 1, dwProtection, &dwTemp);
-	
+
 	if (Fortnite_Version == 0) RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 57 41 56 41 57 48 81 EC ? ? ? ? 48 8B 01 49 8B E9 45 0F B6 F8").Get());
 	else if (Fortnite_Version >= 16.40) {
 		if (Fortnite_Version.GetMajorVersion() == 17) RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 8B C4 48 89 58 08 48 89 70 10 48 89 78 18 4C 89 60 20 55 41 56 41 57 48 8B EC 48 83 EC 60 4D 8B F9 41 8A F0 4C 8B F2 48 8B F9 45 32 E4").Get());
@@ -449,10 +449,10 @@ void InitNullsAndRetTrues() {
 	{
 		uintptr_t rawAddress = Memcury::Scanner::FindPattern("0F 84 ? ? ? ? 48 8D 15 ? ? ? ? 48 8D 4C 24 ? E8 ? ? ? ? 80 3D").Get();
 
-		uintptr_t Offset = rawAddress - IMAGEBASE; 
-		Offset = Offset + 1;                  
-		uintptr_t Addr = Offset + IMAGEBASE;  
- 
+		uintptr_t Offset = rawAddress - IMAGEBASE;
+		Offset = Offset + 1;
+		uintptr_t Addr = Offset + IMAGEBASE;
+
 		FuncsTo85.push_back(Addr);
 	}
 
@@ -496,7 +496,7 @@ void InitNullsAndRetTrues() {
 	}
 
 	NullFuncs.push_back(IMAGEBASE + 0x2983710);
-	
+
 	for (auto& Func : NullFuncs) {
 		if (Func == 0x0) continue;
 		UE_LOG(LogNeon, Log, "NullFuncs: 0x%x", Func - IMAGEBASE);
@@ -510,13 +510,13 @@ void InitNullsAndRetTrues() {
 		UE_LOG(LogNeon, Log, "RetTrueFunc: 0x%x", Func - IMAGEBASE);
 		Runtime::Hook(Func, RetTrue);
 	}
-	
+
 	for (auto& Func : FuncsTo85)
 	{
 		if (Func == 0x0) continue;
 		Runtime::Patch(Func, 0x85);
 	}
-	
+
 	if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.50)
 	{
 		Runtime::Patch(IMAGEBASE + 0x1A45182, 0x90);
@@ -525,8 +525,8 @@ void InitNullsAndRetTrues() {
 		Runtime::Patch(IMAGEBASE + 0x1A45185, 0x90);
 		Runtime::Patch(IMAGEBASE + 0x1A45186, 0x90);
 		Runtime::Patch(IMAGEBASE + 0x1A45187, 0x90);
-		
-	//	Runtime::Hook(IMAGEBASE + 0x1A45060, PostInitializeComponentsVolume, (void**)&PostInitializeComponentsVolumeOG);
+
+		//	Runtime::Hook(IMAGEBASE + 0x1A45060, PostInitializeComponentsVolume, (void**)&PostInitializeComponentsVolumeOG);
 		Runtime::Hook(IMAGEBASE + 0x1A3A640, RetTrue);
 		Runtime::Patch(IMAGEBASE + 0x1A9FFB6, 0xEB);
 		Runtime::Hook(IMAGEBASE + 0x1A8ED30, AFortAthenaMutatorOnSafeZoneUpdated, (void**)&AFortAthenaMutatorOnSafeZoneUpdatedOG);
@@ -557,11 +557,11 @@ void InitNullsAndRetTrues() {
 			matchmaking = Memcury::Scanner::FindPattern("83 BD ? ? ? ? ? 7F 18 49 8D 4D D8 48 8B D7 E8").Get(); // 4.20
 		if (!matchmaking)
 			matchmaking = Memcury::Scanner::FindPattern("83 7C 24 ?? 01 7F 0D 48 8B CF E8").Get();
-	    
+
 		bool bMatchmakingSupported = matchmaking;
 		int idx = 0;
 
-		if (bMatchmakingSupported) 
+		if (bMatchmakingSupported)
 		{
 			for (int i = 0; i < 9; i++)
 			{
@@ -569,8 +569,8 @@ void InitNullsAndRetTrues() {
 
 				if (IsBadReadPtr(byte, sizeof(uint8_t)))
 					continue;
-				
-				if (*byte == 0x7F) 
+
+				if (*byte == 0x7F)
 				{
 					bMatchmakingSupported = true;
 					idx = i;
@@ -584,11 +584,11 @@ void InitNullsAndRetTrues() {
 		if (bMatchmakingSupported)
 		{
 			auto before = (uint8_t*)(matchmaking + idx);
-			
+
 			DWORD dwProtection;
 			VirtualProtect((PVOID)before, 1, PAGE_EXECUTE_READWRITE, &dwProtection);
 
-			*before = 0x74; 
+			*before = 0x74;
 
 			DWORD dwTemp;
 			VirtualProtect((PVOID)before, 1, dwProtection, &dwTemp);
@@ -599,12 +599,12 @@ void InitNullsAndRetTrues() {
 
 	if (GameSessionDedicatedAthenaPatch)
 	{
-	//	Runtime::PatchBytes(GameSessionDedicatedAthenaPatch, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
+		//	Runtime::PatchBytes(GameSessionDedicatedAthenaPatch, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
 	}
 	else
 	{
 		auto S19Patch = Memcury::Scanner::FindPattern("74 1A 48 8D 97 ? ? ? ? 49 8B CF E8 ? ? ? ? 88 87 ? ? ? ? E9", false).Get();
-					
+
 		if (S19Patch)
 		{
 			Runtime::Patch(S19Patch, 0x75);
@@ -633,42 +633,42 @@ FGameplayTag* Ok(void* a1, void* a2, FName f)
 		if (Tag) new(Tag) FGameplayTag();
 	}
 	if (!Tag) return OkOG(a1, a2, f);
-	
+
 	if (f.ToString().ToString() == "PlayerTech:ptid_spyteam_01")
 	{
 		Tag->TagName = UKismetStringLibrary::Conv_StringToName(FString(L"Athena.Faction.Alter"));
 		return Tag;
-	} else if (f.ToString().ToString() == "PlayerTech:ptid_spyteam_02")
+	}
+	else if (f.ToString().ToString() == "PlayerTech:ptid_spyteam_02")
 	{
 		Tag->TagName = UKismetStringLibrary::Conv_StringToName(FString(L"Athena.Faction.Ego"));
 		return Tag;
-	} 
+	}
 
 	return OkOG(a1, a2, f);
 }
 
-static inline FString (*InitNewPlayerOG)(AGameModeBase* GameMode, APlayerController* NewPlayerController, FUniqueNetIdRepl UniqueId, FString Options, FString Portal);
-static FString InitNewPlayer(AGameModeBase* GameMode, APlayerController* NewPlayerController, FUniqueNetIdRepl UniqueId, FString Options, FString Portal)
+static inline APlayerController* (*LoginOG)(AGameModeBase*, UPlayer* NewPlayer, ENetRole InRemoteRole, const FString& Portal, const FString& Options, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage);
+static APlayerController* Login(AGameModeBase* GameMode, UPlayer* NewPlayer, ENetRole InRemoteRole, const FString& Portal, const FString& Options, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
 	std::string OptionsStr = Options.ToString().c_str();
-	std::string PortalStr = Portal.ToString().c_str();
-	
+
 	if (Config::bEchoSessions)
 	{
 		if (!OptionsStr.starts_with("?EncryptionToken=")
 			|| OptionsStr.contains("?AuthTicket=lawinstokenlol?"))
 		{
-			return L"FUckYou";
+			return nullptr;
 		}
 	}
-	
-	return InitNewPlayerOG(GameMode, NewPlayerController, UniqueId, Options, Portal);
+
+	return LoginOG(GameMode, NewPlayer, InRemoteRole, Portal, Options, UniqueId, ErrorMessage);
 }
 
 void Main()
 {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
-	
+
 	AllocConsole();
 	FILE* File = nullptr;
 	freopen_s(&File, "CONOUT$", "w+", stdout);
@@ -676,7 +676,7 @@ void Main()
 	SetConsoleTitleA("Neon | Setting up");
 	SDK::Init();
 	Offsets::FMemory__Realloc = Memcury::Scanner::FindPattern("48 89 5C 24 08 48 89 74 24 10 57 48 83 EC ? 48 8B F1 41 8B D8 48 8B 0D ? ? ? ?").Get();
-	
+
 	MH_Initialize();
 
 	if (Config::bEchoSessions)
@@ -684,42 +684,42 @@ void Main()
 		Config::Port = UKismetMathLibrary::RandomIntegerInRange(7777, 8888);
 
 		std::thread t([]() {
-			 Nexa::Echo::CreateEchoSession(); 
-		 });
+			Nexa::Echo::CreateEchoSession();
+			});
 		t.detach();
 		CreateThread(0, 0, Nexa::Echo::Heartbeat, 0, 0, 0);
 	}
 
 	Finder->Init();
-	
+
 	Sleep(5000);
 	while (!IsInFrontend())
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	}
-	
+
 	if (Finder->GIsClient())
 	{
-		*(bool*)(Finder->GIsClient()) = false; 
+		*(bool*)(Finder->GIsClient()) = false;
 		*(bool*)(Finder->GIsClient() + 1) = true;
 	}
-	
+
 	InitNullsAndRetTrues();
-	
+
 	if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.20)
 	{
 		Runtime::Hook(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 4C 89 44 24 ? 57 48 83 EC ? 48 8B FA 48 8B F1 33 D2").Get(), Ok, (void**)&OkOG);
 	}
-	
+
 	auto ListenInstruction = Memcury::Scanner::FindPattern("E8 ? ? ? ? 84 C0 75 ? 80 3D ? ? ? ? ? 72 ? 45 33 C0 48 8D 55").Get();
 	if (!ListenInstruction)
 	{
 		ListenInstruction = Memcury::Scanner::FindPattern("E8 ? ? ? ? 84 C0 75 ? 80 3D ? ? ? ? ? 72 ? 45 33 C0 48 8D 95").Get();
 	}
-	
+
 	Runtime::ModifyInstruction(ListenInstruction, Finder->InstructionForCollision());
 	Runtime::Hook(Finder->InstructionForCollision(), FortGameSessionDedicated::UWorld_Listen);
-	
+
 	UWorld::GetWorld()->GetOwningGameInstance()->GetLocalPlayers().Remove(0);
 	FString WorldName;
 	if (Fortnite_Version <= 10.40)
@@ -733,7 +733,8 @@ void Main()
 	else if (Fortnite_Version <= 22.40 && Fortnite_Version >= 19.00)
 	{
 		WorldName = L"open Artemis_Terrain";
-	} else if (Fortnite_Version >= 23.00)
+	}
+	else if (Fortnite_Version >= 23.00)
 	{
 		WorldName = L"open Asteria_Terrain";
 	}
@@ -748,21 +749,21 @@ void Main()
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAISpawnerData VeryVerbose", nullptr);
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogMutatorAI VeryVerbose", nullptr);
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAthenaBots VeryVerbose", nullptr);
-//	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogNavigation VeryVerbose", nullptr);
+	//	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogNavigation VeryVerbose", nullptr);
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogPackageLocalizationCache", nullptr);
 
 	if (Fortnite_Version >= 19.10)
 	{
 		ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortUIDirector", nullptr);
 	}
-	
+
 	if (Finder->CreateAndConfigureNavigationSystem() && Fortnite_Version <= 13.00 && Fortnite_Version >= 11.00) {
 		Runtime::Hook(Finder->CreateAndConfigureNavigationSystem(), UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem, (void**)&UFortServerBotManagerAthena::CreateAndConfigureNavigationSystemOG);
 		UE_LOG(LogNeon, Log, "CreateAndConfigureNavigationSystem: 0x%x", Finder->CreateAndConfigureNavigationSystem() - IMAGEBASE);
 	}
 
-//	if (Config::bEchoSessions) Runtime::Hook(IMAGEBASE + 0x420DA70, InitNewPlayer, (void**)&InitNewPlayerOG);
-	
+	if (Config::bEchoSessions) Runtime::Hook(IMAGEBASE + 0x4210FE0, Login, (void**)&LoginOG);
+
 	Runtime::Exec("/Script/Engine.GameMode.ReadyToStartMatch", AFortGameModeAthena::ReadyToStartMatch, (void**)&AFortGameModeAthena::ReadyToStartMatchOG);
 	Runtime::Hook<&AFortGameModeAthena::StaticClass>("SpawnDefaultPawnFor", AFortGameModeAthena::SpawnDefaultPawnFor);
 	int InternalServerTryActivateAbilityIndex = 0;
@@ -820,46 +821,47 @@ void Main()
 	}
 	Runtime::Exec("/Script/FortniteGame.FortPlayerControllerAthena.ServerGiveCreativeItem", AFortPlayerControllerAthena::ServerGiveCreativeItem);
 	Runtime::Exec("/Script/FortniteGame.FortProjectileBase.OnStopCallback", AFortProjectileBase::OnStopCallback, (void**)&AFortProjectileBase::OnStopCallbackOG);
-	
+
 	Runtime::Hook(Finder->ReloadWeapon(), AFortPlayerPawn::ReloadWeapon, (void**)&AFortPlayerPawn::ReloadWeaponOG); // this is right um we can make it uni after we get it to fucking call 
 	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);
 	Runtime::Hook(Finder->StartNewSafeZonePhase(), AFortGameModeAthena::StartNewSafeZonePhase, (void**)&AFortGameModeAthena::StartNewSafeZonePhaseOG);
 	Runtime::Hook<&AFortGameModeAthena::StaticClass>("HandleStartingNewPlayer", AFortGameModeAthena::HandleStartingNewPlayer, AFortGameModeAthena::HandleStartingNewPlayerOG);
 	Runtime::Hook<&AFortPlayerPawn::StaticClass>("ServerReviveFromDBNO", AFortPlayerPawn::ServerReviveFromDBNO);
-//	Runtime::Hook<&AFortPlayerControllerAthena::StaticClass>("ServerDBNOReviveInterrupted", AFortPlayerControllerAthena::ServerDBNOReviveInterrupted, AFortPlayerControllerAthena::ServerDBNOReviveInterruptedOG);
+	//	Runtime::Hook<&AFortPlayerControllerAthena::StaticClass>("ServerDBNOReviveInterrupted", AFortPlayerControllerAthena::ServerDBNOReviveInterrupted, AFortPlayerControllerAthena::ServerDBNOReviveInterruptedOG);
 	if (Config::bEchoSessions) Runtime::Hook(Finder->PickTeam(), AFortGameModeAthena::PickTeam, (void**)&AFortGameModeAthena::PickTeamOG);
 	Runtime::Hook(Finder->GetSquadIdForCurrentPlayer(), FortGameSessionDedicated::GetSquadIdForCurrentPlayer);
 	Runtime::Exec("/Script/FortniteGame.FortAthenaMutator_GiveItemsAtGamePhaseStep.OnGamePhaseStepChanged", AFortAthenaMutator_GiveItemsAtGamePhaseStep::OnGamePhaseStepChanged);
 	Runtime::Exec("/Script/FortniteGame.FortAthenaMutator_Barrier.OnGamePhaseStepChanged", AFortAthenaMutator_Barrier::OnGamePhaseStepChanged);
 	uint64 Addr = __int64(Runtime::StaticFindObject<UFunction>("/Script/Engine.PlayerController.SetVirtualJoystickVisibility")->GetNativeFunc());
-	if (Fortnite_Version > 8.00){
-	Runtime::ModifyInstructionLEA(Finder->RebootingDelegate(), Addr, 3); 
-	Runtime::Hook(Addr, ABuildingGameplayActorSpawnMachine::RebootingDelegate);
+	if (Fortnite_Version > 8.00) {
+		Runtime::ModifyInstructionLEA(Finder->RebootingDelegate(), Addr, 3);
+		Runtime::Hook(Addr, ABuildingGameplayActorSpawnMachine::RebootingDelegate);
 	}
 	Runtime::Exec("/Script/FortniteGame.FortControllerComponent_Interaction.ServerAttemptInteract", FortLootPackage::ServerAttemptInteract, (void**)&FortLootPackage::ServerAttemptInteractOG);
-	
+
 	if (Finder->CompletePickupAnimation())
 	{
 		Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.ServerHandlePickup", AFortPlayerPawn::ServerHandlePickup);
 		Runtime::Hook(Finder->CompletePickupAnimation(), AFortPlayerPawn::CompletePickupAnimation, (void**)&AFortPlayerPawn::CompletePickupAnimationOG);
 		UE_LOG(LogNeon, Log, "CompletePickupAnimation: 0x%x", Finder->CompletePickupAnimation() - IMAGEBASE);
-	} else
+	}
+	else
 	{
 		Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.ServerHandlePickup", AFortPlayerPawn::ServerHandlePickup);
 	}
-	
-	if (Finder->OnPossessedPawnDied()) Runtime::Hook(Finder->OnPossessedPawnDied(), AFortAthenaAIBotController::OnPossessedPawnDied, (void**)&AFortAthenaAIBotController::OnPossessedPawnDiedOG); 
+
+	if (Finder->OnPossessedPawnDied()) Runtime::Hook(Finder->OnPossessedPawnDied(), AFortAthenaAIBotController::OnPossessedPawnDied, (void**)&AFortAthenaAIBotController::OnPossessedPawnDiedOG);
 	if (Finder->DispatchRequest()) Runtime::Hook(Finder->DispatchRequest(), HTTP::DispatchRequest, (void**)&HTTP::DispatchRequestOriginal);
-//	Runtime::Exec("/Script/FortniteGame.BuildingFoundation.SetDynamicFoundationTransform", ABuildingFoundation::SetDynamicFoundationTransformF, (void**)&ABuildingFoundation::SetDynamicFoundationTransformFOG);
-//	Runtime::Exec("/Script/FortniteGame.BuildingFoundation.SetDynamicFoundationEnabled", ABuildingFoundation::SetDynamicFoundationTransformF, (void**)&ABuildingFoundation::SetDynamicFoundationEnabledFOG);
+	//	Runtime::Exec("/Script/FortniteGame.BuildingFoundation.SetDynamicFoundationTransform", ABuildingFoundation::SetDynamicFoundationTransformF, (void**)&ABuildingFoundation::SetDynamicFoundationTransformFOG);
+	//	Runtime::Exec("/Script/FortniteGame.BuildingFoundation.SetDynamicFoundationEnabled", ABuildingFoundation::SetDynamicFoundationTransformF, (void**)&ABuildingFoundation::SetDynamicFoundationEnabledFOG);
 
 	if (Fortnite_Version >= 11.00)
 	{
 		if (Finder->SpawnBot()) Runtime::Hook(Finder->SpawnBot(), UFortServerBotManagerAthena::SpawnBot, (void**)&UFortServerBotManagerAthena::SpawnBotOG);
 	}
-	
+
 	Runtime::Hook(Finder->SendStatEventWithTags(), UFortQuestManager::SendStatEventWithTags, (void**)&UFortQuestManager::SendStatEventWithTagsOG);
-	
+
 	ExecuteConsoleCommand(UWorld::GetWorld(), WorldName, nullptr);
 }
 
