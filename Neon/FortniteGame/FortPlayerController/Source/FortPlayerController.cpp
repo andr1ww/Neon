@@ -287,7 +287,6 @@ public:
 };
 
 void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FGuid ItemGuid) {
-	UE_LOG(LogNeon, Log, __FUNCTION__);
     if (!PlayerController || !PlayerController->GetMyFortPawn()) return;
     
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
