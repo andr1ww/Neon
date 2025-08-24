@@ -1002,11 +1002,16 @@ uint64 UFinder::SpawnActor()
     if (CachedResult != 0)
         return CachedResult;
 
-    if (Fortnite_Version >= 6.21 && Fortnite_Version <= 15.30)
+    if (Fortnite_Version >= 6.21 && Fortnite_Version <= 15.00) // idk just make this 
     {
         return CachedResult = Memcury::Scanner::FindPattern("40 53 56 57 48 83 EC ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 44 24 ? 0F 28 1D ? ? ? ? 0F 57 D2 48 8B B4 24").Get();
-    } 
-    
+    }
+
+    if (Fortnite_Version >= 15.30 && Fortnite_Version <= 15.50)
+    {
+        return CachedResult = Memcury::Scanner::FindPattern("4C 8B DC 55 53 49 8D AB ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 49 89 73 ? 48 8D 05 ? ? ? ? 49 89 7B ? 48 8B D9 4D 89 63 ? 49 8B F1").Get();
+    }
+
     return CachedResult = 0;
 }
 
