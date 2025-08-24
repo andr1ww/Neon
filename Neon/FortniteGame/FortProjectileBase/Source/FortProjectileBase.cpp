@@ -86,6 +86,7 @@ void AFortProjectileBase::OnStopCallback(AFortProjectileBase* ProjectileBase, FF
                                 if (parts[2] == "S") SizeFolder = "Small/";
                                 else if (parts[2] == "M") SizeFolder = "Medium/";
                                 else if (parts[2] == "L") SizeFolder = "Large/";
+                                else if (parts[2] == "XL") SizeFolder = "XLarge/";
 
                                 ConstructedPath = BasePath + parts[1] + "/" + SizeFolder + AssetFullName;
                                 World = Runtime::StaticLoadObject<UWorld>(ConstructedPath);
