@@ -316,6 +316,7 @@ public:
     }
 
 public:
+    DEFINE_MEMBER(float, UPrimitiveComponent, BoundsScale)
     DECLARE_STATIC_CLASS(UPrimitiveComponent)
     DECLARE_DEFAULT_OBJECT(UPrimitiveComponent)
 };

@@ -14,6 +14,13 @@ namespace SDK
             }
 
 	        template< class T >
+static constexpr FORCEINLINE T Max(const T A, const T B)
+            {
+                    return (A >= B) ? A : B;
+            }
+
+
+	        template< class T >
 static FORCEINLINE T Clamp(const T X, const T Min, const T Max)
             {
                     return X < Min ? Min : X < Max ? X : Max;

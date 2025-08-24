@@ -501,7 +501,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     } else
     {
         auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
-        auto WarmupDuration = 900000.f;
+        auto WarmupDuration = 900000000000.f;
 
         GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
         GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);

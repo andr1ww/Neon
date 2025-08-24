@@ -767,7 +767,7 @@ void Main()
 	Runtime::Exec("/Game/Abilities/Player/Interrogation/GAB_InterrogatePlayer_Reveal.GAB_InterrogatePlayer_Reveal_C.EndInterrogation", UGAB_InterrogatePlayer_Reveal_C::EndInterrogation);
 	if (Fortnite_Version >= 12.00) Runtime::Exec("/Script/FortniteGame.FortPlayerPawn.OnCapsuleBeginOverlap", AFortPlayerPawn::OnCapsuleBeginOverlap);
 	Runtime::Exec("/Script/Engine.PlayerController.ServerAcknowledgePossession", AFortPlayerControllerAthena::ServerAcknowledgePossession);
-	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerExecuteInventoryItem", AFortPlayerControllerAthena::ServerExecuteInventoryItem);
+	Runtime::Hook<&AFortPlayerControllerAthena::StaticClass>("ServerExecuteInventoryItem", AFortPlayerControllerAthena::ServerExecuteInventoryItem);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerCheat", AFortPlayerControllerAthena::ServerCheat);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerPlayEmoteItem", AFortPlayerControllerAthena::ServerPlayEmoteItem);
 	Runtime::Exec("/Script/FortniteGame.FortControllerComponent_Aircraft.ServerAttemptAircraftJump", AFortPlayerControllerAthena::ServerAttemptAircraftJump);

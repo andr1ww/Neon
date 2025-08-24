@@ -640,7 +640,7 @@ public:
 	DefHookOg(void, GetPlayerViewPoint, AFortPlayerControllerAthena* PlayerController, FVector &OutViewLocation, FRotator &OutViewRotation);
 	DefHookOg(void, ServerLoadingScreenDropped, AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerAcknowledgePossession(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
-	static void ServerExecuteInventoryItem(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
+	static void ServerExecuteInventoryItem(AFortPlayerControllerAthena *PlayerController, FGuid ItemGuid);
 	static void ServerPlayEmoteItem(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerCheat(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	DefHookOg(void, ServerCreateBuildingActor, AFortPlayerControllerAthena *PlayerController, FFrame &Stack);

@@ -402,7 +402,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             static bool bSet = false;
             static bool bOk = false;
 
-            if (Fortnite_Version <= 13.40)
+            if (Fortnite_Version <= 13.40 && Fortnite_Version >= 11.00)
             {
                 if (GameState->GetGamePhase() == EAthenaGamePhase::Warmup && GameMode->GetAlivePlayers().Num() > 0
                     && (GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()) < 100

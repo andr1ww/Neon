@@ -286,11 +286,8 @@ public:
 	DECLARE_STATIC_CLASS(AFortDecoTool_ContextTrap)
 };
 
-void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack) {
-    FGuid ItemGuid;
-    Stack.StepCompiledIn(&ItemGuid);
-    Stack.IncrementCode();
-    
+void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FGuid ItemGuid) {
+	UE_LOG(LogNeon, Log, __FUNCTION__);
     if (!PlayerController) return;
     
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
@@ -311,21 +308,14 @@ void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControll
     }
     
     if (!Entry) {
+    	UE_LOG(LogNeon, Log, "Failed to find entry on %s!", __FUNCTION__);
         return;
     }
 	
     UFortWeaponItemDefinition* ItemDefinition = nullptr;
 	static const UClass* GadgetItem = UFortGadgetItemDefinition::StaticClass();
 	static const UClass* DecoItem = UFortDecoItemDefinition::StaticClass();
-
-/*	if (auto Deco = (UFortContextTrapItemDefinition *) Entry->GetItemDefinition()->IsA(DecoItem)) {
-		PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "PickUpActor", nullptr, Deco);
-		PlayerController->GetMyFortPawn()->GetCurrentWeapon()->SetItemEntryGuid(ItemGuid);
-
-		if (auto ContextTrap = (AFortDecoTool_ContextTrap*)PlayerController->GetMyFortPawn()->GetCurrentWeapon()) ContextTrap->SetContextTrapItemDefinition(Deco);
-		return;
-	}
-*/	
+	
     if (Entry->GetItemDefinition()->IsA(GadgetItem))
     {
         ItemDefinition = ((UFortGadgetItemDefinition*)Entry->GetItemDefinition())->GetWeaponItemDefinition();
@@ -333,6 +323,14 @@ void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControll
     {
         ItemDefinition = (UFortWeaponItemDefinition*)(Entry->GetItemDefinition());
     }
+
+	if (auto Deco = (UFortContextTrapItemDefinition *) ItemDefinition->IsA(DecoItem)) {
+		PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "PickUpActor", nullptr, Deco);
+		PlayerController->GetMyFortPawn()->GetCurrentWeapon()->SetItemEntryGuid(ItemGuid);
+
+		if (auto ContextTrap = (AFortDecoTool_ContextTrap*)PlayerController->GetMyFortPawn()->GetCurrentWeapon()) ContextTrap->SetContextTrapItemDefinition(Deco);
+		return;
+	}
     
     AFortPawn* MyFortPawn = PlayerController->GetMyFortPawn();
 

@@ -63,60 +63,118 @@ public:
 	}
 };
 
-
-class FFrame : public FOutputDevice
+struct FFrame : public FOutputDevice
 {
 public:
-	void** VTable;
-	UFunction* Node;
-	UObject* Object;
-	uint8* Code;
-	uint8* Locals;
-	void* MostRecentProperty;
-	uint8_t* MostRecentPropertyAddress;
-	uint8_t _Padding1[0x40];
-	FField* PropertyChainForCompiledIn;
+    void** VFT;
+    UFunction* Node;
+    UObject* Object;
+    uint8* Code;
+    uint8* Locals;
+    void* MostRecentProperty;
+    uint8_t* MostRecentPropertyAddress;
+
+private:
+    static bool IsUsingFField() {
+        return Fortnite_Version >= 11.00f;
+    }
+
+    static void* GetNext(void* Property) {
+        if (!Property) return nullptr;
+        
+        if (IsUsingFField()) {
+            return *(void**)((uint8_t*)Property + 0x28);
+        } else {
+            return *(void**)((uint8_t*)Property + 0x28);
+        }
+    }
 
 public:
-	void StepCompiledIn(void* const Result, bool ForceExplicitProp = false)
-	{
+    void*& GetPropertyChainForCompiledIn()
+    {
+        static auto PropertyChainForCompiledInOffset = 0x80;
+        return *(void**)(__int64(this) + PropertyChainForCompiledInOffset);
+    }
 
-		if (Code && !ForceExplicitProp)
-		{
-			static void (*CompiledInFunc)(FFrame*, UObject*, void* const) = (decltype(CompiledInFunc))Finder::GetCompiledInPattern();
-			CompiledInFunc(this, Object, Result);
-		}
-		else
-		{
-			FField* _Prop = PropertyChainForCompiledIn;
-			PropertyChainForCompiledIn = _Prop->Next;
-			((void (*)(FFrame*, void* const, FField*))(Finder::GetExplicitPropPattern()))(this, Result, _Prop); 
-		}
-	}
-	
-	template <typename T>
-	T& StepCompiledInRef() {
-		T TempVal{};
-		MostRecentPropertyAddress = nullptr;
+    uint8_t*& GetMostRecentPropertyAddress()
+    {
+        return MostRecentPropertyAddress;
+    }
 
-		if (Code)
-		{
-			static void (*CompiledInFunc)(FFrame*, UObject*, void* const) = (decltype(CompiledInFunc))Finder::GetCompiledInPattern();
-			CompiledInFunc(this, Object, &TempVal);
-		}
-		else
-		{
-			FField* _Prop = PropertyChainForCompiledIn;
-			PropertyChainForCompiledIn = _Prop->Next;
-			((void (*)(FFrame*, void* const, FField*))(Finder::GetExplicitPropPattern()))(this, &TempVal, _Prop); 
-		}
+    __forceinline void StepExplicitProperty(void* const Result, void* Property)
+    {
+        static void (*StepExplicitPropertyOriginal)(__int64 frame, void* const Result, void* Property) = decltype(StepExplicitPropertyOriginal)(Finder::GetExplicitPropPattern());
+        StepExplicitPropertyOriginal(__int64(this), Result, Property);
+    }
 
-		return MostRecentPropertyAddress ? *(T*)MostRecentPropertyAddress : TempVal;
-	}
+    __forceinline void Step(UObject* Context, RESULT_DECL)
+    {
+        static void (*StepOriginal)(__int64 frame, UObject* Context, RESULT_DECL) = decltype(StepOriginal)(Finder::GetCompiledInPattern());
+        StepOriginal(__int64(this), Context, RESULT_PARAM);
+    }
 
-	void IncrementCode() {
-		Code = (uint8_t*)(__int64(Code) + (bool)Code);
-	}
+    __forceinline void StepCompiledIn(void* const Result, bool bPrint = false)
+    {
+        if (Code)
+        {
+            Step(Object, Result);
+        }
+        else
+        {
+            void* Property = GetPropertyChainForCompiledIn();
+            if (Property) {
+                GetPropertyChainForCompiledIn() = GetNext(Property);
+                StepExplicitProperty(Result, Property);
+            }
+        }
+    }
+
+    template<typename TNativeType>
+    __forceinline TNativeType& StepCompiledInRef(void* const TemporaryBuffer)
+    {
+        GetMostRecentPropertyAddress() = nullptr;
+
+        if (Code)
+        {
+            Step(Object, TemporaryBuffer);
+        }
+        else
+        {
+            void* Property = GetPropertyChainForCompiledIn();
+            if (Property) {
+                GetPropertyChainForCompiledIn() = GetNext(Property);
+                StepExplicitProperty(TemporaryBuffer, Property);
+            }
+        }
+
+        return (GetMostRecentPropertyAddress() != nullptr) ? *(TNativeType*)(GetMostRecentPropertyAddress()) : *(TNativeType*)TemporaryBuffer;
+    }
+    
+    template <typename T>
+    T& StepCompiledInRef() {
+        T TempVal{};
+        GetMostRecentPropertyAddress() = nullptr;
+
+        if (Code)
+        {
+            static void (*CompiledInFunc)(FFrame*, UObject*, void* const) = (decltype(CompiledInFunc))Finder::GetCompiledInPattern();
+            CompiledInFunc(this, Object, &TempVal);
+        }
+        else
+        {
+            void* Property = GetPropertyChainForCompiledIn();
+            if (Property) {
+                GetPropertyChainForCompiledIn() = GetNext(Property);
+                ((void (*)(FFrame*, void* const, void*))(Finder::GetExplicitPropPattern()))(this, &TempVal, Property);
+            }
+        }
+
+        return GetMostRecentPropertyAddress() ? *(T*)GetMostRecentPropertyAddress() : TempVal;
+    }
+
+    void IncrementCode() {
+        Code = (uint8_t*)(__int64(Code) + (bool)Code);
+    }
 };
 
 template<typename ClassType>
