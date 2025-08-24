@@ -70,6 +70,7 @@ void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerA
 			if (!CurrentPortal->GetLinkedVolume() || CurrentPortal->GetLinkedVolume()->GetVolumeState() == EVolumeState::Ready)
 				continue;
 			Portal = CurrentPortal;
+			UE_LOG(LogNeon, Log, "Index: %d", i);
 		}
 
 		if (!Portal)
@@ -121,7 +122,7 @@ void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerA
 
 		((void (*)(UPlaysetLevelStreamComponent*)) (Finder->LoadPlayset()))(Comp);
 
-		UGameplayStatics::SpawnActorOG(AFortMinigameSettingsBuilding::StaticClass(), Portal->GetLinkedVolume()->K2_GetActorLocation(), {}, {});
+		UGameplayStatics::SpawnActorOG(Runtime::StaticFindObject<UClass>("/Game/Athena/Items/Gameplay/MinigameSettingsControl/MinigameSettingsMachine.MinigameSettingsMachine_C"), Portal->GetLinkedVolume()->K2_GetActorLocation(), {}, Portal->GetLinkedVolume());
 	}
 	
 	struct
@@ -569,7 +570,8 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
             BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot, PlayerController);
             
         if (BuildingSMActor) {
-            if (!PlayerController->Get<bool>("FortPlayerController", "bBuildFree")) {
+            //if (!PlayerController->Get<bool>("FortPlayerController", "bBuildFree"))
+            {
                auto* Resource = UFortKismetLibrary::K2_GetResourceItemDefinition(BuildingSMActor->GetResourceType());
 
                AFortInventory* WorldInventory = PlayerController->GetWorldInventory();

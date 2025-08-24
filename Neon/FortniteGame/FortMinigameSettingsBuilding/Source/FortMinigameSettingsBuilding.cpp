@@ -7,10 +7,11 @@ void AFortMinigameSettingsBuilding::BeginPlay(AFortMinigameSettingsBuilding* Bui
 {
     auto GameState = UWorld::GetWorld()->GetGameState();
 
-    if (!GameState)
+    if (!GameState || !Building)
         return;
 
-    Building->SetSettingsVolume(GameState->GetVolumeManager()->GetVolumeForActor(Building));
+    Building->SetSettingsVolume((AFortVolume*)Building->GetOwner());
 
     UE_LOG(LogNeon, Log, __FUNCTION__);
+    UE_LOG(LogNeon, Log, "Volume: %s", Building->GetOwner()->GetFName().ToString().ToString().c_str());
 }

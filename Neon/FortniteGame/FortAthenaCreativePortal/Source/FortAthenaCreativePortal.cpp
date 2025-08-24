@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "../Header/FortAthenaCreativePortal.h"
 
+#include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 
 void AFortAthenaCreativePortal::TeleportPlayerToLinkedVolume(AFortAthenaCreativePortal* Portal, FFrame& Stack)
@@ -20,7 +21,7 @@ void AFortAthenaCreativePortal::TeleportPlayerToLinkedVolume(AFortAthenaCreative
 
     PlayerPawn->K2_TeleportTo(Location, FRotator());
     PlayerPawn->BeginSkydiving(false);
-
+    
     FFortItemList& Inventory = ((AFortPlayerControllerAthena*)PlayerPawn->GetController())->GetWorldInventory()->GetInventory();
     TArray<UFortWorldItem*>& ItemInstances = Inventory.GetItemInstances();
     
