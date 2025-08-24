@@ -812,8 +812,10 @@ void Main()
 	Runtime::Exec("/Script/FortniteGame.FortAthenaMutator_GiveItemsAtGamePhaseStep.OnGamePhaseStepChanged", AFortAthenaMutator_GiveItemsAtGamePhaseStep::OnGamePhaseStepChanged);
 	Runtime::Exec("/Script/FortniteGame.FortAthenaMutator_Barrier.OnGamePhaseStepChanged", AFortAthenaMutator_Barrier::OnGamePhaseStepChanged);
 	uint64 Addr = __int64(Runtime::StaticFindObject<UFunction>("/Script/Engine.PlayerController.SetVirtualJoystickVisibility")->GetNativeFunc());
+	if (Fortnite_Version > 8.00){
 	Runtime::ModifyInstructionLEA(Finder->RebootingDelegate(), Addr, 3); 
 	Runtime::Hook(Addr, ABuildingGameplayActorSpawnMachine::RebootingDelegate);
+	}
 	Runtime::Exec("/Script/FortniteGame.FortControllerComponent_Interaction.ServerAttemptInteract", FortLootPackage::ServerAttemptInteract, (void**)&FortLootPackage::ServerAttemptInteractOG);
 	
 	if (Finder->CompletePickupAnimation())
