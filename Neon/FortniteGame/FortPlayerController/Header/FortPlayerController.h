@@ -604,13 +604,6 @@ public:
 	DECLARE_DEFAULT_OBJECT(UFortLevelSaveComponent)
 };
 
-class UFortPlaysetItemDefinition : public UFortItemDefinition
-{
-public:
-	DECLARE_STATIC_CLASS(UFortPlaysetItemDefinition)
-	DECLARE_DEFAULT_OBJECT(UFortPlaysetItemDefinition)
-};
-
 class UPlaysetLevelStreamComponent : public UActorComponent
 {
 public:

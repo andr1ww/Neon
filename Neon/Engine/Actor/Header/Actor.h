@@ -43,6 +43,8 @@ public:
 		this->ProcessEvent(Func, &Params);
 	}
 public:
+	DEFINE_MEMBER(FVector, USceneComponent, RelativeLocation)
+	DEFINE_MEMBER(FRotator, USceneComponent, RelativeRotation)
     DEFINE_PTR(USceneComponent, USceneComponent, RootComponent);
     DECLARE_DEFAULT_OBJECT(USceneComponent)
     DECLARE_STATIC_CLASS(USceneComponent)

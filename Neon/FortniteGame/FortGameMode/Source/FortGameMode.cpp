@@ -500,6 +500,15 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
         GameMode->Set("FortGameModeAthena", "WarmupCountdownDuration", WarmupDuration);
         GameMode->Set("FortGameModeAthena", "WarmupEarlyCountdownDuration", WarmupDuration);
+    } else
+    {
+        auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
+        auto WarmupDuration = 900000.f;
+
+        GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
+        GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
+        GameMode->Set("FortGameModeAthena", "WarmupCountdownDuration", WarmupDuration);
+        GameMode->Set("FortGameModeAthena", "WarmupEarlyCountdownDuration", WarmupDuration);
     }
     
     return *Result = Res;

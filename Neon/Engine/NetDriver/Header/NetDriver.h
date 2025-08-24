@@ -370,6 +370,7 @@ struct FLevelCollection
 class UWorld : public UObject
 {
 public:
+    DEFINE_PTR(ULevel, UWorld, PersistentLevel)
     DEFINE_PTR(AFortGameStateAthena, UWorld, GameState);
     DEFINE_PTR(UGameInstance, UWorld, OwningGameInstance);
     DEFINE_PTR(UNetDriver, UWorld, NetDriver);

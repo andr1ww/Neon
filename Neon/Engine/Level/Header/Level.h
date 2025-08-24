@@ -9,6 +9,7 @@ class UWorld;
 class ULevel : public UObject
 {
 public:
+    DEFINE_MEMBER(TArray<class AActor*>, ULevel, Actors)
     DEFINE_PTR(UWorld, ULevel, OwningWorld);
 public:
     static ULevel* GetLevel(AActor* Actor) {
