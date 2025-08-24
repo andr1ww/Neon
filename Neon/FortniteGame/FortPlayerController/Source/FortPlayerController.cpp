@@ -61,8 +61,7 @@ void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerA
 	if (Config::bCreative)
 	{
 		GameMode->GetGameState()->SetGamePhase(EAthenaGamePhase::SafeZones);
-		GameMode->GetGameState()->SetGamePhaseStep(EAthenaGamePhaseStep::StormHolding);
-		GameMode->GetGameState()->OnRep_GamePhase(EAthenaGamePhase::SafeZones);
+		GameMode->GetGameState()->OnRep_GamePhase(EAthenaGamePhase::Warmup);
 		
 		AFortAthenaCreativePortal* Portal = nullptr;
 		for (int i = 0; i < GameMode->GetGameState()->GetCreativePortalManager()->GetAllPortals().Num(); i++)
@@ -859,7 +858,9 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	auto KillerPlayerState = DeathReport.GetKillerPlayerState();
 	auto KillerPawn = DeathReport.GetKillerPawn();
 	auto VictimPawn = PlayerController->GetMyFortPawn();
-
+	bool bRespawningAllowed = GameState && PlayerState ? GameState->IsRespawningAllowed(PlayerState) : false;
+	if (bRespawningAllowed) return ClientOnPawnDiedOG(PlayerController, DeathReport);
+	
 	FVector DeathLocation = VictimPawn ? VictimPawn->K2_GetActorLocation() : FVector(0,0,0);
 
 	if (!KillerPlayerState && VictimPawn)
@@ -899,7 +900,7 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 	static auto Metal = Runtime::StaticFindObject<UFortWorldItemDefinition>("/Game/Items/ResourcePickups/MetalItemData.MetalItemData");
    
 	auto WorldInventory = PlayerController->GetWorldInventory();
-	if (WorldInventory && VictimPawn) {
+	if (!bRespawningAllowed && WorldInventory && VictimPawn) {
 		static const UClass* WeaponClass = UFortWeaponRangedItemDefinition::StaticClass();
 		static const UClass* ConsumableClass = UFortConsumableItemDefinition::StaticClass();
 		static const UClass* AmmoClass = UFortAmmoItemDefinition::StaticClass();
@@ -1044,71 +1045,74 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 		}
 	}
 
-	((void (*)(AFortGameModeAthena*, AFortPlayerController*, AFortPlayerStateAthena*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char, bool))(Finder->RemoveFromAlivePlayers()))
-  (GameMode, PlayerController, KillerPlayerState, KillerPawn, ItemDef, DeathCause, 0, false);
+	if (!bRespawningAllowed)
+	{
+		((void (*)(AFortGameModeAthena*, AFortPlayerController*, AFortPlayerStateAthena*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char, bool))(Finder->RemoveFromAlivePlayers()))
+	  (GameMode, PlayerController, KillerPlayerState, KillerPawn, ItemDef, DeathCause, 0, false);
 	
-	if (bRebooting) {
-		PlayerController->SetbMarkedAlive(false);
-		return ClientOnPawnDiedOG(PlayerController, DeathReport);
-	}
+		if (bRebooting) {
+			PlayerController->SetbMarkedAlive(false);
+			return ClientOnPawnDiedOG(PlayerController, DeathReport);
+		}
 
-	PlayerController->SetbMarkedAlive(false);
+		PlayerController->SetbMarkedAlive(false);
 	
-	if (!bRebooting) {
-		for (auto& MemberController : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
-			if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) {
-				auto MemberPlayerState = MemberController->GetPlayerState();
-				auto MemberMatchReport = MemberController->GetMatchReport();
+		if (!bRebooting) {
+			for (auto& MemberController : PlayerState->GetPlayerTeam()->GetTeamMembers()) {
+				if (MemberController != PlayerController && !MemberController->GetbMarkedAlive()) {
+					auto MemberPlayerState = MemberController->GetPlayerState();
+					auto MemberMatchReport = MemberController->GetMatchReport();
 					
-				if (MemberMatchReport && MemberPlayerState) {
-					MemberPlayerState->SetPlace(AliveCount);
+					if (MemberMatchReport && MemberPlayerState) {
+						MemberPlayerState->SetPlace(AliveCount);
 						
-					auto MemberMatchStats = &MemberMatchReport->GetMatchStats();
-					auto MemberTeamStats = &MemberMatchReport->GetTeamStats();
-					auto MemberRewardResult = &MemberMatchReport->GetEndOfMatchResults();
+						auto MemberMatchStats = &MemberMatchReport->GetMatchStats();
+						auto MemberTeamStats = &MemberMatchReport->GetTeamStats();
+						auto MemberRewardResult = &MemberMatchReport->GetEndOfMatchResults();
 						
-					if (MemberPlayerState->GetKillScore() && MemberPlayerState->GetSquadId() && MemberMatchStats) {
-						MemberMatchStats->Stats[3] = MemberPlayerState->GetKillScore();
-						MemberMatchStats->Stats[8] = MemberPlayerState->GetSquadId();
-						MemberMatchReport->SetMatchStats(*MemberMatchStats);
-						MemberController->ClientSendMatchStatsForPlayer(*MemberMatchStats);
+						if (MemberPlayerState->GetKillScore() && MemberPlayerState->GetSquadId() && MemberMatchStats) {
+							MemberMatchStats->Stats[3] = MemberPlayerState->GetKillScore();
+							MemberMatchStats->Stats[8] = MemberPlayerState->GetSquadId();
+							MemberMatchReport->SetMatchStats(*MemberMatchStats);
+							MemberController->ClientSendMatchStatsForPlayer(*MemberMatchStats);
+						}
+						
+						if (MemberTeamStats) {
+							MemberTeamStats->SetPlace(AliveCount);
+							MemberTeamStats->SetTotalPlayers(AliveCount);
+							MemberMatchReport->SetTeamStats(*MemberTeamStats);
+							MemberController->ClientSendTeamStatsForPlayer(*MemberTeamStats);
+						}
+						
+						int32 MemberXP = MemberController->GetXPComponent()->GetTotalXpEarned();
+						MemberRewardResult->SetTotalBookXpGained(MemberXP);
+						MemberRewardResult->SetTotalSeasonXpGained(MemberXP);
+						MemberMatchReport->SetEndOfMatchResults(*MemberRewardResult);
 					}
-						
-					if (MemberTeamStats) {
-						MemberTeamStats->SetPlace(AliveCount);
-						MemberTeamStats->SetTotalPlayers(AliveCount);
-						MemberMatchReport->SetTeamStats(*MemberTeamStats);
-						MemberController->ClientSendTeamStatsForPlayer(*MemberTeamStats);
-					}
-						
-					int32 MemberXP = MemberController->GetXPComponent()->GetTotalXpEarned();
-					MemberRewardResult->SetTotalBookXpGained(MemberXP);
-					MemberRewardResult->SetTotalSeasonXpGained(MemberXP);
-					MemberMatchReport->SetEndOfMatchResults(*MemberRewardResult);
 				}
 			}
 		}
-	}
 
-	if (MatchReport && RewardResult) {
-		int32 TotalXP = PlayerController->GetXPComponent()->GetTotalXpEarned();
-		RewardResult->SetTotalBookXpGained(TotalXP);
-		RewardResult->SetTotalSeasonXpGained(TotalXP);
-		MatchReport->SetEndOfMatchResults(*RewardResult);
+		if (MatchReport && RewardResult) {
+			int32 TotalXP = Fortnite_Version >= 11.10 ? PlayerController->GetXPComponent()->GetTotalXpEarned() : 0;
+			RewardResult->SetTotalBookXpGained(TotalXP);
+			RewardResult->SetTotalSeasonXpGained(TotalXP);
+			MatchReport->SetEndOfMatchResults(*RewardResult);
 
-		int32 PlayerPlace = AliveCount;
-		PlayerState->SetPlace(PlayerPlace);
+			int32 PlayerPlace = AliveCount;
+			PlayerState->SetPlace(PlayerPlace);
 
-		if (PlayerState->GetKillScore() && PlayerState->GetSquadId() && MatchStats) {
-			MatchStats->Stats[3] = PlayerState->GetKillScore();
-			MatchStats->Stats[8] = PlayerState->GetSquadId();
-			MatchReport->SetMatchStats(*MatchStats);
-		}
+			if (PlayerState->GetKillScore() && PlayerState->GetSquadId() && MatchStats) {
+				MatchStats->Stats[3] = PlayerState->GetKillScore();
+				MatchStats->Stats[8] = PlayerState->GetSquadId();
+				MatchReport->SetMatchStats(*MatchStats);
+			}
 
-		if (TeamStats) {
-			TeamStats->SetPlace(PlayerPlace);
-			TeamStats->SetTotalPlayers(PlayerPlace);
-			MatchReport->SetTeamStats(*TeamStats);
+			if (TeamStats) {
+				TeamStats->SetPlace(PlayerPlace);
+				TeamStats->SetTotalPlayers(PlayerPlace);
+				MatchReport->SetTeamStats(*TeamStats);
+			}
 		}
 	}
    	

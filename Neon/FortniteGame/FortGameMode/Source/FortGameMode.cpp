@@ -106,7 +106,6 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
 
         GameState->OnRep_CurrentPlaylistId();
         GameState->OnRep_CurrentPlaylistInfo();
-        GameState->OnRep_AdditionalPlaylistLevelsStreamed();
         GameMode->GetGameSession()->SetMaxPlayers(Playlist->GetMaxPlayers());
             
         GameMode->SetWarmupRequiredPlayerCount(1);
@@ -122,7 +121,6 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
                 FVector Loc{};
                 FRotator Rot{};
                 bool Success = false;
-                ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::Conv_NameToString(AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName), Loc, Rot, &Success, FString());
                 if (Fortnite_Version >= 11.20)
                 {
                     TArray<FAdditionalLevelStreamed>& Levels = GameState->GetAdditionalPlaylistLevelsStreamed();
@@ -131,11 +129,17 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
                     NewLevel.LevelName = AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName;
                     UE_LOG(LogNeon, Log, "Additional Level: %s", NewLevel.LevelName.ToString().ToString().c_str());
                     Levels.Add(NewLevel, StaticClassImpl("AdditionalLevelStreamed")->GetSize());
+                    ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::Conv_NameToString(AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName), Loc, Rot, &Success, FString());
                 } else
                 {
+                    UE_LOG(LogNeon, Log, "Level: %s", AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName.ToString().ToString().c_str());
                     static int AdditionalPlaylistLevelsStreamedOffset = Runtime::GetOffset(GameState, "AdditionalPlaylistLevelsStreamed");
-                    auto AdditionalPlaylistLevelsStreamed = *reinterpret_cast<TArray<FName>*>(__int64(GameState) + AdditionalPlaylistLevelsStreamedOffset);
-                    AdditionalPlaylistLevelsStreamed.Add(AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName);
+                    auto* AdditionalPlaylistLevelsStreamed = reinterpret_cast<TArray<FName>*>(__int64(GameState) + AdditionalPlaylistLevelsStreamedOffset);
+                    if (AdditionalPlaylistLevelsStreamed)
+                    {
+                        AdditionalPlaylistLevelsStreamed->Add(AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName);
+                    }
+                    ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::Conv_NameToString(AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName), Loc, Rot, &Success, FString());
                 }
            }
         }
@@ -480,12 +484,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         GameState->OnRep_CurrentPlaylistInfo();
         GameState->OnRep_CurrentPlaylistId();
         
-        if (Config::bCreative)
-        {
-            GameMode->CallFunc<void>("GameMode", "StartMatch");
-            GameMode->CallFunc<void>("GameModeBase", "StartPlay");
-        }
-        
         Double = true;
     }
     
@@ -521,7 +519,10 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
 		return 0;
     }
 
-    auto Pawn = GameMode->CallFunc<APawn*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer,  StartSpot->GetTransform());
+    FTransform Transform = StartSpot->GetTransform();
+    Transform.Translation.Z += 250.f;
+
+    auto Pawn = GameMode->CallFunc<APawn*>("GameModeBase", "SpawnDefaultPawnAtTransform", NewPlayer,  Transform);
     //APawn* Pawn = GameMode->SpawnDefaultPawnAtTransform(NewPlayer,  StartSpot->GetTransform()); yk why this doesent work???
     if (!Pawn)
     {
@@ -545,14 +546,14 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         AFortInventory::GiveItem(NewPlayer, Item->Item, Item->Count, 1, 1);
     }
     
-    if (Fortnite_Version.GetMajorVersion() <= 8.50) {
+  //  if (Fortnite_Version.GetMajorVersion() <= 8.50) {
     
-    }
-    else {
+    //}
+   // else {
         auto Pickaxe = NewPlayer->GetCosmeticLoadoutPC().GetPickaxe();
         auto WeaponDef = Pickaxe->GetWeaponDefinition();
         AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 0, 1); 
-    }
+   // }
     
     return Pawn;
 }
@@ -910,20 +911,26 @@ void ABuildingFoundation::SetDynamicFoundationTransformF(ABuildingFoundation* Fo
     Stack.StepCompiledIn(&Transform);
     Stack.IncrementCode();
 
-    Foundation->SetDynamicFoundationTransform(Transform);
-    Foundation->GetStreamingData().SetFoundationLocation(Transform.Translation);
-    Foundation->GetDynamicFoundationRepData().Rotation = Transform.Rotation;
-    Foundation->GetDynamicFoundationRepData().Translation = Transform.Translation;
-    Foundation->OnRep_DynamicFoundationRepData();
-    if (Foundation->GetFName().ToString().ToString() == "Fortilla_Foundation_MANG")
+    if (Fortnite_Version.GetMajorVersion() == 13)
     {
-        for (auto &World : Foundation->GetAdditionalWorlds())
+        Foundation->SetDynamicFoundationTransform(Transform);
+        Foundation->GetStreamingData().SetFoundationLocation(Transform.Translation);
+        Foundation->GetDynamicFoundationRepData().Rotation = Transform.Rotation;
+        Foundation->GetDynamicFoundationRepData().Translation = Transform.Translation;
+        Foundation->OnRep_DynamicFoundationRepData();
+//        if (Fortnite_Version.GetMajorVersion() == 13)
         {
-            bool Success = false;
-            ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::Conv_NameToString(World.SoftObjectPtr.ObjectID.AssetPathName), Transform.Translation, Transform.Rotation.ToRotator(), &Success, FString());
+            if (Foundation->GetFName().ToString().ToString() == "Fortilla_Foundation_MANG")
+            {
+                for (auto &World : Foundation->GetAdditionalWorlds())
+                {
+                    bool Success = false;
+                    ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::Conv_NameToString(World.SoftObjectPtr.ObjectID.AssetPathName), Transform.Translation, Transform.Rotation.ToRotator(), &Success, FString());
+                }
+            }
         }
     }
-
+    
     struct {FTransform Ok;} Params{Transform};
     
     return callExecOG(Foundation, "/Script/FortniteGame.BuildingFoundation.SetDynamicFoundationTransform", SetDynamicFoundationTransformF, Params);

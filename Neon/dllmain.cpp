@@ -828,11 +828,14 @@ void Main()
 	
 	if (Finder->OnPossessedPawnDied()) Runtime::Hook(Finder->OnPossessedPawnDied(), AFortAthenaAIBotController::OnPossessedPawnDied, (void**)&AFortAthenaAIBotController::OnPossessedPawnDiedOG); 
 	if (Finder->DispatchRequest()) Runtime::Hook(Finder->DispatchRequest(), HTTP::DispatchRequest, (void**)&HTTP::DispatchRequestOriginal);
-	Runtime::Exec("/Script/FortniteGame.BuildingFoundation.SetDynamicFoundationTransform", ABuildingFoundation::SetDynamicFoundationTransformF, (void**)&ABuildingFoundation::SetDynamicFoundationTransformFOG);
-	Runtime::Exec("/Script/FortniteGame.BuildingFoundation.SetDynamicFoundationEnabled", ABuildingFoundation::SetDynamicFoundationTransformF, (void**)&ABuildingFoundation::SetDynamicFoundationEnabledFOG);
+//	Runtime::Exec("/Script/FortniteGame.BuildingFoundation.SetDynamicFoundationTransform", ABuildingFoundation::SetDynamicFoundationTransformF, (void**)&ABuildingFoundation::SetDynamicFoundationTransformFOG);
+//	Runtime::Exec("/Script/FortniteGame.BuildingFoundation.SetDynamicFoundationEnabled", ABuildingFoundation::SetDynamicFoundationTransformF, (void**)&ABuildingFoundation::SetDynamicFoundationEnabledFOG);
 
-	if (Finder->SpawnBot()) Runtime::Hook(Finder->SpawnBot(), UFortServerBotManagerAthena::SpawnBot, (void**)&UFortServerBotManagerAthena::SpawnBotOG);
-
+	if (Fortnite_Version >= 11.00)
+	{
+		if (Finder->SpawnBot()) Runtime::Hook(Finder->SpawnBot(), UFortServerBotManagerAthena::SpawnBot, (void**)&UFortServerBotManagerAthena::SpawnBotOG);
+	}
+	
 	Runtime::Hook(Finder->SendStatEventWithTags(), UFortQuestManager::SendStatEventWithTags, (void**)&UFortQuestManager::SendStatEventWithTagsOG);
 	
 	ExecuteConsoleCommand(UWorld::GetWorld(), WorldName, nullptr);
