@@ -10,6 +10,7 @@
 #include "FortniteGame/FortAthenaMutator/Header/FortAthenaMutator.h"
 #include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
+#include "FortniteGame/FortMinigameSettingsBuilding/Header/FortMinigameSettingsBuilding.h"
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "Neon/Config.h"
 #include "Neon/Finder/Header/Finder.h"
@@ -118,7 +119,9 @@ void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerA
 		PlayerController->SetCreativePlotLinkedVolume(Portal->GetLinkedVolume());
 		PlayerController->OnRep_CreativePlotLinkedVolume();
 
-		((void (*)(UPlaysetLevelStreamComponent*)) (Finder->LoadPlayset()))(Comp); 
+		((void (*)(UPlaysetLevelStreamComponent*)) (Finder->LoadPlayset()))(Comp);
+
+		UGameplayStatics::SpawnActorOG(AFortMinigameSettingsBuilding::StaticClass(), Portal->GetLinkedVolume()->K2_GetActorLocation(), {}, {});
 	}
 	
 	struct

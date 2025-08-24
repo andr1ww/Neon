@@ -178,6 +178,7 @@
     <ClInclude Include="FortniteGame\FortGameState\Header\FortGameState.h" />
     <ClInclude Include="FortniteGame\FortKismetLibrary\Header\FortKismetLibrary.h" />
     <ClInclude Include="FortniteGame\FortLootPackage\Header\FortLootPackage.h" />
+    <ClInclude Include="FortniteGame\FortMinigameSettingsBuilding\Header\FortMinigameSettingsBuilding.h" />
     <ClInclude Include="FortniteGame\FortPlayerController\Header\FortPlayerController.h" />
     <ClInclude Include="FortniteGame\FortPlayerPawn\Header\FortPlayerPawn.h" />
     <ClInclude Include="FortniteGame\FortPlayerState\Header\FortPlayerState.h" />
@@ -319,6 +320,7 @@
     <ClCompile Include="FortniteGame\FortInventory\Source\FortInventory.cpp" />
     <ClCompile Include="FortniteGame\FortKismetLibrary\Source\FortKismetLibrary.cpp" />
     <ClCompile Include="FortniteGame\FortLootPackage\Source\FortLootPackage.cpp" />
+    <ClCompile Include="FortniteGame\FortMinigameSettingsBuilding\Source\FortMinigameSettingsBuilding.cpp" />
     <ClCompile Include="FortniteGame\FortPlayerController\Source\FortPlayerController.cpp" />
     <ClCompile Include="FortniteGame\FortPlayerPawn\Source\FortPlayerPawn.cpp" />
     <ClCompile Include="FortniteGame\FortQuestManager\Source\FortQuestManager.cpp" />

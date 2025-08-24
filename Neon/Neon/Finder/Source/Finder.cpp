@@ -755,37 +755,29 @@ uint64 UFinder::RepDriverServerReplicateActors()
     static uint64 CachedResult = 0;
     if (CachedResult != 0)
         return CachedResult;
-
-    auto Addr = Memcury::Scanner::FindStringRef(L"NET_PrepareReplication")
-        .ScanFor({ 0x4C, 0x8B, 0xDC }, false).Get();
-
-    if (Addr)
-    {
-    //    return CachedResult = Addr;
-    }
     
     int Season = (int) std::floor(std::stod(Fortnite_Version.ToString()));
 
-    if (Fortnite_Version >= 3.5 && Fortnite_Version <= 4.5)
+    if (Engine_Version == 4.20)
         CachedResult = 0x53;
-    else if (Fortnite_Version >= 5.00 && Fortnite_Version <= 6.31)
-        CachedResult = Season == 5 ? 0x54 : 0x56;
-    else if (Engine_Version >= 4.22 && Fortnite_Version >= 11.00 && Fortnite_Version <= 12.20)
+    else if (Engine_Version == 4.21)
+        CachedResult = Fortnite_Version.GetMajorVersion() == 5 ? 0x54 : 0x56;
+    else if (Engine_Version >= 4.22 && Engine_Version <= 4.24)
         CachedResult = Fortnite_Version >= 7.40 && Fortnite_Version < 8.40 ? 0x57 :
-        Fortnite_Version >= 11.00 && Fortnite_Version <= 12.20 ? (Fortnite_Version >= 11.00 && Fortnite_Version <= 11.10 ? 0x57 :
+        Engine_Version == 4.24 ? (Fortnite_Version >= 11.00 && Fortnite_Version <= 11.10 ? 0x57 :
             (Fortnite_Version == 11.30 || Fortnite_Version == 11.31 ? 0x59 : 0x5A)) : 0x56;
 
     // ^ I know this makes no sense, 7.40-8.40 is 0x57, other 7-10 is 0x56, 11.00-11.10 = 0x57, 11.30-11.31 = 0x59, other S11 is 0x5A
 
-    else if (Season == 12 || Season == 13)
+    else if (Fortnite_Version.GetMajorVersion() == 12 || Fortnite_Version.GetMajorVersion() == 13)
         CachedResult = 0x5D;
-    else if (Season == 14 || Fortnite_Version <= 15.2) // never tested 15.2
+    else if (Fortnite_Version.GetMajorVersion() == 14 || Fortnite_Version <= 15.2) // never tested 15.2
         CachedResult = 0x5E;
     else if (Fortnite_Version >= 15.3 && Engine_Version < 5.00) // 15.3-18 = 0x5F
         CachedResult = 0x5F;
-    else if (Season >= 19 && Season <= 20)
+    else if (Fortnite_Version.GetMajorVersion() >= 19 && Fortnite_Version.GetMajorVersion() <= 20)
         CachedResult = 0x66;
-    else if (Season >= 21)
+    else if (Fortnite_Version.GetMajorVersion() >= 21)
         CachedResult = 0x67; // checked onb 22.30
 
     return CachedResult;
@@ -1035,6 +1027,18 @@ uint64 UFinder::CantBuild()
         CachedResult = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC 70 49 8B E9 4D 8B F8 48 8B DA 48 8B F9").Get(); // 20.00
 
     return CachedResult;
+}
+
+uint64 UFinder::AFortMinigameSettingsBuilding_BeginPlay()
+{
+    if (Fortnite_Version.ToString() == "12.61.0")
+    {
+        return IMAGEBASE + 0x26E5AB0;
+    }
+    
+    auto Addr = Memcury::Scanner::FindStringRef(L"AFortMinigameSettingsBuilding::BeginPlay: FullName[%s]");
+    
+    return Addr.ScanFor({ 0x40, 0x55 }, 1000, 0, true).Get();
 }
 
 uint64 UFinder::ReplaceBuildingActor()

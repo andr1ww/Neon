@@ -173,6 +173,8 @@ public:
 
     uint64 PostUpdate();
 
+    uint64 AFortMinigameSettingsBuilding_BeginPlay();
+    
     inline void Init()
     {
         GetMaxTickRate();

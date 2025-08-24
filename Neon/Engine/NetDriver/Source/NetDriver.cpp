@@ -311,6 +311,8 @@ int32 UNetDriver::ServerReplicateActors(UNetDriver* NetDriver, float DeltaSecond
 
 void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 {
+    if (!NetDriver) return TickFlushOriginal(NetDriver, DeltaSeconds);
+    
     static bool bStartedBus = false;
     if (GetAsyncKeyState(VK_F5) & 0x1) {
         bStartedBus = true;
@@ -358,7 +360,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
             bStartedEvent = true;
         }
     }
-
+    
     if (Finder->RepDriverServerReplicateActors() && Fortnite_Version.GetMajorVersion() <= 20)
     {
         reinterpret_cast<void(*)(UReplicationDriver*)>(NetDriver->GetReplicationDriver()->GetVTable()[Finder->RepDriverServerReplicateActors()])(NetDriver->GetReplicationDriver());

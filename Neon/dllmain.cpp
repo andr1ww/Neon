@@ -12,6 +12,7 @@
 #include "FortniteGame/FortGameMode/Header/FortGameMode.h"
 #include "FortniteGame/FortGameSessionDedicated/Header/FortGameSessionDedicated.h"
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
+#include "FortniteGame/FortMinigameSettingsBuilding/Header/FortMinigameSettingsBuilding.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "FortniteGame/FortSafeZoneIndicator/Header/FortSafeZoneIndicator.h"
@@ -222,9 +223,32 @@ public:
 	uint8                                         Pad_28[0x2A8];                                     // 0x0028(0x02A8)(Fixing Struct Size After Last Property [ Dumper-7 ])
 };
 
+
+// Enum Engine.ECollisionTraceFlag
+// NumValues: 0x0005
+enum class ECollisionTraceFlag : uint8
+{
+	CTF_UseDefault                           = 0,
+	CTF_UseSimpleAndComplex                  = 1,
+	CTF_UseSimpleAsComplex                   = 2,
+	CTF_UseComplexAsSimple                   = 3,
+	CTF_MAX                                  = 4,
+};
+
+class UBodySetup : public UObject
+{
+public:
+	DEFINE_BOOL(UBodySetup, bDoubleSidedGeometry)
+	DEFINE_BOOL(UBodySetup, bGenerateMirroredCollision)
+	DEFINE_MEMBER(ECollisionTraceFlag, UBodySetup, CollisionTraceFlag)
+	DECLARE_STATIC_CLASS(UBodySetup)
+	DECLARE_DEFAULT_OBJECT(UBodySetup)
+};
+
 class UBrushComponent : public AActor
 {
 public:
+	DEFINE_PTR(UBodySetup, UBrushComponent, BrushBodySetup)
 	DEFINE_PTR(UModel, UBrushComponent, Brush)
 public:
 	DECLARE_STATIC_CLASS(UBrushComponent)
@@ -266,27 +290,31 @@ enum class EAttachmentRule : uint8
 DefHookOg(void, PostInitializeComponentsVolume, AFortPoiVolume* This);
 void PostInitializeComponentsVolume(AFortPoiVolume* This)
 {
-	UBrushComponent* Comp = This->GetBrushComponent();
-	if (!Comp)
-	{
-		Comp = Runtime::StaticFindObject<UBrushComponent>("/Game/Athena/Apollo/Maps/Apollo_Terrain.Apollo_Terrain:PersistentLevel.SafeZoneVolume_4.BrushComponent0");
-		if (!Comp)
-		{
-			UE_LOG(LogNeon, Log, "no comp ig?");
-			return PostInitializeComponentsVolumeOG(This);
-		}
-        
-		USceneComponent* RootComp = This->CallFunc<USceneComponent*>("Actor", "K2_GetRootComponent");
-		if (RootComp)
-		{
-			Comp->CallFunc<void>("SceneComponent", "K2_AttachToComponent", RootComp, UKismetStringLibrary::Conv_StringToName(L""), EAttachmentRule::KeepWorld, 
-									 EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, false);
-		}
-	}
-    
-	Comp->SetBrush(This->GetBrush());
-	This->SetBrushComponent(Comp);
-    
+	This->SetBrushComponent((UBrushComponent*)UGameplayStatics::SpawnObject(
+		UBrushComponent::StaticClass(), This));
+	
+	static void (*SetCollisonProfileName)(UBrushComponent*, __int64,
+										  __int64) =
+		decltype(SetCollisonProfileName)(
+			This->GetBrushComponent()->GetVTable()[(0x620 / 8)]);
+	((void (*)(UObject * Component, UObject * World))(Finder->RegisterComponentWithWorld()))(This->GetBrushComponent(), UWorld::GetWorld());
+
+	static void (*SetGenerateOverlapEvents)(UBrushComponent*, bool) =
+			decltype(SetGenerateOverlapEvents)(IMAGEBASE + 0x40ECA30);
+	
+	SetCollisonProfileName(
+		This->GetBrushComponent(),
+		*reinterpret_cast<__int64*>(IMAGEBASE + 0x8317CB0), 1);
+	SetGenerateOverlapEvents(This->GetBrushComponent(), 0);
+	
+	UBodySetup* BodySetup = (UBodySetup*)UGameplayStatics::SpawnObject(
+	UBodySetup::StaticClass(), This->GetBrushComponent());
+	BodySetup->SetCollisionTraceFlag(ECollisionTraceFlag::CTF_UseComplexAsSimple);
+	BodySetup->SetbGenerateMirroredCollision(false);
+	BodySetup->SetbDoubleSidedGeometry(true);
+
+	This->GetBrushComponent()->SetBrushBodySetup(BodySetup);
+	
 	return PostInitializeComponentsVolumeOG(This);
 }
 
@@ -490,6 +518,13 @@ void InitNullsAndRetTrues() {
 	
 	if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.50)
 	{
+		Runtime::Patch(IMAGEBASE + 0x1A45182, 0x90);
+		Runtime::Patch(IMAGEBASE + 0x1A45183, 0x90);
+		Runtime::Patch(IMAGEBASE + 0x1A45184, 0x90);
+		Runtime::Patch(IMAGEBASE + 0x1A45185, 0x90);
+		Runtime::Patch(IMAGEBASE + 0x1A45186, 0x90);
+		Runtime::Patch(IMAGEBASE + 0x1A45187, 0x90);
+		
 		Runtime::Hook(IMAGEBASE + 0x1A45060, PostInitializeComponentsVolume, (void**)&PostInitializeComponentsVolumeOG);
 		Runtime::Hook(IMAGEBASE + 0x1A3A640, RetTrue);
 		Runtime::Patch(IMAGEBASE + 0x1A9FFB6, 0xEB);
@@ -609,12 +644,6 @@ FGameplayTag* Ok(void* a1, void* a2, FName f)
 	} 
 
 	return OkOG(a1, a2, f);
-}
-
-static void NullCall(uint64_t Offset)
-{
-	for (int i = 0; i < 5; i++)
-		Runtime::Patch(IMAGEBASE + Offset + i, 0x90); // call -> nop
 }
 
 void Main()
@@ -759,6 +788,7 @@ void Main()
 	Runtime::Hook(Finder->ClientOnPawnDied(), AFortPlayerControllerAthena::ClientOnPawnDied, (void**)&AFortPlayerControllerAthena::ClientOnPawnDiedOG);
 	Runtime::Exec("/Script/FortniteGame.FortPhysicsPawn.ServerMove", AFortPhysicsPawn::ServerMove);
 	Runtime::Hook(Finder->PostUpdate(), FortLootPackage::PostUpdate, (void**)&FortLootPackage::PostUpdateOG);
+	Runtime::Hook(Finder->AFortMinigameSettingsBuilding_BeginPlay(), AFortMinigameSettingsBuilding::BeginPlay);
 	if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.20)
 	{
 		Runtime::VFTHook(UAthenaNavSystem::GetDefaultObj()->GetVTable(), 0x53, UFortServerBotManagerAthena::InitializeForWorld, (void**)&UFortServerBotManagerAthena::InitializeForWorldOG);

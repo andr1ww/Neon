@@ -123,12 +123,20 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
                 FRotator Rot{};
                 bool Success = false;
                 ULevelStreamingDynamic::LoadLevelInstance(UWorld::GetWorld(), UKismetStringLibrary::Conv_NameToString(AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName), Loc, Rot, &Success, FString());
-                FAdditionalLevelStreamed NewLevel{};
-                NewLevel.bIsServerOnly = false;
-                NewLevel.LevelName = AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName;
-                UE_LOG(LogNeon, Log, "Additional Level: %s", NewLevel.LevelName.ToString().ToString().c_str());
-                TArray<FAdditionalLevelStreamed>& Levels = GameState->GetAdditionalPlaylistLevelsStreamed();
-                Levels.Add(NewLevel, StaticClassImpl("AdditionalLevelStreamed")->GetSize());
+                if (Fortnite_Version >= 11.20)
+                {
+                    TArray<FAdditionalLevelStreamed>& Levels = GameState->GetAdditionalPlaylistLevelsStreamed();
+                    FAdditionalLevelStreamed NewLevel{};
+                    NewLevel.bIsServerOnly = false;
+                    NewLevel.LevelName = AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName;
+                    UE_LOG(LogNeon, Log, "Additional Level: %s", NewLevel.LevelName.ToString().ToString().c_str());
+                    Levels.Add(NewLevel, StaticClassImpl("AdditionalLevelStreamed")->GetSize());
+                } else
+                {
+                    static int AdditionalPlaylistLevelsStreamedOffset = Runtime::GetOffset(GameState, "AdditionalPlaylistLevelsStreamed");
+                    auto AdditionalPlaylistLevelsStreamed = *reinterpret_cast<TArray<FName>*>(__int64(GameState) + AdditionalPlaylistLevelsStreamedOffset);
+                    AdditionalPlaylistLevelsStreamed.Add(AdditionalLevels[i].SoftObjectPtr.ObjectID.AssetPathName);
+                }
            }
         }
 

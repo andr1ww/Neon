@@ -125,19 +125,6 @@ public:
     DEFINE_BOOL(AFortGameStateZone, bDBNODeathEnabled)
 };
 
-struct TeamsArrayContainer // totally not stolen from rebooot
-{
-    TArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>> TeamsArray; // 13D0
-    TArray<int> TeamIdk1; // 13E0
-    TArray<int> TeamIndexesArray; // 13F0
-
-    uintptr_t idfk; //(or 2 ints) // 1400
-
-    TArray<TArray<TWeakObjectPtr<AFortPlayerStateAthena>>> SquadsArray; // Index = SquadId // 1408
-    TArray<int> SquadIdk1; // 1418
-    TArray<int> SquadIdsArray; // 0x1428
-};
-
 class AFortSafeZoneIndicator : public UObject
 {
 public:
@@ -148,9 +135,41 @@ public:
     DECLARE_DEFAULT_OBJECT(AFortSafeZoneIndicator)
 };
 
+class AFortVolumeManager : public AActor
+{
+public:
+    AFortVolume* GetVolumeForActor(AActor* Actor)
+    {
+        static SDK::UFunction* Func = nullptr;
+        SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortVolumeManager", "GetVolumeForActor");
+
+        if (Func == nullptr)
+            Func = Info.Func;
+        if (!Func)
+            return nullptr;
+
+        struct FortVolumeManager_GetVolumeForActor final
+        {
+        public:
+            const class AActor*                           Actor;                                             // 0x0000(0x0008)(ConstParm, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+            class AFortVolume*                            ReturnValue;                                       // 0x0008(0x0008)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        } Params{};
+
+        Params.Actor = Actor;
+		
+        this->ProcessEvent(Func, &Params);
+
+        return Params.ReturnValue;
+    }
+public:
+    DECLARE_STATIC_CLASS(AFortVolumeManager)
+    DECLARE_DEFAULT_OBJECT(AFortVolumeManager)
+};
+
 class AFortGameStateAthena : public AFortGameStateZone
 {
 public:
+    DEFINE_PTR(AFortVolumeManager, AFortGameStateAthena, VolumeManager);
     DEFINE_MEMBER(float, AFortGameStateAthena, DefaultParachuteDeployTraceForGroundDistance);
     DEFINE_PTR(AFortSafeZoneIndicator, AFortGameStateAthena, SafeZoneIndicator);
     void OnRep_WinningPlayerState()
