@@ -83,6 +83,23 @@ public:
 		uint8 FireModeNum;
 	};
 public:
+	bool PickUpActor(AActor* PickupTarget, class UFortDecoItemDefinition* PlacementDecoItemDefinition)
+	{
+		static SDK::UFunction* Func = nullptr;
+		SDK::FFunctionInfo Info = SDK::PropLibrary->GetFunctionByName("FortPawn", "PickUpActor");
+
+		if (Func == nullptr)
+			Func = Info.Func;
+		if (!Func)
+			return false;
+
+		struct { AActor* PickupTarget; class UFortDecoItemDefinition* PlacementDecoItemDefinition; bool ReturnValue; } AFortPawn_PickUpActor_Params{ PickupTarget, PlacementDecoItemDefinition };
+		
+		this->ProcessEvent(Func, &AFortPawn_PickUpActor_Params);
+
+		return AFortPawn_PickUpActor_Params.ReturnValue;
+	}
+	
 	bool IsDBNO()
 	{
 		static SDK::UFunction* Func = nullptr;

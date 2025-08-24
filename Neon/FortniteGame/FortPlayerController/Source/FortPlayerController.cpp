@@ -288,7 +288,7 @@ public:
 
 void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControllerAthena* PlayerController, FGuid ItemGuid) {
 	UE_LOG(LogNeon, Log, __FUNCTION__);
-    if (!PlayerController) return;
+    if (!PlayerController || !PlayerController->GetMyFortPawn()) return;
     
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
     FFortItemList& Inventory = WorldInventory->GetInventory();
@@ -324,11 +324,18 @@ void AFortPlayerControllerAthena::ServerExecuteInventoryItem(AFortPlayerControll
         ItemDefinition = (UFortWeaponItemDefinition*)(Entry->GetItemDefinition());
     }
 
-	if (auto Deco = (UFortContextTrapItemDefinition *) ItemDefinition->IsA(DecoItem)) {
-		PlayerController->GetMyFortPawn()->CallFunc<void>("FortPawn", "PickUpActor", nullptr, Deco);
+	if (ItemDefinition->IsA(UFortDecoItemDefinition::StaticClass()))
+	{
+		auto DecoItemDefinition = Cast<UFortDecoItemDefinition>(ItemDefinition);
+		if (!DecoItemDefinition) return;
+    
+		PlayerController->GetMyFortPawn()->PickUpActor(nullptr, DecoItemDefinition);
 		PlayerController->GetMyFortPawn()->GetCurrentWeapon()->SetItemEntryGuid(ItemGuid);
 
-		if (auto ContextTrap = (AFortDecoTool_ContextTrap*)PlayerController->GetMyFortPawn()->GetCurrentWeapon()) ContextTrap->SetContextTrapItemDefinition(Deco);
+		if (auto ContextTrap = Cast<AFortDecoTool_ContextTrap>(PlayerController->GetMyFortPawn()->GetCurrentWeapon()))
+		{
+			ContextTrap->SetContextTrapItemDefinition(Cast<UFortContextTrapItemDefinition>(DecoItemDefinition));
+		}
 		return;
 	}
     
@@ -534,46 +541,81 @@ void AFortPlayerControllerAthena::ServerAttemptAircraftJump(UActorComponent* Com
 
 void AFortPlayerControllerAthena::ServerGiveCreativeItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
 {
-	static int Size = StaticClassImpl("FortItemEntry")->GetSize();
-	void* Mem = malloc(Size);
-	if (!Mem || !PlayerController)
-		return;
+    static int Size = StaticClassImpl("FortItemEntry")->GetSize();
+    void* Mem = malloc(Size);
+    if (!Mem || !PlayerController)
+       return;
 
-	memset(Mem, 0, Size);
-	Stack.StepCompiledIn(Mem);
+    memset(Mem, 0, Size);
+    Stack.StepCompiledIn(Mem);
 
-	auto CreativeItemPtr = reinterpret_cast<FFortItemEntry*>(Mem);
-	auto ItemDef = CreativeItemPtr->GetItemDefinition();
-	auto Count = CreativeItemPtr->GetCount() == 0 ? 1 : CreativeItemPtr->GetCount();
-	if (!ItemDef)
-	{
-		UE_LOG(LogNeon, Log, "Failed to get Item Def!");
-		free(Mem);
-		return;
-	}
+    auto CreativeItemPtr = reinterpret_cast<FFortItemEntry*>(Mem);
+    auto ItemDef = CreativeItemPtr->GetItemDefinition();
+    auto Count = CreativeItemPtr->GetCount() == 0 ? 1 : CreativeItemPtr->GetCount();
+    
+    if (!ItemDef)
+    {
+       UE_LOG(LogNeon, Log, "Failed to get Item Def!");
+       free(Mem);
+       return;
+    }
 
-	AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
-	TArray<UFortWorldItem*>& ItemInstances = WorldInventory->GetInventory().GetItemInstances();
+    AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+    if (!WorldInventory)
+    {
+        UE_LOG(LogNeon, Error, "WorldInventory is null!");
+        free(Mem);
+        return;
+    }
+
+    TArray<UFortWorldItem*>& ItemInstances = WorldInventory->GetInventory().GetItemInstances();
             
-	FFortItemEntry* ItemEntry = nullptr;
-	for (UFortWorldItem* Item : ItemInstances) {
-		if (Item->GetItemEntry().GetItemDefinition()->IsA(UFortResourceItemDefinition::StaticClass()) || Item->GetItemEntry().GetItemDefinition()->IsA(UFortAmmoItemDefinition::StaticClass())) {
-			ItemEntry = &Item->GetItemEntry();
-			break;
-		}
-	}
+    FFortItemEntry* ItemEntry = nullptr;
+    for (UFortWorldItem* Item : ItemInstances) 
+    {
+        if (!Item)
+            continue;
+            
+        auto ItemEntryDef = Item->GetItemEntry().GetItemDefinition();
+        if (!ItemEntryDef)
+            continue;
+            
+        if (ItemEntryDef->IsA(UFortResourceItemDefinition::StaticClass()) || 
+            ItemEntryDef->IsA(UFortAmmoItemDefinition::StaticClass())) 
+        {
+            ItemEntry = &Item->GetItemEntry();
+            break;
+        }
+    }
 
-	if (ItemEntry)
-	{
-		ItemEntry->SetCount(ItemEntry->GetCount() + Count);
-		AFortInventory::ReplaceEntry(PlayerController, *ItemEntry);
-		free(Mem);
-		return;
-	}
+    if (ItemEntry)
+    {
+        ItemEntry->SetCount(ItemEntry->GetCount() + Count);
+        AFortInventory::ReplaceEntry(PlayerController, *ItemEntry);
+        free(Mem);
+        return;
+    }
 
-	int32 LoadedAmmo = ItemDef->IsA<UFortWeaponItemDefinition>() ? AFortInventory::GetStats((UFortWeaponItemDefinition*)ItemDef)->GetClipSize() : CreativeItemPtr->GetLoadedAmmo();
-	AFortInventory::GiveItem(PlayerController, ItemDef, Count, LoadedAmmo, 1);
-	free(Mem);
+    int32 LoadedAmmo = 0;
+    if (ItemDef->IsA<UFortWeaponItemDefinition>())
+    {
+        auto WeaponStats = AFortInventory::GetStats((UFortWeaponItemDefinition*)ItemDef);
+        if (WeaponStats)
+        {
+            LoadedAmmo = WeaponStats->GetClipSize();
+        }
+        else
+        {
+            LoadedAmmo = 1;
+        }
+    }
+    else
+    {
+        LoadedAmmo = CreativeItemPtr->GetLoadedAmmo();
+    }
+
+    AFortInventory::GiveItem(PlayerController, ItemDef, Count, LoadedAmmo, 1);
+    free(Mem);
 }
 
 void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
