@@ -183,6 +183,7 @@
     <ClInclude Include="FortniteGame\FortPlayerPawn\Header\FortPlayerPawn.h" />
     <ClInclude Include="FortniteGame\FortPlayerState\Header\FortPlayerState.h" />
     <ClInclude Include="FortniteGame\FortPlaylistAthena\Header\FortPlaylistAthena.h" />
+    <ClInclude Include="FortniteGame\FortProjectileBase\Header\FortProjectileBase.h" />
     <ClInclude Include="FortniteGame\FortQuestManager\Header\FortQuestManager.h" />
     <ClInclude Include="FortniteGame\FortSafeZoneIndicator\Header\FortSafeZoneIndicator.h" />
     <ClInclude Include="FortniteGame\GAB_InterrogatePlayer\Header\GAB_InterrogatePlayer.h" />
@@ -323,6 +324,7 @@
     <ClCompile Include="FortniteGame\FortMinigameSettingsBuilding\Source\FortMinigameSettingsBuilding.cpp" />
     <ClCompile Include="FortniteGame\FortPlayerController\Source\FortPlayerController.cpp" />
     <ClCompile Include="FortniteGame\FortPlayerPawn\Source\FortPlayerPawn.cpp" />
+    <ClCompile Include="FortniteGame\FortProjectileBase\Source\FortProjectileBase.cpp" />
     <ClCompile Include="FortniteGame\FortQuestManager\Source\FortQuestManager.cpp" />
     <ClCompile Include="FortniteGame\FortSafeZoneIndicator\Source\FortSafeZoneIndicator.cpp" />
     <ClCompile Include="FortniteGame\FortServerBotManager\Source\FortServerBotManager.cpp" />

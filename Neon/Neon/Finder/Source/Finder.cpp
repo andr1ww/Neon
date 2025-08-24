@@ -1409,6 +1409,15 @@ uint64 UFinder::SpawnLoot()
     return CachedResult;
 }
 
+uint64 UFinder::OnStopCallback()
+{
+    auto Addr = Memcury::Scanner::FindPattern("48 89 74 24 ? 48 89 7C 24 ? 55 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B F9 48 8B F2 8B 89").Get();
+    if (Addr != 0)
+    {
+        return Addr;
+    }
+}
+
 uint64 UFinder::ReloadWeapon()
 {
     static uint64 CachedResult = 0;

@@ -314,7 +314,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
     if (!NetDriver) return TickFlushOriginal(NetDriver, DeltaSeconds);
     
     static bool bStartedBus = false;
-    if (GetAsyncKeyState(VK_F5) & 0x1) {
+    if (GetAsyncKeyState(VK_F5) & 0x1 && !Config::bCreative) {
         bStartedBus = true;
         ExecuteConsoleCommand(UWorld::GetWorld(), L"startaircraft", nullptr);
         Sleep(400);

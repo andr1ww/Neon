@@ -585,13 +585,6 @@ public:
 	DECLARE_DEFAULT_OBJECT(UFortPlayerControllerAthenaXPComponent)
 };
 
-class AFortProjectileBase : public UObject
-{
-public:
-	DECLARE_STATIC_CLASS(AFortProjectileBase)
-	DECLARE_DEFAULT_OBJECT(AFortProjectileBase)
-};
-
 class UAthenaResurrectionComponent : public UActorComponent
 {
 public:

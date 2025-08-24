@@ -11,6 +11,7 @@
 #include "FortniteGame/FortKismetLibrary/Header/FortKismetLibrary.h"
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 #include "FortniteGame/FortMinigameSettingsBuilding/Header/FortMinigameSettingsBuilding.h"
+#include "FortniteGame/FortProjectileBase/Header/FortProjectileBase.h"
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "Neon/Config.h"
 #include "Neon/Finder/Header/Finder.h"
@@ -546,15 +547,16 @@ void AFortPlayerControllerAthena::ServerGiveCreativeItem(AFortPlayerControllerAt
 
 	auto CreativeItemPtr = reinterpret_cast<FFortItemEntry*>(Mem);
 	auto ItemDef = CreativeItemPtr->GetItemDefinition();
-	auto Count = CreativeItemPtr->GetCount();
+	auto Count = CreativeItemPtr->GetCount() == 0 ? 1 : CreativeItemPtr->GetCount();
 	if (!ItemDef)
 	{
+		UE_LOG(LogNeon, Log, "Failed to get Item Def!");
 		free(Mem);
 		return;
 	}
 
-	int32 LoadedAmmo = ItemDef->IsA<UFortWeaponItemDefinition>() ? AFortInventory::GetStats((UFortWeaponItemDefinition*)ItemDef)->GetClipSize() : 0;
-	AFortInventory::GiveItem(PlayerController, ItemDef, Count, LoadedAmmo, 0);
+	int32 LoadedAmmo = ItemDef->IsA<UFortWeaponItemDefinition>() ? AFortInventory::GetStats((UFortWeaponItemDefinition*)ItemDef)->GetClipSize() : CreativeItemPtr->GetLoadedAmmo();
+	AFortInventory::GiveItem(PlayerController, ItemDef, Count, LoadedAmmo, CreativeItemPtr->GetLevel());
 	free(Mem);
 }
 

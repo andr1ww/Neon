@@ -3,9 +3,9 @@
 
 namespace Config
 {
-    inline bool bLogProcessEvent = false;
-    inline bool bLateGame = false;
     inline bool bCreative = true;
+    inline bool bLogProcessEvent = bCreative;
+    inline bool bLateGame = false;
     inline bool bGameSessions = false;
     inline bool bEchoSessions = false;
     inline std::string Playlist = "Playlist_DefaultSolo";

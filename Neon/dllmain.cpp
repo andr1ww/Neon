@@ -14,6 +14,7 @@
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 #include "FortniteGame/FortMinigameSettingsBuilding/Header/FortMinigameSettingsBuilding.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
+#include "FortniteGame/FortProjectileBase/Header/FortProjectileBase.h"
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "FortniteGame/FortSafeZoneIndicator/Header/FortSafeZoneIndicator.h"
 #include "FortniteGame/GAB_InterrogatePlayer/Header/GAB_InterrogatePlayer.h"
@@ -798,6 +799,7 @@ void Main()
 		Runtime::VFTHook(StaticClassImpl("FortPlayerPawnAthena")->GetClassDefaultObject()->GetVTable(), 0x119, AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues, (void**)&AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCuesOG);
 	}
 	Runtime::Exec("/Script/FortniteGame.FortPlayerControllerAthena.ServerGiveCreativeItem", AFortPlayerControllerAthena::ServerGiveCreativeItem);
+	Runtime::Exec("/Script/FortniteGame.FortProjectileBase.OnStopCallback", AFortProjectileBase::OnStopCallback, (void**)&AFortProjectileBase::OnStopCallbackOG);
 	
 	Runtime::Hook(Finder->ReloadWeapon(), AFortPlayerPawn::ReloadWeapon, (void**)&AFortPlayerPawn::ReloadWeaponOG); // this is right um we can make it uni after we get it to fucking call 
 	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);
