@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortProjectileBase/Source/FortProjectileBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortProjectileBase/Source/FortProjectileBase.cpp" afterDir="false" />
-    </list>
+    <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -188,6 +184,11 @@
           <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp</url>
           <line>833</line>
           <option name="timeStamp" value="93" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortProjectileBase/Source/FortProjectileBase.cpp</url>
+          <line>7</line>
+          <option name="timeStamp" value="96" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

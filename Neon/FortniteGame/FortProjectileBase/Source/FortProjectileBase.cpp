@@ -11,12 +11,10 @@ void AFortProjectileBase::OnStopCallback(AFortProjectileBase* ProjectileBase, FF
     Stack.StepCompiledIn(&Result);
     Stack.IncrementCode();
 
-    if (!ProjectileBase->IsA<AB_Prj_Athena_PlaysetGrenade_C>())
-        return;
+    if (!ProjectileBase->IsA<AB_Prj_Athena_PlaysetGrenade_C>()) return;
 
     auto* Playset = ((AB_Prj_Athena_PlaysetGrenade_C*)ProjectileBase)->GetCachedPlayset();
-    if (!Playset || !Playset->GetClass())
-        return;
+    if (!Playset || !Playset->GetClass()) return;
 
     std::string PathName = UKismetSystemLibrary::GetDefaultObj()->CallFunc<FString>(
         "KismetSystemLibrary", "GetPathName", Playset).ToString().c_str();
@@ -33,8 +31,7 @@ void AFortProjectileBase::OnStopCallback(AFortProjectileBase* ProjectileBase, FF
         if (pos != std::string::npos) AssetName = AssetName.substr(pos);
     }
 
-    if (!(AssetName.rfind("CP_", 0) == 0 || AssetName.rfind("PG_", 0) == 0))
-        return;
+    if (!(AssetName.rfind("CP_", 0) == 0 || AssetName.rfind("PG_", 0) == 0)) return;
 
     std::vector<std::string> parts;
     size_t start = 0, pos = 0;
@@ -62,11 +59,13 @@ void AFortProjectileBase::OnStopCallback(AFortProjectileBase* ProjectileBase, FF
     std::string AssetFull = AssetName + "." + AssetName;
     UWorld* World = nullptr;
 
-    std::vector<std::string> TryPaths = {
-        BasePath + parts[1] + "/Gallery/" + AssetFull,
-        BasePath + parts[1] + "/" + AssetFull,
-        BasePath + AssetFull
-    };
+    std::vector<std::string> TryPaths;
+
+    if (AssetName.find("Gallery") != std::string::npos)
+        TryPaths.push_back(BasePath + parts[1] + "/Gallery/" + AssetFull);
+
+    TryPaths.push_back(BasePath + parts[1] + "/" + AssetFull);
+    TryPaths.push_back(BasePath + AssetFull);
 
     if (parts.size() >= 3)
     {
