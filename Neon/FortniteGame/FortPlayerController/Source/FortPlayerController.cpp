@@ -539,7 +539,7 @@ void AFortPlayerControllerAthena::ServerGiveCreativeItem(AFortPlayerControllerAt
 {
 	static int Size = StaticClassImpl("FortItemEntry")->GetSize();
 	void* Mem = malloc(Size);
-	if (!Mem)
+	if (!Mem || !PlayerController)
 		return;
 
 	memset(Mem, 0, Size);
@@ -556,7 +556,7 @@ void AFortPlayerControllerAthena::ServerGiveCreativeItem(AFortPlayerControllerAt
 	}
 
 	int32 LoadedAmmo = ItemDef->IsA<UFortWeaponItemDefinition>() ? AFortInventory::GetStats((UFortWeaponItemDefinition*)ItemDef)->GetClipSize() : CreativeItemPtr->GetLoadedAmmo();
-	AFortInventory::GiveItem(PlayerController, ItemDef, Count, LoadedAmmo, CreativeItemPtr->GetLevel());
+	AFortInventory::GiveItem(PlayerController, ItemDef, Count, LoadedAmmo, 1);
 	free(Mem);
 }
 
