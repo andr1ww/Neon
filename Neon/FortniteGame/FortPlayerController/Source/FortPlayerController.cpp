@@ -591,14 +591,23 @@ void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControlle
 		for (AActor* Building : ExistingBuildings) {
 			if (Building) Building->K2_DestroyActor();
 		}
-    	
+
+		static map<UClass*, EFortResourceType> ResourceMap;
             
 		if (!PlayerController->GetbBuildFree())
 		{
-			ABuildingSMActor* BuildingSMActor = UGameplayStatics::SpawnActorOG<ABuildingSMActor>(
-BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot, PlayerController);
-            	
-			auto* Resource = UFortKismetLibrary::K2_GetResourceItemDefinition(BuildingSMActor->GetResourceType());
+			EFortResourceType ResourceType;
+			
+			if (ResourceMap.contains(BuildingClass))
+			{
+				ResourceType = ResourceMap[BuildingClass];
+			} else
+			{
+				ResourceMap[BuildingClass] = ((ABuildingSMActor*)BuildingClass->GetClassDefaultObject())->GetResourceType();
+				ResourceType = ResourceMap[BuildingClass];
+			}
+			
+			auto* Resource = UFortKismetLibrary::K2_GetResourceItemDefinition(ResourceType);
 
 			AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
 			TArray<UFortWorldItem*>& ItemInstances = WorldInventory->GetInventory().GetItemInstances();
@@ -614,6 +623,9 @@ BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot, PlayerC
 			if (!ItemEntry || ItemEntry->GetCount() < 10) {
 				goto original;
 			}
+
+			ABuildingSMActor* BuildingSMActor = UGameplayStatics::SpawnActorOG<ABuildingSMActor>(
+BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot, PlayerController);
 
 			ItemEntry->SetCount(ItemEntry->GetCount() - 10);
 			AFortInventory::ReplaceEntry(PlayerController, *ItemEntry);
