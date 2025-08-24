@@ -185,11 +185,6 @@
           <line>833</line>
           <option name="timeStamp" value="93" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortProjectileBase/Source/FortProjectileBase.cpp</url>
-          <line>7</line>
-          <option name="timeStamp" value="96" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

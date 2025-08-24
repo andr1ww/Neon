@@ -555,6 +555,25 @@ void AFortPlayerControllerAthena::ServerGiveCreativeItem(AFortPlayerControllerAt
 		return;
 	}
 
+	AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
+	TArray<UFortWorldItem*>& ItemInstances = WorldInventory->GetInventory().GetItemInstances();
+            
+	FFortItemEntry* ItemEntry = nullptr;
+	for (UFortWorldItem* Item : ItemInstances) {
+		if (Item->GetItemEntry().GetItemDefinition()->IsA(UFortResourceItemDefinition::StaticClass()) || Item->GetItemEntry().GetItemDefinition()->IsA(UFortAmmoItemDefinition::StaticClass())) {
+			ItemEntry = &Item->GetItemEntry();
+			break;
+		}
+	}
+
+	if (ItemEntry)
+	{
+		ItemEntry->SetCount(ItemEntry->GetCount() + Count);
+		AFortInventory::ReplaceEntry(PlayerController, *ItemEntry);
+		free(Mem);
+		return;
+	}
+
 	int32 LoadedAmmo = ItemDef->IsA<UFortWeaponItemDefinition>() ? AFortInventory::GetStats((UFortWeaponItemDefinition*)ItemDef)->GetClipSize() : CreativeItemPtr->GetLoadedAmmo();
 	AFortInventory::GiveItem(PlayerController, ItemDef, Count, LoadedAmmo, 1);
 	free(Mem);
