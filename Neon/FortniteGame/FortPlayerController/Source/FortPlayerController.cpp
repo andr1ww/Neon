@@ -617,7 +617,80 @@ void AFortPlayerControllerAthena::ServerGiveCreativeItem(AFortPlayerControllerAt
     AFortInventory::GiveItem(PlayerController, ItemDef, Count, LoadedAmmo, 1);
     free(Mem);
 }
+/*
+void AFortPlayerControllerAthena::ServerCreateBuildingAndSpawnDeco(AFortDecoTool_ContextTrap* Tool, FFrame& Stack) {
+	auto Pawn = (APawn*)Tool->GetOwner();
+	if (!Pawn) return;
+	auto PlayerController = (AFortPlayerControllerAthena*)Pawn->GetController();
+	if (!PlayerController) return;
+	FVector_NetQuantize10 BuildingLocation;
+	FRotator BuildingRotation;
+	FVector_NetQuantize10 Location;
+	FRotator Rotation;
+	EBuildingAttachmentType InBuildingAttachmentType;
+	Stack.StepCompiledIn(&BuildingLocation);
+	Stack.StepCompiledIn(&BuildingRotation);
+	Stack.StepCompiledIn(&Location);
+	Stack.StepCompiledIn(&Rotation);
+	Stack.StepCompiledIn(&InBuildingAttachmentType);
+	Stack.IncrementCode();
 
+	auto Mat = PlayerController->BroadcastRemoteClientInfo->RemoteBuildingMaterial;
+	std::string MatName;
+	std::string MatNameShort;
+	switch ((int)Mat) {
+	case 0:
+		MatName = "Wood";
+		MatNameShort = "W";
+		break;
+	case 1:
+		MatName = "Stone";
+		MatNameShort = "S";
+		break;
+	case 2:
+		MatName = "Metal";
+		MatNameShort = "M";
+		break;
+	}
+	std::string BuildingType;
+	switch ((int)InBuildingAttachmentType) {
+	case 0:
+	case 6:
+	case 7:
+	case 2:
+		BuildingType = "Floor";
+		break;
+	case 1:
+		BuildingType = "Solid";
+		break;
+	}
+	auto Build = Runtime::StaticFindObject<UClass>("/Game/Building/ActorBlueprints/Player/" + MatName + "/L1/PBWA_" + MatNameShort + "1_" + BuildingType + ".PBWA_" + MatNameShort + "1_" + BuildingType + "_C");
+	ABuildingSMActor* Building = nullptr;
+	TArray<ABuildingSMActor*> RemoveBuildings;
+	char _Unknown;
+	static auto CantBuild = (__int64 (*)(UWorld*, UObject*, FVector, FRotator, bool, TArray<ABuildingSMActor*> *, char*))(Finder->CantBuild()); 
+	if (CantBuild(UWorld::GetWorld(), Build, BuildingLocation, BuildingRotation, false, &RemoveBuildings, &_Unknown)) return;
+	auto Resource = UFortKismetLibrary::K2_GetResourceItemDefinition(((ABuildingSMActor*)Build->DefaultObject)->GetResourceType());
+	auto itemEntry = PlayerController->GetWorldInventory()->GetInventory().ReplicatedEntries.Search([&](FFortItemEntry& entry) {
+		return entry.GetItemDefinition() == Resource;
+	});
+	if (!itemEntry) return;
+
+	itemEntry->Count -= 10;
+	if (itemEntry->Count <= 0) AFortInventory::Remove(PlayerController, itemEntry->ItemGuid);
+	AFortInventory::ReplaceEntry((AFortPlayerControllerAthena*)PlayerController, *itemEntry);
+
+	for (auto& RemoveBuilding : RemoveBuildings) RemoveBuilding->K2_DestroyActor();
+	RemoveBuildings.Free();
+
+	Building = UGameplayStatics::SpawnActorOG<ABuildingSMActor>(Build, BuildingLocation, BuildingRotation, PlayerController);
+	Building->bPlayerPlaced = true;
+	Building->InitializeKismetSpawnedBuildingActor(Building, PlayerController, true);
+	Building->TeamIndex = ((AFortPlayerStateAthena*)PlayerController->PlayerState)->TeamIndex;
+	Building->Team = EFortTeam(Building->TeamIndex);
+	Tool->ServerSpawnDeco(Location, Rotation, Building, InBuildingAttachmentType);
+}
+*/
 void AFortPlayerControllerAthena::ServerCreateBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
 {
 	FCreateBuildingActorData CreateBuildingData;

@@ -526,7 +526,7 @@ void InitNullsAndRetTrues() {
 		Runtime::Patch(IMAGEBASE + 0x1A45186, 0x90);
 		Runtime::Patch(IMAGEBASE + 0x1A45187, 0x90);
 		
-		Runtime::Hook(IMAGEBASE + 0x1A45060, PostInitializeComponentsVolume, (void**)&PostInitializeComponentsVolumeOG);
+	//	Runtime::Hook(IMAGEBASE + 0x1A45060, PostInitializeComponentsVolume, (void**)&PostInitializeComponentsVolumeOG);
 		Runtime::Hook(IMAGEBASE + 0x1A3A640, RetTrue);
 		Runtime::Patch(IMAGEBASE + 0x1A9FFB6, 0xEB);
 		Runtime::Hook(IMAGEBASE + 0x1A8ED30, AFortAthenaMutatorOnSafeZoneUpdated, (void**)&AFortAthenaMutatorOnSafeZoneUpdatedOG);
@@ -647,6 +647,24 @@ FGameplayTag* Ok(void* a1, void* a2, FName f)
 	return OkOG(a1, a2, f);
 }
 
+static inline FString (*InitNewPlayerOG)(AGameModeBase* GameMode, APlayerController* NewPlayerController, FUniqueNetIdRepl UniqueId, FString Options, FString Portal);
+static FString InitNewPlayer(AGameModeBase* GameMode, APlayerController* NewPlayerController, FUniqueNetIdRepl UniqueId, FString Options, FString Portal)
+{
+	std::string OptionsStr = Options.ToString().c_str();
+	std::string PortalStr = Portal.ToString().c_str();
+	
+	if (Config::bEchoSessions)
+	{
+		if (!OptionsStr.starts_with("?EncryptionToken=")
+			|| OptionsStr.contains("?AuthTicket=lawinstokenlol?"))
+		{
+			return L"FUckYou";
+		}
+	}
+	
+	return InitNewPlayerOG(GameMode, NewPlayerController, UniqueId, Options, Portal);
+}
+
 void Main()
 {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
@@ -742,6 +760,8 @@ void Main()
 		Runtime::Hook(Finder->CreateAndConfigureNavigationSystem(), UFortServerBotManagerAthena::CreateAndConfigureNavigationSystem, (void**)&UFortServerBotManagerAthena::CreateAndConfigureNavigationSystemOG);
 		UE_LOG(LogNeon, Log, "CreateAndConfigureNavigationSystem: 0x%x", Finder->CreateAndConfigureNavigationSystem() - IMAGEBASE);
 	}
+
+//	if (Config::bEchoSessions) Runtime::Hook(IMAGEBASE + 0x420DA70, InitNewPlayer, (void**)&InitNewPlayerOG);
 	
 	Runtime::Exec("/Script/Engine.GameMode.ReadyToStartMatch", AFortGameModeAthena::ReadyToStartMatch, (void**)&AFortGameModeAthena::ReadyToStartMatchOG);
 	Runtime::Hook<&AFortGameModeAthena::StaticClass>("SpawnDefaultPawnFor", AFortGameModeAthena::SpawnDefaultPawnFor);
