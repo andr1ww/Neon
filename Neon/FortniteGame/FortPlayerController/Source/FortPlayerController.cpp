@@ -685,12 +685,10 @@ void AFortPlayerControllerAthena::ServerBeginEditingBuildingActor(AFortPlayerCon
     AFortInventory* WorldInventory = PlayerController->GetWorldInventory();
     FFortItemList& Inventory = WorldInventory->GetInventory();
     TArray<UFortWorldItem*>& ItemInstancesOffsetPtr = Inventory.GetItemInstances();
-
-	static UFortItemDefinition* Def = Runtime::StaticFindObject<UFortItemDefinition>("/Game/Items/Weapons/BuildingTools/EditTool.EditTool");
 	
     for (int32 i = 0; i < ItemInstancesOffsetPtr.Num(); ++i)
     {
-        if (ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemDefinition() == Def)
+		if (ItemInstancesOffsetPtr[i]->GetItemEntry().GetItemDefinition()->IsA(UFortEditToolItemDefinition::StaticClass()))
         {
             ItemEntry = &ItemInstancesOffsetPtr[i]->GetItemEntry();
             break;
