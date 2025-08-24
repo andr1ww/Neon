@@ -83,7 +83,7 @@ private:
         if (!Property) return nullptr;
         
         if (IsUsingFField()) {
-            return *(void**)((uint8_t*)Property + 0x28);
+			return ((FField*)Property)->Next;
         } else {
             return *(void**)((uint8_t*)Property + 0x28);
         }
