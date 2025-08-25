@@ -102,7 +102,7 @@ void AFortPlayerControllerAthena::ServerEndMinigame(AFortPlayerControllerAthena*
 
 	std::thread([MiniGame]()
 		{
-			while (MiniGame->GetCurrentState() != EFortMinigameState::PostGameReset)
+		while ((int)MiniGame->GetCurrentState() != (Fortnite_Version >= 12.00 ? 10 : 9))
 			{
 					std::this_thread::sleep_for(std::chrono::milliseconds(200));
 			}
