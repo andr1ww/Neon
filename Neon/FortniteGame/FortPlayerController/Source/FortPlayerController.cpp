@@ -111,6 +111,32 @@ void AFortPlayerControllerAthena::ServerEndMinigame(AFortPlayerControllerAthena*
 		}).detach();
 }
 
+void AFortPlayerController::ServerUpdateActorOptions(AActor* Actor, FFrame& Stack)
+{
+	AActor* TargetActor;
+	TArray<FString> OptionsKeys;
+	TArray<FString> OptionsValues;
+	Stack.StepCompiledIn(&TargetActor);
+	Stack.StepCompiledIn(&OptionsKeys);
+	Stack.StepCompiledIn(&OptionsValues);
+	Stack.IncrementCode();
+
+	UE_LOG(LogNeon, Log, __FUNCTION__);
+	
+	if (Actor)
+	{
+		UE_LOG(LogNeon, Log, "OptionsTargetClass: %s", TargetActor->GetClass()->GetFName().ToString().ToString().c_str());
+		UE_LOG(LogNeon, Log, "OptionsTarget: %s", TargetActor->GetFName().ToString().ToString().c_str());
+		UE_LOG(LogNeon, Log, "OptionsValues: %d", OptionsValues.Num());
+		UE_LOG(LogNeon, Log, "OptionsKeys: %d", OptionsKeys.Num());
+		for (int i = 0; i < OptionsKeys.Num(); i++)
+			UE_LOG(LogNeon, Log, TEXT("\t -> %s : %s"), *OptionsKeys[i], *OptionsValues[i]);
+
+		for (int i = 0; i < OptionsValues.Num(); i++)
+			UE_LOG(LogNeon, Log, TEXT("\t -> %s : %s"), *OptionsValues[i], *OptionsValues[i]);
+	}
+}
+
 void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
 {
 	Stack.IncrementCode();
@@ -122,13 +148,27 @@ void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerA
 	if (Config::bCreative)
 	{
 		AFortAthenaCreativePortal* Portal = nullptr;
-		for (int i = 0; i < GameMode->GetGameState()->GetCreativePortalManager()->GetAllPortals().Num(); i++)
+		if (Fortnite_Version >= 12.00)
 		{
-			auto CurrentPortal = GameMode->GetGameState()->GetCreativePortalManager()->GetAllPortals()[i];
-			if (!CurrentPortal->GetLinkedVolume() || CurrentPortal->GetLinkedVolume()->GetVolumeState() == EVolumeState::Ready)
-				continue;
-			Portal = CurrentPortal;
-			UE_LOG(LogNeon, Log, "Index: %d", i);
+			for (int i = 0; i < GameMode->GetGameState()->GetCreativePortalManager()->GetAllPortals().Num(); i++)
+			{
+				auto CurrentPortal = GameMode->GetGameState()->GetCreativePortalManager()->GetAllPortals()[i];
+				if (!CurrentPortal->GetLinkedVolume() || CurrentPortal->GetLinkedVolume()->GetVolumeState() == EVolumeState::Ready)
+					continue;
+				Portal = CurrentPortal;
+			}
+		} else
+		{
+			for (int i = 0; i < GameMode->GetGameState()->GetCreativePortalManager()->GetAvailablePortals().Num(); i++)
+			{
+				auto CurrentPortal = GameMode->GetGameState()->GetCreativePortalManager()->GetAvailablePortals()[i];
+				if (!CurrentPortal->GetLinkedVolume() || CurrentPortal->GetLinkedVolume()->GetVolumeState() == EVolumeState::Ready)
+					continue;
+				Portal = CurrentPortal;
+				GameMode->GetGameState()->GetCreativePortalManager()->GetAvailablePortals().Remove(i);
+				GameMode->GetGameState()->GetCreativePortalManager()->GetUsedPortals().Add(Portal);
+				break;
+			}
 		}
 
 		if (!Portal)
@@ -1473,7 +1513,10 @@ void AFortPlayerControllerAthena::ServerCheat(AFortPlayerControllerAthena* Playe
 		auto fn1 = Runtime::StaticFindObject<UFunction>("/Script/FortniteGame.FortMinigame.AdvanceState");
     
 		AFortMinigame* MG = PlayerController->CallFunc<AFortMinigame*>("FortPlayerControllerAthena", "GetMinigame");
-		MG->ProcessEvent(fn1, nullptr);
+		if (MG)
+		{
+			MG->ProcessEvent(fn1, nullptr);
+		}
 	}
 }
 

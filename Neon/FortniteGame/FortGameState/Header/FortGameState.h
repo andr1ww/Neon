@@ -113,6 +113,8 @@ public:
 class AFortCreativePortalManager final : public AActor
 {
 public:
+    DEFINE_MEMBER(TArray<class AFortAthenaCreativePortal*>, AFortCreativePortalManager, UsedPortals);
+    DEFINE_MEMBER(TArray<class AFortAthenaCreativePortal*>, AFortCreativePortalManager, AvailablePortals);
     DEFINE_MEMBER(TArray<class AFortAthenaCreativePortal*>, AFortCreativePortalManager, AllPortals);
     DECLARE_STATIC_CLASS(AFortCreativePortalManager)
     DECLARE_DEFAULT_OBJECT(AFortCreativePortalManager)

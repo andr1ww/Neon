@@ -913,7 +913,11 @@ void Main()
 	Runtime::Hook(Finder->ClientOnPawnDied(), AFortPlayerControllerAthena::ClientOnPawnDied, (void**)&AFortPlayerControllerAthena::ClientOnPawnDiedOG);
 	Runtime::Exec("/Script/FortniteGame.FortPhysicsPawn.ServerMove", AFortPhysicsPawn::ServerMove);
 	Runtime::Hook(Finder->PostUpdate(), FortLootPackage::PostUpdate, (void**)&FortLootPackage::PostUpdateOG);
-
+	if (Fortnite_Version >= 9.00)
+	{
+		Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerUpdateActorOptions", AFortPlayerController::ServerUpdateActorOptions);
+	}
+	
 	if (Fortnite_Version >= 12.00)
 	{
 		Runtime::Hook(Finder->AFortMinigameSettingsBuilding_BeginPlay(), AFortMinigameSettingsBuilding::BeginPlay, (void**)&AFortMinigameSettingsBuilding::BeginPlayOG);

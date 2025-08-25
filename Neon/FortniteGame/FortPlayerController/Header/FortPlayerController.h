@@ -108,6 +108,7 @@ public:
 	DEFINE_PTR(AFortInventory, AFortPlayerController, WorldInventory);
 	DEFINE_MEMBER(FFortAthenaLoadout, AFortPlayerController, CosmeticLoadoutPC);
 	DEFINE_PTR(AFortPlayerPawn, AFortPlayerController, MyFortPawn);
+	static void ServerUpdateActorOptions(AActor* Actor, FFrame& Stack);
 
 public:
 	void ClientReportDamagedResourceBuilding(class ABuildingSMActor *BuildingSMActor, EFortResourceType PotentialResourceType, int32 PotentialResourceCount, bool bDestroyed, bool bJustHitWeakspot)

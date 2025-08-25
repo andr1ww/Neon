@@ -434,7 +434,7 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
                 }
             }
 
-            if (!bSet)
+            if (!bSet && !Config::bCreative)
             {
                 // base time set cause of UNetDriver::TickFlush 
                 auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
