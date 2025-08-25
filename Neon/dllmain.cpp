@@ -436,7 +436,7 @@ void PostInitializeComponentsVolume(AFortPoiVolume* This)
     UBodySetup* BodySetup = (UBodySetup*)UGameplayStatics::SpawnObject(
         UBodySetup::StaticClass(), This->GetBrushComponent());
 
-    UModel* BrushModel = This->GetBrush();
+    UModel* BrushModel = This->GetBrush(); // instead we should use CreateFromModel in UBodySetup, but im not sure how to find it.
     if (BrushModel)
     {
         static int CorrectSize = StaticClassImpl("Model")->GetSize(); 
@@ -643,7 +643,7 @@ void InitNullsAndRetTrues()
 		Runtime::Patch(IMAGEBASE + 0x1A45186, 0x90);
 		Runtime::Patch(IMAGEBASE + 0x1A45187, 0x90);
 
-		Runtime::Hook(IMAGEBASE + 0x1A45060, PostInitializeComponentsVolume, (void**)&PostInitializeComponentsVolumeOG);
+	//	Runtime::Hook(IMAGEBASE + 0x1A45060, PostInitializeComponentsVolume, (void**)&PostInitializeComponentsVolumeOG);
 		Runtime::Hook(IMAGEBASE + 0x1A3A640, RetTrue);
 		Runtime::Patch(IMAGEBASE + 0x1A9FFB6, 0xEB);
 		Runtime::Hook(IMAGEBASE + 0x1A8ED30, AFortAthenaMutatorOnSafeZoneUpdated, (void**)&AFortAthenaMutatorOnSafeZoneUpdatedOG);
