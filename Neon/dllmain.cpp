@@ -218,12 +218,99 @@ void InitializeMMRInfos(AFortAthenaMutator_Bots* a1)
 	return InitializeMMRInfosOG(a1);
 }
 
-class UModel final : public UObject
+struct alignas(0x10) FPlane final : public FVector
 {
-public:
-	uint8                                         Pad_28[0x2A8];                                     // 0x0028(0x02A8)(Fixing Struct Size After Last Property [ Dumper-7 ])
+	public:
+	float                                         W;                                                 // 0x000C(0x0004)(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 };
 
+struct FBspNode // 62 bytes
+{
+	enum {MAX_NODE_VERTICES=255};	// Max vertices in a Bsp node.
+	enum {MAX_ZONES=64};			// Max zones per level.
+
+	// Persistent information.
+	FPlane		Plane;			// 16 Plane the node falls into (X, Y, Z, W).
+	int32			iVertPool;		// 4  Index of first vertex in vertex pool, =iTerrain if NumVertices==0 and NF_TerrainFront.
+	int32			iSurf;			// 4  Index to surface information.
+
+	/** The index of the node's first vertex in the UModel's vertex buffer. */
+	int32			iVertexIndex;
+
+	/** The index in ULevel::ModelComponents of the UModelComponent containing this node. */
+	uint16_t		ComponentIndex;
+
+	/** The index of the node in the UModelComponent's Nodes array. */
+	uint16_t		ComponentNodeIndex;
+
+	/** The index of the element in the UModelComponent's Element array. */
+	int32			ComponentElementIndex;
+	union { int32 iBack; int32 iChild[1]; };
+	int32 iFront;
+	int32 iPlane;
+
+	int32		iCollisionBound;// 4  Collision bound.
+
+	uint8	iZone[2];		// 2  Visibility zone in 1=front, 0=back.
+	uint8	NumVertices;	// 1  Number of vertices in node.
+	uint8	NodeFlags;		// 1  Node flags.
+	int32		iLeaf[2];		// 8  Leaf in back and front, INDEX_NONE=not a leaf.
+};
+
+class FVert
+{
+public:
+	// Variables.
+	int32 	pVertex;	// Index of vertex.
+	int32		iSide;		// If shared, index of unique side. Otherwise INDEX_NONE.
+
+	/** The vertex's shadow map coordinate. */
+	FVector2D ShadowTexCoord;
+
+	/** The vertex's shadow map coordinate for the backface of the node. */
+	FVector2D BackfaceShadowTexCoord;
+};
+
+// 0x0060 (0x0088 - 0x0028)
+class UMaterialInterface : public UObject
+{
+public:
+	uint8 Pad_28[0x60]; // 0x0028(0x0060) Padding to match the original size
+};
+
+struct FBspSurf
+{
+public:
+
+	UMaterialInterface*	Material;		// 4 Material.
+	uint32				PolyFlags;		// 4 Polygon flags.
+	int32					pBase;			// 4 Polygon & texture base point index (where U,V==0,0).
+	int32					vNormal;		// 4 Index to polygon normal.
+	int32					vTextureU;		// 4 Texture U-vector index.
+	int32					vTextureV;		// 4 Texture V-vector index.
+	int32					iBrushPoly;		// 4 Editor brush polygon index.
+	class ABrush*				Actor;			// 4 Brush actor owning this Bsp surface.
+	FPlane				Plane;			// 16 The plane this surface lies on.
+	float				LightMapScale;	// 4 The number of units/lightmap texel on this surface.
+
+	int32					iLightmassIndex;// 4 Index to the lightmass settings
+
+	bool				bHiddenEdTemporary;	// 1 Marks whether this surface is temporarily hidden in the editor or not. Not serialized.
+	bool				bHiddenEdLevel;		// 1 Marks whether this surface is hidden by the level browser or not. Not serialized.
+	bool				bHiddenEdLayer;		// 1 Marks whether this surface is hidden by the layer browser or not. Not serialized.
+	// Functions.
+	
+};
+
+class UModel : public UObject
+{
+public:
+	TArray<FBspNode> Nodes;   
+	TArray<FVert> Verts;       
+	TArray<FVector> Vectors;  
+	TArray<FVector> Points;  
+	TArray<FBspSurf> Surfs;    
+};
 
 // Enum Engine.ECollisionTraceFlag
 // NumValues: 0x0005
@@ -236,9 +323,47 @@ enum class ECollisionTraceFlag : uint8
 	CTF_MAX = 4,
 };
 
+struct FBox final
+{
+public:
+	struct FVector                                min_0;                                             // 0x0000(0x000C)(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	struct FVector                                max_0;                                             // 0x000C(0x000C)(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	uint8                                         IsValid;                                           // 0x0018(0x0001)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	uint8                                         Pad_19[0x3];                                       // 0x0019(0x0003)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
+struct alignas(0x08) FKShapeElem
+{
+	public:
+	uint8 Pad_0[0x8];			 // 0x0000(0x0008)(Fixing Size After Last Property [ Dumper-7 ])
+	float RestOffset;			 // 0x0008(0x0004)(Edit, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+	class FName Name;			 // 0x000C(0x0008)(Edit, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+	uint8 Pad_14[0x4];			 // 0x0014(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
+	uint8 bContributeToMass : 1; // 0x0018(0x0001)(BitIndex: 0x00, PropSize: 0x0001 (Edit, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate))
+	uint8 Pad_19[0x17];			 // 0x0019(0x0017)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
+struct FKConvexElem final : public FKShapeElem
+{
+public:
+	TArray<struct FVector> VertexData; // 0x0030(0x0010)(ZeroConstructor, NativeAccessSpecifierPublic)
+	TArray<int32> IndexData;		   // 0x0040(0x0010)(ZeroConstructor, NativeAccessSpecifierPublic)
+	struct FBox ElemBox;			   // 0x0050(0x001C)(ZeroConstructor, IsPlainOldData, NoDestructor, NativeAccessSpecifierPublic)
+	uint8 Pad_6C[0x4];				   // 0x006C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
+	struct FTransform Transform;	   // 0x0070(0x0030)(IsPlainOldData, NoDestructor, NativeAccessSpecifierPrivate)
+	uint8 Pad_A0[0x10];				   // 0x00A0(0x0010)(Fixing Struct Size After Last Property [ Dumper-7 ])
+};
+
+struct FKAggregateGeom final
+{
+public:
+	DEFINE_MEMBER(TArray<struct FKConvexElem>, FKAggregateGeom, ConvexElems);
+};
+
 class UBodySetup : public UObject
 {
 public:
+	DEFINE_MEMBER(FKAggregateGeom, UBodySetup, AggGeom)
 	DEFINE_BOOL(UBodySetup, bDoubleSidedGeometry)
 		DEFINE_BOOL(UBodySetup, bGenerateMirroredCollision)
 		DEFINE_MEMBER(ECollisionTraceFlag, UBodySetup, CollisionTraceFlag)
@@ -291,32 +416,139 @@ enum class EAttachmentRule : uint8
 DefHookOg(void, PostInitializeComponentsVolume, AFortPoiVolume* This);
 void PostInitializeComponentsVolume(AFortPoiVolume* This)
 {
-	This->SetBrushComponent((UBrushComponent*)UGameplayStatics::SpawnObject(
-		UBrushComponent::StaticClass(), This));
+    This->SetBrushComponent((UBrushComponent*)UGameplayStatics::SpawnObject(
+        UBrushComponent::StaticClass(), This));
 
-	static void (*SetCollisonProfileName)(UBrushComponent*, __int64,
-		__int64) =
-		decltype(SetCollisonProfileName)(
-			This->GetBrushComponent()->GetVTable()[(0x620 / 8)]);
-	((void (*)(UObject * Component, UObject * World))(Finder->RegisterComponentWithWorld()))(This->GetBrushComponent(), UWorld::GetWorld());
+    static void (*SetCollisonProfileName)(UBrushComponent*, __int64,
+        __int64) =
+        decltype(SetCollisonProfileName)(
+            This->GetBrushComponent()->GetVTable()[(0x620 / 8)]);
+    ((void (*)(UObject * Component, UObject * World))(Finder->RegisterComponentWithWorld()))(This->GetBrushComponent(), UWorld::GetWorld());
 
-	static void (*SetGenerateOverlapEvents)(UBrushComponent*, bool) =
-		decltype(SetGenerateOverlapEvents)(IMAGEBASE + 0x40ECA30);
+    static void (*SetGenerateOverlapEvents)(UBrushComponent*, bool) =
+        decltype(SetGenerateOverlapEvents)(IMAGEBASE + 0x40ECA30);
 
-	SetCollisonProfileName(
-		This->GetBrushComponent(),
-		*reinterpret_cast<__int64*>(IMAGEBASE + 0x8317CB0), 1);
-	SetGenerateOverlapEvents(This->GetBrushComponent(), 0);
+    SetCollisonProfileName(
+        This->GetBrushComponent(),
+        *reinterpret_cast<__int64*>(IMAGEBASE + 0x8317CB0), 1);
+    SetGenerateOverlapEvents(This->GetBrushComponent(), 0);
 
-	UBodySetup* BodySetup = (UBodySetup*)UGameplayStatics::SpawnObject(
-		UBodySetup::StaticClass(), This->GetBrushComponent());
-	BodySetup->SetCollisionTraceFlag(ECollisionTraceFlag::CTF_UseComplexAsSimple);
-	BodySetup->SetbGenerateMirroredCollision(false);
-	BodySetup->SetbDoubleSidedGeometry(true);
+    UBodySetup* BodySetup = (UBodySetup*)UGameplayStatics::SpawnObject(
+        UBodySetup::StaticClass(), This->GetBrushComponent());
 
-	This->GetBrushComponent()->SetBrushBodySetup(BodySetup);
+    UModel* BrushModel = This->GetBrush();
+    if (BrushModel)
+    {
+        static int CorrectSize = StaticClassImpl("Model")->GetSize(); 
+        
+        void* NewModel = malloc(CorrectSize);
+        if (NewModel) {
+            memset(NewModel, 0, CorrectSize);
+            
+            memcpy(NewModel, BrushModel, 0x28);
+            
+            memcpy((uint8*)NewModel + 0x28, (uint8*)BrushModel + 0x28, 0x10); // Nodes
+            memcpy((uint8*)NewModel + 0x38, (uint8*)BrushModel + 0x38, 0x10); // Verts  
+            memcpy((uint8*)NewModel + 0x48, (uint8*)BrushModel + 0x48, 0x10); // Vectors
+            memcpy((uint8*)NewModel + 0x58, (uint8*)BrushModel + 0x58, 0x10); // Points
+            memcpy((uint8*)NewModel + 0x68, (uint8*)BrushModel + 0x68, 0x10); // Surfs
+            
+            BrushModel = (UModel*)NewModel;
+        }
+        
+        uint8* ModelBytes = reinterpret_cast<uint8*>(BrushModel);
+       
+        TArray<FBspNode>* Nodes = reinterpret_cast<TArray<FBspNode>*>(ModelBytes + 0x28);
+        TArray<FVert>* Verts = reinterpret_cast<TArray<FVert>*>(ModelBytes + 0x38);
+        TArray<FVector>* Vectors = reinterpret_cast<TArray<FVector>*>(ModelBytes + 0x48);
+        TArray<FVector>* Points = reinterpret_cast<TArray<FVector>*>(ModelBytes + 0x58);
+        TArray<FBspSurf>* Surfs = reinterpret_cast<TArray<FBspSurf>*>(ModelBytes + 0x68);
+       
+        if (Nodes && Verts && Vectors && Points && Surfs)
+        {
+            for (int32 NodeIndex = 0; NodeIndex < Nodes->Num(); NodeIndex++)
+            {
+                FBspNode& Node = (*Nodes)[NodeIndex];
+                
+                FKConvexElem ConvexElem;
+                
+                for (int32 VertIndex = 0; VertIndex < Node.NumVertices; VertIndex++)
+                {
+                    if (Node.iVertPool + VertIndex < Verts->Num())
+                    {
+                        FVert& Vert = (*Verts)[Node.iVertPool + VertIndex];
+                        
+                        if (Vert.pVertex < Points->Num())
+                        {
+                            FVector VertexPos = (*Points)[Vert.pVertex];
+                            VertexPos = This->GetActorLocation() + VertexPos;
+                            
+                            ConvexElem.VertexData.Add(VertexPos);
+                        }
+                    }
+                }
+                
+                if (ConvexElem.VertexData.Num() > 0)
+                {
+                    BodySetup->GetAggGeom().GetConvexElems().Add(ConvexElem);
+                }
+                
+                if (Node.iSurf < Surfs->Num())
+                {
+                    FBspSurf& Surface = (*Surfs)[Node.iSurf];
+                    
+                    if (Surface.vNormal < Vectors->Num())
+                    {
+                        FVector Normal = (*Vectors)[Surface.vNormal];
+                    }
+                }
+            }
+            
+            for (int32 VertIndex = 0; VertIndex < Verts->Num(); VertIndex++)
+            {
+                FVert& Vert = (*Verts)[VertIndex];
+                
+                if (Vert.pVertex < Points->Num())
+                {
+                    FVector Point = (*Points)[Vert.pVertex];
+                    Point = This->GetActorLocation() + Point;
+                    
+                    for (int32 ConvexIndex = 0; ConvexIndex < BodySetup->GetAggGeom().GetConvexElems().Num(); ConvexIndex++)
+                    {
+                        FKConvexElem& ConvexElem = BodySetup->GetAggGeom().GetConvexElems()[ConvexIndex];
+                        ConvexElem.VertexData.Add(Point);
+                    }
+                }
+            }
+            
+            for (int32 SurfIndex = 0; SurfIndex < Surfs->Num(); SurfIndex++)
+            {
+                FBspSurf& Surface = (*Surfs)[SurfIndex];
+                FPlane SurfacePlane = Surface.Plane;
+                
+                if (Surface.pBase < Points->Num())
+                {
+                    FVector BasePoint = (*Points)[Surface.pBase];
+                    BasePoint = This->GetActorLocation() + BasePoint;
+                    
+                    FKConvexElem SurfaceConvex;
+                    SurfaceConvex.VertexData.Add(BasePoint);
+                    SurfaceConvex.VertexData.Add(BasePoint + SurfacePlane.GetNormalized() * 100.0f);
+                    BodySetup->GetAggGeom().GetConvexElems().Add(SurfaceConvex);
+                }
+            }
+        }
+        
+        BodySetup->SetCollisionTraceFlag(ECollisionTraceFlag::CTF_UseComplexAsSimple);
+        BodySetup->SetbGenerateMirroredCollision(false);
+        BodySetup->SetbDoubleSidedGeometry(true);
+        
+        free(NewModel);
+    }
 
-	return PostInitializeComponentsVolumeOG(This);
+    This->GetBrushComponent()->SetBrushBodySetup(BodySetup);
+
+    return PostInitializeComponentsVolumeOG(This);
 }
 
 void InitNullsAndRetTrues()
@@ -411,7 +643,7 @@ void InitNullsAndRetTrues()
 		Runtime::Patch(IMAGEBASE + 0x1A45186, 0x90);
 		Runtime::Patch(IMAGEBASE + 0x1A45187, 0x90);
 
-		//	Runtime::Hook(IMAGEBASE + 0x1A45060, PostInitializeComponentsVolume, (void**)&PostInitializeComponentsVolumeOG);
+		Runtime::Hook(IMAGEBASE + 0x1A45060, PostInitializeComponentsVolume, (void**)&PostInitializeComponentsVolumeOG);
 		Runtime::Hook(IMAGEBASE + 0x1A3A640, RetTrue);
 		Runtime::Patch(IMAGEBASE + 0x1A9FFB6, 0xEB);
 		Runtime::Hook(IMAGEBASE + 0x1A8ED30, AFortAthenaMutatorOnSafeZoneUpdated, (void**)&AFortAthenaMutatorOnSafeZoneUpdatedOG);
@@ -702,7 +934,7 @@ void Main()
 	Runtime::Exec("/Script/FortniteGame.FortPlayerControllerAthena.ServerEndMinigame", AFortPlayerControllerAthena::ServerEndMinigame, (void**)&AFortPlayerControllerAthena::ServerEndMinigameOG);
 
 	Runtime::Hook(Finder->ReloadWeapon(), AFortPlayerPawn::ReloadWeapon, (void**)&AFortPlayerPawn::ReloadWeaponOG); // this is right um we can make it uni after we get it to fucking call 
-//	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);
+	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);
 	Runtime::Hook(Finder->StartNewSafeZonePhase(), AFortGameModeAthena::StartNewSafeZonePhase, (void**)&AFortGameModeAthena::StartNewSafeZonePhaseOG);
 	Runtime::Hook<&AFortGameModeAthena::StaticClass>("HandleStartingNewPlayer", AFortGameModeAthena::HandleStartingNewPlayer, AFortGameModeAthena::HandleStartingNewPlayerOG);
 	Runtime::Hook<&AFortPlayerPawn::StaticClass>("ServerReviveFromDBNO", AFortPlayerPawn::ServerReviveFromDBNO);

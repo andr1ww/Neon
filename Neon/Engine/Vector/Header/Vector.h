@@ -1,6 +1,111 @@
 #pragma once
 #include "pch.h"
 
+struct FVector2D {
+    float X, Y;
+
+    FVector2D() : X(0), Y(0) {}
+    FVector2D(float x, float y) : X(x), Y(y) {}
+
+    FVector2D operator+(const FVector2D& Other) const {
+        return { X + Other.X, Y + Other.Y };
+    }
+
+    FVector2D operator-(const FVector2D& Other) const {
+        return { X - Other.X, Y - Other.Y };
+    }
+
+    FVector2D operator*(const FVector2D& Other) const {
+        return { X * Other.X, Y * Other.Y };
+    }
+
+    FVector2D operator*(float Scalar) const {
+        return { X * Scalar, Y * Scalar };
+    }
+
+    FVector2D operator/(const FVector2D& Other) const {
+        if (Other.X == 0.0f || Other.Y == 0.0f)
+            return *this;
+        return { X / Other.X, Y / Other.Y };
+    }
+
+    FVector2D operator/(float Scalar) const {
+        if (Scalar == 0.0f)
+            return *this;
+        return { X / Scalar, Y / Scalar };
+    }
+
+    FVector2D& operator+=(const FVector2D& Other) {
+        X += Other.X;
+        Y += Other.Y;
+        return *this;
+    }
+
+    FVector2D& operator-=(const FVector2D& Other) {
+        X -= Other.X;
+        Y -= Other.Y;
+        return *this;
+    }
+
+    FVector2D& operator*=(float Scalar) {
+        X *= Scalar;
+        Y *= Scalar;
+        return *this;
+    }
+
+    FVector2D& operator/=(float Scalar) {
+        if (Scalar != 0.0f) {
+            X /= Scalar;
+            Y /= Scalar;
+        }
+        return *this;
+    }
+
+    bool operator==(const FVector2D& Other) const {
+        return X == Other.X && Y == Other.Y;
+    }
+
+    bool operator!=(const FVector2D& Other) const {
+        return !(*this == Other);
+    }
+
+    float operator|(const FVector2D& Other) const {
+        return X * Other.X + Y * Other.Y;
+    }
+
+    FVector2D operator-() const {
+        return { -X, -Y };
+    }
+
+    float Size() const {
+        return sqrtf(X * X + Y * Y);
+    }
+
+    float SizeSquared() const {
+        return X * X + Y * Y;
+    }
+
+    FVector2D GetNormalized() const {
+        float Length = Size();
+        if (Length > 0.0f) {
+            return *this / Length;
+        }
+        return { 0, 0 };
+    }
+
+    void Normalize() {
+        float Length = Size();
+        if (Length > 0.0f) {
+            *this /= Length;
+        }
+    }
+
+    bool IsZero() const {
+        return X == 0.0f && Y == 0.0f;
+    }
+};
+
+
 struct FVector {
     float X, Y, Z;
 

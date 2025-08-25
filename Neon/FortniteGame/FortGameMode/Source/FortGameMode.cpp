@@ -493,7 +493,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     if (Res && !Config::bCreative)
     {
         auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
-        auto WarmupDuration = 90000.f;
+        auto WarmupDuration = 60.f;
 
         GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
         GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
@@ -704,7 +704,7 @@ EFortTeam AFortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t P
 
 void AFortGameModeAthena::StartAircraftPhase(AFortGameModeAthena* GameMode, char a2)
 {
-    if (!GameMode) return(StartAircraftPhaseOG(GameMode, a2));
+    if (!GameMode || Config::bCreative) return(StartAircraftPhaseOG(GameMode, a2));
     StartAircraftPhaseOG(GameMode, a2);
 
     if (Config::bEchoSessions)
