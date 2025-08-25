@@ -10,6 +10,7 @@
 #include "FortniteGame/FortInventory/Header/FortInventory.h"
 #include "FortniteGame/FortPlayerController/Header/FortPlayerController.h"
 #include "FortniteGame/FortAthenaAIBotController/Header/FortAthenaAIBotController.h"
+#include "FortniteGame/FortAthenaCreativePortal/Header/FortAthenaCreativePortal.h"
 #include "FortniteGame/FortLootPackage/Header/FortLootPackage.h"
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
 #include "Neon/Config.h"
@@ -20,6 +21,7 @@
 #include "Neon/Nexa/Curl/Curl.h"
 #include "Neon/Nexa/Echo/Echo.h"
 #include "Neon/Runtime/Runtime.h"
+#include "FortniteGame/FortProjectileBase/Header/FortProjectileBase.h"
 
 std::vector<std::string> split(std::string s, std::string delimiter) {
     size_t pos_start = 0, pos_end, delim_len = delimiter.length();
@@ -476,8 +478,8 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     static bool Double = false;
     if (!Double)
     {
-        GameState->OnRep_CurrentPlaylistInfo();
-        GameState->OnRep_CurrentPlaylistId();
+   //     GameState->OnRep_CurrentPlaylistInfo();
+     //   GameState->OnRep_CurrentPlaylistId();
 
         if (Config::bCreative && Fortnite_Version >= 12.00)
         {
@@ -511,7 +513,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         
         callExecOG(GameMode, "/Script/Engine.GameMode", ReadyToStartMatch, Params);
         Res = Params.ReturnValue;
-        UE_LOG(LogNeon, Log, "Res: %s", Res ? "True" : "False");
     } else
     {
         Res = GameState->GetPlayersLeft() > 0;
@@ -608,7 +609,77 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
             UGameplayStatics::SpawnActorOG<AActor>(Runtime::StaticFindObject<UClass>("/Game/Athena/Playlists/Barrier/Barrier.Barrier_C"), FVector{ 0, 0, -2000 }, FRotator{});
         }
     }
-    
+
+	if (Config::bCreative)
+	{
+		AFortAthenaCreativePortal* Portal = nullptr;
+		if (Fortnite_Version >= 12.00)
+		{
+			for (int i = 0; i < GameMode->GetGameState()->GetCreativePortalManager()->GetAllPortals().Num(); i++)
+			{
+				auto CurrentPortal = GameMode->GetGameState()->GetCreativePortalManager()->GetAllPortals()[i];
+				if (!CurrentPortal->GetLinkedVolume() || CurrentPortal->GetLinkedVolume()->GetVolumeState() == EVolumeState::Ready)
+					continue;
+				Portal = CurrentPortal;
+			}
+		} else
+		{
+			for (int i = 0; i < GameMode->GetGameState()->GetCreativePortalManager()->GetAvailablePortals().Num(); i++)
+			{
+				auto CurrentPortal = GameMode->GetGameState()->GetCreativePortalManager()->GetAvailablePortals()[i];
+				if (!CurrentPortal->GetLinkedVolume() || CurrentPortal->GetLinkedVolume()->GetVolumeState() == EVolumeState::Ready)
+					continue;
+				Portal = CurrentPortal;
+				GameMode->GetGameState()->GetCreativePortalManager()->GetAvailablePortals().Remove(i);
+				GameMode->GetGameState()->GetCreativePortalManager()->GetUsedPortals().Add(Portal);
+				break;
+			}
+		}
+
+		if (!Portal)
+		{
+		    return HandleStartingNewPlayerOG(GameMode, NewPlayer);
+		}
+
+		Portal->GetLinkedVolume()->SetbShowPublishWatermark(false);
+		Portal->GetLinkedVolume()->SetbNeverAllowSaving(false);
+		Portal->GetLinkedVolume()->SetVolumeState(EVolumeState::Ready);
+		Portal->GetLinkedVolume()->OnRep_VolumeState();
+		Portal->SetOwningPlayer(PlayerState->GetUniqueId());
+		Portal->OnRep_OwningPlayer();
+
+		Portal->GetIslandInfo().CreatorName = PlayerState->GetPlayerName();
+		Portal->GetIslandInfo().SupportCode = L"NexaGoated";
+		Portal->GetIslandInfo().Version = 1.0f;
+		Portal->OnRep_IslandInfo();
+
+		Portal->SetbPortalOpen(true);
+		Portal->OnRep_PortalOpen();
+
+		Portal->GetPlayersReady().Add(PlayerState->GetUniqueId());
+		Portal->OnRep_PlayersReady();
+
+		Portal->SetbUserInitiatedLoad(true);
+		Portal->SetbInErrorState(false);
+
+		NewPlayer->SetOwnedPortal(Portal);
+		auto Comp = Portal->GetLinkedVolume()->CallFunc<UPlaysetLevelStreamComponent*>("Actor", "GetComponentByClass", UPlaysetLevelStreamComponent::StaticClass());
+
+		static auto PlaysetDih = Runtime::StaticLoadObject<UFortPlaysetItemDefinition>("/Game/Playsets/PID_Playset_60x60_Composed.PID_Playset_60x60_Composed");
+		Comp->SetPlayset(PlaysetDih);
+
+		auto Comp2 = Portal->GetLinkedVolume()->CallFunc<UFortLevelSaveComponent*>("Actor", "GetComponentByClass", UFortLevelSaveComponent::StaticClass());
+
+		Comp2->SetAccountIdOfOwner(PlayerState->GetUniqueId());
+		Comp2->SetbIsLoaded(true);
+		
+		NewPlayer->SetCreativePlotLinkedVolume(Portal->GetLinkedVolume());
+		NewPlayer->OnRep_CreativePlotLinkedVolume();
+
+		((void (*)(UPlaysetLevelStreamComponent*)) (Finder->LoadPlayset()))(Comp);
+
+		UGameplayStatics::SpawnActorOG(Runtime::StaticLoadObject<UClass>("/Game/Athena/Items/Gameplay/MinigameSettingsControl/MinigameSettingsMachine.MinigameSettingsMachine_C"), Portal->GetLinkedVolume()->K2_GetActorLocation(), {}, Portal->GetLinkedVolume());
+	}
     
  /*   if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.50)
     {
