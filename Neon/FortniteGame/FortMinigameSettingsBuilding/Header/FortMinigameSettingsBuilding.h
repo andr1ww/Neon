@@ -7,8 +7,7 @@
 class AFortMinigameSettingsBuilding : public AActor
 {
 public:
-    static void BeginPlay(AFortMinigameSettingsBuilding*);
-
+    DefHookOg(void, BeginPlay, AFortMinigameSettingsBuilding*);
     DEFINE_PTR(AFortVolume, AFortMinigameSettingsBuilding, SettingsVolume)
 public:
     DECLARE_STATIC_CLASS(AFortMinigameSettingsBuilding)

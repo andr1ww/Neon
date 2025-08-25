@@ -1043,10 +1043,16 @@ uint64 UFinder::AFortMinigameSettingsBuilding_BeginPlay()
     {
         return IMAGEBASE + 0x26E5AB0;
     }
+
+    if (Fortnite_Version == 8.51)
+    {
+        return IMAGEBASE + 0x1C96A40;
+    }
     
-    auto Addr = Memcury::Scanner::FindStringRef(L"AFortMinigameSettingsBuilding::BeginPlay: FullName[%s]");
+    auto Addr = Memcury::Scanner::FindPattern("40 57 48 83 EC ? 80 3D ? ? ? ? ? 48 8B F9 72 ? 45 33 C0").Get();
+    if (!Addr) Addr = Memcury::Scanner::FindPattern("40 55 41 56 41 57 48 8B EC 48 83 EC ? 80 3D ? ? ? ? ? 4C 8B F9").Get();
     
-    return Addr.ScanFor({ 0x40, 0x55 }, 1000, 0, true).Get();
+    return Addr;
 }
 
 uint64 UFinder::ReplaceBuildingActor()

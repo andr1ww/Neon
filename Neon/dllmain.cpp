@@ -828,7 +828,12 @@ void Main()
 	Runtime::Hook(Finder->ClientOnPawnDied(), AFortPlayerControllerAthena::ClientOnPawnDied, (void**)&AFortPlayerControllerAthena::ClientOnPawnDiedOG);
 	Runtime::Exec("/Script/FortniteGame.FortPhysicsPawn.ServerMove", AFortPhysicsPawn::ServerMove);
 	Runtime::Hook(Finder->PostUpdate(), FortLootPackage::PostUpdate, (void**)&FortLootPackage::PostUpdateOG);
-	Runtime::Hook(Finder->AFortMinigameSettingsBuilding_BeginPlay(), AFortMinigameSettingsBuilding::BeginPlay);
+
+	if (Fortnite_Version >= 12.00)
+	{
+		Runtime::Hook(Finder->AFortMinigameSettingsBuilding_BeginPlay(), AFortMinigameSettingsBuilding::BeginPlay, (void**)&AFortMinigameSettingsBuilding::BeginPlayOG);
+	}
+	
 	if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.20)
 	{
 		Runtime::VFTHook(UAthenaNavSystem::GetDefaultObj()->GetVTable(), 0x53, UFortServerBotManagerAthena::InitializeForWorld, (void**)&UFortServerBotManagerAthena::InitializeForWorldOG);

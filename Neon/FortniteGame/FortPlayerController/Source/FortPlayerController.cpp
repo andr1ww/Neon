@@ -180,7 +180,7 @@ void AFortPlayerControllerAthena::ServerReadyToStartMatch(AFortPlayerControllerA
 
 		((void (*)(UPlaysetLevelStreamComponent*)) (Finder->LoadPlayset()))(Comp);
 
-		UGameplayStatics::SpawnActorOG(Runtime::StaticFindObject<UClass>("/Game/Athena/Items/Gameplay/MinigameSettingsControl/MinigameSettingsMachine.MinigameSettingsMachine_C"), Portal->GetLinkedVolume()->K2_GetActorLocation(), {}, Portal->GetLinkedVolume());
+		UGameplayStatics::SpawnActorOG(Runtime::StaticLoadObject<UClass>("/Game/Athena/Items/Gameplay/MinigameSettingsControl/MinigameSettingsMachine.MinigameSettingsMachine_C"), Portal->GetLinkedVolume()->K2_GetActorLocation(), {}, Portal->GetLinkedVolume());
 	}
 	
 	struct
