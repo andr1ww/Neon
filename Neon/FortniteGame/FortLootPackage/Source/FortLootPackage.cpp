@@ -4,6 +4,8 @@
 #include "Engine/GameplayStatics/Header/GameplayStatics.h"
 #include <FortniteGame/FortQuestManager/Header/FortQuestManager.h>
 
+#include "Neon/Config.h"
+
 TArray<FFortLootTierData*> FortLootPackage::TierDataAllGroups;
 TArray<FFortLootPackageData*> FortLootPackage::LPGroupsAll;
 
@@ -580,28 +582,32 @@ void FortLootPackage::ServerAttemptInteract(UFortControllerComponent_Interaction
         if (Container->GetbAlreadySearched()) {
             goto CallOriginal;
         }
-        
-        FName LootTierGroupToUse = Container->GetSearchLootTierGroup();
-        auto World = UWorld::GetWorld();
-        if (World && World->GetAuthorityGameMode()) {
-            for (auto& [SupportTierGroup, Redirect] : World->GetAuthorityGameMode()->GetRedirectAthenaLootTierGroups()) {
-                if (LootTierGroupToUse.GetComparisonIndex() == SupportTierGroup.GetComparisonIndex()) {
-                    LootTierGroupToUse = Redirect;
-                    break;
+
+        if (!Config::bCreative)
+        {
+            FName LootTierGroupToUse = Container->GetSearchLootTierGroup();
+            auto World = UWorld::GetWorld();
+            if (World && World->GetAuthorityGameMode()) {
+                for (auto& [SupportTierGroup, Redirect] : World->GetAuthorityGameMode()->GetRedirectAthenaLootTierGroups()) {
+                    if (LootTierGroupToUse.GetComparisonIndex() == SupportTierGroup.GetComparisonIndex()) {
+                        LootTierGroupToUse = Redirect;
+                        break;
+                    }
                 }
             }
-        }
       
-        TArray<FNeonLootImproper> LootItems = PickLootDrops(LootTierGroupToUse);
-        auto SpawnLocation = Container->K2_GetActorLocation() + Container->GetActorRightVector() * 70.f + FVector{ 0, 0, 50 };	
+            TArray<FNeonLootImproper> LootItems = PickLootDrops(LootTierGroupToUse);
+            auto SpawnLocation = Container->K2_GetActorLocation() + Container->GetActorRightVector() * 70.f + FVector{ 0, 0, 50 };	
 
-        static UFortAccoladeItemDefinition* open3 = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_008_SearchChests_Bronze.AccoladeId_008_SearchChests_Bronze"); // SearchCount  3
-        static UFortAccoladeItemDefinition* open7 = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_009_SearchChests_Silver.AccoladeId_009_SearchChests_Silver");// SearchCount 7
-        static UFortAccoladeItemDefinition* open12 = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_010_SearchChests_Gold.AccoladeId_010_SearchChests_Gold");// SearchCount 12
-        static UFortAccoladeItemDefinition* openany = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_007_SearchChests.AccoladeId_007_SearchChests"); // SearchCount any ig
-        static UFortAccoladeItemDefinition* Ammobox = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_011_SearchAmmoBox.AccoladeId_011_SearchAmmoBox"); // ammo box obv
+            static UFortAccoladeItemDefinition* open3 = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_008_SearchChests_Bronze.AccoladeId_008_SearchChests_Bronze"); // SearchCount  3
+            static UFortAccoladeItemDefinition* open7 = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_009_SearchChests_Silver.AccoladeId_009_SearchChests_Silver");// SearchCount 7
+            static UFortAccoladeItemDefinition* open12 = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_010_SearchChests_Gold.AccoladeId_010_SearchChests_Gold");// SearchCount 12
+            static UFortAccoladeItemDefinition* openany = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_007_SearchChests.AccoladeId_007_SearchChests"); // SearchCount any ig
+            static UFortAccoladeItemDefinition* Ammobox = Runtime::StaticLoadObject<UFortAccoladeItemDefinition>("/Game/Athena/Items/Accolades/AccoladeId_011_SearchAmmoBox.AccoladeId_011_SearchAmmoBox"); // ammo box obv
 
-        InternalSpawnLoot(LootTierGroupToUse, SpawnLocation, LootItems);
+            InternalSpawnLoot(LootTierGroupToUse, SpawnLocation, LootItems);
+        }
+        
         Container->SetbAlreadySearched(true);
         Container->CallFunc<void>("BuildingContainer", "OnRep_bAlreadySearched");
         Container->Get<FFortSearchBounceData>("BuildingContainer", "SearchBounceData").SearchAnimationCount++;

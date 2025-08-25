@@ -45,10 +45,6 @@ uint64 UFinder::StartAircraftPhase()
 
 uint64_t UFinder::WorldNetMode()
 {
-    if (Fortnite_Version == 23.50)
-    {
-        return Memcury::Scanner::FindPattern("48 83 EC ? 48 83 79 ? ? 74 ? B8").Get();
-    }
     auto Addr = Memcury::Scanner::FindStringRef(L"PREPHYSBONES");
 
     auto BeginningFunction = FindBytes(Addr, { 0x40, 0x55 }, 1000, 0, true);

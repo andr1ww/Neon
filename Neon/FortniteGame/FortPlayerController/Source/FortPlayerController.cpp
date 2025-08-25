@@ -1473,9 +1473,7 @@ void AFortPlayerControllerAthena::ServerCheat(AFortPlayerControllerAthena* Playe
 		auto fn1 = Runtime::StaticFindObject<UFunction>("/Script/FortniteGame.FortMinigame.AdvanceState");
     
 		AFortMinigame* MG = PlayerController->CallFunc<AFortMinigame*>("FortPlayerControllerAthena", "GetMinigame");
-		UE_LOG(LogNeon, Log, "CurrentStateBefore: %d", MG->GetCurrentState());
 		MG->ProcessEvent(fn1, nullptr);
-		UE_LOG(LogNeon, Log, "CurrentStateAfter: %d", MG->GetCurrentState());
 	}
 }
 

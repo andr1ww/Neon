@@ -205,9 +205,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     {
         return *Result = false;
     }
-
-    GameState->SetGamePhase(EAthenaGamePhase::Warmup);
-    GameState->OnRep_GamePhase(EAthenaGamePhase::Setup);
     
     if (!GameState->GetMapInfo())
     {
@@ -215,9 +212,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     }
 
     GameMode->SetbWorldIsReady(true);
-    GameMode->SetbDBNOEnabled(true);
-    GameState->SetbDBNODeathEnabled(false);
-    GameMode->SetbAlwaysDBNO(false);
     
     static bool bInit = false;
 
@@ -251,6 +245,7 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
                 GameMode->SetAISettings(Playlist->GetAISettings());
             }
             SetPlaylist(GameMode, Playlist);
+            return *Result = false;
         }
         else
         {
@@ -493,17 +488,33 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         Double = true;
     }
     
-    bool Res = GameState->GetPlayersLeft() > 0;
+    bool Res = false;
     
     if (Res && !Config::bCreative)
     {
         auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
-        auto WarmupDuration = 60.f;
+        auto WarmupDuration = 90000.f;
 
         GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
         GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
         GameMode->Set("FortGameModeAthena", "WarmupCountdownDuration", WarmupDuration);
         GameMode->Set("FortGameModeAthena", "WarmupEarlyCountdownDuration", WarmupDuration);
+    } 
+
+    if (Fortnite_Version <= 10.40)
+    {
+        struct GameMode_ReadyToStartMatch final
+        {
+        public:
+            bool                                          ReturnValue;                                       // 0x0000(0x0001)(Parm, OutParm, ZeroConstructor, ReturnParm, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+        } Params{};
+        
+        callExecOG(GameMode, "/Script/Engine.GameMode", ReadyToStartMatch, Params);
+        Res = Params.ReturnValue;
+        UE_LOG(LogNeon, Log, "Res: %s", Res ? "True" : "False");
+    } else
+    {
+        Res = GameState->GetPlayersLeft() > 0;
     }
     
     return *Result = Res;
@@ -551,6 +562,9 @@ APawn* AFortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, A
         auto WeaponDef = Pickaxe->GetWeaponDefinition();
         AFortInventory::GiveItem(NewPlayer, WeaponDef, 1, 0, 1); 
    // }
+
+    __int64 bBlockingNewPlayers = Runtime::GetOffset(GameMode, "WarmupRequiredPlayerCount") - 0x4;
+    *(bool*)(__int64(GameMode) + bBlockingNewPlayers) = false;
     
     return Pawn;
 }

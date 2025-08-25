@@ -347,6 +347,7 @@ public:
     DECLARE_DEFAULT_OBJECT(AFortGameModeAthena);
     DECLARE_STATIC_CLASS(AFortGameModeAthena);
 public:
+    DefHookOg(bool, ReadyToStartMatchVFT, AFortGameModeAthena* GameMode);
     DefHookOg(bool, ReadyToStartMatch, AFortGameModeAthena* GameMode, FFrame& Stack, bool* Result);
     static APawn* SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer, AActor* StartSpot);
     DefHookOg(void, HandleStartingNewPlayer, AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer);
