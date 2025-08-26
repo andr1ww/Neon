@@ -7,7 +7,7 @@ namespace Config
     inline bool bLogProcessEvent = bCreative;
     inline bool bLateGame = false;
     inline bool bGameSessions = false;
-    inline bool bEchoSessions = true;
+    inline bool bEchoSessions = false;
     inline std::string Playlist = "Playlist_DefaultSolo";
     inline int Port = 7777;
 

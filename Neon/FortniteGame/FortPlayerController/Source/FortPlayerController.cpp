@@ -1561,17 +1561,36 @@ void AFortPlayerControllerAthena::ServerCheat(AFortPlayerControllerAthena* Playe
 	} 
 	else if (FullCmd.starts_with("bomb"))
 	{
-		std::string PlayerName;
-		PlayerName = Args[1];
+		if (Args.size() < 2)
+		{
+			UE_LOG(LogNeon, Warning, TEXT("Usage: bomb <PlayerName>"));
+			return;
+		}
+
+		std::string PlayerName = Args[1];
+		
 		auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
 
 		static FGameplayTag* Tag = nullptr;
-		static int32 Size = 0;
+		static SIZE_T Size = 0;
 		if (!Tag)
 		{
 			Size = StaticClassImpl("GameplayTag")->GetSize();
-			Tag = (FGameplayTag*)VirtualAlloc(0, Size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-			if (Tag) new(Tag) FGameplayTag();
+
+			Tag = (FGameplayTag*)VirtualAlloc(
+				nullptr,
+				Size,
+				MEM_COMMIT | MEM_RESERVE,
+				PAGE_READWRITE
+			);
+
+			if (!Tag)
+			{
+				UE_LOG(LogNeon, Error, TEXT("VirtualAlloc failed for FGameplayTag"));
+				return;
+			}
+
+			new (Tag) FGameplayTag();
 		}
 
 		Tag->TagName = UKismetStringLibrary::Conv_StringToName(L"DeathCause.BanHammer");

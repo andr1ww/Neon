@@ -213,6 +213,11 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
         return *Result = false;
     }
 
+    if (Fortnite_Version >= 13.00)
+    {
+        GameState->SetGamePhase(EAthenaGamePhase::Warmup);
+        GameState->OnRep_GamePhase(EAthenaGamePhase::Setup);
+    }
     GameMode->SetbWorldIsReady(true);
     
     static bool bInit = false;

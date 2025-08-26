@@ -604,6 +604,54 @@ void InitNullsAndRetTrues()
 	RetTrueFuncs.push_back(Finder->WorldNetMode());
 	RetTrueFuncs.push_back(Finder->WorldGetNetMode());
 
+	auto GamePhaseStepStringAddr = Memcury::Scanner::FindStringRef(L"Gamephase Step: %s", false).Get();
+
+	uint64 BeginningOfGamePhaseStepFn = 0;
+	uint64 ByteToPatch = 0;
+
+	if (!GamePhaseStepStringAddr)
+	{
+		BeginningOfGamePhaseStepFn = Memcury::Scanner::FindPattern("48 89 5C 24 ? 57 48 83 EC 20 E8 ? ? ? ? 48 8B D8 48 85 C0 0F 84 ? ? ? ? E8").Get(); // not actually the func but its fine
+	}
+
+	if (!BeginningOfGamePhaseStepFn && !ByteToPatch)
+	{
+		for (int i = 0; i < 3000; i++)
+		{
+			if (*(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i) == 0x40 && *(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i + 1) == 0x55)
+			{
+				BeginningOfGamePhaseStepFn = GamePhaseStepStringAddr - i;
+				break;
+			}
+
+			if (*(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i) == 0x48 && *(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i + 1) == 0x89 && *(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i + 2) == 0x5C)
+			{
+				BeginningOfGamePhaseStepFn = GamePhaseStepStringAddr - i;
+				break;
+			}
+
+			if (*(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i) == 0x48 && *(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i + 1) == 0x8B && *(uint8_t*)(uint8_t*)(GamePhaseStepStringAddr - i + 2) == 0xC4)
+			{
+				BeginningOfGamePhaseStepFn = GamePhaseStepStringAddr - i;
+				break;
+			}
+		}
+	}
+
+	if (!ByteToPatch)
+	{
+		for (int i = 0; i < 500; i++)
+		{
+			if (*(uint8_t*)(uint8_t*)(BeginningOfGamePhaseStepFn + i) == 0x0F && *(uint8_t*)(uint8_t*)(BeginningOfGamePhaseStepFn + i + 1) == 0x84)
+			{
+				ByteToPatch = (BeginningOfGamePhaseStepFn + i + 1);
+				break;
+			}
+		}
+	}
+
+	FuncsTo85.push_back(ByteToPatch);
+	
 	if (Fortnite_Version == 0) RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 57 41 56 41 57 48 81 EC ? ? ? ? 48 8B 01 49 8B E9 45 0F B6 F8").Get());
 	else if (Fortnite_Version >= 16.40) {
 		if (Fortnite_Version.GetMajorVersion() == 17) RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 8B C4 48 89 58 08 48 89 70 10 48 89 78 18 4C 89 60 20 55 41 56 41 57 48 8B EC 48 83 EC 60 4D 8B F9 41 8A F0 4C 8B F2 48 8B F9 45 32 E4").Get());
@@ -640,6 +688,15 @@ void InitNullsAndRetTrues()
 				break;
 			}
 		}
+	}
+
+	RetTrueFuncs.push_back(Memcury::Scanner::FindPattern("48 8B C4 48 89 58 08 48 89 70 10 48 89 78 18 4C 89 60 20 55 41 56 41 57 48 8B EC 48 83 EC 60 49 8B D9 45 8A").Get()); // No reserve
+
+	auto BeginPlayPedestalScanner = Memcury::Scanner::FindPattern("40 53 41 56 48 83 EC 48 48 89 6C 24 ? 48 8B D9 48 89 74 24 ? 48 89 7C 24");
+
+	if (auto BeginPlayPedestal = BeginPlayPedestalScanner.Get())
+	{
+		NullFuncs.push_back(BeginPlayPedestal);
 	}
 	
 	for (auto& Func : NullFuncs) {
@@ -912,7 +969,6 @@ void Main()
 	Runtime::Hook(Finder->TickFlush(), UNetDriver::TickFlush, (void**)&TickFlushOriginal);
 	Runtime::Hook(Finder->GetMaxTickRate(), UNetDriver::GetMaxTickRate);
 	if (Finder->DispatchRequest()) Runtime::Hook(Finder->DispatchRequest(), HTTP::DispatchRequest, (void**)&HTTP::DispatchRequestOriginal);
-//	Runtime::Exec("/Script/FortniteGame.FortPlayerController.ServerReadyToStartMatch", AFortPlayerControllerAthena::ServerReadyToStartMatch, (void**)&AFortPlayerControllerAthena::ServerReadyToStartMatchOG);
 
 	Runtime::Exec("/Game/Athena/Items/Consumables/Parents/GA_Athena_MedConsumable_Parent.GA_Athena_MedConsumable_Parent_C.Triggered_4C02BFB04B18D9E79F84848FFE6D2C32", UGA_Athena_MedConsumable_Parent_C::Athena_MedConsumable_Triggered, (void**)&UGA_Athena_MedConsumable_Parent_C::Athena_MedConsumable_TriggeredOG);
 	Runtime::Exec("/Game/Abilities/Player/Interrogation/GAB_InterrogatePlayer_Reveal.GAB_InterrogatePlayer_Reveal_C.EndInterrogation", UGAB_InterrogatePlayer_Reveal_C::EndInterrogation);
