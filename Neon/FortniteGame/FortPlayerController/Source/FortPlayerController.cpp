@@ -99,7 +99,8 @@ void AFortPlayerControllerAthena::ServerEndMinigame(AFortPlayerControllerAthena*
 	ServerEndMinigameOG(PlayerController, Stack);
 	
 	AFortMinigame* MiniGame = PlayerController->CallFunc<AFortMinigame*>("FortPlayerControllerAthena", "GetMinigame");
-
+	if (!MiniGame) return;
+	
 	std::thread([MiniGame]()
 		{
 		while ((int)MiniGame->GetCurrentState() != (Fortnite_Version >= 12.00 ? 10 : 9))
@@ -806,7 +807,8 @@ void AFortPlayerControllerAthena::ServerStartMinigame(AFortPlayerControllerAthen
 	static auto GetParticipatingPlayers = Runtime::StaticFindObject<UFunction>("/Script/FortniteGame.FortMinigame.GetParticipatingPlayers");
 	static auto HandleVolumeEditModeChange = Runtime::StaticFindObject<UFunction>("/Script/FortniteGame.FortMinigame.HandleVolumeEditModeChange");
 	AFortMinigame* MiniGame = PlayerController->CallFunc<AFortMinigame*>("FortPlayerControllerAthena", "GetMinigame");
-	
+	if (!MiniGame) return;
+
 	struct FortMinigame_GetParticipatingPlayers final
 	{
 	public:
@@ -815,6 +817,7 @@ void AFortPlayerControllerAthena::ServerStartMinigame(AFortPlayerControllerAthen
 	
 	MiniGame->ProcessEvent(GetParticipatingPlayers, &ret);
 	TArray<class AFortPlayerState*> Players = ret.OutPlayers;
+	UE_LOG(LogNeon, Log, "Minigame has %d players", Players.Num());
 	
 	for (int i = 0; i < Players.Num(); i++)
 	{
@@ -919,6 +922,20 @@ BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot, PlayerC
 				BuildingSMActor->Set("BuildingActor", "TeamIndex", TeamIndex);
 				BuildingSMActor->Set("BuildingActor", "Team", EFortTeam(TeamIndex));
 			}
+		} else
+		{
+			ABuildingSMActor* BuildingSMActor = UGameplayStatics::SpawnActorOG<ABuildingSMActor>(
+BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot, PlayerController);
+			
+			BuildingSMActor->SetbPlayerPlaced(true);
+			BuildingSMActor->SetMirrored(CreateBuildingData.bMirrored);
+			BuildingSMActor->InitializeKismetSpawnedBuildingActor(BuildingSMActor, PlayerController, true);
+
+			if (AFortPlayerStateAthena* PlayerState = PlayerController->GetPlayerState()) {
+				uint8 TeamIndex = PlayerState->GetTeamIndex();
+				BuildingSMActor->Set("BuildingActor", "TeamIndex", TeamIndex);
+				BuildingSMActor->Set("BuildingActor", "Team", EFortTeam(TeamIndex));
+			}
 		}
 	}
     
@@ -932,13 +949,28 @@ BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot, PlayerC
 	return callExecOG(PlayerController, "/Script/FortniteGame.FortPlayerController", ServerCreateBuildingActor, Params);
 }
 
+void AFortPlayerControllerAthena::ServerTeleportToPlaygroundLobbyIsland(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
+{
+	auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
+
+	if (PlayerController->GetWarmupPlayerStart())
+	{
+		PlayerController->GetMyFortPawn()->K2_TeleportTo(PlayerController->GetWarmupPlayerStart()->K2_GetActorLocation(), PlayerController->GetMyFortPawn()->K2_GetActorRotation());
+	}
+	else {
+		AActor* Actor = GameMode->CallFunc<AActor*>("GameModeBase", "ChoosePlayerStart", PlayerController);
+		PlayerController->GetMyFortPawn()->K2_TeleportTo(Actor->K2_GetActorLocation(), Actor->K2_GetActorRotation());
+	}
+}
+
 void AFortPlayerControllerAthena::ServerBeginEditingBuildingActor(AFortPlayerControllerAthena* PlayerController, FFrame& Stack)
 {
     ABuildingSMActor* BuildingSMActor;
     Stack.StepCompiledIn(&BuildingSMActor);
     Stack.IncrementCode();
-
-    if (!PlayerController || !PlayerController->GetMyFortPawn() || !BuildingSMActor || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->GetTeamIndex())
+	
+	if (!BuildingSMActor) return;
+    if (!PlayerController || !PlayerController->GetMyFortPawn() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->GetTeamIndex())
         return;
 
     FFortItemEntry* ItemEntry = nullptr;
@@ -968,7 +1000,6 @@ void AFortPlayerControllerAthena::ServerBeginEditingBuildingActor(AFortPlayerCon
 	
     PlayerController->ProcessEvent(Func, &ItemEntry->GetItemGuid());
 
-//	BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", PlayerController->GetPlayerState());
 	auto SetEditingPlayer = (void (*)(ABuildingSMActor*, AFortPlayerState*))(Finder->SetEditingPlayer());
 	SetEditingPlayer(BuildingSMActor, PlayerController->GetPlayerState());
 	
@@ -992,10 +1023,13 @@ void AFortPlayerControllerAthena::ServerEditBuildingActor(AFortPlayerControllerA
     Stack.StepCompiledIn(&bMirrored);
     Stack.IncrementCode();
 
-    if (!PlayerController || !BuildingSMActor || !PlayerController->GetMyFortPawn() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
+	if (!BuildingSMActor) return;
+    if (!PlayerController || !PlayerController->GetMyFortPawn() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->Get<uint8>("FortPlayerStateAthena", "TeamIndex")) return;
 
 	auto SetEditingPlayer = (void (*)(ABuildingSMActor*, AFortPlayerState*))(Finder->SetEditingPlayer());
 	SetEditingPlayer(BuildingSMActor, nullptr);
+
+	BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", nullptr);
 	
     static auto ReplaceBuildingActor = (ABuildingSMActor * (*)(ABuildingSMActor*, unsigned int, UObject*, unsigned int, int, bool, AFortPlayerController*))(Finder->ReplaceBuildingActor());
 
@@ -1014,7 +1048,8 @@ void AFortPlayerControllerAthena::ServerEndEditingBuildingActor(AFortPlayerContr
     Stack.StepCompiledIn(&BuildingSMActor);
     Stack.IncrementCode();
 
-    if (!PlayerController || !PlayerController->GetMyFortPawn() || !BuildingSMActor || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->GetTeamIndex()) return;
+	if (!BuildingSMActor) return;
+    if (!PlayerController || !PlayerController->GetMyFortPawn() || BuildingSMActor->Get<uint8>("BuildingActor", "TeamIndex") != PlayerController->GetPlayerState()->GetTeamIndex()) return;
 
 	auto SetEditingPlayer = (void (*)(ABuildingSMActor*, AFortPlayerState*))(Finder->SetEditingPlayer());
 	SetEditingPlayer(BuildingSMActor, nullptr);

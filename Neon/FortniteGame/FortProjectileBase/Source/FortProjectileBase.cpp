@@ -9,8 +9,10 @@ void AFortProjectileBase::OnStopCallback(AFortProjectileBase* ProjectileBase, FF
 {
     FHitResult Result;
     Stack.StepCompiledIn(&Result);
-    Stack.IncrementCode();
 
+    struct { FHitResult Hit; } Params{Result};
+    callExecOG(ProjectileBase, "/Script/FortniteGame.FortProjectileBase.OnStopCallback", OnStopCallback, Params);
+    
     if (ProjectileBase->IsA<AB_Prj_Athena_PlaysetGrenade_C>())
     {
         if (auto* Playset = ((AB_Prj_Athena_PlaysetGrenade_C*)ProjectileBase)->GetCachedPlayset())
@@ -139,13 +141,7 @@ void AFortProjectileBase::OnStopCallback(AFortProjectileBase* ProjectileBase, FF
                 }
             }
         }
-
-        struct { FHitResult Hit; } Params{Result};
-        callExecOG(ProjectileBase, "/Script/FortniteGame.FortProjectileBase.OnStopCallback", OnStopCallback, Params);
+        
         ProjectileBase->K2_DestroyActor();
-        return;
     }
-
-    struct { FHitResult Hit; } Params{Result};
-    callExecOG(ProjectileBase, "/Script/FortniteGame.FortProjectileBase.OnStopCallback", OnStopCallback, Params);
 }

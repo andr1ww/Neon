@@ -665,6 +665,7 @@ public:
 class AFortPlayerControllerAthena : public AFortPlayerController
 {
 public:
+	DEFINE_PTR(AActor, AFortPlayerControllerAthena, WarmupPlayerStart)
 	DEFINE_PTR(class AFortVolume, AFortPlayerControllerAthena, CreativePlotLinkedVolume);
 	DEFINE_PTR(UAthenaResurrectionComponent, AFortPlayerControllerAthena, ResurrectionComponent);
 	DEFINE_BOOL(AFortPlayerControllerAthena, bMarkedAlive)
@@ -688,6 +689,7 @@ public:
 	static void ServerRepairBuildingActor(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerAttemptInventoryDrop(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerClientIsReadyToRespawn(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
+	static void ServerTeleportToPlaygroundLobbyIsland(AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	static void ServerGiveCreativeItem(AFortPlayerControllerAthena* PlayerController, FFrame& Stack);
 	DefHookOg(void, ServerStartMinigame, AFortPlayerControllerAthena *PlayerController, FFrame &Stack);
 	DefHookOg(void, ServerEndMinigame, AFortPlayerControllerAthena *PlayerController, FFrame &Stack);

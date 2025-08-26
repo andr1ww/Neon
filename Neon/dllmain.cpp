@@ -932,10 +932,16 @@ void Main()
 		Runtime::VFTHook(StaticClassImpl("FortPlayerPawnAthena")->GetClassDefaultObject()->GetVTable(), 0x119, AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCues, (void**)&AFortPlayerPawn::NetMulticast_Athena_BatchedDamageCuesOG);
 	}
 	Runtime::Exec("/Script/FortniteGame.FortPlayerControllerAthena.ServerGiveCreativeItem", AFortPlayerControllerAthena::ServerGiveCreativeItem);
-	Runtime::Exec("/Script/FortniteGame.FortProjectileBase.OnStopCallback", AFortProjectileBase::OnStopCallback, (void**)&AFortProjectileBase::OnStopCallbackOG);
+
+	if (Config::bCreative)
+	{
+		Runtime::Exec("/Script/FortniteGame.FortProjectileBase.OnStopCallback", AFortProjectileBase::OnStopCallback, (void**)&AFortProjectileBase::OnStopCallbackOG);
+	}
+
 	Runtime::Exec("/Script/FortniteGame.FortPlayerControllerAthena.ServerStartMinigame", AFortPlayerControllerAthena::ServerStartMinigame, (void**)&AFortPlayerControllerAthena::ServerStartMinigameOG);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerControllerAthena.ServerClientIsReadyToRespawn", AFortPlayerControllerAthena::ServerClientIsReadyToRespawn);
 	Runtime::Exec("/Script/FortniteGame.FortPlayerControllerAthena.ServerEndMinigame", AFortPlayerControllerAthena::ServerEndMinigame, (void**)&AFortPlayerControllerAthena::ServerEndMinigameOG);
+	Runtime::Exec("/Script/FortniteGame.FortPlayerControllerAthena.ServerTeleportToPlaygroundLobbyIsland", AFortPlayerControllerAthena::ServerTeleportToPlaygroundLobbyIsland);
 
 	Runtime::Hook(Finder->ReloadWeapon(), AFortPlayerPawn::ReloadWeapon, (void**)&AFortPlayerPawn::ReloadWeaponOG); // this is right um we can make it uni after we get it to fucking call 
 	Runtime::Hook(Finder->StartAircraftPhase(), AFortGameModeAthena::StartAircraftPhase, (void**)&AFortGameModeAthena::StartAircraftPhaseOG);
