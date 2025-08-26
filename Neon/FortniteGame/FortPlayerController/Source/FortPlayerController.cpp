@@ -641,7 +641,10 @@ void AFortPlayerControllerAthena::ServerGiveCreativeItem(AFortPlayerControllerAt
     static int Size = StaticClassImpl("FortItemEntry")->GetSize();
     void* Mem = malloc(Size);
     if (!Mem || !PlayerController)
-       return;
+    {
+    	UE_LOG(LogNeon, Log, "wtf?");
+	    return;
+    }
 
     memset(Mem, 0, Size);
     Stack.StepCompiledIn(Mem);
@@ -680,8 +683,11 @@ void AFortPlayerControllerAthena::ServerGiveCreativeItem(AFortPlayerControllerAt
         if (ItemEntryDef->IsA(UFortResourceItemDefinition::StaticClass()) || 
             ItemEntryDef->IsA(UFortAmmoItemDefinition::StaticClass())) 
         {
-            ItemEntry = &Item->GetItemEntry();
-            break;
+        	if (ItemEntryDef == ItemDef)
+        	{
+        		ItemEntry = &Item->GetItemEntry();
+        		break;
+        	}
         }
     }
 
