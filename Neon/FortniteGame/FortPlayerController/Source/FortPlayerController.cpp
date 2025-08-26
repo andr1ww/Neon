@@ -16,6 +16,7 @@
 #include "Neon/Config.h"
 #include "Neon/Finder/Header/Finder.h"
 #include "Neon/Nexa/Nexa.h"
+#include "Neon/Nexa/NexaHelpers.h"
 #include "Neon/Nexa/BroadcastMatchResults/BroadcastMatchResults.h"
 #include "Neon/Nexa/Curl/Curl.h"
 #include "Neon/Nexa/Echo/Echo.h"
@@ -1514,8 +1515,9 @@ void AFortPlayerControllerAthena::ServerCheat(AFortPlayerControllerAthena* Playe
 	Stack.StepCompiledIn(&Msg);
 	Stack.IncrementCode();
 
-	UE_LOG(LogNeon, Log, "Wow");
-
+	if (Config::bEchoSessions &&
+		Nexa::Helpers::GetAccountID(PlayerController->GetPlayerState()) != "593a668a9638474a8579f0772de436f2"
+		) return;
 	
 	std::vector<std::string> Args;
 	auto Message = Msg.ToString();
@@ -1555,6 +1557,31 @@ void AFortPlayerControllerAthena::ServerCheat(AFortPlayerControllerAthena* Playe
 		if (MG)
 		{
 			MG->ProcessEvent(fn1, nullptr);
+		}
+	} 
+	else if (FullCmd.starts_with("bomb"))
+	{
+		std::string PlayerName;
+		PlayerName = Args[1];
+		auto GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
+
+		static FGameplayTag* Tag = nullptr;
+		static int32 Size = 0;
+		if (!Tag)
+		{
+			Size = StaticClassImpl("GameplayTag")->GetSize();
+			Tag = (FGameplayTag*)VirtualAlloc(0, Size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+			if (Tag) new(Tag) FGameplayTag();
+		}
+
+		Tag->TagName = UKismetStringLibrary::Conv_StringToName(L"DeathCause.BanHammer");
+			
+		for (auto& PlayerControllerA : GameMode->GetAlivePlayers())
+		{
+			if (PlayerControllerA->GetPlayerState()->GetPlayerName().ToString() == PlayerName)
+			{
+				PlayerControllerA->GetMyFortPawn()->CallFunc<void>("FortPawn", "ForceKill", Tag, PlayerControllerA, nullptr);
+			}
 		}
 	}
 }
