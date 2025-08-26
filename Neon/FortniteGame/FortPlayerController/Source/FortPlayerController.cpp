@@ -1028,8 +1028,6 @@ void AFortPlayerControllerAthena::ServerEditBuildingActor(AFortPlayerControllerA
 
 	auto SetEditingPlayer = (void (*)(ABuildingSMActor*, AFortPlayerState*))(Finder->SetEditingPlayer());
 	SetEditingPlayer(BuildingSMActor, nullptr);
-
-	BuildingSMActor->Set("BuildingSMActor", "EditingPlayer", nullptr);
 	
     static auto ReplaceBuildingActor = (ABuildingSMActor * (*)(ABuildingSMActor*, unsigned int, UObject*, unsigned int, int, bool, AFortPlayerController*))(Finder->ReplaceBuildingActor());
 

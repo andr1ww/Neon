@@ -491,17 +491,6 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     }
     
     bool Res = false;
-    
-    if (Res && !Config::bCreative)
-    {
-        auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
-        auto WarmupDuration = 60.f;
-
-        GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
-        GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
-        GameMode->Set("FortGameModeAthena", "WarmupCountdownDuration", WarmupDuration);
-        GameMode->Set("FortGameModeAthena", "WarmupEarlyCountdownDuration", WarmupDuration);
-    } 
 
     if (Fortnite_Version <= 10.40)
     {
@@ -517,6 +506,17 @@ bool AFortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode, FFram
     {
         Res = GameState->GetPlayersLeft() > 0;
     }
+
+    if (Res && !Config::bCreative)
+    {
+        auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
+        auto WarmupDuration = 60.f;
+
+        GameState->Set("FortGameStateAthena", "WarmupCountdownStartTime", Time);
+        GameState->Set("FortGameStateAthena", "WarmupCountdownEndTime", Time + WarmupDuration + 10.f);
+        GameMode->Set("FortGameModeAthena", "WarmupCountdownDuration", WarmupDuration);
+        GameMode->Set("FortGameModeAthena", "WarmupEarlyCountdownDuration", WarmupDuration);
+    } 
     
     return *Result = Res;
 }
