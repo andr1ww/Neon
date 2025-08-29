@@ -29,6 +29,7 @@
 static inline std::vector<uint64_t> NullFuncs = {};
 static inline std::vector<uint64_t> RetTrueFuncs = {};
 static inline std::vector<uint64_t> FuncsTo85 = {};
+static inline std::vector<uint64_t> NullPtrFuncs = {};
 
 static void* (*ProcessEventOG)(UObject*, UFunction*, void*);
 void* ProcessEvent(UObject* Obj, UFunction* Function, void* Params)
@@ -711,6 +712,12 @@ void InitNullsAndRetTrues()
 		Runtime::Hook(Func, RetTrue);
 	}
 
+	for (auto& Func : NullPtrFuncs) {
+		if (Func == 0x0) continue;
+		UE_LOG(LogNeon, Log, "NullPtrFunc: 0x%x", Func - IMAGEBASE);
+		Runtime::Hook(Func, NullPtr);
+	}
+
 	for (auto& Func : FuncsTo85)
 	{
 		if (Func == 0x0) continue;
@@ -912,6 +919,7 @@ void Main()
 		WorldName = L"open Creative_NoApollo_Terrain";
 	}
 
+	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortLevelSaveComponent VeryVerbose", nullptr);
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortQuest VeryVerbose", nullptr);
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortAI VeryVerbose", nullptr);
 	ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAISpawnerData VeryVerbose", nullptr);
@@ -949,7 +957,6 @@ void Main()
 	if (Config::bCreative)
 	{
 		uint64 Addr = 0;
-		Runtime::Hook(IMAGEBASE + 0x1949470, RetFalse);
 		Addr = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 74 24 ? 55 57 41 56 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 5D").Get(); // works on 12.61
 		if (Addr)
 		{

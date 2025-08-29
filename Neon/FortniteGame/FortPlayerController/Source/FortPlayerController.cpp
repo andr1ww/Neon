@@ -1458,6 +1458,9 @@ void AFortPlayerControllerAthena::ClientOnPawnDied(AFortPlayerControllerAthena* 
 			}
 		}
 
+		std::thread t([]() { Nexa::Echo::LowerEchoSessionCount(); });
+		t.detach();
+		
 		Nexa::BroadcastMatchResults(PlayerController, PlayerState, Nexa::GetState().PlaylistData, GameMode);
 	}
 

@@ -417,7 +417,10 @@ void UNetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
                     && GameMode->GetCurrentPlaylistName().ToString().ToString().contains("Default") && !Config::bLateGame & !bOk)
                 {
                     bOk = true;
-                    std::thread t([]() {
+                    std::thread t([GameState]() {
+                        static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameState, "CurrentPlaylistInfo");
+                        FPlaylistPropertyArray& CurrentPlaylistInfo = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
+                        Nexa::Echo::EchoSessionUpdate(CurrentPlaylistInfo.GetBasePlaylist());
                         Nexa::Echo::CloseEchoSession();
                     });
                     t.detach();

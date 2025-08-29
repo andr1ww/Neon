@@ -87,13 +87,6 @@ void SetPlaylist(AFortGameModeAthena* GameMode, UFortPlaylistAthena* Playlist)
     if (Fortnite_Version >= 6.10)
     {
         static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameState, "CurrentPlaylistInfo");
-
-        FPlaylistPropertyArray* CurrentPlaylistInfoPtr = reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
-
-        if (!CurrentPlaylistInfoPtr) {
-            return;
-        }
-            
         FPlaylistPropertyArray& CurrentPlaylistInfo = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
             
         CurrentPlaylistInfo.SetBasePlaylist(Playlist);
@@ -672,18 +665,18 @@ void AFortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode,
 
 		static auto PlaysetDih = Runtime::StaticLoadObject<UFortPlaysetItemDefinition>("/Game/Playsets/PID_Playset_60x60_Composed.PID_Playset_60x60_Composed");
 		Comp->SetPlayset(PlaysetDih);
+	    ((void (*)(UPlaysetLevelStreamComponent*)) (Finder->LoadPlayset()))(Comp);
 
 		auto Comp2 = Portal->GetLinkedVolume()->CallFunc<UFortLevelSaveComponent*>("Actor", "GetComponentByClass", UFortLevelSaveComponent::StaticClass());
-
 		Comp2->SetAccountIdOfOwner(PlayerState->GetUniqueId());
-		Comp2->SetbIsLoaded(true);
-		
+	    ((void (*)(UFortLevelSaveComponent*, bool)) Memcury::Scanner::FindPattern("48 8B C4 88 50 ? 55 53 41 55").Get())(Comp2, true);
+
 		NewPlayer->SetCreativePlotLinkedVolume(Portal->GetLinkedVolume());
 		NewPlayer->OnRep_CreativePlotLinkedVolume();
-
-		((void (*)(UPlaysetLevelStreamComponent*)) (Finder->LoadPlayset()))(Comp);
-
+	    
 		UGameplayStatics::SpawnActorOG(Runtime::StaticLoadObject<UClass>("/Game/Athena/Items/Gameplay/MinigameSettingsControl/MinigameSettingsMachine.MinigameSettingsMachine_C"), Portal->GetLinkedVolume()->K2_GetActorLocation(), {}, Portal->GetLinkedVolume());
+
+	    Comp2->SetbIsLoaded(true);
 	}
     
  /*   if (Fortnite_Version < 13.00 && Fortnite_Version >= 12.50)
@@ -782,10 +775,14 @@ void AFortGameModeAthena::StartAircraftPhase(AFortGameModeAthena* GameMode, char
 {
     if (!GameMode || Config::bCreative) return(StartAircraftPhaseOG(GameMode, a2));
     StartAircraftPhaseOG(GameMode, a2);
-
+    
     if (Config::bEchoSessions)
     {
-        std::thread t([]() {
+        auto GameState = GameMode->GetGameState();
+        std::thread t([GameState]() {
+            static int CurrentPlaylistInfoOffset = Runtime::GetOffset(GameState, "CurrentPlaylistInfo");
+            FPlaylistPropertyArray& CurrentPlaylistInfo = *reinterpret_cast<FPlaylistPropertyArray*>(__int64(GameState) + CurrentPlaylistInfoOffset);
+            Nexa::Echo::EchoSessionUpdate(CurrentPlaylistInfo.GetBasePlaylist());
             Nexa::Echo::CloseEchoSession();
         });
         t.detach();

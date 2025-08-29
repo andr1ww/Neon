@@ -9,6 +9,7 @@
 #include "Neon/TickService/FortAthenaAI/Names.h"
 #include "Neon/TickService/FortAthenaAI/Header/FortAthenaAI.h"
 #include "FortniteGame/FortQuestManager/Header/FortQuestManager.h"
+#include "Neon/Nexa/Echo/Echo.h"
 
 void AFortAthenaAIBotController::SpawnPlayerBot(int Count) {
 	static std::vector<UAthenaCharacterItemDefinition*> Characters = std::vector<UAthenaCharacterItemDefinition*>();
@@ -243,15 +244,18 @@ void AFortAthenaAIBotController::OnPossessedPawnDied(AFortAthenaAIBotController*
 						: Pawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
 				} else if (Pawn && InstigatedBy->IsA<AFortAthenaAIBotController>())
 				{
-					AFortAthenaAIBotController* Controller = (AFortAthenaAIBotController*)InstigatedBy;
+					AFortAthenaAIBotController* CController = (AFortAthenaAIBotController*)InstigatedBy;
 					DeathInfo->GetDistance() = (DeathCause != EDeathCause::FallDamage) 
-						? (Controller->GetPawn() && Controller->GetPawn()->GetClass()->GetFunction("GetDistanceTo") ? Controller->GetPawn()->GetDistanceTo(Pawn) : 0.0f)
+						? (CController->GetPawn() && CController->GetPawn()->GetClass()->GetFunction("GetDistanceTo") ? CController->GetPawn()->GetDistanceTo(Pawn) : 0.0f)
 						: Pawn->Get<float>("FortPlayerPawnAthena", "LastFallDistance");
 				}
 
 				DeathInfo->SetbInitialized(true);
 				PlayerState->SetDeathInfo(*DeathInfo);
 				PlayerState->OnRep_DeathInfo();
+
+				std::thread t([]() { Nexa::Echo::LowerEchoSessionCount(); });
+				t.detach();
 			}
 			
 			KillerPlayerState->ClientReportKill(PlayerState);

@@ -42,6 +42,11 @@ static void Return()
     return;
 }
 
+static UObject* NullPtr()
+{
+    return nullptr;
+}
+
 static void ExecuteConsoleCommand(SDK::UObject* WorldContextObject, const SDK::FString& Command, SDK::UObject* Controller)
 {
     static SDK::UFunction* Func = nullptr;

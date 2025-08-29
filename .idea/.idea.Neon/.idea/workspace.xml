@@ -6,10 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="b04c7e80-3e97-40a7-a8ed-8b7fac795171" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Neon/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Engine/NetDriver/Source/NetDriver.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Engine/NetDriver/Source/NetDriver.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/FortniteGame/FortPlayerController/Source/FortPlayerController.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/Neon/Config.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/Neon/Nexa/Echo/Echo.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/Neon/Nexa/Echo/Echo.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Neon/dllmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/dllmain.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Neon/pch.h" beforeDir="false" afterPath="$PROJECT_DIR$/Neon/pch.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,6 +107,9 @@
       <workItem from="1756132862013" duration="1976000" />
       <workItem from="1756139076127" duration="25579000" />
       <workItem from="1756223496444" duration="4591000" />
+      <workItem from="1756399515811" duration="1667000" />
+      <workItem from="1756427621139" duration="5246000" />
+      <workItem from="1756472387612" duration="946000" />
     </task>
     <servers />
   </component>
@@ -166,7 +171,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp</url>
-          <line>543</line>
+          <line>536</line>
           <option name="timeStamp" value="78" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -181,7 +186,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Neon/dllmain.cpp</url>
-          <line>33</line>
+          <line>34</line>
           <option name="timeStamp" value="87" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -191,13 +196,18 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp</url>
-          <line>848</line>
+          <line>844</line>
           <option name="timeStamp" value="93" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Neon/FortniteGame/FortGameMode/Source/FortGameMode.cpp</url>
-          <line>490</line>
+          <line>483</line>
           <option name="timeStamp" value="104" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/Neon/dllmain.cpp</url>
+          <line>30</line>
+          <option name="timeStamp" value="105" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

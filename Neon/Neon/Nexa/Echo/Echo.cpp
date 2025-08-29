@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "Echo.h"
+
+#include "FortniteGame/FortGameMode/Header/FortGameMode.h"
 #include "Neon/Config.h"
 #include "Neon/Nexa/Curl/Curl.h"
 
@@ -209,6 +211,8 @@ void Nexa::Echo::LowerEchoSessionCount()
 
 void Nexa::Echo::EchoSessionUpdate(UFortPlaylistAthena* Playlist)
 {
+    AFortGameModeAthena* GameMode = UWorld::GetWorld()->GetAuthorityGameMode();
+    
     if (Config::Echo::Session.empty())
     {
         UE_LOG(LogNeon, Log, TEXT("No active echo session to update"));
@@ -218,7 +222,8 @@ void Nexa::Echo::EchoSessionUpdate(UFortPlaylistAthena* Playlist)
     json UpdateData;
     try {
         UpdateData = {
-            {"Secret", ""}, 
+            {"Secret", ""},
+            {"ActivePlayers", GameMode->GetAlivePlayers().Num() + GameMode->GetAliveBots().Num()},
             {"Attributes", {
                 {"GameType", Playlist->GetGameType()},
                 {"bIsTournament", Playlist->GetbIsTournament()},
